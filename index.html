@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Probeta Timer</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="./assets/logo_koala.png" type="image/x-icon">
+</head>
+<body>
+
+    <div id="app-container">
+        <div id="config-panel">
+            <h2>Configura tu Sesión</h2>
+            <div class="input-group">
+                <label for="session-minutes">Minutos por sesión:</label>
+                <input type="number" id="session-minutes" value="25" min="1">
+            </div>
+            <button id="set-time-btn">
+                <span>Empezar Sesión</span>
+                <div class="star-1"><svg viewBox="0 0 512 512" xml:space="preserve" height="25px" width="25px" version="1.1" xmlns="http://www.w3.org/2000/svg"><polygon points="256.001,0 332.099,183.473 512,197.334 377.222,322.617 412.329,512 256.001,411.23 99.673,512 134.78,322.617 0,197.334 179.903,183.473 "/></svg></div>
+                <div class="star-2"><svg viewBox="0 0 512 512" xml:space="preserve" height="15px" width="15px" version="1.1" xmlns="http://www.w3.org/2000/svg"><polygon points="256.001,0 332.099,183.473 512,197.334 377.222,322.617 412.329,512 256.001,411.23 99.673,512 134.78,322.617 0,197.334 179.903,183.473 "/></svg></div>
+                <div class="star-3"><svg viewBox="0 0 512 512" xml:space="preserve" height="5px" width="5px" version="1.1" xmlns="http://www.w3.org/2000/svg"><polygon points="256.001,0 332.099,183.473 512,197.334 377.222,322.617 412.329,512 256.001,411.23 99.673,512 134.78,322.617 0,197.334 179.903,183.473 "/></svg></div>
+                <div class="star-4"><svg viewBox="0 0 512 512" xml:space="preserve" height="8px" width="8px" version="1.1" xmlns="http://www.w3.org/2000/svg"><polygon points="256.001,0 332.099,183.473 512,197.334 377.222,322.617 412.329,512 256.001,411.23 99.673,512 134.78,322.617 0,197.334 179.903,183.473 "/></svg></div>
+                <div class="star-5"><svg viewBox="0 0 512 512" xml:space="preserve" height="15px" width="15px" version="1.1" xmlns="http://www.w3.org/2000/svg"><polygon points="256.001,0 332.099,183.473 512,197.334 377.222,322.617 412.329,512 256.001,411.23 99.673,512 134.78,322.617 0,197.334 179.903,183.473 "/></svg></div>
+                <div class="star-6"><svg viewBox="0 0 512 512" xml:space="preserve" height="5px" width="5px" version="1.1" xmlns="http://www.w3.org/2000/svg"><polygon points="256.001,0 332.099,183.473 512,197.334 377.222,322.617 412.329,512 256.001,411.23 99.673,512 134.78,322.617 0,197.334 179.903,183.473 "/></svg></div>
+            </button>
+        </div>
+
+        <div id="timer-display" class="hidden">
+            <h1 id="timer-label">25:00</h1>
+            <div id="beaker-container">
+                <div id="liquid"></div>
+            </div>
+            <div id="controls">
+                <button id="pause-btn">
+                    <span>Pausar</span>
+                    <div class="star-1"><svg viewBox="0 0 512 512" xml:space="preserve" height="25px" width="25px" version="1.1" xmlns="http://www.w3.org/2000/svg"><polygon points="256.001,0 332.099,183.473 512,197.334 377.222,322.617 412.329,512 256.001,411.23 99.673,512 134.78,322.617 0,197.334 179.903,183.473 "/></svg></div>
+                    <div class="star-2"><svg viewBox="0 0 512 512" xml:space="preserve" height="15px" width="15px" version="1.1" xmlns="http://www.w3.org/2000/svg"><polygon points="256.001,0 332.099,183.473 512,197.334 377.222,322.617 412.329,512 256.001,411.23 99.673,512 134.78,322.617 0,197.334 179.903,183.473 "/></svg></div>
+                    <div class="star-3"><svg viewBox="0 0 512 512" xml:space="preserve" height="5px" width="5px" version="1.1" xmlns="http://www.w3.org/2000/svg"><polygon points="256.001,0 332.099,183.473 512,197.334 377.222,322.617 412.329,512 256.001,411.23 99.673,512 134.78,322.617 0,197.334 179.903,183.473 "/></svg></div>
+                    <div class="star-4"><svg viewBox="0 0 512 512" xml:space="preserve" height="8px" width="8px" version="1.1" xmlns="http://www.w3.org/2000/svg"><polygon points="256.001,0 332.099,183.473 512,197.334 377.222,322.617 412.329,512 256.001,411.23 99.673,512 134.78,322.617 0,197.334 179.903,183.473 "/></svg></div>
+                    <div class="star-5"><svg viewBox="0 0 512 512" xml:space="preserve" height="15px" width="15px" version="1.1" xmlns="http://www.w3.org/2000/svg"><polygon points="256.001,0 332.099,183.473 512,197.334 377.222,322.617 412.329,512 256.001,411.23 99.673,512 134.78,322.617 0,197.334 179.903,183.473 "/></svg></div>
+                    <div class="star-6"><svg viewBox="0 0 512 512" xml:space="preserve" height="5px" width="5px" version="1.1" xmlns="http://www.w3.org/2000/svg"><polygon points="256.001,0 332.099,183.473 512,197.334 377.222,322.617 412.329,512 256.001,411.23 99.673,512 134.78,322.617 0,197.334 179.903,183.473 "/></svg></div>
+                </button>
+                <button id="reset-btn">
+                    <span>Reiniciar</span>
+                    <div class="star-1"><svg viewBox="0 0 512 512" xml:space="preserve" height="25px" width="25px" version="1.1" xmlns="http://www.w3.org/2000/svg"><polygon points="256.001,0 332.099,183.473 512,197.334 377.222,322.617 412.329,512 256.001,411.23 99.673,512 134.78,322.617 0,197.334 179.903,183.473 "/></svg></div>
+                    <div class="star-2"><svg viewBox="0 0 512 512" xml:space="preserve" height="15px" width="15px" version="1.1" xmlns="http://www.w3.org/2000/svg"><polygon points="256.001,0 332.099,183.473 512,197.334 377.222,322.617 412.329,512 256.001,411.23 99.673,512 134.78,322.617 0,197.334 179.903,183.473 "/></svg></div>
+                    <div class="star-3"><svg viewBox="0 0 512 512" xml:space="preserve" height="5px" width="5px" version="1.1" xmlns="http://www.w3.org/2000/svg"><polygon points="256.001,0 332.099,183.473 512,197.334 377.222,322.617 412.329,512 256.001,411.23 99.673,512 134.78,322.617 0,197.334 179.903,183.473 "/></svg></div>
+                    <div class="star-4"><svg viewBox="0 0 512 512" xml:space="preserve" height="8px" width="8px" version="1.1" xmlns="http://www.w3.org/2000/svg"><polygon points="256.001,0 332.099,183.473 512,197.334 377.222,322.617 412.329,512 256.001,411.23 99.673,512 134.78,322.617 0,197.334 179.903,183.473 "/></svg></div>
+                    <div class="star-5"><svg viewBox="0 0 512 512" xml:space="preserve" height="15px" width="15px" version="1.1" xmlns="http://www.w3.org/2000/svg"><polygon points="256.001,0 332.099,183.473 512,197.334 377.222,322.617 412.329,512 256.001,411.23 99.673,512 134.78,322.617 0,197.334 179.903,183.473 "/></svg></div>
+                    <div class="star-6"><svg viewBox="0 0 512 512" xml:space="preserve" height="5px" width="5px" version="1.1" xmlns="http://www.w3.org/2000/svg"><polygon points="256.001,0 332.099,183.473 512,197.334 377.222,322.617 412.329,512 256.001,411.23 99.673,512 134.78,322.617 0,197.334 179.903,183.473 "/></svg></div>
+                </button>
+                <button id="pip-btn">
+                    <span>Mini Pantalla</span>
+                    <div class="star-1"><svg viewBox="0 0 512 512" xml:space="preserve" height="25px" width="25px" version="1.1" xmlns="http://www.w3.org/2000/svg"><polygon points="256.001,0 332.099,183.473 512,197.334 377.222,322.617 412.329,512 256.001,411.23 99.673,512 134.78,322.617 0,197.334 179.903,183.473 "/></svg></div>
+                    <div class="star-2"><svg viewBox="0 0 512 512" xml:space="preserve" height="15px" width="15px" version="1.1" xmlns="http://www.w3.org/2000/svg"><polygon points="256.001,0 332.099,183.473 512,197.334 377.222,322.617 412.329,512 256.001,411.23 99.673,512 134.78,322.617 0,197.334 179.903,183.473 "/></svg></div>
+                    <div class="star-3"><svg viewBox="0 0 512 512" xml:space="preserve" height="5px" width="5px" version="1.1" xmlns="http://www.w3.org/2000/svg"><polygon points="256.001,0 332.099,183.473 512,197.334 377.222,322.617 412.329,512 256.001,411.23 99.673,512 134.78,322.617 0,197.334 179.903,183.473 "/></svg></div>
+                    <div class="star-4"><svg viewBox="0 0 512 512" xml:space="preserve" height="8px" width="8px" version="1.1" xmlns="http://www.w3.org/2000/svg"><polygon points="256.001,0 332.099,183.473 512,197.334 377.222,322.617 412.329,512 256.001,411.23 99.673,512 134.78,322.617 0,197.334 179.903,183.473 "/></svg></div>
+                    <div class="star-5"><svg viewBox="0 0 512 512" xml:space="preserve" height="15px" width="15px" version="1.1" xmlns="http://www.w3.org/2000/svg"><polygon points="256.001,0 332.099,183.473 512,197.334 377.222,322.617 412.329,512 256.001,411.23 99.673,512 134.78,322.617 0,197.334 179.903,183.473 "/></svg></div>
+                    <div class="star-6"><svg viewBox="0 0 512 512" xml:space="preserve" height="5px" width="5px" version="1.1" xmlns="http://www.w3.org/2000/svg"><polygon points="256.001,0 332.099,183.473 512,197.334 377.222,322.617 412.329,512 256.001,411.23 99.673,512 134.78,322.617 0,197.334 179.903,183.473 "/></svg></div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <canvas id="pip-canvas" style="display: none;"></canvas>
+    <script src="script.js"></script>
+</body>
+</html>

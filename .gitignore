@@ -1,0 +1,25 @@
+# Configuración de VS Code
+.vscode/
+
+# Archivos del sistema (por si usas Windows)
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Archivos temporales
+*.log
+*.tmp
+
+# Archivos de sistema macOS (si llegas a usarlo)
+.DS_Store
+
+# Archivos de respaldo o generados por editores
+*.bak
+*.swp
+*.swo
+
+# Node.js (por si en el futuro usas npm para herramientas)
+node_modules/
+
+# Otros posibles entornos
+.env
