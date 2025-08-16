@@ -54,6 +54,7 @@ let currentLiquidHue;
 // Variables para efectos visuales
 let pipBubbles = [];
 let wakeLock = null;
+let vaporInterval = null;
 
 // Configuración de la sesión
 let config = {
@@ -64,60 +65,195 @@ let config = {
     pomodorosUntilLong: 4
 };
 
-// === FUNCIÓN PRINCIPAL: GENERAR PLAN DE TRABAJO ===
-function generarPlan() {
-    const totalHours = parseInt(totalHoursInput.value, 10);
-    const workMinutes = parseInt(workMinutesInput.value, 10);
-    const shortBreakMinutes = parseInt(shortBreakMinutesInput.value, 10);
-    const longBreakMinutes = parseInt(longBreakMinutesInput.value, 10);
-    const pomodorosUntilLong = parseInt(pomodorosUntilLongInput.value, 10);
-
-    // Validaciones
-    if ([totalHours, workMinutes, shortBreakMinutes, longBreakMinutes, pomodorosUntilLong].some(val => isNaN(val) || val < 1)) {
-        alert("Por favor, ingresa valores válidos en todos los campos.");
-        return false;
+// === FUNCIÓN PARA AGREGAR ESTILOS ADICIONALES ===
+function agregarEstilosAdicionales() {
+    // Verificar si ya se agregaron los estilos
+    if (document.getElementById('estilos-timer-adicionales')) {
+        return; // Ya existen, no duplicar
     }
-
-    // Guardar configuración
-    config = {
-        totalHours,
-        workMinutes,
-        shortBreakMinutes,
-        longBreakMinutes,
-        pomodorosUntilLong
-    };
-
-    // Calcular número total de pomodoros necesarios
-    const totalWorkTimeMinutes = totalHours * 60;
-    const totalPomodoros = Math.ceil(totalWorkTimeMinutes / workMinutes);
     
-    // Generar el plan
-    sessionPlan = [];
-    let pomodoroCount = 0;
-
-    for (let i = 0; i < totalPomodoros; i++) {
-        sessionPlan.push('TRABAJO');
-        pomodoroCount++;
-        
-        // Solo agregar descanso si no es el último pomodoro
-        if (i < totalPomodoros - 1) {
-            if (pomodoroCount % pomodorosUntilLong === 0) {
-                sessionPlan.push('LARGO');
-            } else {
-                sessionPlan.push('CORTO');
-            }
-        }
-    }
-
-    totalSessions = sessionPlan.length;
-    currentSessionIndex = 0;
-    workSessionsCompleted = 0;
-
-    console.log('Plan generado:', sessionPlan);
-    return true;
+    const additionalCSS = `
+/* Estilos para el estante de probetas */
+.test-tube {
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
 }
 
-// === FUNCIÓN: CREAR REPISA VISUAL ===
+.test-tube.in-progress {
+    animation: pulse-glow 2s infinite;
+    box-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+}
+
+.test-tube.completed {
+    opacity: 0.8;
+}
+
+.test-tube.work-completed {
+    box-shadow: 0 0 15px rgba(241, 196, 15, 0.7);
+}
+
+.test-tube.break-completed {
+    box-shadow: 0 0 15px rgba(46, 204, 113, 0.7);
+}
+
+@keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 5px rgba(52, 152, 219, 0.3); }
+    50% { box-shadow: 0 0 20px rgba(52, 152, 219, 0.8); }
+}
+
+/* Estilos para partículas de vapor */
+.vapor-particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 50%;
+    animation: vapor-rise linear infinite;
+    pointer-events: none;
+    z-index: 10;
+}
+
+@keyframes vapor-rise {
+    0% {
+        transform: translateY(0) scale(0.5);
+        opacity: 0.8;
+    }
+    50% {
+        transform: translateY(-30px) scale(1);
+        opacity: 0.6;
+    }
+    100% {
+        transform: translateY(-80px) scale(1.5);
+        opacity: 0;
+    }
+}
+
+/* Mejorar el efecto de vapor existente */
+#vapor-effect.active {
+    opacity: 1;
+    animation: vapor-flow 4s infinite;
+}
+
+@keyframes vapor-flow {
+    0%, 100% { 
+        transform: translateY(0) scale(1);
+        opacity: 0.6;
+    }
+    50% { 
+        transform: translateY(-10px) scale(1.1);
+        opacity: 0.8;
+    }
+}
+
+/* Animación para el líquido que se vacía */
+#liquid {
+    transition: height 1s ease-out;
+}
+
+/* Mejoras para el contenedor de vapor */
+#vapor-effect {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100px;
+    pointer-events: none;
+    z-index: 5;
+}
+`;
+
+    // Crear elemento style y agregarlo al head
+    const styleSheet = document.createElement('style');
+    styleSheet.id = 'estilos-timer-adicionales';
+    styleSheet.textContent = additionalCSS;
+    document.head.appendChild(styleSheet);
+    
+    console.log('Estilos adicionales agregados correctamente');
+}
+
+// === FUNCIÓN PRINCIPAL: GENERAR PLAN DE TRABAJO ===
+function generarPlan() {
+    try {
+        const totalHours = parseInt(totalHoursInput.value, 10);
+        const workMinutes = parseInt(workMinutesInput.value, 10);
+        const shortBreakMinutes = parseInt(shortBreakMinutesInput.value, 10);
+        const longBreakMinutes = parseInt(longBreakMinutesInput.value, 10);
+        const pomodorosUntilLong = parseInt(pomodorosUntilLongInput.value, 10);
+
+        // Validaciones mejoradas
+        if (isNaN(totalHours) || totalHours < 1 || totalHours > 24) {
+            alert("Las horas deben estar entre 1 y 24.");
+            return false;
+        }
+        
+        if (isNaN(workMinutes) || workMinutes < 5 || workMinutes > 120) {
+            alert("Los minutos de trabajo deben estar entre 5 y 120.");
+            return false;
+        }
+        
+        if (isNaN(shortBreakMinutes) || shortBreakMinutes < 1 || shortBreakMinutes > 60) {
+            alert("Los minutos de descanso corto deben estar entre 1 y 60.");
+            return false;
+        }
+        
+        if (isNaN(longBreakMinutes) || longBreakMinutes < 5 || longBreakMinutes > 120) {
+            alert("Los minutos de descanso largo deben estar entre 5 y 120.");
+            return false;
+        }
+        
+        if (isNaN(pomodorosUntilLong) || pomodorosUntilLong < 2 || pomodorosUntilLong > 10) {
+            alert("Los pomodoros hasta descanso largo deben estar entre 2 y 10.");
+            return false;
+        }
+
+        // Guardar configuración
+        config = {
+            totalHours,
+            workMinutes,
+            shortBreakMinutes,
+            longBreakMinutes,
+            pomodorosUntilLong
+        };
+
+        // Calcular número total de pomodoros necesarios
+        const totalWorkTimeMinutes = totalHours * 60;
+        const totalPomodoros = Math.ceil(totalWorkTimeMinutes / workMinutes);
+        
+        // Generar el plan
+        sessionPlan = [];
+        let pomodoroCount = 0;
+
+        for (let i = 0; i < totalPomodoros; i++) {
+            sessionPlan.push('TRABAJO');
+            pomodoroCount++;
+            
+            // Solo agregar descanso si no es el último pomodoro
+            if (i < totalPomodoros - 1) {
+                if (pomodoroCount % pomodorosUntilLong === 0) {
+                    sessionPlan.push('LARGO');
+                } else {
+                    sessionPlan.push('CORTO');
+                }
+            }
+        }
+
+        totalSessions = sessionPlan.length;
+        currentSessionIndex = 0;
+        workSessionsCompleted = 0;
+
+        console.log('Plan generado:', sessionPlan);
+        console.log('Total sesiones:', totalSessions);
+        return true;
+        
+    } catch (error) {
+        console.error('Error generando plan:', error);
+        alert("Error al generar el plan. Por favor, verifica los valores ingresados.");
+        return false;
+    }
+}
+
+// === FUNCIÓN: CREAR REPISA VISUAL (MEJORADA) ===
 function crearRepisaVisual() {
     testTubesContainer.innerHTML = '';
     
@@ -128,65 +264,150 @@ function crearRepisaVisual() {
         
         const liquidDiv = document.createElement('div');
         liquidDiv.className = 'test-tube-liquid';
-        testTube.appendChild(liquidDiv);
         
+        // Inicializar todas las probetas vacías
+        liquidDiv.style.height = '0%';
+        
+        // Asignar colores según el tipo de sesión
+        if (sessionType === 'TRABAJO') {
+            liquidDiv.style.backgroundColor = 'hsl(' + Math.floor(Math.random() * 360) + ', 80%, 60%)';
+        } else if (sessionType === 'CORTO') {
+            liquidDiv.style.backgroundColor = '#2ecc71'; // Verde para descanso corto
+        } else if (sessionType === 'LARGO') {
+            liquidDiv.style.backgroundColor = '#e74c3c'; // Rojo para descanso largo
+        }
+        
+        testTube.appendChild(liquidDiv);
         testTubesContainer.appendChild(testTube);
     });
     
     progressShelf.classList.remove('hidden');
 }
 
-// === FUNCIÓN: ACTUALIZAR PROGRESO VISUAL ===
-function actualizarProgresoVisual() {
+// === FUNCIÓN: ACTUALIZAR PROGRESO VISUAL DEL ESTANTE ===
+function actualizarProgresoVisualEstante() {
+    // Actualizar solo la sesión actual
     const currentTube = testTubesContainer.children[currentSessionIndex];
     if (currentTube) {
         const liquidDiv = currentTube.querySelector('.test-tube-liquid');
         const sessionType = sessionPlan[currentSessionIndex];
         
         if (sessionType === 'TRABAJO') {
-            // En trabajo: el líquido se vacía (representa evaporación)
-            const percentage = (remainingSeconds / totalSeconds) * 100;
+            // En trabajo: el líquido se llena progresivamente (representando acumulación de trabajo)
+            const percentage = ((totalSeconds - remainingSeconds) / totalSeconds) * 100;
             liquidDiv.style.height = `${percentage}%`;
         } else {
-            // En descanso: el líquido se llena (representa relajación)
+            // En descanso: el líquido se llena progresivamente (representando relajación)
             const percentage = ((totalSeconds - remainingSeconds) / totalSeconds) * 100;
             liquidDiv.style.height = `${percentage}%`;
         }
+        
+        // Añadir clase de progreso para animaciones
+        currentTube.classList.add('in-progress');
     }
 }
 
-// === FUNCIÓN: MARCAR SESIÓN COMO COMPLETADA ===
+// === FUNCIÓN: MARCAR SESIÓN COMO COMPLETADA (MEJORADA) ===
 function marcarSesionCompletada() {
     const completedTube = testTubesContainer.children[currentSessionIndex];
     if (completedTube) {
-        completedTube.classList.add('completed');
+        const liquidDiv = completedTube.querySelector('.test-tube-liquid');
         const sessionType = sessionPlan[currentSessionIndex];
         
+        // Remover clase de progreso y añadir clase de completado
+        completedTube.classList.remove('in-progress');
+        completedTube.classList.add('completed');
+        
         if (sessionType === 'TRABAJO') {
-            // Trabajo completado: tubo vacío
-            completedTube.querySelector('.test-tube-liquid').style.height = '0%';
+            // Trabajo completado: tubo lleno al 100%
+            liquidDiv.style.height = '100%';
             workSessionsCompleted++;
+            
+            // Añadir efecto de brillo para trabajo completado
+            completedTube.classList.add('work-completed');
         } else {
-            // Descanso completado: tubo lleno
-            completedTube.querySelector('.test-tube-liquid').style.height = '100%';
+            // Descanso completado: tubo lleno al 100%
+            liquidDiv.style.height = '100%';
+            
+            // Añadir efecto de relajación para descanso completado
+            completedTube.classList.add('break-completed');
         }
+        
+        // Efecto de pulso al completar
+        setTimeout(() => {
+            completedTube.style.transform = 'scale(1.1)';
+            setTimeout(() => {
+                completedTube.style.transform = 'scale(1)';
+            }, 200);
+        }, 100);
     }
 }
 
-// === FUNCIÓN: CONFIGURAR EFECTOS VISUALES ===
-function configurarEfectosVisuales(sessionType) {
-    // Limpiar efectos anteriores
-    vaporEffect.classList.remove('active');
-    bubblesEffect.classList.remove('active');
+// === FUNCIÓN: CREAR EFECTO DE VAPOR ===
+function crearEfectoVapor() {
+    const vaporContainer = document.getElementById('vapor-effect');
+    if (!vaporContainer) return;
     
-    if (sessionType === 'TRABAJO') {
-        // Activar efecto de vapor para trabajo
-        vaporEffect.classList.add('active');
-        setRandomLiquidColor();
-    } else {
-        // Activar efecto de burbujas para descansos
-        bubblesEffect.classList.add('active');
-        setBreakLiquidColor(sessionType);
+    // Crear múltiples partículas de vapor
+    for (let i = 0; i < 8; i++) {
+        const vaporParticle = document.createElement('div');
+        vaporParticle.className = 'vapor-particle';
+        
+        // Posición inicial aleatoria en la parte superior de la probeta
+        vaporParticle.style.left = `${45 + Math.random() * 10}%`;
+        vaporParticle.style.animationDelay = `${Math.random() * 2}s`;
+        vaporParticle.style.animationDuration = `${2 + Math.random() * 2}s`;
+        
+        vaporContainer.appendChild(vaporParticle);
+        
+        // Remover la partícula después de la animación
+        setTimeout(() => {
+            if (vaporParticle.parentNode) {
+                vaporParticle.remove();
+            }
+        }, 4000);
+    }
+}
+
+// === FUNCIÓN: CONFIGURAR EFECTOS VISUALES (MEJORADA) ===
+function configurarEfectosVisuales(sessionType) {
+    try {
+        console.log('Configurando efectos para:', sessionType);
+        
+        // Limpiar efectos anteriores
+        vaporEffect.classList.remove('active');
+        bubblesEffect.classList.remove('active');
+        
+        // Limpiar interval anterior de vapor
+        if (vaporInterval) {
+            clearInterval(vaporInterval);
+            vaporInterval = null;
+        }
+        
+        if (sessionType === 'TRABAJO') {
+            // Activar efecto de vapor para trabajo
+            vaporEffect.classList.add('active');
+            setRandomLiquidColor();
+            
+            // Crear vapor continuo durante el trabajo
+            vaporInterval = setInterval(() => {
+                if (isRunning && sessionPlan[currentSessionIndex] === 'TRABAJO') {
+                    crearEfectoVapor();
+                } else {
+                    clearInterval(vaporInterval);
+                    vaporInterval = null;
+                }
+            }, 3000);
+            
+            console.log('Efecto de vapor activado');
+        } else {
+            // Activar efecto de burbujas para descansos
+            bubblesEffect.classList.add('active');
+            setBreakLiquidColor(sessionType);
+            console.log('Efecto de burbujas activado para', sessionType);
+        }
+    } catch (error) {
+        console.error('Error configurando efectos visuales:', error);
     }
 }
 
@@ -236,42 +457,55 @@ function reproducirSonido(tipo) {
 
 // === FUNCIÓN PRINCIPAL: INICIAR SIGUIENTE SESIÓN ===
 async function iniciarSiguienteSesion() {
-    if (currentSessionIndex >= sessionPlan.length) {
-        // ¡Todas las sesiones completadas!
-        mostrarPantallaFinalizacion();
-        return;
-    }
+    try {
+        console.log(`Iniciando sesión ${currentSessionIndex + 1} de ${totalSessions}`);
+        
+        if (currentSessionIndex >= sessionPlan.length) {
+            console.log('Todas las sesiones completadas');
+            mostrarPantallaFinalizacion();
+            return;
+        }
 
-    const sessionType = sessionPlan[currentSessionIndex];
-    
-    // Configurar duración según el tipo de sesión
-    switch (sessionType) {
-        case 'TRABAJO':
-            totalSeconds = config.workMinutes * 60;
-            break;
-        case 'CORTO':
-            totalSeconds = config.shortBreakMinutes * 60;
-            break;
-        case 'LARGO':
-            totalSeconds = config.longBreakMinutes * 60;
-            break;
+        const sessionType = sessionPlan[currentSessionIndex];
+        console.log('Tipo de sesión:', sessionType);
+        
+        // Configurar duración según el tipo de sesión
+        switch (sessionType) {
+            case 'TRABAJO':
+                totalSeconds = config.workMinutes * 60;
+                break;
+            case 'CORTO':
+                totalSeconds = config.shortBreakMinutes * 60;
+                break;
+            case 'LARGO':
+                totalSeconds = config.longBreakMinutes * 60;
+                break;
+            default:
+                console.error('Tipo de sesión desconocido:', sessionType);
+                totalSeconds = 25 * 60; // Fallback
+        }
+        
+        remainingSeconds = totalSeconds;
+        console.log('Duración configurada:', totalSeconds, 'segundos');
+        
+        // Actualizar UI
+        actualizarInformacionSesion();
+        configurarEfectosVisuales(sessionType);
+        updateUI();
+        
+        // Reproducir sonido de inicio
+        reproducirSonido('inicio');
+        
+        // Activar Wake Lock
+        await requestWakeLock();
+        
+        // Iniciar temporizador
+        startTimer();
+        
+    } catch (error) {
+        console.error('Error en iniciarSiguienteSesion:', error);
+        alert('Error al iniciar la sesión. Continuando...');
     }
-    
-    remainingSeconds = totalSeconds;
-    
-    // Actualizar UI
-    actualizarInformacionSesion();
-    configurarEfectosVisuales(sessionType);
-    updateUI();
-    
-    // Reproducir sonido de inicio
-    reproducirSonido('inicio');
-    
-    // Activar Wake Lock
-    await requestWakeLock();
-    
-    // Iniciar temporizador
-    startTimer();
 }
 
 // === FUNCIÓN: ACTUALIZAR INFORMACIÓN DE SESIÓN ===
@@ -300,6 +534,12 @@ function actualizarInformacionSesion() {
 function mostrarPantallaFinalizacion() {
     releaseWakeLock();
     
+    // Limpiar efectos
+    if (vaporInterval) {
+        clearInterval(vaporInterval);
+        vaporInterval = null;
+    }
+    
     // Ocultar timer y mostrar pantalla de finalización
     timerDisplay.classList.add('hidden');
     completionScreen.classList.remove('hidden');
@@ -321,19 +561,38 @@ function mostrarPantallaFinalizacion() {
     }
 }
 
-// === FUNCIONES DEL TEMPORIZADOR (ADAPTADAS) ===
+// === FUNCIONES DEL TEMPORIZADOR ===
 async function setupTimer() {
-    if (!generarPlan()) return;
-    
-    // Cambiar a vista del timer
-    configPanel.classList.add('hidden');
-    timerDisplay.classList.remove('hidden');
-    
-    // Crear repisa visual
-    crearRepisaVisual();
-    
-    // Iniciar primera sesión
-    await iniciarSiguienteSesion();
+    try {
+        console.log('Iniciando setup del timer...');
+        
+        if (!generarPlan()) {
+            console.log('Error al generar plan');
+            return;
+        }
+        
+        console.log('Plan generado exitosamente');
+        
+        // Cambiar a vista del timer
+        configPanel.classList.add('hidden');
+        timerDisplay.classList.remove('hidden');
+        
+        // Crear repisa visual
+        crearRepisaVisual();
+        console.log('Repisa visual creada');
+        
+        // Iniciar primera sesión
+        await iniciarSiguienteSesion();
+        console.log('Primera sesión iniciada');
+        
+    } catch (error) {
+        console.error('Error en setupTimer:', error);
+        alert('Error al iniciar la sesión. Por favor, intenta de nuevo.');
+        
+        // Volver al panel de configuración si hay error
+        timerDisplay.classList.add('hidden');
+        configPanel.classList.remove('hidden');
+    }
 }
 
 async function startTimer() {
@@ -349,13 +608,14 @@ async function startTimer() {
     
     timerInterval = setInterval(() => {
         remainingSeconds--;
-        updateUI();
-        actualizarProgresoVisual();
+        updateUI(); // Esta función ya incluye actualizarProgresoVisualEstante()
         
-        // Crear burbujas solo en descansos
-        const sessionType = sessionPlan[currentSessionIndex];
-        if (isRunning && (sessionType === 'CORTO' || sessionType === 'LARGO')) {
-            createBubble();
+        // Crear burbujas según el tipo de sesión
+        if (isRunning && sessionPlan[currentSessionIndex]) {
+            const sessionType = sessionPlan[currentSessionIndex];
+            if (sessionType === 'CORTO' || sessionType === 'LARGO') {
+                createBubble();
+            }
         }
         
         if (remainingSeconds <= 0) {
@@ -363,17 +623,17 @@ async function startTimer() {
             isRunning = false;
             releaseWakeLock();
             
-            // Marcar sesión como completada
+            // Marcar sesión como completada (ahora llena las probetas correctamente)
             marcarSesionCompletada();
             
             // Reproducir sonido según el tipo de sesión que termina
             const sessionType = sessionPlan[currentSessionIndex];
             if (sessionType === 'TRABAJO') {
-                reproducirSonido('descanso-corto'); // Sonido cuando termina trabajo
+                reproducirSonido('descanso-corto');
             } else if (sessionType === 'LARGO') {
-                reproducirSonido('descanso-largo'); // Sonido cuando termina descanso largo
+                reproducirSonido('descanso-largo');
             } else {
-                reproducirSonido('descanso-corto'); // Sonido cuando termina descanso corto
+                reproducirSonido('descanso-corto');
             }
             
             // Vibración
@@ -398,11 +658,23 @@ function pauseTimer() {
     clearInterval(timerInterval);
     releaseWakeLock();
     pauseBtnText.textContent = "Continuar";
+    
+    // Pausar también el vapor
+    if (vaporInterval) {
+        clearInterval(vaporInterval);
+        vaporInterval = null;
+    }
 }
 
 function resetTimer() {
     pauseTimer();
     releaseWakeLock();
+    
+    // Limpiar efectos
+    if (vaporInterval) {
+        clearInterval(vaporInterval);
+        vaporInterval = null;
+    }
     
     // Reiniciar variables
     sessionPlan = [];
@@ -438,7 +710,7 @@ function skipSession() {
     }, 1000);
 }
 
-// === FUNCIONES DE UI (MANTENIDAS DEL ORIGINAL) ===
+// === FUNCIÓN: ACTUALIZAR UI (MEJORADA CON VAPOR) ===
 function updateUI() {
     const sessionType = sessionPlan[currentSessionIndex];
     
@@ -446,6 +718,11 @@ function updateUI() {
         // En trabajo: líquido se vacía (evaporación)
         const percentage = (remainingSeconds / totalSeconds) * 100;
         liquid.style.height = `${percentage}%`;
+        
+        // Intensificar vapor cuando queda poco líquido
+        if (percentage < 20 && isRunning) {
+            crearEfectoVapor();
+        }
     } else {
         // En descanso: líquido se llena
         const percentage = ((totalSeconds - remainingSeconds) / totalSeconds) * 100;
@@ -455,24 +732,46 @@ function updateUI() {
     const mins = Math.floor(remainingSeconds / 60);
     const secs = remainingSeconds % 60;
     timerLabel.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    
+    // Actualizar estante de probetas
+    actualizarProgresoVisualEstante();
 }
 
 function createBubble() {
-    const bubble = document.createElement('div');
-    bubble.classList.add('bubble');
-    const contrastingHue = (currentLiquidHue + 180) % 360;
-    const bubbleColor = `hsla(${contrastingHue}, 90%, 70%, 0.7)`;
-    bubble.style.backgroundColor = bubbleColor;
-    const size = Math.random() * 10 + 5;
-    bubble.style.width = `${size}px`;
-    bubble.style.height = `${size}px`;
-    bubble.style.left = `${Math.random() * 90}%`;
-    bubble.style.animationDuration = `${Math.random() * 2 + 3}s`;
-    beaker.appendChild(bubble);
-    setTimeout(() => bubble.remove(), 5000);
+    try {
+        if (!sessionPlan[currentSessionIndex]) return;
+        
+        const sessionType = sessionPlan[currentSessionIndex];
+        console.log('Creando burbuja para sesión:', sessionType);
+        
+        const bubble = document.createElement('div');
+        bubble.classList.add('bubble');
+        const contrastingHue = (currentLiquidHue + 180) % 360;
+        const bubbleColor = `hsla(${contrastingHue}, 90%, 70%, 0.7)`;
+        bubble.style.backgroundColor = bubbleColor;
+        const size = Math.random() * 10 + 5;
+        bubble.style.width = `${size}px`;
+        bubble.style.height = `${size}px`;
+        bubble.style.left = `${Math.random() * 90}%`;
+        bubble.style.animationDuration = `${Math.random() * 2 + 3}s`;
+        
+        if (beaker) {
+            beaker.appendChild(bubble);
+            console.log('Burbuja añadida al beaker');
+            setTimeout(() => {
+                if (bubble && bubble.parentNode) {
+                    bubble.remove();
+                }
+            }, 5000);
+        } else {
+            console.error('Beaker no encontrado');
+        }
+    } catch (error) {
+        console.error('Error creando burbuja:', error);
+    }
 }
 
-// === FUNCIONES WAKE LOCK (MANTENIDAS) ===
+// === FUNCIONES WAKE LOCK ===
 async function requestWakeLock() {
     if ('wakeLock' in navigator) {
         try {
@@ -506,22 +805,8 @@ document.addEventListener('visibilitychange', async () => {
     }
 });
 
-// === EVENT LISTENERS ===
-setTimeBtn.addEventListener('click', setupTimer);
-newSessionBtn.addEventListener('click', resetTimer);
-resetBtn.addEventListener('click', resetTimer);
-skipBtn.addEventListener('click', skipSession);
-
-pauseBtn.addEventListener('click', () => {
-    if (isRunning) {
-        pauseTimer();
-    } else if (isPaused) {
-        startTimer();
-    }
-});
-
-// === PICTURE-IN-PICTURE (ADAPTADO PARA NUEVOS EFECTOS) ===
-pipBtn.addEventListener('click', async () => {
+// === FUNCIÓN PICTURE-IN-PICTURE CORREGIDA ===
+async function activarPictureInPicture() {
     if (!document.pictureInPictureEnabled) {
         alert('Tu navegador no soporta el modo Picture-in-Picture.');
         return;
@@ -550,6 +835,7 @@ pipBtn.addEventListener('click', async () => {
         document.body.appendChild(video);
 
         const createPipBubble = () => {
+            if (!sessionPlan[currentSessionIndex]) return;
             const sessionType = sessionPlan[currentSessionIndex];
             if (!isRunning || sessionType === 'TRABAJO') return;
             
@@ -580,7 +866,7 @@ pipBtn.addEventListener('click', async () => {
 
             // Calcular altura del líquido según el tipo de sesión
             let liquidPercentage;
-            const sessionType = sessionPlan[currentSessionIndex];
+            const sessionType = sessionPlan[currentSessionIndex] || 'TRABAJO';
             
             if (sessionType === 'TRABAJO') {
                 liquidPercentage = (remainingSeconds / totalSeconds) * 100;
@@ -643,7 +929,7 @@ pipBtn.addEventListener('click', async () => {
                     ctx.arc(bubble.x, bubble.y, bubble.size / 2, 0, Math.PI * 2);
                     ctx.fill();
                     
-                    ctx.globalAlpha = bubble.opacity * 0.4;
+                    // Highlight en la burbuja
                     ctx.fillStyle = '#ffffff';
                     ctx.beginPath();
                     ctx.arc(bubble.x - bubble.size * 0.1, bubble.y - bubble.size * 0.1, bubble.size * 0.2, 0, Math.PI * 2);
@@ -715,4 +1001,95 @@ pipBtn.addEventListener('click', async () => {
         console.error("Falló la activación de PiP:", error);
         alert("Ocurrió un error al intentar activar la mini pantalla.");
     }
+}
+
+// === EVENT LISTENERS ===
+document.addEventListener('DOMContentLoaded', function() {
+    // Agregar los estilos adicionales
+    agregarEstilosAdicionales();
+    
+    console.log('DOM cargado, configurando event listeners...');
+    
+    // Manejo de errores global para móviles
+    window.addEventListener('error', function(e) {
+        console.error('Error global capturado:', e.error);
+        console.error('En archivo:', e.filename, 'línea:', e.lineno);
+    });
+    
+    window.addEventListener('unhandledrejection', function(e) {
+        console.error('Promise rechazada no manejada:', e.reason);
+    });
+    
+    // Event listeners principales
+    if (setTimeBtn) {
+        setTimeBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('Botón empezar sesión clickeado');
+            setupTimer();
+        });
+        
+        // Añadir también el evento 'touchstart' para móviles
+        setTimeBtn.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            console.log('Touch start en botón empezar sesión');
+            setupTimer();
+        });
+    } else {
+        console.error('setTimeBtn no encontrado!');
+    }
+    
+    if (newSessionBtn) {
+        newSessionBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('Botón nueva sesión clickeado');
+            resetTimer();
+        });
+    }
+    
+    if (resetBtn) {
+        resetBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('Botón reset clickeado');
+            resetTimer();
+        });
+    }
+    
+    if (skipBtn) {
+        skipBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('Botón saltar clickeado');
+            skipSession();
+        });
+    }
+
+    if (pauseBtn) {
+        pauseBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('Botón pausa clickeado, isRunning:', isRunning, 'isPaused:', isPaused);
+            if (isRunning) {
+                pauseTimer();
+            } else if (isPaused) {
+                startTimer();
+            }
+        });
+    }
+    
+    // Event listener para Picture-in-Picture
+    if (pipBtn) {
+        pipBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('Botón PiP clickeado');
+            activarPictureInPicture();
+        });
+    }
+    
+    console.log('Todos los event listeners configurados');
+    
+    // Test de elementos del DOM
+    console.log('Elementos encontrados:');
+    console.log('- setTimeBtn:', !!setTimeBtn);
+    console.log('- configPanel:', !!configPanel);
+    console.log('- timerDisplay:', !!timerDisplay);
+    console.log('- totalHoursInput:', !!totalHoursInput);
+    console.log('- workMinutesInput:', !!workMinutesInput);
 });
