@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -10,12 +11,35 @@
 <body>
 
     <div id="app-container">
+        <!-- Nuevo Panel de Configuración Completo -->
         <div id="config-panel">
-            <h2>Configura tu Sesión</h2>
+            <h2>Configura tu Sesión de Trabajo</h2>
+            
             <div class="input-group">
-                <label for="session-minutes">Minutos por sesión:</label>
-                <input type="number" id="session-minutes" value="25" min="1">
+                <label for="total-hours">Horas totales de trabajo:</label>
+                <input type="number" id="total-hours" value="2" min="1" max="12">
             </div>
+            
+            <div class="input-group">
+                <label for="work-minutes">Minutos de trabajo (Pomodoro):</label>
+                <input type="number" id="work-minutes" value="25" min="5" max="60">
+            </div>
+            
+            <div class="input-group">
+                <label for="short-break-minutes">Minutos de descanso corto:</label>
+                <input type="number" id="short-break-minutes" value="5" min="1" max="30">
+            </div>
+            
+            <div class="input-group">
+                <label for="long-break-minutes">Minutos de descanso largo:</label>
+                <input type="number" id="long-break-minutes" value="15" min="5" max="60">
+            </div>
+            
+            <div class="input-group">
+                <label for="pomodoros-until-long">Pomodoros hasta descanso largo:</label>
+                <input type="number" id="pomodoros-until-long" value="4" min="2" max="8">
+            </div>
+            
             <button id="set-time-btn">
                 <span>Empezar Sesión</span>
                 <div class="star-1"><svg viewBox="0 0 512 512" xml:space="preserve" height="25px" width="25px" version="1.1" xmlns="http://www.w3.org/2000/svg"><polygon points="256.001,0 332.099,183.473 512,197.334 377.222,322.617 412.329,512 256.001,411.23 99.673,512 134.78,322.617 0,197.334 179.903,183.473 "/></svg></div>
@@ -27,11 +51,27 @@
             </button>
         </div>
 
+        <!-- Display del Timer -->
         <div id="timer-display" class="hidden">
+            <div id="session-info">
+                <h3 id="session-type">Trabajo</h3>
+                <p id="session-progress">Sesión 1 de 8</p>
+            </div>
+            
             <h1 id="timer-label">25:00</h1>
+            
             <div id="beaker-container">
                 <div id="liquid"></div>
+                <div id="vapor-effect" class="hidden"></div>
+                <div id="bubbles-effect" class="hidden"></div>
             </div>
+            
+            <!-- Repisa Visual de Progreso -->
+            <div id="progress-shelf" class="hidden">
+                <h4>Progreso de la Sesión</h4>
+                <div id="test-tubes-container"></div>
+            </div>
+            
             <div id="controls">
                 <button id="pause-btn">
                     <span>Pausar</span>
@@ -51,6 +91,15 @@
                     <div class="star-5"><svg viewBox="0 0 512 512" xml:space="preserve" height="15px" width="15px" version="1.1" xmlns="http://www.w3.org/2000/svg"><polygon points="256.001,0 332.099,183.473 512,197.334 377.222,322.617 412.329,512 256.001,411.23 99.673,512 134.78,322.617 0,197.334 179.903,183.473 "/></svg></div>
                     <div class="star-6"><svg viewBox="0 0 512 512" xml:space="preserve" height="5px" width="5px" version="1.1" xmlns="http://www.w3.org/2000/svg"><polygon points="256.001,0 332.099,183.473 512,197.334 377.222,322.617 412.329,512 256.001,411.23 99.673,512 134.78,322.617 0,197.334 179.903,183.473 "/></svg></div>
                 </button>
+                <button id="skip-btn">
+                    <span>Saltar</span>
+                    <div class="star-1"><svg viewBox="0 0 512 512" xml:space="preserve" height="25px" width="25px" version="1.1" xmlns="http://www.w3.org/2000/svg"><polygon points="256.001,0 332.099,183.473 512,197.334 377.222,322.617 412.329,512 256.001,411.23 99.673,512 134.78,322.617 0,197.334 179.903,183.473 "/></svg></div>
+                    <div class="star-2"><svg viewBox="0 0 512 512" xml:space="preserve" height="15px" width="15px" version="1.1" xmlns="http://www.w3.org/2000/svg"><polygon points="256.001,0 332.099,183.473 512,197.334 377.222,322.617 412.329,512 256.001,411.23 99.673,512 134.78,322.617 0,197.334 179.903,183.473 "/></svg></div>
+                    <div class="star-3"><svg viewBox="0 0 512 512" xml:space="preserve" height="5px" width="5px" version="1.1" xmlns="http://www.w3.org/2000/svg"><polygon points="256.001,0 332.099,183.473 512,197.334 377.222,322.617 412.329,512 256.001,411.23 99.673,512 134.78,322.617 0,197.334 179.903,183.473 "/></svg></div>
+                    <div class="star-4"><svg viewBox="0 0 512 512" xml:space="preserve" height="8px" width="8px" version="1.1" xmlns="http://www.w3.org/2000/svg"><polygon points="256.001,0 332.099,183.473 512,197.334 377.222,322.617 412.329,512 256.001,411.23 99.673,512 134.78,322.617 0,197.334 179.903,183.473 "/></svg></div>
+                    <div class="star-5"><svg viewBox="0 0 512 512" xml:space="preserve" height="15px" width="15px" version="1.1" xmlns="http://www.w3.org/2000/svg"><polygon points="256.001,0 332.099,183.473 512,197.334 377.222,322.617 412.329,512 256.001,411.23 99.673,512 134.78,322.617 0,197.334 179.903,183.473 "/></svg></div>
+                    <div class="star-6"><svg viewBox="0 0 512 512" xml:space="preserve" height="5px" width="5px" version="1.1" xmlns="http://www.w3.org/2000/svg"><polygon points="256.001,0 332.099,183.473 512,197.334 377.222,322.617 412.329,512 256.001,411.23 99.673,512 134.78,322.617 0,197.334 179.903,183.473 "/></svg></div>
+                </button>
                 <button id="pip-btn">
                     <span>Mini Pantalla</span>
                     <div class="star-1"><svg viewBox="0 0 512 512" xml:space="preserve" height="25px" width="25px" version="1.1" xmlns="http://www.w3.org/2000/svg"><polygon points="256.001,0 332.099,183.473 512,197.334 377.222,322.617 412.329,512 256.001,411.23 99.673,512 134.78,322.617 0,197.334 179.903,183.473 "/></svg></div>
@@ -62,9 +111,37 @@
                 </button>
             </div>
         </div>
+        
+        <!-- Pantalla de Finalización -->
+        <div id="completion-screen" class="hidden">
+            <h2>¡Sesión Completada!</h2>
+            <p id="completion-summary"></p>
+            <button id="new-session-btn">
+                <span>Nueva Sesión</span>
+                <div class="star-1"><svg viewBox="0 0 512 512" xml:space="preserve" height="25px" width="25px" version="1.1" xmlns="http://www.w3.org/2000/svg"><polygon points="256.001,0 332.099,183.473 512,197.334 377.222,322.617 412.329,512 256.001,411.23 99.673,512 134.78,322.617 0,197.334 179.903,183.473 "/></svg></div>
+                <div class="star-2"><svg viewBox="0 0 512 512" xml:space="preserve" height="15px" width="15px" version="1.1" xmlns="http://www.w3.org/2000/svg"><polygon points="256.001,0 332.099,183.473 512,197.334 377.222,322.617 412.329,512 256.001,411.23 99.673,512 134.78,322.617 0,197.334 179.903,183.473 "/></svg></div>
+                <div class="star-3"><svg viewBox="0 0 512 512" xml:space="preserve" height="5px" width="5px" version="1.1" xmlns="http://www.w3.org/2000/svg"><polygon points="256.001,0 332.099,183.473 512,197.334 377.222,322.617 412.329,512 256.001,411.23 99.673,512 134.78,322.617 0,197.334 179.903,183.473 "/></svg></div>
+                <div class="star-4"><svg viewBox="0 0 512 512" xml:space="preserve" height="8px" width="8px" version="1.1" xmlns="http://www.w3.org/2000/svg"><polygon points="256.001,0 332.099,183.473 512,197.334 377.222,322.617 412.329,512 256.001,411.23 99.673,512 134.78,322.617 0,197.334 179.903,183.473 "/></svg></div>
+                <div class="star-5"><svg viewBox="0 0 512 512" xml:space="preserve" height="15px" width="15px" version="1.1" xmlns="http://www.w3.org/2000/svg"><polygon points="256.001,0 332.099,183.473 512,197.334 377.222,322.617 412.329,512 256.001,411.23 99.673,512 134.78,322.617 0,197.334 179.903,183.473 "/></svg></div>
+                <div class="star-6"><svg viewBox="0 0 512 512" xml:space="preserve" height="5px" width="5px" version="1.1" xmlns="http://www.w3.org/2000/svg"><polygon points="256.001,0 332.099,183.473 512,197.334 377.222,322.617 412.329,512 256.001,411.23 99.673,512 134.78,322.617 0,197.334 179.903,183.473 "/></svg></div>
+            </button>
+        </div>
     </div>
 
+    <!-- Canvas para Picture-in-Picture -->
     <canvas id="pip-canvas" style="display: none;"></canvas>
+    
+    <!-- Elementos de Audio -->
+    <audio id="sound-start" preload="auto">
+        <source src="./assets/in.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="sound-short-break" preload="auto">
+        <source src="./assets/des.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="sound-long-break" preload="auto">
+        <source src="./assets/larg.mp3" type="audio/mpeg">
+    </audio>
+    
     <script src="script.js"></script>
 </body>
 </html>

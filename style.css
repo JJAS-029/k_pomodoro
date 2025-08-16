@@ -4,8 +4,11 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    min-height: 100vh;
     font-family: sans-serif;
+    margin: 0;
+    padding: 20px;
+    box-sizing: border-box;
 }
 
 #app-container {
@@ -13,12 +16,62 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    max-width: 100%;
 }
 
 #app-container h1 {
     color: #f7b733;
 }
 
+/* === PANEL DE CONFIGURACIÓN MEJORADO === */
+#config-panel {
+    padding: 25px;
+    background-color: #2c2c44;
+    border-radius: 15px;
+    width: 350px;
+    max-width: 90vw;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(254, 193, 149, 0.2);
+}
+
+#config-panel h2 {
+    color: #f7b733;
+    margin-bottom: 20px;
+    font-size: 1.5em;
+}
+
+.input-group {
+    margin-bottom: 18px;
+    text-align: left;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 6px;
+    color: #e0e0e0;
+    font-weight: 500;
+    font-size: 0.95em;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 10px 12px;
+    background-color: #1a1a2e;
+    border: 2px solid #444;
+    border-radius: 8px;
+    color: #e0e0e0;
+    font-size: 16px;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease;
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: #fec195;
+    box-shadow: 0 0 0 3px rgba(254, 193, 149, 0.2);
+}
+
+/* === BEAKER Y EFECTOS === */
 #beaker-container {
     width: 150px;
     height: 300px;
@@ -40,25 +93,62 @@ body {
     transition: height 0.5s linear;
 }
 
-#config-panel {
-    padding: 20px;
-    background-color: #2c2c44;
-    border-radius: 10px;
-    width: 300px; /* Ancho fijo para el panel de configuración */
+/* === EFECTOS DE VAPOR (para sesiones de trabajo) === */
+#vapor-effect {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 50px;
+    pointer-events: none;
+    z-index: 10;
 }
 
-.input-group {
-    margin-bottom: 15px;
+#vapor-effect.active::before,
+#vapor-effect.active::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background-color: rgba(255, 255, 255, 0.6);
+    border-radius: 50%;
+    animation: vaporRise 3s infinite ease-out;
 }
 
-.hidden {
-    display: none !important;
+#vapor-effect.active::before {
+    left: 30%;
+    animation-delay: 0s;
 }
 
-#timer-label {
-    font-size: 4em;
-    margin-bottom: 10px;
-    color: #fff;
+#vapor-effect.active::after {
+    left: 60%;
+    animation-delay: 1.5s;
+}
+
+@keyframes vaporRise {
+    0% {
+        transform: translateY(0) scale(0.5);
+        opacity: 0.8;
+    }
+    50% {
+        transform: translateY(-25px) scale(0.8);
+        opacity: 0.6;
+    }
+    100% {
+        transform: translateY(-50px) scale(1.2);
+        opacity: 0;
+    }
+}
+
+/* === EFECTOS DE BURBUJAS (para descansos) === */
+#bubbles-effect {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 5;
 }
 
 .bubble {
@@ -72,170 +162,335 @@ body {
 }
 
 @keyframes rise {
-    0% { transform: translateY(0); opacity: 1; }
-    50% { transform: translateY(-150px) translateX(10px); }
-    100% { transform: translateY(-300px) translateX(-10px); opacity: 0; }
+    0% { 
+        transform: translateY(0); 
+        opacity: 1; 
+    }
+    50% { 
+        transform: translateY(-150px) translateX(10px); 
+        opacity: 0.7;
+    }
+    100% { 
+        transform: translateY(-300px) translateX(-10px); 
+        opacity: 0; 
+    }
+}
+
+/* === INFORMACIÓN DE SESIÓN === */
+#session-info {
+    margin-bottom: 15px;
+}
+
+#session-type {
+    color: #f7b733;
+    font-size: 1.8em;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+#session-progress {
+    color: #ccc;
+    font-size: 1em;
+    margin: 0;
+}
+
+/* === REPISA DE PROGRESO === */
+#progress-shelf {
+    margin: 25px 0;
+    padding: 20px;
+    background-color: rgba(44, 44, 68, 0.6);
+    border-radius: 12px;
+    border: 1px solid rgba(254, 193, 149, 0.3);
+    max-width: 90vw;
+    overflow-x: auto;
+}
+
+#progress-shelf h4 {
+    color: #f7b733;
+    margin-bottom: 15px;
+    font-size: 1.1em;
+}
+
+#test-tubes-container {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    min-height: 60px;
+}
+
+.test-tube {
+    width: 25px;
+    height: 50px;
+    border: 2px solid #666;
+    border-top: none;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+    position: relative;
+    overflow: hidden;
+    background-color: rgba(26, 26, 46, 0.8);
+}
+
+.test-tube-liquid {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 0%;
+    transition: height 0.3s ease-in-out;
+}
+
+.test-tube.work {
+    border-color: #3498db;
+}
+
+.test-tube.work .test-tube-liquid {
+    background-color: #3498db;
+}
+
+.test-tube.short-break {
+    border-color: #2ecc71;
+}
+
+.test-tube.short-break .test-tube-liquid {
+    background-color: #2ecc71;
+}
+
+.test-tube.long-break {
+    border-color: #e74c3c;
+}
+
+.test-tube.long-break .test-tube-liquid {
+    background-color: #e74c3c;
+}
+
+.test-tube.completed .test-tube-liquid {
+    height: 100% !important;
+}
+
+/* === PANTALLA DE FINALIZACIÓN === */
+#completion-screen {
+    text-align: center;
+    padding: 40px;
+    background-color: #2c2c44;
+    border-radius: 15px;
+    width: 350px;
+    max-width: 90vw;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(254, 193, 149, 0.2);
+}
+
+#completion-screen h2 {
+    color: #f7b733;
+    font-size: 2.2em;
+    margin-bottom: 20px;
+}
+
+#completion-summary {
+    color: #e0e0e0;
+    font-size: 1.1em;
+    line-height: 1.5;
+    margin-bottom: 25px;
+}
+
+/* === ESTILOS GENERALES === */
+.hidden {
+    display: none !important;
+}
+
+#timer-label {
+    font-size: 4em;
+    margin-bottom: 10px;
+    color: #fff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 #controls {
     display: flex;
     justify-content: center;
     gap: 15px;
-    flex-wrap: wrap; /* Para que los botones se ajusten en pantallas pequeñas */
+    flex-wrap: wrap;
+    margin-top: 20px;
 }
 
-
+/* === ESTILOS DE BOTONES (mantenidos del original) === */
 button {
-  position: relative;
-  padding: 12px 35px;
-  background: #fec195;
-  font-size: 17px;
-  font-weight: 500;
-  color: #5a1111;
-  border: 3px solid #fec195;
-  border-radius: 8px;
-  box-shadow: 0 0 0 #fec1958c;
-  transition: all 0.3s ease-in-out;
-  cursor: pointer;
+    position: relative;
+    padding: 12px 35px;
+    background: #fec195;
+    font-size: 17px;
+    font-weight: 500;
+    color: #5a1111;
+    border: 3px solid #fec195;
+    border-radius: 8px;
+    box-shadow: 0 0 0 #fec1958c;
+    transition: all 0.3s ease-in-out;
+    cursor: pointer;
 }
 
 button svg {
-    fill: #e4deaf; /* Color de las estrellas */
+    fill: #e4deaf;
     transition: all 0.5s ease;
 }
 
 .star-1 {
-  position: absolute;
-  top: 20%;
-  left: 20%;
-  width: 25px;
-  height: auto;
-  filter: drop-shadow(0 0 0 #fffdef);
-  z-index: -5;
-  transition: all 1s cubic-bezier(0.05, 0.83, 0.43, 0.96);
+    position: absolute;
+    top: 20%;
+    left: 20%;
+    width: 25px;
+    height: auto;
+    filter: drop-shadow(0 0 0 #fffdef);
+    z-index: -5;
+    transition: all 1s cubic-bezier(0.05, 0.83, 0.43, 0.96);
 }
 
 .star-2 {
-  position: absolute;
-  top: 45%;
-  left: 45%;
-  width: 15px;
-  height: auto;
-  filter: drop-shadow(0 0 0 #fffdef);
-  z-index: -5;
-  transition: all 1s cubic-bezier(0, 0.4, 0, 1.01);
+    position: absolute;
+    top: 45%;
+    left: 45%;
+    width: 15px;
+    height: auto;
+    filter: drop-shadow(0 0 0 #fffdef);
+    z-index: -5;
+    transition: all 1s cubic-bezier(0, 0.4, 0, 1.01);
 }
 
 .star-3 {
-  position: absolute;
-  top: 40%;
-  left: 40%;
-  width: 5px;
-  height: auto;
-  filter: drop-shadow(0 0 0 #fffdef);
-  z-index: -5;
-  transition: all 1s cubic-bezier(0, 0.4, 0, 1.01);
+    position: absolute;
+    top: 40%;
+    left: 40%;
+    width: 5px;
+    height: auto;
+    filter: drop-shadow(0 0 0 #fffdef);
+    z-index: -5;
+    transition: all 1s cubic-bezier(0, 0.4, 0, 1.01);
 }
 
 .star-4 {
-  position: absolute;
-  top: 20%;
-  left: 40%;
-  width: 8px;
-  height: auto;
-  filter: drop-shadow(0 0 0 #fffdef);
-  z-index: -5;
-  transition: all 0.8s cubic-bezier(0, 0.4, 0, 1.01);
+    position: absolute;
+    top: 20%;
+    left: 40%;
+    width: 8px;
+    height: auto;
+    filter: drop-shadow(0 0 0 #fffdef);
+    z-index: -5;
+    transition: all 0.8s cubic-bezier(0, 0.4, 0, 1.01);
 }
 
 .star-5 {
-  position: absolute;
-  top: 25%;
-  left: 45%;
-  width: 15px;
-  height: auto;
-  filter: drop-shadow(0 0 0 #fffdef);
-  z-index: -5;
-  transition: all 0.6s cubic-bezier(0, 0.4, 0, 1.01);
+    position: absolute;
+    top: 25%;
+    left: 45%;
+    width: 15px;
+    height: auto;
+    filter: drop-shadow(0 0 0 #fffdef);
+    z-index: -5;
+    transition: all 0.6s cubic-bezier(0, 0.4, 0, 1.01);
 }
 
 .star-6 {
-  position: absolute;
-  top: 5%;
-  left: 50%;
-  width: 5px;
-  height: auto;
-  filter: drop-shadow(0 0 0 #fffdef);
-  z-index: -5;
-  transition: all 0.8s ease;
+    position: absolute;
+    top: 5%;
+    left: 50%;
+    width: 5px;
+    height: auto;
+    filter: drop-shadow(0 0 0 #fffdef);
+    z-index: -5;
+    transition: all 0.8s ease;
 }
 
 button:hover {
-  background: transparent;
-  color: #fec195;
-  box-shadow: 0 0 25px #fec1958c;
+    background: transparent;
+    color: #fec195;
+    box-shadow: 0 0 25px #fec1958c;
 }
 
 button:hover .star-1 {
-  position: absolute;
-  top: -80%;
-  left: -30%;
-  width: 25px;
-  height: auto;
-  filter: drop-shadow(0 0 10px #fffdef);
-  z-index: 2;
+    position: absolute;
+    top: -80%;
+    left: -30%;
+    width: 25px;
+    height: auto;
+    filter: drop-shadow(0 0 10px #fffdef);
+    z-index: 2;
 }
 
 button:hover .star-2 {
-  position: absolute;
-  top: -25%;
-  left: 10%;
-  width: 15px;
-  height: auto;
-  filter: drop-shadow(0 0 10px #fffdef);
-  z-index: 2;
+    position: absolute;
+    top: -25%;
+    left: 10%;
+    width: 15px;
+    height: auto;
+    filter: drop-shadow(0 0 10px #fffdef);
+    z-index: 2;
 }
 
 button:hover .star-3 {
-  position: absolute;
-  top: 55%;
-  left: 25%;
-  width: 5px;
-  height: auto;
-  filter: drop-shadow(0 0 10px #fffdef);
-  z-index: 2;
+    position: absolute;
+    top: 55%;
+    left: 25%;
+    width: 5px;
+    height: auto;
+    filter: drop-shadow(0 0 10px #fffdef);
+    z-index: 2;
 }
 
 button:hover .star-4 {
-  position: absolute;
-  top: 30%;
-  left: 80%;
-  width: 8px;
-  height: auto;
-  filter: drop-shadow(0 0 10px #fffdef);
-  z-index: 2;
+    position: absolute;
+    top: 30%;
+    left: 80%;
+    width: 8px;
+    height: auto;
+    filter: drop-shadow(0 0 10px #fffdef);
+    z-index: 2;
 }
 
 button:hover .star-5 {
-  position: absolute;
-  top: 25%;
-  left: 115%;
-  width: 15px;
-  height: auto;
-  filter: drop-shadow(0 0 10px #fffdef);
-  z-index: 2;
+    position: absolute;
+    top: 25%;
+    left: 115%;
+    width: 15px;
+    height: auto;
+    filter: drop-shadow(0 0 10px #fffdef);
+    z-index: 2;
 }
 
 button:hover .star-6 {
-  position: absolute;
-  top: 5%;
-  left: 60%;
-  width: 5px;
-  height: auto;
-  filter: drop-shadow(0 0 10px #fffdef);
-  z-index: 2;
+    position: absolute;
+    top: 5%;
+    left: 60%;
+    width: 5px;
+    height: auto;
+    filter: drop-shadow(0 0 10px #fffdef);
+    z-index: 2;
 }
 
 .fil0 {
-  fill: #fffdef;
+    fill: #fffdef;
+}
+
+/* === RESPONSIVIDAD === */
+@media (max-width: 480px) {
+    #config-panel,
+    #completion-screen {
+        width: 95%;
+        padding: 20px;
+    }
+    
+    #timer-label {
+        font-size: 3em;
+    }
+    
+    button {
+        padding: 10px 25px;
+        font-size: 15px;
+    }
+    
+    #controls {
+        gap: 10px;
+    }
+    
+    .test-tube {
+        width: 20px;
+        height: 40px;
+    }
 }
