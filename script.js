@@ -343,68 +343,71 @@ function marcarSesionCompletada() {
     }
 }
 
-// === FUNCIÓN: CREAR EFECTO DE VAPOR ===
+// === FUNCIÓN: CREAR EFECTO DE VAPOR (MEJORADA) ===
 function crearEfectoVapor() {
-    const vaporContainer = document.getElementById('vapor-effect');
-    if (!vaporContainer) return;
+    // Verificamos que el beaker exista para evitar errores
+    if (!beaker) return;
+
+    // Obtenemos la altura total del beaker y la altura actual del líquido
+    const beakerHeight = beaker.offsetHeight;
+    const liquidHeightPercentage = parseFloat(liquid.style.height) || 0;
     
+    // Calculamos la posición Y (vertical) de la superficie del líquido
+    // (100 - porcentaje) / 100 nos da la proporción desde la parte superior
+    const liquidSurfaceY = beakerHeight * (100 - liquidHeightPercentage) / 100;
+
     // Crear múltiples partículas de vapor
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < 2; i++) { // Reducimos a 2 por ciclo para un efecto más sutil
         const vaporParticle = document.createElement('div');
         vaporParticle.className = 'vapor-particle';
         
-        // Posición inicial aleatoria en la parte superior de la probeta
-        vaporParticle.style.left = `${45 + Math.random() * 10}%`;
-        vaporParticle.style.animationDelay = `${Math.random() * 2}s`;
+        // ✅ Posicionamos la partícula en la superficie del líquido
+        vaporParticle.style.top = `${liquidSurfaceY}px`;
+        
+        // Posición horizontal aleatoria sobre la superficie
+        vaporParticle.style.left = `${20 + Math.random() * 60}%`;
+        
+        // Duración y retraso aleatorios para un efecto más natural
+        vaporParticle.style.animationDelay = `${Math.random() * 1.5}s`;
         vaporParticle.style.animationDuration = `${2 + Math.random() * 2}s`;
         
-        vaporContainer.appendChild(vaporParticle);
+        // ✅ Añadimos la partícula al beaker principal, no al contenedor de vapor
+        beaker.appendChild(vaporParticle);
         
-        // Remover la partícula después de la animación
+        // Remover la partícula del DOM después de que su animación termine
         setTimeout(() => {
             if (vaporParticle.parentNode) {
                 vaporParticle.remove();
             }
-        }, 4000);
+        }, 4000); // 4000ms es un tiempo seguro mayor a la duración de la animación
     }
 }
 
-// === FUNCIÓN: CONFIGURAR EFECTOS VISUALES (MEJORADA) ===
+// === FUNCIÓN: CONFIGURAR EFECTOS VISUALES (CORREGIDA) ===
 function configurarEfectosVisuales(sessionType) {
     try {
         console.log('Configurando efectos para:', sessionType);
-        
-        // Limpiar efectos anteriores
-        vaporEffect.classList.remove('active');
-        bubblesEffect.classList.remove('active');
-        
-        // Limpiar interval anterior de vapor
+
+        // Limpiamos cualquier intervalo de vapor anterior por si acaso
         if (vaporInterval) {
             clearInterval(vaporInterval);
             vaporInterval = null;
         }
-        
+
         if (sessionType === 'TRABAJO') {
-            // Activar efecto de vapor para trabajo
+            // Preparamos para el vapor: mostramos su contenedor y ocultamos las burbujas
+            bubblesEffect.classList.add('hidden');
+            vaporEffect.classList.remove('hidden');
             vaporEffect.classList.add('active');
             setRandomLiquidColor();
-            
-            // Crear vapor continuo durante el trabajo
-            vaporInterval = setInterval(() => {
-                if (isRunning && sessionPlan[currentSessionIndex] === 'TRABAJO') {
-                    crearEfectoVapor();
-                } else {
-                    clearInterval(vaporInterval);
-                    vaporInterval = null;
-                }
-            }, 3000);
-            
-            console.log('Efecto de vapor activado');
-        } else {
-            // Activar efecto de burbujas para descansos
+            console.log('Contenedor de vapor preparado.');
+        } else { // Si es descanso...
+            // Preparamos para las burbujas: mostramos su contenedor y ocultamos el vapor
+            vaporEffect.classList.add('hidden');
+            bubblesEffect.classList.remove('hidden');
             bubblesEffect.classList.add('active');
             setBreakLiquidColor(sessionType);
-            console.log('Efecto de burbujas activado para', sessionType);
+            console.log('Contenedor de burbujas preparado.');
         }
     } catch (error) {
         console.error('Error configurando efectos visuales:', error);
@@ -459,7 +462,9 @@ function reproducirSonido(tipo) {
 async function iniciarSiguienteSesion() {
     try {
         console.log(`Iniciando sesión ${currentSessionIndex + 1} de ${totalSessions}`);
-        
+    
+        limpiarEfectos(); // ✅ AÑADIMOS ESTA LÍNEA
+
         if (currentSessionIndex >= sessionPlan.length) {
             console.log('Todas las sesiones completadas');
             mostrarPantallaFinalizacion();
@@ -572,7 +577,10 @@ async function setupTimer() {
         }
         
         console.log('Plan generado exitosamente');
-        
+       
+        // Limpiar efectos visuales
+        limpiarEfectos();
+
         // Cambiar a vista del timer
         configPanel.classList.add('hidden');
         timerDisplay.classList.remove('hidden');
@@ -597,59 +605,80 @@ async function setupTimer() {
 
 async function startTimer() {
     if (isRunning) return;
-    
+
     isRunning = true;
     isPaused = false;
     pauseBtnText.textContent = "Pausar";
-    
+
     if (!wakeLock) {
         await requestWakeLock();
     }
-    
+
+    // ✅ AQUÍ AÑADIMOS LA LÓGICA PARA INICIAR EL VAPOR
+    // Se ejecuta una sola vez cuando el timer arranca.
+    const currentSessionType = sessionPlan[currentSessionIndex];
+    if (currentSessionType === 'TRABAJO') {
+        if (vaporInterval) clearInterval(vaporInterval); // Limpiamos por si acaso
+        // Iniciamos un intervalo que crea partículas de vapor cada 1.5 segundos
+        vaporInterval = setInterval(crearEfectoVapor, 1500); 
+    }
+
+    // Tu intervalo principal que se ejecuta cada segundo (sin cambios aquí)
     timerInterval = setInterval(() => {
         remainingSeconds--;
-        updateUI(); // Esta función ya incluye actualizarProgresoVisualEstante()
-        
-        // Crear burbujas según el tipo de sesión
-        if (isRunning && sessionPlan[currentSessionIndex]) {
-            const sessionType = sessionPlan[currentSessionIndex];
-            if (sessionType === 'CORTO' || sessionType === 'LARGO') {
-                createBubble();
-            }
+        updateUI();
+
+        // 👇 TU CÓDIGO ORIGINAL PARA LAS BURBUJAS (SE QUEDA IGUAL)
+        // Se ejecuta cada segundo y solo crea burbujas si es un descanso.
+        const sessionType = sessionPlan[currentSessionIndex];
+        if (isRunning && (sessionType === 'CORTO' || sessionType === 'LARGO')) {
+            createBubble();
         }
         
+        // Cuando el tiempo se acaba...
         if (remainingSeconds <= 0) {
             clearInterval(timerInterval);
             isRunning = false;
             releaseWakeLock();
-            
-            // Marcar sesión como completada (ahora llena las probetas correctamente)
+
+            // ✅ TAMBIÉN DETENEMOS EL VAPOR
+            if (vaporInterval) {
+                clearInterval(vaporInterval);
+                vaporInterval = null;
+            }
+
             marcarSesionCompletada();
             
-            // Reproducir sonido según el tipo de sesión que termina
-            const sessionType = sessionPlan[currentSessionIndex];
-            if (sessionType === 'TRABAJO') {
+            // ...el resto de la función sigue exactamente igual...
+            const endedSessionType = sessionPlan[currentSessionIndex];
+            if (endedSessionType === 'TRABAJO') {
                 reproducirSonido('descanso-corto');
-            } else if (sessionType === 'LARGO') {
+            } else if (endedSessionType === 'LARGO') {
                 reproducirSonido('descanso-largo');
             } else {
                 reproducirSonido('descanso-corto');
             }
-            
-            // Vibración
             if ('vibrate' in navigator) {
                 navigator.vibrate([500, 200, 500, 200, 500]);
             }
-            
-            // Avanzar a la siguiente sesión
             currentSessionIndex++;
-            
-            // Pausa de 3 segundos antes de la siguiente sesión
             setTimeout(async () => {
                 await iniciarSiguienteSesion();
             }, 3000);
         }
     }, 1000);
+}
+
+// === FUNCIÓN: LIMPIAR TODOS LOS EFECTOS VISUALES ===
+function limpiarEfectos() {
+    // Limpiar burbujas del beaker principal
+    const existingBubbles = document.querySelectorAll('#beaker-container .bubble');
+    existingBubbles.forEach(bubble => bubble.remove());
+    
+    // Limpiar partículas de vapor
+    if (vaporEffect) {
+        vaporEffect.innerHTML = '';
+    }
 }
 
 function pauseTimer() {
@@ -658,12 +687,21 @@ function pauseTimer() {
     clearInterval(timerInterval);
     releaseWakeLock();
     pauseBtnText.textContent = "Continuar";
-    
-    // Pausar también el vapor
+
+    // --- Lógica para el Vapor (ya la teníamos) ---
     if (vaporInterval) {
         clearInterval(vaporInterval);
         vaporInterval = null;
     }
+    if (vaporEffect) {
+        vaporEffect.classList.remove('active');
+        vaporEffect.innerHTML = ''; // Borra las partículas de vapor
+    }
+
+    // --- ✅ AÑADIMOS ESTO PARA LIMPIAR LAS BURBUJAS EXISTENTES ---
+    const existingBubbles = document.querySelectorAll('#beaker-container .bubble');
+    existingBubbles.forEach(bubble => bubble.remove());
+    // --- Fin del código añadido ---
 }
 
 function resetTimer() {
