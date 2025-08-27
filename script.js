@@ -361,7 +361,7 @@ function crearEfectoVapor() {
         const vaporParticle = document.createElement('div');
         vaporParticle.className = 'vapor-particle';
         
-        // ✅ Posicionamos la partícula en la superficie del líquido
+        //  partícula en la superficie del líquido
         vaporParticle.style.top = `${liquidSurfaceY}px`;
         
         // Posición horizontal aleatoria sobre la superficie
@@ -371,7 +371,7 @@ function crearEfectoVapor() {
         vaporParticle.style.animationDelay = `${Math.random() * 1.5}s`;
         vaporParticle.style.animationDuration = `${2 + Math.random() * 2}s`;
         
-        // ✅ Añadimos la partícula al beaker principal, no al contenedor de vapor
+        // partícula al beaker principal, no al contenedor de vapor
         beaker.appendChild(vaporParticle);
         
         // Remover la partícula del DOM después de que su animación termine
@@ -383,7 +383,7 @@ function crearEfectoVapor() {
     }
 }
 
-// === FUNCIÓN: CONFIGURAR EFECTOS VISUALES (CORREGIDA) ===
+// === FUNCIÓN: CONFIGURAR EFECTOS VISUALES===
 function configurarEfectosVisuales(sessionType) {
     try {
         console.log('Configurando efectos para:', sessionType);
@@ -463,7 +463,7 @@ async function iniciarSiguienteSesion() {
     try {
         console.log(`Iniciando sesión ${currentSessionIndex + 1} de ${totalSessions}`);
     
-        limpiarEfectos(); // ✅ AÑADIMOS ESTA LÍNEA
+        limpiarEfectos(); 
 
         if (currentSessionIndex >= sessionPlan.length) {
             console.log('Todas las sesiones completadas');
@@ -557,7 +557,7 @@ function mostrarPantallaFinalizacion() {
     
     completionSummary.textContent = `¡Excelente trabajo! Has completado ${workSessionsCompleted} sesiones de trabajo, totalizando ${hours}h ${minutes}m de productividad.`;
     
-    // Reproducir sonido de finalización (usando el sonido largo)
+    // Reproducir sonido de finalización 
     reproducirSonido('descanso-largo');
     
     // Vibración de celebración
@@ -614,7 +614,7 @@ async function startTimer() {
         await requestWakeLock();
     }
 
-    // ✅ AQUÍ AÑADIMOS LA LÓGICA PARA INICIAR EL VAPOR
+    // LÓGICA PARA INICIAR EL VAPOR
     // Se ejecuta una sola vez cuando el timer arranca.
     const currentSessionType = sessionPlan[currentSessionIndex];
     if (currentSessionType === 'TRABAJO') {
@@ -623,12 +623,12 @@ async function startTimer() {
         vaporInterval = setInterval(crearEfectoVapor, 1500); 
     }
 
-    // Tu intervalo principal que se ejecuta cada segundo (sin cambios aquí)
+    
     timerInterval = setInterval(() => {
         remainingSeconds--;
         updateUI();
 
-        // 👇 TU CÓDIGO ORIGINAL PARA LAS BURBUJAS (SE QUEDA IGUAL)
+       
         // Se ejecuta cada segundo y solo crea burbujas si es un descanso.
         const sessionType = sessionPlan[currentSessionIndex];
         if (isRunning && (sessionType === 'CORTO' || sessionType === 'LARGO')) {
@@ -641,7 +641,7 @@ async function startTimer() {
             isRunning = false;
             releaseWakeLock();
 
-            // ✅ TAMBIÉN DETENEMOS EL VAPOR
+            //DETENER EL VAPOR
             if (vaporInterval) {
                 clearInterval(vaporInterval);
                 vaporInterval = null;
@@ -649,7 +649,7 @@ async function startTimer() {
 
             marcarSesionCompletada();
             
-            // ...el resto de la función sigue exactamente igual...
+           
             const endedSessionType = sessionPlan[currentSessionIndex];
             if (endedSessionType === 'TRABAJO') {
                 reproducirSonido('descanso-corto');
@@ -698,7 +698,7 @@ function pauseTimer() {
         vaporEffect.innerHTML = ''; // Borra las partículas de vapor
     }
 
-    // --- ✅ AÑADIMOS ESTO PARA LIMPIAR LAS BURBUJAS EXISTENTES ---
+    //LIMPIAR LAS BURBUJAS EXISTENTES ---
     const existingBubbles = document.querySelectorAll('#beaker-container .bubble');
     existingBubbles.forEach(bubble => bubble.remove());
     // --- Fin del código añadido ---
@@ -748,7 +748,7 @@ function skipSession() {
     }, 1000);
 }
 
-// === FUNCIÓN: ACTUALIZAR UI (MEJORADA CON VAPOR) ===
+// === FUNCIÓN: ACTUALIZAR UI ===
 function updateUI() {
     const sessionType = sessionPlan[currentSessionIndex];
     
