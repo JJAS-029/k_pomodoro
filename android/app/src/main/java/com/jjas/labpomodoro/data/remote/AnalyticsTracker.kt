@@ -1,7 +1,7 @@
 package com.jjas.labpomodoro.data.remote
 
-import androidx.core.os.bundleOf
 import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.logEvent
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -13,20 +13,16 @@ class AnalyticsTracker @Inject constructor(
 
     /** Base para el reporte de "horas pico de productividad". [type]: work, short_break o long_break. */
     fun logSessionCompleted(type: String, hourOfDay: Int, durationMin: Int) {
-        analytics.logEvent(
-            "session_completed",
-            bundleOf(
-                "session_type" to type,
-                "hour_of_day" to hourOfDay.toLong(),
-                "duration_min" to durationMin.toLong(),
-            )
-        )
+        analytics.logEvent("session_completed") {
+            param("session_type", type)
+            param("hour_of_day", hourOfDay.toLong())
+            param("duration_min", durationMin.toLong())
+        }
     }
 
     fun logLogin() {
-        analytics.logEvent(
-            FirebaseAnalytics.Event.LOGIN,
-            bundleOf(FirebaseAnalytics.Param.METHOD to "google")
-        )
+        analytics.logEvent(FirebaseAnalytics.Event.LOGIN) {
+            param(FirebaseAnalytics.Param.METHOD, "google")
+        }
     }
 }

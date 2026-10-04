@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)            // procesador de anotaciones (Hilt, Room)
     alias(libs.plugins.hilt)           // inyección de dependencias
@@ -9,7 +8,7 @@ plugins {
 
 android {
     namespace = "com.jjas.labpomodoro"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.jjas.labpomodoro"
@@ -30,12 +29,10 @@ android {
             )
         }
     }
+    // AGP 9 compila Kotlin de forma nativa y toma el jvmTarget de aquí
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-    kotlinOptions {
-        jvmTarget = "11"
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     buildFeatures {
         compose = true
@@ -69,7 +66,7 @@ dependencies {
     // Hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
-    implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
 
     // Room
     implementation(libs.androidx.room.runtime)
