@@ -20,12 +20,16 @@ class SessionRepository @Inject constructor(
     private val clock: Clock,
 ) {
 
-    /** Guarda una sesión terminada. Lo llamará el TimerEngine en la Fase 2 al completar o saltar. */
+    /**
+     * Guarda una sesión terminada (el TimerEngine lo llama al completar o saltar).
+     * [actualSeconds] es el tiempo corrido sin contar pausas, por eso no se deduce de inicio y fin.
+     */
     suspend fun record(
         type: SessionType,
         startedAt: Instant,
         endedAt: Instant,
         plannedSeconds: Int,
+        actualSeconds: Int,
         completed: Boolean,
     ): Long {
         val local = startedAt.atZone(clock.zone)
@@ -35,7 +39,7 @@ class SessionRepository @Inject constructor(
                 startedAtMillis = startedAt.toEpochMilli(),
                 endedAtMillis = endedAt.toEpochMilli(),
                 plannedSeconds = plannedSeconds,
-                actualSeconds = (endedAt.epochSecond - startedAt.epochSecond).toInt().coerceAtLeast(0),
+                actualSeconds = actualSeconds.coerceIn(0, plannedSeconds),
                 completed = completed,
                 epochDay = local.toLocalDate().toEpochDay(),
                 hourOfDay = local.hour,

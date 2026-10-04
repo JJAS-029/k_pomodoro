@@ -48,7 +48,7 @@ class LabDatabaseTest {
     /** Guarda un pomodoro que empezó a las [hour] horas de hace [daysAgo] días. */
     private suspend fun work(daysAgo: Long, hour: Int, minutes: Long = 25, completed: Boolean = true) {
         val start = LocalDateTime.of(2026, 10, 4, hour, 0).minusDays(daysAgo).atZone(zone).toInstant()
-        sessions.record(SessionType.WORK, start, start.plusSeconds(minutes * 60), (minutes * 60).toInt(), completed)
+        sessions.record(SessionType.WORK, start, start.plusSeconds(minutes * 60), (minutes * 60).toInt(), (minutes * 60).toInt(), completed)
     }
 
     @Test
@@ -80,7 +80,7 @@ class LabDatabaseTest {
         work(daysAgo = 3, hour = 9, completed = false)
         // Un descanso tampoco cuenta
         val breakStart = now.minusSeconds(3600)
-        sessions.record(SessionType.SHORT_BREAK, breakStart, breakStart.plusSeconds(300), 300, completed = true)
+        sessions.record(SessionType.SHORT_BREAK, breakStart, breakStart.plusSeconds(300), 300, 300, completed = true)
 
         assertEquals(Streak(current = 3, longest = 3), sessions.streak.first())
         assertEquals(
@@ -95,7 +95,7 @@ class LabDatabaseTest {
     fun guardaElDiaYLaHoraLocales() = runTest {
         // 23:30 hora local = 05:30 UTC del día siguiente: debe contar para el día local
         val start = LocalDateTime.of(2026, 10, 3, 23, 30).atZone(zone).toInstant()
-        sessions.record(SessionType.WORK, start, start.plusSeconds(1500), 1500, completed = true)
+        sessions.record(SessionType.WORK, start, start.plusSeconds(1500), 1500, 1500, completed = true)
 
         val saved = sessions.observeRecent().first().single()
         assertEquals(LocalDateTime.of(2026, 10, 3, 0, 0).toLocalDate().toEpochDay(), saved.epochDay)
