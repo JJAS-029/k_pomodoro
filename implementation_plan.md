@@ -265,7 +265,26 @@ Botón temporal **"Iniciar sesión con Google"** que muestra tu nombre al entrar
 
 ---
 
-## 5. Hoja de ruta (se detalla después de que revises la Fase 0/0.5)
+## 5. Fase 1 — Datos locales (implementada)
+
+| Pieza | Archivo | Notas |
+|---|---|---|
+| Configuración | `domain/model/AppSettings.kt`, `data/repository/SettingsRepository.kt` | DataStore. Valores por defecto y rangos del prototipo; `normalized()` corrige valores fuera de rango. Incluye `PlanRounding` (por defecto `TRIM_LAST`), sonido, vibración y pantalla encendida |
+| Historial | `data/local/entity/SessionEntity.kt`, `dao/SessionDao.kt`, `data/repository/SessionRepository.kt` | Guarda `epochDay` y `hourOfDay` **locales** al momento de grabar. `completed = false` = sesión saltada (no cuenta para racha, horas ni recompensas) |
+| Racha | `domain/usecase/StreakCalculator.kt` | Días consecutivos con ≥1 pomodoro completado; sigue viva si el último día fue hoy o ayer. Devuelve racha actual y la más larga |
+| Horas pico | `SessionDao.observeProductiveHours()` | Suma de trabajo completado por hora del día |
+| Inventario | `data/local/entity/InventoryEntity.kt`, `dao/InventoryDao.kt`, `data/repository/InventoryRepository.kt` | 118 filas precargadas en 0 (`LabDatabase.SeedInventory`); `add()` guarda la fecha del primer hallazgo |
+| Catálogo | `domain/model/PeriodicTable.kt` | Datos fijos en código (símbolo, nombre en español, grupo, categoría); el periodo se deriva del número atómico |
+| DI | `core/di/DataModule.kt` | Room, DataStore y un `Clock` inyectable (reloj fijo en tests) |
+| UI | `ui/settings/` | Pantalla Config real (reemplaza el placeholder) |
+
+Esquema de Room exportado en `android/app/schemas/` (versión 1): versionarlo sirve para escribir migraciones.
+
+**Tests:** `StreakCalculatorTest`, `SessionConfigTest`, `PeriodicTableTest`, `SettingsRepositoryTest` (JVM) y `LabDatabaseTest` (instrumentado, en emulador: `.\gradlew.bat connectedDebugAndroidTest`).
+
+---
+
+## 6. Hoja de ruta
 
 | Fase | Contenido clave |
 |---|---|

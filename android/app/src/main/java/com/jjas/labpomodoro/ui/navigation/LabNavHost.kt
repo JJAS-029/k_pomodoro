@@ -7,6 +7,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.jjas.labpomodoro.ui.main.MainScreen
 import com.jjas.labpomodoro.ui.main.PlaceholderScreen
+import com.jjas.labpomodoro.ui.settings.SettingsScreen
 
 object Routes {
     const val MAIN = "main"
@@ -25,10 +26,10 @@ fun LabNavHost(navController: NavHostController = rememberNavController()) {
                 onOpenPro = { navController.navigate(Routes.PRO) },
             )
         }
-        // Destinos provisionales; cada uno se implementa en su fase
         composable(Routes.SETTINGS) {
-            PlaceholderScreen(title = "Configuración", phase = 1, onBack = navController::popBackStack)
+            SettingsScreen(onBack = navController::popBackStack)
         }
+        // Destinos provisionales; cada uno se implementa en su fase
         composable(Routes.ACHIEVEMENTS) {
             PlaceholderScreen(title = "Logros", phase = 4, onBack = navController::popBackStack)
         }
