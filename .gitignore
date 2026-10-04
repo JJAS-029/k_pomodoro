@@ -23,3 +23,15 @@ node_modules/
 
 # Otros posibles entornos
 .env
+# Android (proyecto en android/)
+android/.gradle/
+android/.kotlin/
+android/build/
+android/app/build/
+android/local.properties
+android/.idea/
+android/captures/
+*.keystore
+*.jks
+# Config de Firebase: se copia a mano en cada máquina
+android/app/google-services.json

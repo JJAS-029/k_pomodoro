@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Fondo negro desde el arranque para evitar un destello blanco antes de que Compose dibuje -->
+    <style name="Theme.LabPomodoro" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/black</item>
+    </style>
+</resources>
