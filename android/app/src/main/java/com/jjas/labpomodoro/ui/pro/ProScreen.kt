@@ -23,18 +23,23 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import com.jjas.labpomodoro.BuildConfig
+import com.jjas.labpomodoro.data.repository.SessionRepository
 import com.jjas.labpomodoro.data.repository.SettingsRepository
+import com.jjas.labpomodoro.domain.model.SessionType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.time.Clock
 import javax.inject.Inject
 
 @HiltViewModel
 class ProViewModel @Inject constructor(
     private val settings: SettingsRepository,
+    private val sessions: SessionRepository,
+    private val clock: Clock,
 ) : ViewModel() {
 
     val isPro: StateFlow<Boolean> = settings.settings.map { it.isPro }
@@ -42,6 +47,14 @@ class ProViewModel @Inject constructor(
 
     fun setPro(enabled: Boolean) {
         viewModelScope.launch { settings.setPro(enabled) }
+    }
+
+    /** Solo pruebas: guarda una hora de trabajo completada para ganar elementos sin esperar. */
+    fun addTestFocusHour() {
+        viewModelScope.launch {
+            val end = clock.instant()
+            sessions.record(SessionType.WORK, end.minusSeconds(3600), end, 3600, 3600, completed = true)
+        }
     }
 }
 
@@ -94,6 +107,7 @@ fun ProScreen(onBack: () -> Unit, viewModel: ProViewModel = hiltViewModel()) {
                     )
                     Switch(checked = isPro, onCheckedChange = viewModel::setPro)
                 }
+                TextButton(onClick = viewModel::addTestFocusHour) { Text("Sumar 1 h de enfoque (solo pruebas)") }
             }
         }
     }

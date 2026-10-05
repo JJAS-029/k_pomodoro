@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.room.Room
 import com.jjas.labpomodoro.data.local.LabDatabase
+import com.jjas.labpomodoro.data.local.dao.DiscoveryDao
 import com.jjas.labpomodoro.data.local.dao.InventoryDao
 import com.jjas.labpomodoro.data.local.dao.SessionDao
 import dagger.Module
@@ -33,6 +34,9 @@ object DataModule {
 
     @Provides
     fun provideInventoryDao(db: LabDatabase): InventoryDao = db.inventoryDao()
+
+    @Provides
+    fun provideDiscoveryDao(db: LabDatabase): DiscoveryDao = db.discoveryDao()
 
     @Provides
     @Singleton

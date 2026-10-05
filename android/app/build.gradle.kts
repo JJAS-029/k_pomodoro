@@ -38,6 +38,8 @@ android {
         compose = true
         buildConfig = true
     }
+    // Los esquemas exportados de Room sirven a los tests de migración
+    sourceSets.getByName("androidTest").assets.directories.add("$projectDir/schemas")
 }
 
 ksp {
@@ -72,6 +74,8 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
+    // La navegación trae la 1.7.3, que choca con room-testing (AbstractMethodError); se sube a la estable
+    implementation(libs.kotlinx.serialization.core)
 
     // Corrutinas + DataStore
     implementation(libs.kotlinx.coroutines.android)
@@ -93,6 +97,7 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.kotlinx.coroutines.test)
+    androidTestImplementation(libs.androidx.room.testing)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

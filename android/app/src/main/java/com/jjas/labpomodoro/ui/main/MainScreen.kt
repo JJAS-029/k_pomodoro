@@ -15,6 +15,8 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -67,6 +69,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jjas.labpomodoro.R
+import com.jjas.labpomodoro.data.repository.Discovery
+import com.jjas.labpomodoro.domain.model.DiscoverySource
 import com.jjas.labpomodoro.domain.model.SessionType
 import com.jjas.labpomodoro.service.formatMinutesSeconds
 import com.jjas.labpomodoro.service.label
@@ -91,8 +95,10 @@ fun MainScreen(
     onOpenGuide: () -> Unit,
     viewModel: MainViewModel = hiltViewModel(),
     timerViewModel: TimerViewModel = hiltViewModel(),
+    discoveryViewModel: DiscoveryViewModel = hiltViewModel(),
 ) {
     val account by viewModel.uiState.collectAsStateWithLifecycle()
+    val discoveries by discoveryViewModel.unseen.collectAsStateWithLifecycle()
     val timer by timerViewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
@@ -176,6 +182,7 @@ fun MainScreen(
                 account = account,
                 showTitle = !timer.isPro,
                 dynamicColor = timer.dynamicColor,
+                discoveries = discoveries,
                 // Observa los toques sin consumirlos, para reiniciar la cuenta del modo ambiente
                 modifier = Modifier.pointerInput(Unit) {
                     awaitPointerEventScope {
@@ -199,6 +206,7 @@ fun MainScreen(
                     onOpenAchievements = onOpenAchievements,
                     onOpenPro = onOpenPro,
                     onOpenGuide = onOpenGuide,
+                    onDismissDiscoveries = discoveryViewModel::dismiss,
                     onSignIn = { viewModel.signIn(context) },
                     onSignOut = viewModel::signOut,
                     // Modo ambiente al instante (Pro); si no es Pro, lleva a la pantalla Pro
@@ -220,6 +228,7 @@ data class MainActions(
     val onOpenAchievements: () -> Unit = {},
     val onOpenPro: () -> Unit = {},
     val onOpenGuide: () -> Unit = {},
+    val onDismissDiscoveries: () -> Unit = {},
     val onSignIn: () -> Unit = {},
     val onSignOut: () -> Unit = {},
     val onEnterAmbient: () -> Unit = {},
@@ -233,6 +242,7 @@ private fun MainContent(
     modifier: Modifier = Modifier,
     showTitle: Boolean = true,
     dynamicColor: Boolean = false,
+    discoveries: List<Discovery> = emptyList(),
 ) {
     // Con Material You el reloj toma el color del sistema
     val clockColor = if (dynamicColor) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
@@ -279,6 +289,23 @@ private fun MainContent(
                         modifier = Modifier.padding(top = 8.dp),
                     )
                 }
+            }
+
+            // Elementos ganados con el tiempo de enfoque; "Ver" lleva a la tabla periódica
+            AnimatedVisibility(
+                visible = discoveries.any { it.source != DiscoverySource.FUSION },
+                enter = slideInVertically { -it } + fadeIn(),
+                exit = slideOutVertically { -it } + fadeOut(),
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+            ) {
+                DiscoveryBanner(
+                    discoveries = discoveries,
+                    onOpen = actions.onOpenAchievements,
+                    onDismiss = actions.onDismissDiscoveries,
+                    modifier = Modifier.fillMaxWidth(),
+                )
             }
 
             LabDock(

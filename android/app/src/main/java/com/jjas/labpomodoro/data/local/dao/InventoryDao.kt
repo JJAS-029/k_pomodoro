@@ -11,8 +11,8 @@ interface InventoryDao {
     @Query("SELECT * FROM inventory ORDER BY atomicNumber")
     fun observeAll(): Flow<List<InventoryEntity>>
 
-    /** Cuántos elementos distintos se han conseguido (cantidad > 0). */
-    @Query("SELECT COUNT(*) FROM inventory WHERE quantity > 0")
+    /** Cuántos elementos distintos se han conseguido alguna vez (gastarlos no los borra de la tabla). */
+    @Query("SELECT COUNT(*) FROM inventory WHERE firstObtainedAtMillis IS NOT NULL")
     fun observeDiscoveredCount(): Flow<Int>
 
     /** Suma [amount] unidades y registra la fecha del primer hallazgo. Devuelve las filas afectadas. */
@@ -25,4 +25,12 @@ interface InventoryDao {
         """
     )
     suspend fun add(atomicNumber: Int, amount: Int, nowMillis: Long): Int
+
+    /** Gasta [amount] unidades solo si alcanzan. Devuelve 0 si no había suficientes. */
+    @Query("UPDATE inventory SET quantity = quantity - :amount WHERE atomicNumber = :atomicNumber AND quantity >= :amount")
+    suspend fun consume(atomicNumber: Int, amount: Int): Int
+
+    /** Los que se han conseguido alguna vez (aunque ya se hayan gastado en el sintetizador). */
+    @Query("SELECT atomicNumber FROM inventory WHERE firstObtainedAtMillis IS NOT NULL")
+    suspend fun discoveredAtomicNumbers(): List<Int>
 }

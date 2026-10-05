@@ -37,8 +37,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jjas.labpomodoro.R
 import com.jjas.labpomodoro.data.repository.SettingsRepository
+import com.jjas.labpomodoro.domain.model.PeriodicTable
 import com.jjas.labpomodoro.domain.model.SessionType
 import com.jjas.labpomodoro.ui.components.DotState
+import com.jjas.labpomodoro.ui.components.ElementTile
 import com.jjas.labpomodoro.ui.components.LiquidEffect
 import com.jjas.labpomodoro.ui.components.LiquidPalette
 import com.jjas.labpomodoro.ui.components.MiniVessel
@@ -78,6 +80,7 @@ fun GuideScreen(onDone: () -> Unit, viewModel: GuideViewModel = hiltViewModel())
         { SymbolsPage() },
         { ControlsPage() },
         { ShelfAndAmbientPage() },
+        { ElementsPage() },
     )
     val pager = rememberPagerState { pages.size }
     val scope = rememberCoroutineScope()
@@ -299,3 +302,20 @@ private fun ShelfAndAmbientPage() {
     LegendRow({ LegendIcon(R.drawable.ic_moon, MaterialTheme.colorScheme.secondary) }, "Modo ambiente (Pro): si no tocas la pantalla (o con 🌙 en el menú), quedan solo el recipiente, el tiempo y lo que sigue, atenuados. Tócala para volver.")
     LegendRow({ LegendIcon(R.drawable.ic_stat_timer, MaterialTheme.colorScheme.tertiary) }, "Si sales de la app, el timer sigue en una ventana flotante y en la notificación.")
 }
+
+@Composable
+private fun ElementsPage() {
+    PageTitle("Colecciona la tabla periódica")
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+        ElementTile(PeriodicTable[1], discovered = true, size = 48.dp)
+        Text("+", style = MaterialTheme.typography.titleLarge)
+        ElementTile(PeriodicTable[92], discovered = true, size = 48.dp)
+        Text("→", style = MaterialTheme.typography.titleLarge)
+        ElementTile(PeriodicTable[93], discovered = true, size = 48.dp)
+    }
+    Spacer(Modifier.height(16.dp))
+    Body("Tu tiempo de enfoque se convierte en elementos: cada 25 min completados ganas uno básico y cada 60 min uno raro. Saltar una sesión no cuenta.")
+    Spacer(Modifier.height(12.dp))
+    Body("En ★ Logros › Sintetizador fusiona dos elementos: sus números atómicos se suman (H 1 + U 92 → Np 93). Es la única forma de conseguir los sintéticos.")
+}
+

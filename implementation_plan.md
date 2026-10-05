@@ -323,14 +323,35 @@ Esquema de Room exportado en `android/app/schemas/` (versión 1): versionarlo si
 
 ---
 
-## 8. Hoja de ruta
+## 8. Fase 4 — Tabla periódica, recompensas y sintetizador (implementada)
+
+| Pieza | Archivo | Notas |
+|---|---|---|
+| Rarezas | `domain/model/Rarity.kt` | **Básico**: Z 1–30 (30). **Raro**: Z 31–92 (60). **Sintético**: Tc, Pm y Z ≥ 93 (28): no salen como recompensa, solo se fabrican |
+| Recompensas | `domain/usecase/Rewards.kt` (`RewardSchedule`, `ElementPicker`) | Por tiempo de enfoque **acumulado** (solo pomodoros completados): cada 25 min un básico, cada 60 min un raro, así funciona con pomodoros de cualquier duración. El selector da uno que falta el 75 % de las veces; los repetidos sirven de material |
+| Entrega | `service/RewardSync.kt`, `data/repository/LabRepository.kt` | Escucha el total de trabajo en Room y entrega lo que falte en una transacción. Es idempotente (cuenta lo ya entregado en `discoveries`), así que no se pierde ni se duplica nada aunque la app estuviera cerrada |
+| Hallazgos | `data/local/entity/DiscoveryEntity.kt`, `dao/DiscoveryDao.kt` | Una fila por elemento conseguido (fuente: básico, raro o fusión) con marca `seen`. Room v2 con migración automática desde v1 (`MigrationTest`) |
+| Sintetizador | `domain/usecase/Rewards.kt` (`Fusion`), `LabRepository.fuse` | Fusión nuclear simplificada: A + B → elemento con Z = A + B. Gasta una unidad de cada uno (dos si es el mismo) en transacción; si falta alguno no se gasta nada. Lo gastado sigue contando como descubierto |
+| Pantalla Logros | `ui/lab/LabScreen.kt`, `LabViewModel.kt` | Elementos descubiertos, racha y horas de enfoque; barras hacia el siguiente básico/raro. Pestaña **Tabla periódica** (18 columnas y bloque f aparte, cabe completa; colores por familia, contorno = sin descubrir, borde blanco = nuevo; al tocar, hoja con detalle y cómo conseguirlo). Pestaña **Sintetizador**: "Nuevos para tu tabla" y "Para juntar más"; al tocar, hoja con las recetas y destello con el resultado |
+| Aviso | `ui/main/DiscoveryBanner.kt` | Tarjeta "¡Descubriste …!" arriba de la pantalla principal con los elementos ganados; "Ver" abre Logros y los marca como vistos |
+| Casilla | `ui/components/ElementTile.kt` | Reutilizada en tabla, detalle, sintetizador, aviso y guía. Compacta (solo símbolo) cuando mide menos de 32 dp |
+| Guía | `ui/guide/GuideScreen.kt` | Página 5: "Colecciona la tabla periódica" |
+| Pruebas | `ui/pro/ProScreen.kt` | En debug, "Sumar 1 h de enfoque (solo pruebas)" junto al interruptor de Pro |
+
+`kotlinx-serialization` se fijó en 1.11.0: la 1.7.3 que traía la navegación rompía `room-testing`.
+
+**Tests:** `RewardsTest` (JVM, 10) y `LabRepositoryTest` + `MigrationTest` (instrumentados). Ojo: `connectedDebugAndroidTest` desinstala la app del emulador al terminar (se pierden sus datos).
+
+---
+
+## 9. Hoja de ruta
 
 | Fase | Contenido clave |
 |---|---|
 | 1 | Room: `SessionEntity`, `InventoryEntity` (precargadas las 118), DAOs con racha y horas productivas; DataStore para la config |
 | 2 | `SessionPlanGenerator` (lógica de `generarPlan`), `TimerEngine` por timestamps, `ForegroundService` con notificación, sonidos/vibración, modo AOD |
 | 3 | `BeakerView` Canvas (vapor desde la superficie, burbujas desde el fondo), repisa de tubos, PiP nativo, pantalla principal |
-| 4 | Tabla periódica, recompensas (25 min → básico, 60 min → raro), sintetizador |
+| 4 | ✅ Tabla periódica, recompensas (25 min → básico, 60 min → raro), sintetizador |
 | 5 | Play Billing (Pro, reemplaza la marca provisional), AdMob (solo al configurar o terminar un ciclo), exportar CSV |
 
 ### Ideas Pro para más adelante
