@@ -424,6 +424,13 @@ private fun ElementDetail(
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
+                    if (look.origin.isNotEmpty()) {
+                        Text(
+                            "Su color: ${look.origin.replaceFirstChar { it.lowercase() }}.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                    }
                 }
             }
         }
