@@ -7,6 +7,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationCompat
+import androidx.core.graphics.drawable.IconCompat
 import com.jjas.labpomodoro.MainActivity
 import com.jjas.labpomodoro.R
 import com.jjas.labpomodoro.domain.model.SessionType
@@ -46,6 +47,8 @@ class TimerNotifications @Inject constructor(
             .setCategory(NotificationCompat.CATEGORY_STOPWATCH)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setContentIntent(openAppIntent())
+            // Android 16+: Live Update (chip en la barra de estado, pantalla de bloqueo y Now Bar de Samsung)
+            .setRequestPromotedOngoing(true)
 
         if (state !is TimerState.Active) {
             return builder.setContentTitle("Lab Pomodoro").build()
@@ -55,11 +58,14 @@ class TimerNotifications @Inject constructor(
         builder
             .setContentTitle(state.current.type.label())
             .setSubText("Sesión ${state.index + 1} de ${state.plan.size}")
+            .setStyle(planProgress(state, remaining))
 
         if (state.isPaused) {
             builder
                 .setContentText("En pausa · quedan ${formatMinutesSeconds(remaining)}")
                 .setShowWhen(false)
+                // El chip no puede mostrar un reloj detenido; avisa que está en pausa
+                .setShortCriticalText("Pausa")
                 .addAction(0, "Continuar", serviceIntent(TimerService.ACTION_RESUME))
         } else {
             builder
@@ -76,6 +82,31 @@ class TimerNotifications @Inject constructor(
             .build()
     }
 
+    /**
+     * Barra de avance de todo el plan: un segmento por sesión con el color de su tipo. En versiones
+     * anteriores a Android 16 se ve como una barra de progreso normal.
+     */
+    private fun planProgress(state: TimerState.Active, remaining: Long): NotificationCompat.ProgressStyle {
+        val doneSeconds = state.plan.take(state.index).sumOf { it.durationSeconds } +
+            (state.current.durationSeconds - remaining / 1000).coerceAtLeast(0)
+        val segments = if (state.plan.size <= MAX_SEGMENTS) {
+            state.plan.map { NotificationCompat.ProgressStyle.Segment(it.durationSeconds).setColor(it.type.color()) }
+        } else {
+            // Planes muy largos: un solo segmento para que la barra no se vuelva ilegible
+            listOf(NotificationCompat.ProgressStyle.Segment(state.plan.sumOf { it.durationSeconds }).setColor(WORK_COLOR))
+        }
+        return NotificationCompat.ProgressStyle()
+            .setProgressSegments(segments)
+            .setProgress(doneSeconds.toInt())
+            .setProgressTrackerIcon(IconCompat.createWithResource(context, R.drawable.ic_stat_timer))
+    }
+
+    private fun SessionType.color(): Int = when (this) {
+        SessionType.WORK -> WORK_COLOR
+        SessionType.SHORT_BREAK -> 0xFF4DB6AC.toInt()
+        SessionType.LONG_BREAK -> 0xFF7986CB.toInt()
+    }
+
     private fun openAppIntent(): PendingIntent = PendingIntent.getActivity(
         context,
         0,
@@ -88,6 +119,8 @@ class TimerNotifications @Inject constructor(
     companion object {
         const val CHANNEL_ID = "timer"
         const val NOTIFICATION_ID = 1
+        private const val MAX_SEGMENTS = 15
+        private val WORK_COLOR = 0xFFFFB74D.toInt()
     }
 }
 

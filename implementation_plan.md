@@ -317,6 +317,7 @@ Esquema de Room exportado en `android/app/schemas/` (versión 1): versionarlo si
 | Pro provisional | `domain/model/AppSettings.isPro`, `ui/pro/ProScreen.kt` | Marca en DataStore hasta que Play Billing (Fase 5) decida. En Pro se oculta el título. En compilaciones debug hay un interruptor "Activar Pro (solo pruebas)" |
 | Colores del sistema (Pro) | `ui/theme/Theme.kt`, Config › Apariencia | Material You (Android 12+): botones, acentos y el reloj (también en modo ambiente) toman el color del fondo de pantalla; el fondo sigue negro puro. Se adelantó de la Fase 5 porque el tema ya lo soportaba |
 | PiP | `MainActivity.kt`, `ui/pip/PipScreen.kt` | Entrada automática al salir de la app si hay plan en curso (Android 12+; antes, con `onUserLeaveHint`). Muestra el mismo recipiente y el tiempo; botón Pausar/Continuar en la ventana |
+| Live Update / Now Bar | `service/TimerNotifications.kt` | Android 16+: la notificación se promueve a Live Update (`setRequestPromotedOngoing`, permiso `POST_PROMOTED_NOTIFICATIONS`): chip con la cuenta regresiva en la barra de estado, tarjeta en pantalla de bloqueo y, en Samsung One UI 8+, la Now Bar. `ProgressStyle` con el avance de todo el plan (un segmento de color por sesión si son 15 o menos) y el matraz como marcador; se refresca cada 30 s. En pausa el chip dice "Pausa". En versiones anteriores se ve como barra de progreso normal |
 
 **Pendiente menor:** `setSourceRectHint` para una animación más suave al entrar a PiP (lo sugiere lint).
 

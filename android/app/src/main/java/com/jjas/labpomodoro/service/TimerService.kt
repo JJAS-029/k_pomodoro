@@ -15,6 +15,8 @@ import com.jjas.labpomodoro.timer.TimerState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -36,11 +38,16 @@ class TimerService : Service() {
         notifications.ensureChannel()
         startInForeground()
         scope.launch {
-            engine.state.collect { state ->
+            engine.state.collectLatest { state ->
                 if (state is TimerState.Active) {
-                    notifications.notify(
-                        notifications.build(state, SystemClock.elapsedRealtime(), System.currentTimeMillis())
-                    )
+                    // El cronómetro avanza solo; la barra del plan se refresca cada 30 s mientras corre
+                    do {
+                        notifications.notify(
+                            notifications.build(state, SystemClock.elapsedRealtime(), System.currentTimeMillis())
+                        )
+                        if (state.isPaused) break
+                        delay(PROGRESS_REFRESH_MILLIS)
+                    } while (true)
                 } else {
                     ServiceCompat.stopForeground(this@TimerService, ServiceCompat.STOP_FOREGROUND_REMOVE)
                     stopSelf()
@@ -84,6 +91,7 @@ class TimerService : Service() {
         const val ACTION_RESUME = "com.jjas.labpomodoro.action.RESUME"
         const val ACTION_SKIP = "com.jjas.labpomodoro.action.SKIP"
         const val ACTION_STOP = "com.jjas.labpomodoro.action.STOP"
+        private const val PROGRESS_REFRESH_MILLIS = 30_000L
 
         fun start(context: Context) {
             ContextCompat.startForegroundService(context, Intent(context, TimerService::class.java))
