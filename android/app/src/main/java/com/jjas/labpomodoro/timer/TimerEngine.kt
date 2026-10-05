@@ -48,15 +48,17 @@ class TimerEngine @Inject constructor(
         mutex.withLock {
             if (_state.value is TimerState.Active) return
             val plan = SessionPlanGenerator.generate(config)
+            val now = time.now()
             _state.value = TimerState.Active(
                 plan = plan,
                 index = 0,
                 isPaused = false,
                 endsAtElapsed = time.elapsedRealtime() + plan.first().durationSeconds * 1000L,
                 remainingWhenPausedMillis = 0,
-                sessionStartedAt = time.now(),
+                sessionStartedAt = now,
                 completedWorkSessions = 0,
                 completedWorkSeconds = 0,
+                planSeed = now.toEpochMilli(),
             )
             armDeadline()
         }
@@ -129,6 +131,7 @@ class TimerEngine @Inject constructor(
                 sessionStartedAt = now,
                 completedWorkSessions = workSessions,
                 completedWorkSeconds = workSeconds,
+                skippedIndices = if (completed) s.skippedIndices else s.skippedIndices + s.index,
             )
             armDeadline()
         }

@@ -83,12 +83,7 @@ class TimerNotifications @Inject constructor(
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
     )
 
-    private fun serviceIntent(action: String): PendingIntent = PendingIntent.getService(
-        context,
-        action.hashCode(),
-        Intent(context, TimerService::class.java).setAction(action),
-        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-    )
+    private fun serviceIntent(action: String): PendingIntent = TimerService.actionIntent(context, action)
 
     companion object {
         const val CHANNEL_ID = "timer"

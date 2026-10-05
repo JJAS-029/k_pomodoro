@@ -302,7 +302,27 @@ Esquema de Room exportado en `android/app/schemas/` (versión 1): versionarlo si
 
 ---
 
-## 7. Hoja de ruta
+## 7. Fase 3 — Visuales y PiP (implementada)
+
+| Pieza | Archivo | Notas |
+|---|---|---|
+| Recipientes | `ui/components/VesselShape.kt` | Vaso de precipitados, matraz Erlenmeyer, tubo de ensayo y matraz de fondo redondo. Cada sesión recibe uno al azar, estable por plan (`LiquidPalette.vessel`). Geometría normalizada: la misma sirve para la vista grande, la repisa y el PiP |
+| Líquido | `ui/components/VesselView.kt` | Oleaje, degradado de profundidad y menisco. **Efervescencia** (burbujitas desde el fondo y las paredes) en todas las sesiones. Trabajo: se **evapora** y el vapor sale por la boca del recipiente (más vapor bajo el 20%). Descanso: se **llena** con burbujas grandes de color. En pausa no nacen partículas |
+| Colores | `ui/components/LiquidPalette.kt` | Trabajo = tono al azar `hsl(h, 80%, 60%)`, estable por sesión gracias a `planSeed`; corto `#2ECC71`, largo `#E74C3C`; burbujas del tono opuesto |
+| Repisa | `ui/components/VesselShelf.kt` | La cristalería del plan: cada sesión con su recipiente. El actual se resalta y se llena con el progreso; los saltados quedan vacíos y punteados (`skippedIndices`) |
+| Dock | `ui/main/MainScreen.kt` (`LabDock`) | Contraído, solo flotan los botones (sin contenedor). Con el timer corriendo, controles tipo reproductor: ⏹ Detener · ⏯ Pausar/Continuar · ⏭ Saltar. La flecha abre una burbuja con Config, Logros, Pro, Guía, Ambiente y Cuenta |
+| Guía | `ui/guide/GuideScreen.kt` | 4 páginas (laboratorio, símbolos, controles, repisa/ambiente/PiP) ilustradas con los componentes reales. Se abre sola la primera vez (`guideSeen` en DataStore) y después desde el dock |
+| Indicador de sesión | `ui/components/SessionIndicator.kt` | Reemplaza "Sesión 3 de 9 · Después: …" por símbolos: ícono actual → siguiente (🧪 trabajo, ☕ descanso corto, 🌙 descanso largo, ✓ fin) con sus minutos, y una fila de puntos (un pomodoro cada uno: lleno = hecho, anillo = actual, borde = saltado) separados por ciclos de descanso largo. Más de 16 pomodoros → "3 / 24". Para lectores de pantalla conserva la descripción en texto |
+| Modo ambiente (Pro) | `ui/main/AmbientScreen.kt` | Tras 3 o 5 min sin tocar la pantalla con el timer corriendo, o al instante con 🌙 Ambiente en el dock: fondo negro y solo quedan el recipiente, el reloj y el indicador de sesión, atenuados y centrados; se ocultan título, repisa y dock. Brillo bajo, barras ocultas y todo se desplaza un poco cada minuto (anti-quemado). Transición suave: fundido a negro y brillo bajando en ~1.2 s al entrar; al despertar, ~0.4 s. Un toque lo despierta. Solo cuentan toques reales, no el hover del mouse. Es una emulación: Android no permite usar el AOD del sistema |
+| Pro provisional | `domain/model/AppSettings.isPro`, `ui/pro/ProScreen.kt` | Marca en DataStore hasta que Play Billing (Fase 5) decida. En Pro se oculta el título. En compilaciones debug hay un interruptor "Activar Pro (solo pruebas)" |
+| Colores del sistema (Pro) | `ui/theme/Theme.kt`, Config › Apariencia | Material You (Android 12+): botones, acentos y el reloj (también en modo ambiente) toman el color del fondo de pantalla; el fondo sigue negro puro. Se adelantó de la Fase 5 porque el tema ya lo soportaba |
+| PiP | `MainActivity.kt`, `ui/pip/PipScreen.kt` | Entrada automática al salir de la app si hay plan en curso (Android 12+; antes, con `onUserLeaveHint`). Muestra el mismo recipiente y el tiempo; botón Pausar/Continuar en la ventana |
+
+**Pendiente menor:** `setSourceRectHint` para una animación más suave al entrar a PiP (lo sugiere lint).
+
+---
+
+## 8. Hoja de ruta
 
 | Fase | Contenido clave |
 |---|---|
@@ -310,7 +330,11 @@ Esquema de Room exportado en `android/app/schemas/` (versión 1): versionarlo si
 | 2 | `SessionPlanGenerator` (lógica de `generarPlan`), `TimerEngine` por timestamps, `ForegroundService` con notificación, sonidos/vibración, modo AOD |
 | 3 | `BeakerView` Canvas (vapor desde la superficie, burbujas desde el fondo), repisa de tubos, PiP nativo, pantalla principal |
 | 4 | Tabla periódica, recompensas (25 min → básico, 60 min → raro), sintetizador |
-| 5 | Play Billing (Pro), AdMob (solo al configurar o terminar un ciclo), exportar CSV |
+| 5 | Play Billing (Pro, reemplaza la marca provisional), AdMob (solo al configurar o terminar un ciclo), exportar CSV |
+
+### Ideas Pro para más adelante
+- **Sonidos de concentración**: ruido blanco, rosa y café generados en el teléfono con `AudioTrack` (sin librerías ni archivos), más ambientes grabados con licencia CC0 (lluvia, cafetería, bosque) en loop con `ExoPlayer`/Media3. Volumen y mezcla independientes; se pausan con el timer.
+- **Efectos del líquido**: hervor en el último minuto, condensación en el vidrio vacío, chapoteo al cambiar de sesión, brillo tenue en modo ambiente, inclinación con el acelerómetro.
 
 ---
 

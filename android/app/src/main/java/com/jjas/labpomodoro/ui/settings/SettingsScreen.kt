@@ -1,5 +1,6 @@
 package com.jjas.labpomodoro.ui.settings
 
+import android.os.Build
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -57,6 +58,9 @@ fun SettingsScreen(
                 onSoundChange = viewModel::setSoundEnabled,
                 onVibrationChange = viewModel::setVibrationEnabled,
                 onKeepScreenOnChange = viewModel::setKeepScreenOn,
+                onAmbientChange = viewModel::setAmbientMode,
+                onAmbientDelayChange = viewModel::setAmbientDelayMinutes,
+                onDynamicColorChange = viewModel::setDynamicColor,
             )
         }
     }
@@ -70,6 +74,9 @@ private fun SettingsContent(
     onSoundChange: (Boolean) -> Unit,
     onVibrationChange: (Boolean) -> Unit,
     onKeepScreenOnChange: (Boolean) -> Unit,
+    onAmbientChange: (Boolean) -> Unit,
+    onAmbientDelayChange: (Int) -> Unit,
+    onDynamicColorChange: (Boolean) -> Unit,
 ) {
     val session = settings.session
     Column(
@@ -135,6 +142,58 @@ private fun SettingsContent(
         SwitchRow("Sonidos", settings.soundEnabled, onSoundChange)
         SwitchRow("Vibración", settings.vibrationEnabled, onVibrationChange)
         SwitchRow("Mantener la pantalla encendida", settings.keepScreenOn, onKeepScreenOnChange)
+
+        SectionTitle(if (settings.isPro) "Modo ambiente" else "Modo ambiente · Pro")
+        SwitchRow(
+            label = "Solo el reloj si no tocas la pantalla",
+            checked = settings.ambientActive,
+            onCheckedChange = onAmbientChange,
+            enabled = settings.isPro,
+        )
+        Text(
+            text = if (settings.isPro) {
+                "Mientras corre el timer, la pantalla se atenúa y queda solo el tiempo. Tócala para volver."
+            } else {
+                "Disponible en la versión Pro."
+            },
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        if (settings.ambientActive) {
+            Spacer(Modifier.height(12.dp))
+            Text("Activar después de", style = MaterialTheme.typography.bodyLarge)
+            Spacer(Modifier.height(8.dp))
+            val delays = AppSettings.AMBIENT_DELAYS
+            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                delays.forEachIndexed { index, minutes ->
+                    SegmentedButton(
+                        selected = settings.ambientDelayMinutes == minutes,
+                        onClick = { onAmbientDelayChange(minutes) },
+                        shape = SegmentedButtonDefaults.itemShape(index, delays.size),
+                    ) { Text("$minutes min") }
+                }
+            }
+        }
+
+        // Material You existe desde Android 12
+        val dynamicAvailable = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+        SectionTitle(if (settings.isPro) "Apariencia" else "Apariencia · Pro")
+        SwitchRow(
+            label = "Colores del sistema (Material You)",
+            checked = settings.dynamicColorActive,
+            onCheckedChange = onDynamicColorChange,
+            enabled = settings.isPro && dynamicAvailable,
+        )
+        Text(
+            text = when {
+                !dynamicAvailable -> "Requiere Android 12 o superior."
+                !settings.isPro -> "Disponible en la versión Pro."
+                else -> "Los botones y acentos toman los colores de tu fondo de pantalla. El fondo sigue negro."
+            },
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.height(24.dp))
     }
 }
 
@@ -180,7 +239,7 @@ private fun StepperRow(
 }
 
 @Composable
-private fun SwitchRow(label: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+private fun SwitchRow(label: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit, enabled: Boolean = true) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -188,7 +247,7 @@ private fun SwitchRow(label: String, checked: Boolean, onCheckedChange: (Boolean
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(label, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
-        Switch(checked = checked, onCheckedChange = onCheckedChange)
+        Switch(checked = checked, onCheckedChange = onCheckedChange, enabled = enabled)
     }
 }
 
@@ -196,6 +255,6 @@ private fun SwitchRow(label: String, checked: Boolean, onCheckedChange: (Boolean
 @Composable
 private fun SettingsContentPreview() {
     LabPomodoroTheme {
-        SettingsContent(AppSettings(), {}, {}, {}, {}, {})
+        SettingsContent(AppSettings(), {}, {}, {}, {}, {}, {}, {}, {})
     }
 }

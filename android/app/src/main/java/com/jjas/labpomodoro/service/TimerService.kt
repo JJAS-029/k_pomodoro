@@ -1,5 +1,6 @@
 package com.jjas.labpomodoro.service
 
+import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -87,5 +88,13 @@ class TimerService : Service() {
         fun start(context: Context) {
             ContextCompat.startForegroundService(context, Intent(context, TimerService::class.java))
         }
+
+        /** Para los botones de la notificación y de la ventana PiP. */
+        fun actionIntent(context: Context, action: String): PendingIntent = PendingIntent.getService(
+            context,
+            action.hashCode(),
+            Intent(context, TimerService::class.java).setAction(action),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
     }
 }

@@ -36,4 +36,16 @@ class SettingsViewModel @Inject constructor(
     fun setKeepScreenOn(enabled: Boolean) {
         viewModelScope.launch { repository.setKeepScreenOn(enabled) }
     }
+
+    fun setAmbientMode(enabled: Boolean) {
+        viewModelScope.launch { repository.setAmbientMode(enabled) }
+    }
+
+    fun setDynamicColor(enabled: Boolean) {
+        viewModelScope.launch { repository.setDynamicColor(enabled) }
+    }
+
+    fun setAmbientDelayMinutes(minutes: Int) {
+        viewModelScope.launch { repository.setAmbientDelayMinutes(minutes) }
+    }
 }

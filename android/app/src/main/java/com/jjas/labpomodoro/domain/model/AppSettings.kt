@@ -42,6 +42,24 @@ data class AppSettings(
     val session: SessionConfig = SessionConfig(),
     val soundEnabled: Boolean = true,
     val vibrationEnabled: Boolean = true,
-    /** Modo AOD: mantiene la pantalla encendida mientras corre el timer. */
+    /** Mantiene la pantalla encendida mientras corre el timer. */
     val keepScreenOn: Boolean = false,
-)
+    /** Pro: tras [ambientDelayMinutes] sin tocar la pantalla, solo queda el reloj atenuado. */
+    val ambientMode: Boolean = false,
+    val ambientDelayMinutes: Int = 3,
+    /** Pro: colores de Material You tomados del fondo de pantalla (Android 12+). */
+    val dynamicColor: Boolean = false,
+    /** Provisional hasta la Fase 5: ahí lo decidirá Play Billing. */
+    val isPro: Boolean = false,
+    /** La guía de uso se muestra sola la primera vez. */
+    val guideSeen: Boolean = false,
+) {
+    /** El modo ambiente solo aplica si el usuario es Pro. */
+    val ambientActive: Boolean get() = isPro && ambientMode
+
+    val dynamicColorActive: Boolean get() = isPro && dynamicColor
+
+    companion object {
+        val AMBIENT_DELAYS = listOf(3, 5)
+    }
+}

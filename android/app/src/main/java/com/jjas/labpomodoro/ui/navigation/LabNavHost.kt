@@ -5,8 +5,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.jjas.labpomodoro.ui.guide.GuideScreen
 import com.jjas.labpomodoro.ui.main.MainScreen
 import com.jjas.labpomodoro.ui.main.PlaceholderScreen
+import com.jjas.labpomodoro.ui.pro.ProScreen
 import com.jjas.labpomodoro.ui.settings.SettingsScreen
 
 object Routes {
@@ -14,6 +16,7 @@ object Routes {
     const val SETTINGS = "settings"
     const val ACHIEVEMENTS = "achievements"
     const val PRO = "pro"
+    const val GUIDE = "guide"
 }
 
 @Composable
@@ -24,6 +27,7 @@ fun LabNavHost(navController: NavHostController = rememberNavController()) {
                 onOpenSettings = { navController.navigate(Routes.SETTINGS) },
                 onOpenAchievements = { navController.navigate(Routes.ACHIEVEMENTS) },
                 onOpenPro = { navController.navigate(Routes.PRO) },
+                onOpenGuide = { navController.navigate(Routes.GUIDE) { launchSingleTop = true } },
             )
         }
         composable(Routes.SETTINGS) {
@@ -34,7 +38,10 @@ fun LabNavHost(navController: NavHostController = rememberNavController()) {
             PlaceholderScreen(title = "Logros", phase = 4, onBack = navController::popBackStack)
         }
         composable(Routes.PRO) {
-            PlaceholderScreen(title = "Pro", phase = 5, onBack = navController::popBackStack)
+            ProScreen(onBack = navController::popBackStack)
+        }
+        composable(Routes.GUIDE) {
+            GuideScreen(onDone = navController::popBackStack)
         }
     }
 }

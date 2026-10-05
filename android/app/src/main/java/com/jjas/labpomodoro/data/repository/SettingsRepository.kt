@@ -45,6 +45,18 @@ class SettingsRepository @Inject constructor(
 
     suspend fun setKeepScreenOn(enabled: Boolean) = dataStore.edit { it[Keys.KEEP_SCREEN_ON] = enabled }
 
+    suspend fun setAmbientMode(enabled: Boolean) = dataStore.edit { it[Keys.AMBIENT_MODE] = enabled }
+
+    suspend fun setAmbientDelayMinutes(minutes: Int) = dataStore.edit {
+        it[Keys.AMBIENT_DELAY] = minutes.takeIf { m -> m in AppSettings.AMBIENT_DELAYS } ?: AppSettings.AMBIENT_DELAYS.first()
+    }
+
+    suspend fun setDynamicColor(enabled: Boolean) = dataStore.edit { it[Keys.DYNAMIC_COLOR] = enabled }
+
+    suspend fun setGuideSeen() = dataStore.edit { it[Keys.GUIDE_SEEN] = true }
+
+    suspend fun setPro(enabled: Boolean) = dataStore.edit { it[Keys.PRO] = enabled }
+
     private fun Preferences.toAppSettings(): AppSettings {
         val defaults = AppSettings()
         val session = SessionConfig(
@@ -62,6 +74,12 @@ class SettingsRepository @Inject constructor(
             soundEnabled = this[Keys.SOUND] ?: defaults.soundEnabled,
             vibrationEnabled = this[Keys.VIBRATION] ?: defaults.vibrationEnabled,
             keepScreenOn = this[Keys.KEEP_SCREEN_ON] ?: defaults.keepScreenOn,
+            ambientMode = this[Keys.AMBIENT_MODE] ?: defaults.ambientMode,
+            ambientDelayMinutes = this[Keys.AMBIENT_DELAY]?.takeIf { it in AppSettings.AMBIENT_DELAYS }
+                ?: defaults.ambientDelayMinutes,
+            dynamicColor = this[Keys.DYNAMIC_COLOR] ?: defaults.dynamicColor,
+            isPro = this[Keys.PRO] ?: defaults.isPro,
+            guideSeen = this[Keys.GUIDE_SEEN] ?: defaults.guideSeen,
         )
     }
 
@@ -75,5 +93,10 @@ class SettingsRepository @Inject constructor(
         val SOUND = booleanPreferencesKey("sound_enabled")
         val VIBRATION = booleanPreferencesKey("vibration_enabled")
         val KEEP_SCREEN_ON = booleanPreferencesKey("keep_screen_on")
+        val AMBIENT_MODE = booleanPreferencesKey("ambient_mode")
+        val AMBIENT_DELAY = intPreferencesKey("ambient_delay_minutes")
+        val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
+        val PRO = booleanPreferencesKey("pro_unlocked")
+        val GUIDE_SEEN = booleanPreferencesKey("guide_seen")
     }
 }

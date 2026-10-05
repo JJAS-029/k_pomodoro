@@ -21,6 +21,10 @@ sealed interface TimerState {
         val sessionStartedAt: Instant,
         val completedWorkSessions: Int,
         val completedWorkSeconds: Long,
+        /** Semilla del plan: da a cada pomodoro un color al azar pero estable (vaso y tubo). */
+        val planSeed: Long,
+        /** Sesiones saltadas: su tubo en la repisa queda vacío. */
+        val skippedIndices: Set<Int> = emptySet(),
     ) : TimerState {
         val current: PlannedSession get() = plan[index]
         val next: PlannedSession? get() = plan.getOrNull(index + 1)
