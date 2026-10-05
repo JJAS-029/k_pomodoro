@@ -34,6 +34,7 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -62,6 +63,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jjas.labpomodoro.data.repository.InventoryItem
 import com.jjas.labpomodoro.domain.model.Element
 import com.jjas.labpomodoro.domain.model.ElementCategory
+import com.jjas.labpomodoro.domain.model.ElementFacts
 import com.jjas.labpomodoro.domain.model.PeriodicTable
 import com.jjas.labpomodoro.domain.model.Rarity
 import com.jjas.labpomodoro.domain.model.label
@@ -69,7 +71,11 @@ import com.jjas.labpomodoro.domain.model.rarity
 import com.jjas.labpomodoro.domain.usecase.Fusion
 import com.jjas.labpomodoro.domain.usecase.RewardSchedule
 import com.jjas.labpomodoro.ui.components.ElementTile
+import com.jjas.labpomodoro.ui.components.LiquidEffect
+import com.jjas.labpomodoro.ui.components.VesselShape
+import com.jjas.labpomodoro.ui.components.VesselView
 import com.jjas.labpomodoro.ui.components.color
+import com.jjas.labpomodoro.ui.components.look
 import kotlinx.coroutines.delay
 import java.time.Instant
 import java.time.ZoneId
@@ -106,7 +112,7 @@ fun LabScreen(onBack: () -> Unit, viewModel: LabViewModel = hiltViewModel()) {
             if (current == null) {
                 CircularProgressIndicator(Modifier.align(Alignment.Center))
             } else {
-                LabContent(current, newOnes, onBack, viewModel::fuse)
+                LabContent(current, newOnes, onBack, viewModel::fuse, viewModel::setVesselElement)
             }
             FusionFlash(fused, Modifier.align(Alignment.Center))
             SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter))
@@ -121,6 +127,7 @@ private fun LabContent(
     newOnes: Set<Int>,
     onBack: () -> Unit,
     onFuse: (Fusion.Recipe) -> Unit,
+    onVesselElement: (Int) -> Unit,
 ) {
     var tab by rememberSaveable { mutableIntStateOf(0) }
     var selected by rememberSaveable { mutableStateOf<Int?>(null) }
@@ -170,6 +177,8 @@ private fun LabContent(
             ElementDetail(
                 item = item,
                 canCraft = Fusion.recipesFor(z, state.quantities).isNotEmpty(),
+                inVessels = state.vesselElement == z,
+                onToggleVessel = { onVesselElement(if (state.vesselElement == z) 0 else z) },
                 onSynthesize = {
                     target = z
                     tab = 1
@@ -349,11 +358,19 @@ private fun Legend(modifier: Modifier = Modifier) {
 private val DATE_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("d 'de' MMMM 'de' yyyy", Locale.forLanguageTag("es"))
 
 @Composable
-private fun ElementDetail(item: InventoryItem, canCraft: Boolean, onSynthesize: () -> Unit) {
+private fun ElementDetail(
+    item: InventoryItem,
+    canCraft: Boolean,
+    inVessels: Boolean,
+    onToggleVessel: () -> Unit,
+    onSynthesize: () -> Unit,
+) {
     val element = item.element
+    val fact = ElementFacts[element.atomicNumber]
     Column(
         Modifier
             .fillMaxWidth()
+            .verticalScroll(rememberScrollState())
             .navigationBarsPadding()
             .padding(horizontal = 24.dp)
             .padding(bottom = 24.dp),
@@ -373,6 +390,49 @@ private fun ElementDetail(item: InventoryItem, canCraft: Boolean, onSynthesize: 
                     style = MaterialTheme.typography.labelLarge,
                     color = element.category.color(),
                 )
+            }
+        }
+        Spacer(Modifier.height(16.dp))
+        Text(fact.description, style = MaterialTheme.typography.bodyLarge)
+        Spacer(Modifier.height(8.dp))
+        Text("Para qué sirve", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+        Text(fact.uses, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Spacer(Modifier.height(16.dp))
+        // Cómo se ve en el timer: es la recompensa visual de tenerlo
+        val look = element.look()
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = MaterialTheme.colorScheme.surfaceVariant,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                VesselView(
+                    shape = VesselShape.BEAKER,
+                    fill = 0.7f,
+                    liquidColor = look.color,
+                    bubbleColor = Color.Transparent,
+                    effect = LiquidEffect.VAPOR,
+                    animate = item.discovered,
+                    behavior = look.behavior,
+                    modifier = Modifier.size(width = 56.dp, height = 72.dp),
+                )
+                Spacer(Modifier.width(12.dp))
+                Column(Modifier.weight(1f)) {
+                    Text("En tus recipientes", style = MaterialTheme.typography.titleSmall)
+                    Text(
+                        look.behavior.description,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        }
+        if (item.discovered) {
+            Spacer(Modifier.height(8.dp))
+            if (inVessels) {
+                OutlinedButton(onClick = onToggleVessel) { Text("Quitar de mis recipientes (volver a variados)") }
+            } else {
+                FilledTonalButton(onClick = onToggleVessel) { Text("Usar en todos mis recipientes") }
             }
         }
         Spacer(Modifier.height(16.dp))

@@ -31,7 +31,7 @@ fun LabNavHost(navController: NavHostController = rememberNavController()) {
             )
         }
         composable(Routes.SETTINGS) {
-            SettingsScreen(onBack = navController::popBackStack)
+            SettingsScreen(onBack = navController::popBackStack, onOpenPro = { navController.navigate(Routes.PRO) })
         }
         // Destinos provisionales; cada uno se implementa en su fase
         composable(Routes.ACHIEVEMENTS) {

@@ -6,6 +6,7 @@ import com.jjas.labpomodoro.data.repository.InventoryItem
 import com.jjas.labpomodoro.data.repository.InventoryRepository
 import com.jjas.labpomodoro.data.repository.LabRepository
 import com.jjas.labpomodoro.data.repository.SessionRepository
+import com.jjas.labpomodoro.data.repository.SettingsRepository
 import com.jjas.labpomodoro.domain.model.Element
 import com.jjas.labpomodoro.domain.usecase.Fusion
 import com.jjas.labpomodoro.domain.usecase.Streak
@@ -26,6 +27,8 @@ data class LabUi(
     val items: List<InventoryItem>,
     val streak: Streak,
     val totalWorkSeconds: Long,
+    /** Elemento elegido para los recipientes; 0 = automático. */
+    val vesselElement: Int = 0,
 ) {
     val discoveredCount: Int get() = items.count { it.discovered }
     val quantities: Map<Int, Int> get() = items.associate { it.element.atomicNumber to it.quantity }
@@ -49,10 +52,16 @@ class LabViewModel @Inject constructor(
     inventory: InventoryRepository,
     sessions: SessionRepository,
     private val lab: LabRepository,
+    private val settings: SettingsRepository,
 ) : ViewModel() {
 
-    val state: StateFlow<LabUi?> = combine(inventory.items, sessions.streak, sessions.totalWorkSeconds) { items, streak, total ->
-        LabUi(items, streak, total)
+    val state: StateFlow<LabUi?> = combine(
+        inventory.items,
+        sessions.streak,
+        sessions.totalWorkSeconds,
+        settings.settings,
+    ) { items, streak, total, prefs ->
+        LabUi(items, streak, total, prefs.vesselElement)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     /** Los hallazgos que aún no se habían visto al abrir la pantalla, para marcarlos como nuevos. */
@@ -67,6 +76,11 @@ class LabViewModel @Inject constructor(
             _newAtomicNumbers.value = lab.unseen.first().map { it.element.atomicNumber }.toSet()
             lab.markAllSeen()
         }
+    }
+
+    /** Fija [atomicNumber] en los recipientes de trabajo, o vuelve a automático con 0. */
+    fun setVesselElement(atomicNumber: Int) {
+        viewModelScope.launch { settings.setVesselElement(atomicNumber) }
     }
 
     fun fuse(recipe: Fusion.Recipe) {

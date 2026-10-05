@@ -5,9 +5,11 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
+import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.jjas.labpomodoro.domain.model.AppSettings
+import com.jjas.labpomodoro.domain.model.FocusSound
 import com.jjas.labpomodoro.domain.model.PlanRounding
 import com.jjas.labpomodoro.domain.model.SessionConfig
 import kotlinx.coroutines.flow.Flow
@@ -55,6 +57,12 @@ class SettingsRepository @Inject constructor(
 
     suspend fun setGuideSeen() = dataStore.edit { it[Keys.GUIDE_SEEN] = true }
 
+    suspend fun setVesselElement(atomicNumber: Int) = dataStore.edit { it[Keys.VESSEL_ELEMENT] = atomicNumber }
+
+    suspend fun setFocusSound(sound: FocusSound) = dataStore.edit { it[Keys.FOCUS_SOUND] = sound.name }
+
+    suspend fun setFocusVolume(volume: Float) = dataStore.edit { it[Keys.FOCUS_VOLUME] = volume.coerceIn(0f, 1f) }
+
     suspend fun setPro(enabled: Boolean) = dataStore.edit { it[Keys.PRO] = enabled }
 
     private fun Preferences.toAppSettings(): AppSettings {
@@ -80,6 +88,9 @@ class SettingsRepository @Inject constructor(
             dynamicColor = this[Keys.DYNAMIC_COLOR] ?: defaults.dynamicColor,
             isPro = this[Keys.PRO] ?: defaults.isPro,
             guideSeen = this[Keys.GUIDE_SEEN] ?: defaults.guideSeen,
+            vesselElement = this[Keys.VESSEL_ELEMENT] ?: defaults.vesselElement,
+            focusSound = this[Keys.FOCUS_SOUND]?.let { name -> FocusSound.entries.firstOrNull { it.name == name } } ?: defaults.focusSound,
+            focusVolume = this[Keys.FOCUS_VOLUME] ?: defaults.focusVolume,
         )
     }
 
@@ -98,5 +109,8 @@ class SettingsRepository @Inject constructor(
         val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
         val PRO = booleanPreferencesKey("pro_unlocked")
         val GUIDE_SEEN = booleanPreferencesKey("guide_seen")
+        val VESSEL_ELEMENT = intPreferencesKey("vessel_element")
+        val FOCUS_SOUND = stringPreferencesKey("focus_sound")
+        val FOCUS_VOLUME = floatPreferencesKey("focus_volume")
     }
 }

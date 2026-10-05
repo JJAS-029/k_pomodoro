@@ -29,16 +29,20 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -75,6 +79,7 @@ import com.jjas.labpomodoro.domain.model.SessionType
 import com.jjas.labpomodoro.service.formatMinutesSeconds
 import com.jjas.labpomodoro.service.label
 import com.jjas.labpomodoro.ui.components.DotState
+import com.jjas.labpomodoro.ui.components.ElementTile
 import com.jjas.labpomodoro.ui.components.LiquidEffect
 import com.jjas.labpomodoro.ui.components.LiquidPalette
 import com.jjas.labpomodoro.ui.components.PlanDot
@@ -84,9 +89,11 @@ import com.jjas.labpomodoro.ui.components.UpNext
 import com.jjas.labpomodoro.ui.components.VesselShape
 import com.jjas.labpomodoro.ui.components.VesselShelf
 import com.jjas.labpomodoro.ui.components.VesselView
+import com.jjas.labpomodoro.ui.sound.FocusSoundPanel
 import com.jjas.labpomodoro.ui.theme.LabPomodoroTheme
 import kotlinx.coroutines.delay
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
     onOpenSettings: () -> Unit,
@@ -140,6 +147,26 @@ fun MainScreen(
         if (active == null) ambient = false
     }
     val showAmbient = ambient && active != null
+
+    // Hoja para elegir el sonido de concentración sin salir del timer
+    var soundSheet by rememberSaveable { mutableStateOf(false) }
+    if (soundSheet) {
+        ModalBottomSheet(onDismissRequest = { soundSheet = false }) {
+            Column(
+                Modifier
+                    .navigationBarsPadding()
+                    .padding(horizontal = 24.dp)
+                    .padding(bottom = 24.dp)
+            ) {
+                Text("Sonido de concentración", style = MaterialTheme.typography.titleLarge)
+                Spacer(Modifier.height(8.dp))
+                FocusSoundPanel(onOpenPro = {
+                    soundSheet = false
+                    onOpenPro()
+                })
+            }
+        }
+    }
     AmbientWindowEffect(showAmbient)
 
     // La pantalla no se apaga mientras corre la sesión (si el usuario lo activó) ni en modo ambiente
@@ -207,6 +234,7 @@ fun MainScreen(
                     onOpenPro = onOpenPro,
                     onOpenGuide = onOpenGuide,
                     onDismissDiscoveries = discoveryViewModel::dismiss,
+                    onOpenSound = { soundSheet = true },
                     onSignIn = { viewModel.signIn(context) },
                     onSignOut = viewModel::signOut,
                     // Modo ambiente al instante (Pro); si no es Pro, lleva a la pantalla Pro
@@ -228,6 +256,7 @@ data class MainActions(
     val onOpenAchievements: () -> Unit = {},
     val onOpenPro: () -> Unit = {},
     val onOpenGuide: () -> Unit = {},
+    val onOpenSound: () -> Unit = {},
     val onDismissDiscoveries: () -> Unit = {},
     val onSignIn: () -> Unit = {},
     val onSignOut: () -> Unit = {},
@@ -363,6 +392,7 @@ private fun LabDock(timer: TimerUi?, account: MainUiState, actions: MainActions,
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                         DockItem(R.drawable.ic_help, "Guía", run(actions.onOpenGuide))
                         if (timer is TimerUi.Active) DockItem(R.drawable.ic_moon, "Ambiente", run(actions.onEnterAmbient))
+                        DockItem(R.drawable.ic_headphones, "Sonido", run(actions.onOpenSound))
                         when {
                             account.isBusy -> DockItem(R.drawable.ic_person, "…", onClick = {})
                             account.isSignedIn -> DockItem(R.drawable.ic_person, "Salir", run(actions.onSignOut))
@@ -490,7 +520,19 @@ private fun IdlePanel(idle: TimerUi.Idle, clockColor: Color) {
 @Composable
 private fun ActivePanel(active: TimerUi.Active, clockColor: Color) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(active.type.label(), style = MaterialTheme.typography.titleLarge, color = active.vessel.liquid)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            val element = active.vessel.element
+            Text(
+                text = if (element != null) "${active.type.label()} · ${element.name}" else active.type.label(),
+                style = MaterialTheme.typography.titleLarge,
+                color = active.vessel.liquid,
+            )
+            // El elemento que hay en el recipiente
+            if (element != null) {
+                Spacer(Modifier.width(8.dp))
+                ElementTile(element, discovered = true, size = 26.dp)
+            }
+        }
         ClockText(active.remainingMillis, color = if (active.isPaused) MaterialTheme.colorScheme.onSurfaceVariant else clockColor)
         if (active.isPaused) {
             Text("En pausa", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -539,6 +581,7 @@ fun Vessel(vessel: VesselUi, modifier: Modifier = Modifier) {
         effect = vessel.effect,
         animate = vessel.animate,
         modifier = modifier,
+        behavior = vessel.behavior,
     )
 }
 

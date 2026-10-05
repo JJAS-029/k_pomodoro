@@ -53,6 +53,15 @@ data class AppSettings(
     val isPro: Boolean = false,
     /** La guía de uso se muestra sola la primera vez. */
     val guideSeen: Boolean = false,
+    /**
+     * Elemento que tiñe los recipientes de trabajo. 0 = automático: uno distinto de tu
+     * colección en cada sesión.
+     */
+    val vesselElement: Int = 0,
+    /** Sonido de fondo para concentrarse (Pro). */
+    val focusSound: FocusSound = FocusSound.OFF,
+    /** Volumen del sonido de fondo, 0..1. */
+    val focusVolume: Float = 0.5f,
 ) {
     /** El modo ambiente solo aplica si el usuario es Pro. */
     val ambientActive: Boolean get() = isPro && ambientMode

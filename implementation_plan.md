@@ -338,6 +338,15 @@ Esquema de Room exportado en `android/app/schemas/` (versión 1): versionarlo si
 | Guía | `ui/guide/GuideScreen.kt` | Página 5: "Colecciona la tabla periódica" |
 | Pruebas | `ui/pro/ProScreen.kt` | En debug, "Sumar 1 h de enfoque (solo pruebas)" junto al interruptor de Pro |
 
+### Elementos con vida propia y sonidos (después de la Fase 4)
+
+| Pieza | Archivo | Notas |
+|---|---|---|
+| Datos reales | `domain/model/ElementFacts.kt` | Para los 118: qué es (o un dato curioso) y para qué sirve en la vida real. Se ven en la ficha del elemento |
+| Comportamiento | `ui/components/ElementLooks.kt` | Color (aspecto real, color de sus iones en agua o de su llama) y comportamiento inspirado en su química: **solución** (tiñe), **reactivo** (alcalinos: efervescencia fuerte y chispas), **llama** (chispas de color), **luminoso** (gases nobles y fósforos: halo), **metálico** (opaco con reflejo que lo recorre), **vapor de color** (halógenos), **precipitado** (cristales que se asientan), **criogénico** (N, O: hierve y suelta niebla), **radiactivo** (halo que late y destellos) |
+| Recipientes | `ui/main/TimerViewModel.kt`, `ui/components/VesselView.kt` | Cada sesión de trabajo usa un elemento distinto de tu colección (se reparten al empezar el plan), o el que fijes con "Usar en todos mis recipientes" en la ficha. Tiñe recipiente, repisa y puntos; la etiqueta dice "Trabajo · Sodio". Los descansos conservan sus colores. Sin elementos, colores al azar como antes |
+| Sonidos (Pro) | `service/FocusSoundPlayer.kt`, `FocusSoundController.kt`, `ui/sound/FocusSoundPanel.kt` | Generados en el teléfono con `AudioTrack` (sin archivos): ruido blanco, rosa (filtro de Kellet), café, lluvia (ruido rosa + gotas al azar) y olas (ruido café con envolvente de ~9 s). Suenan solo en sesiones de trabajo en curso, con fundido al cambiar o pausar. Se eligen en Config o con 🎧 Sonido en el dock; "Probar 5 s" sin iniciar el timer |
+
 `kotlinx-serialization` se fijó en 1.11.0: la 1.7.3 que traía la navegación rompía `room-testing`.
 
 **Tests:** `RewardsTest` (JVM, 10) y `LabRepositoryTest` + `MigrationTest` (instrumentados). Ojo: `connectedDebugAndroidTest` desinstala la app del emulador al terminar (se pierden sus datos).
@@ -355,7 +364,7 @@ Esquema de Room exportado en `android/app/schemas/` (versión 1): versionarlo si
 | 5 | Play Billing (Pro, reemplaza la marca provisional), AdMob (solo al configurar o terminar un ciclo), exportar CSV |
 
 ### Ideas Pro para más adelante
-- **Sonidos de concentración**: ruido blanco, rosa y café generados en el teléfono con `AudioTrack` (sin librerías ni archivos), más ambientes grabados con licencia CC0 (lluvia, cafetería, bosque) en loop con `ExoPlayer`/Media3. Volumen y mezcla independientes; se pausan con el timer.
+- **Más sonidos**: ✅ los generados ya están. Faltan ambientes grabados con licencia CC0 (cafetería, bosque) en loop con `ExoPlayer`/Media3 y mezclar varios a la vez.
 - **Efectos del líquido**: hervor en el último minuto, condensación en el vidrio vacío, chapoteo al cambiar de sesión, brillo tenue en modo ambiente, inclinación con el acelerómetro.
 
 ---

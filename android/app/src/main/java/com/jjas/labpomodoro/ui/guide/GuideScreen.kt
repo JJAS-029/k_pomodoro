@@ -317,5 +317,9 @@ private fun ElementsPage() {
     Body("Tu tiempo de enfoque se convierte en elementos: cada 25 min completados ganas uno básico y cada 60 min uno raro. Saltar una sesión no cuenta.")
     Spacer(Modifier.height(12.dp))
     Body("En ★ Logros › Sintetizador fusiona dos elementos: sus números atómicos se suman (H 1 + U 92 → Np 93). Es la única forma de conseguir los sintéticos.")
+    Spacer(Modifier.height(12.dp))
+    Body("Tus elementos llenan los recipientes de trabajo y se comportan como en la realidad: el sodio burbujea, el neón brilla, el mercurio refleja como metal. Toca uno en la tabla para saber qué es y para qué sirve.")
+    Spacer(Modifier.height(12.dp))
+    LegendRow({ LegendIcon(R.drawable.ic_headphones, MaterialTheme.colorScheme.secondary) }, "Sonido (Pro): ruido blanco, rosa o café, lluvia u olas mientras trabajas.")
 }
 

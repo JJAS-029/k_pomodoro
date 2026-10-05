@@ -37,11 +37,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jjas.labpomodoro.domain.model.AppSettings
 import com.jjas.labpomodoro.domain.model.PlanRounding
 import com.jjas.labpomodoro.domain.model.SessionConfig
+import com.jjas.labpomodoro.ui.sound.FocusSoundPanel
 import com.jjas.labpomodoro.ui.theme.LabPomodoroTheme
 
 @Composable
 fun SettingsScreen(
     onBack: () -> Unit,
+    onOpenPro: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
@@ -61,6 +63,7 @@ fun SettingsScreen(
                 onAmbientChange = viewModel::setAmbientMode,
                 onAmbientDelayChange = viewModel::setAmbientDelayMinutes,
                 onDynamicColorChange = viewModel::setDynamicColor,
+                soundSection = { FocusSoundPanel(onOpenPro = onOpenPro) },
             )
         }
     }
@@ -77,6 +80,7 @@ private fun SettingsContent(
     onAmbientChange: (Boolean) -> Unit,
     onAmbientDelayChange: (Int) -> Unit,
     onDynamicColorChange: (Boolean) -> Unit,
+    soundSection: @Composable () -> Unit = {},
 ) {
     val session = settings.session
     Column(
@@ -193,6 +197,9 @@ private fun SettingsContent(
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+
+        SectionTitle(if (settings.isPro) "Sonido de concentración" else "Sonido de concentración · Pro")
+        soundSection()
         Spacer(Modifier.height(24.dp))
     }
 }

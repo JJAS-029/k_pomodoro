@@ -58,24 +58,26 @@ fun VesselView(
     effect: LiquidEffect,
     animate: Boolean,
     modifier: Modifier = Modifier,
+    behavior: ElementBehavior? = null,
 ) {
     val animatedFill by animateFloatAsState(fill.coerceIn(0f, 1f), tween(300, easing = LinearEasing), label = "fill")
     val animatedColor by animateColorAsState(liquidColor, tween(600), label = "liquid")
     val currentFill by rememberUpdatedState(animatedFill)
     val currentEffect by rememberUpdatedState(effect)
     val currentAnimate by rememberUpdatedState(animate)
+    val currentBehavior by rememberUpdatedState(behavior)
 
     // Al cambiar de recipiente las partículas viejas ya no tienen sentido
     val particles = remember(shape) { ParticleSystem() }
     var frameNanos by remember { mutableLongStateOf(0L) }
 
-    LaunchedEffect(animate, effect, shape) {
+    LaunchedEffect(animate, effect, shape, behavior) {
         var last = 0L
         while (currentAnimate || particles.isNotEmpty()) {
             withFrameNanos { now ->
                 val dt = if (last == 0L) 0f else ((now - last) / 1_000_000_000f).coerceAtMost(0.1f)
                 last = now
-                particles.update(dt, currentFill, currentEffect, spawn = currentAnimate)
+                particles.update(dt, currentFill, currentEffect, currentBehavior, spawn = currentAnimate)
                 frameNanos = now
             }
         }
@@ -84,11 +86,18 @@ fun VesselView(
     Canvas(modifier) {
         val g = VesselGeometry.fit(shape, size.width, size.height, headroom = 0.18f)
         val t = frameNanos / 1_000_000_000f
+        // El halo va fuera del recorte: debe difuminarse más allá del lienzo, sin bordes rectos
+        drawHalo(g, animatedFill, animatedColor, behavior, t)
         clipRect {
-            drawLiquid(g, animatedFill, animatedColor, t, waving = animate)
-            particles.drawInLiquid(this, g, animatedFill, bubbleColor)
+            drawLiquid(g, animatedFill, animatedColor, t, waving = animate, behavior = behavior)
+            particles.drawInLiquid(this, g, animatedFill, bubbleColor, animatedColor)
             drawGlass(g)
-            particles.drawVapor(this, g)
+            particles.drawVapor(
+                this,
+                g,
+                vaporColor = if (behavior == ElementBehavior.COLORED_VAPOR) animatedColor else Color.White,
+                sparkColor = animatedColor,
+            )
         }
     }
 }
@@ -118,7 +127,27 @@ fun MiniVessel(
     }
 }
 
-private fun DrawScope.drawLiquid(g: VesselGeometry, fill: Float, liquid: Color, t: Float, waving: Boolean) {
+/** Brillo propio alrededor del líquido: constante en los luminosos, late en los radiactivos. */
+private fun DrawScope.drawHalo(g: VesselGeometry, fill: Float, color: Color, behavior: ElementBehavior?, t: Float) {
+    val alpha = when (behavior) {
+        ElementBehavior.GLOW -> 0.32f + 0.04f * sin(t * 9f) // leve parpadeo de tubo de descarga
+        ElementBehavior.RADIOACTIVE -> 0.18f + 0.14f * sin(t * 2.2f)
+        else -> return
+    }
+    if (fill <= 0.02f) return
+    val center = Offset(g.px(0.5f), g.py(fill * g.maxFill / 2f))
+    val radius = g.width * 0.95f
+    drawCircle(Brush.radialGradient(listOf(color.copy(alpha = alpha), Color.Transparent), center, radius), radius, center)
+}
+
+private fun DrawScope.drawLiquid(
+    g: VesselGeometry,
+    fill: Float,
+    liquid: Color,
+    t: Float,
+    waving: Boolean,
+    behavior: ElementBehavior? = null,
+) {
     if (fill <= 0.001f) return
     clipPath(g.interior) {
         val surface = g.surfaceY(fill)
@@ -136,14 +165,30 @@ private fun DrawScope.drawLiquid(g: VesselGeometry, fill: Float, liquid: Color, 
             close()
         }
         // Profundidad: más claro en la superficie y más oscuro al fondo
-        drawPath(
-            path,
-            Brush.verticalGradient(
-                listOf(lerp(liquid, Color.White, 0.18f).copy(alpha = 0.9f), lerp(liquid, Color.Black, 0.35f).copy(alpha = 0.95f)),
-                startY = surface,
-                endY = g.bottom,
-            ),
-        )
+        val (top, bottom) = when (behavior) {
+            // Metal: opaco y con mucho contraste, como un espejo
+            ElementBehavior.METALLIC -> lerp(liquid, Color.White, 0.45f) to lerp(liquid, Color.Black, 0.55f)
+            // Luminoso: más claro, parece encendido
+            ElementBehavior.GLOW -> lerp(liquid, Color.White, 0.4f).copy(alpha = 0.95f) to liquid.copy(alpha = 0.9f)
+            else -> lerp(liquid, Color.White, 0.18f).copy(alpha = 0.9f) to lerp(liquid, Color.Black, 0.35f).copy(alpha = 0.95f)
+        }
+        drawPath(path, Brush.verticalGradient(listOf(top, bottom), startY = surface, endY = g.bottom))
+        if (behavior == ElementBehavior.METALLIC) {
+            // Reflejo que recorre el metal de lado a lado
+            val x = g.left + g.width * ((t * 0.18f) % 1.6f - 0.3f)
+            val band = g.width * 0.22f
+            clipPath(path) {
+                drawRect(
+                    Brush.horizontalGradient(
+                        listOf(Color.Transparent, Color.White.copy(alpha = 0.45f), Color.Transparent),
+                        startX = x - band,
+                        endX = x + band,
+                    ),
+                    topLeft = Offset(x - band, surface - g.unit),
+                    size = Size(band * 2, g.bottom - surface + g.unit),
+                )
+            }
+        }
         // Menisco: línea brillante en la superficie
         drawLine(Color.White.copy(alpha = 0.3f), Offset(g.left, surface), Offset(g.right, surface), g.stroke * 0.6f)
     }
@@ -188,7 +233,20 @@ private fun DrawScope.drawGlass(g: VesselGeometry) {
     drawPath(g.outline, GlassColor, style = Stroke(width = g.stroke, cap = StrokeCap.Round))
 }
 
-private enum class Kind { FIZZ, BUBBLE, VAPOR }
+private enum class Kind {
+    FIZZ,
+    BUBBLE,
+    VAPOR,
+
+    /** Chispa que salta de la superficie (alcalinos y prueba de la llama). */
+    SPARK,
+
+    /** Cristal que cae y se asienta en el fondo (precipitado). */
+    FLAKE,
+
+    /** Destello breve dentro del líquido (radiactivos). */
+    SPARKLE,
+}
 
 private class Particle(
     /** Carril horizontal −1..1: se escala con el ancho del recipiente a esa altura. */
@@ -209,23 +267,36 @@ private class ParticleSystem {
     private val random = Random(System.nanoTime())
     private var fizzBudget = 0f
     private var mainBudget = 0f
+    private var specialBudget = 0f
 
     fun isNotEmpty() = particles.isNotEmpty()
 
-    fun update(dt: Float, fill: Float, effect: LiquidEffect, spawn: Boolean) {
+    fun update(dt: Float, fill: Float, effect: LiquidEffect, behavior: ElementBehavior?, spawn: Boolean) {
         val iterator = particles.iterator()
         while (iterator.hasNext()) {
             val p = iterator.next()
             p.age += dt
-            p.v += p.speed * dt
-            val popped = p.kind != Kind.VAPOR && p.v >= fill
-            if (p.age >= p.life || popped) iterator.remove()
+            // Los cristales se quedan quietos al tocar el fondo
+            p.v = (p.v + p.speed * dt).coerceAtLeast(0.015f)
+            val popped = (p.kind == Kind.FIZZ || p.kind == Kind.BUBBLE) && p.v >= fill
+            // Si el líquido baja de su altura, el destello ya no tiene dónde estar
+            val stranded = (p.kind == Kind.SPARKLE || p.kind == Kind.FLAKE) && p.v > fill
+            if (p.age >= p.life || popped || stranded) iterator.remove()
         }
 
         if (!spawn || effect == LiquidEffect.NONE || dt == 0f || fill <= 0.02f) return
 
-        // Efervescencia: la mayoría nace en el fondo y algunas en las paredes
-        fizzBudget += 9f * dt
+        spawnSpecial(dt, fill, behavior)
+
+        // Efervescencia: la mayoría nace en el fondo y algunas en las paredes. Los alcalinos
+        // reaccionan con el agua y los gases licuados hierven: mucha más
+        val fizzRate = when (behavior) {
+            ElementBehavior.REACTIVE -> 32f
+            ElementBehavior.CRYO -> 24f
+            ElementBehavior.METALLIC -> 2f
+            else -> 9f
+        }
+        fizzBudget += fizzRate * dt
         while (fizzBudget >= 1f && particles.size < MAX_PARTICLES) {
             fizzBudget -= 1f
             val fromWall = random.nextFloat() < 0.3f
@@ -240,8 +311,13 @@ private class ParticleSystem {
             )
         }
 
+        val vaporBoost = when (behavior) {
+            ElementBehavior.CRYO -> 3f
+            ElementBehavior.COLORED_VAPOR -> 1.6f
+            else -> 1f
+        }
         val rate = when (effect) {
-            LiquidEffect.VAPOR -> if (fill < 0.2f) 4f else 1.6f // Como el prototipo: más vapor al final
+            LiquidEffect.VAPOR -> (if (fill < 0.2f) 4f else 1.6f) * vaporBoost // Como el prototipo: más vapor al final
             LiquidEffect.BUBBLES -> 2.2f
             LiquidEffect.NONE -> 0f
         }
@@ -254,7 +330,7 @@ private class ParticleSystem {
                     v = fill,
                     speed = 0.08f + random.nextFloat() * 0.06f,
                     life = 2f + random.nextFloat() * 1.5f,
-                    size = 0.06f + random.nextFloat() * 0.05f,
+                    size = (0.06f + random.nextFloat() * 0.05f) * if (behavior == ElementBehavior.CRYO) 1.6f else 1f,
                     phase = random.nextFloat() * 6.28f,
                     kind = Kind.VAPOR,
                 )
@@ -274,6 +350,50 @@ private class ParticleSystem {
         if (mainBudget > 1f) mainBudget = 0f
     }
 
+    private fun spawnSpecial(dt: Float, fill: Float, behavior: ElementBehavior?) {
+        val rate = when (behavior) {
+            ElementBehavior.REACTIVE -> 3f
+            ElementBehavior.FLAME -> 5f
+            ElementBehavior.PRECIPITATE -> 2.5f
+            ElementBehavior.RADIOACTIVE -> 7f
+            else -> return
+        }
+        specialBudget += rate * dt
+        while (specialBudget >= 1f && particles.size < MAX_PARTICLES) {
+            specialBudget -= 1f
+            particles += when (behavior) {
+                ElementBehavior.PRECIPITATE -> Particle(
+                    lane = random.nextFloat() * 1.6f - 0.8f,
+                    v = fill * (0.7f + random.nextFloat() * 0.3f),
+                    speed = -(0.05f + random.nextFloat() * 0.05f),
+                    life = 14f,
+                    size = 0.012f + random.nextFloat() * 0.012f,
+                    phase = random.nextFloat() * 6.28f,
+                    kind = Kind.FLAKE,
+                )
+                ElementBehavior.RADIOACTIVE -> Particle(
+                    lane = random.nextFloat() * 1.8f - 0.9f,
+                    v = random.nextFloat() * fill,
+                    speed = 0f,
+                    life = 0.25f + random.nextFloat() * 0.25f,
+                    size = 0.008f + random.nextFloat() * 0.01f,
+                    phase = random.nextFloat() * 6.28f,
+                    kind = Kind.SPARKLE,
+                )
+                else -> Particle(
+                    lane = random.nextFloat() * 1.4f - 0.7f,
+                    v = fill,
+                    speed = 0.25f + random.nextFloat() * 0.25f,
+                    life = 0.5f + random.nextFloat() * 0.5f,
+                    size = 0.008f + random.nextFloat() * 0.008f,
+                    phase = random.nextFloat() * 6.28f,
+                    kind = Kind.SPARK,
+                )
+            }
+        }
+        if (specialBudget > 1f) specialBudget = 0f
+    }
+
     private fun position(g: VesselGeometry, p: Particle, wobbleAmount: Float): Offset {
         val v = p.v * g.maxFill
         val wobble = sin(p.phase + p.age * 3f) * wobbleAmount
@@ -281,7 +401,7 @@ private class ParticleSystem {
         return Offset(g.px(u), g.py(v))
     }
 
-    fun drawInLiquid(scope: DrawScope, g: VesselGeometry, fill: Float, bubbleColor: Color) = with(scope) {
+    fun drawInLiquid(scope: DrawScope, g: VesselGeometry, fill: Float, bubbleColor: Color, liquidColor: Color) = with(scope) {
         if (fill <= 0.001f) return@with
         clipPath(g.interior) {
             clipRect(top = g.surfaceY(fill)) {
@@ -294,22 +414,51 @@ private class ParticleSystem {
                             drawCircle(bubbleColor, r, c)
                             drawCircle(Color.White.copy(alpha = 0.5f), r * 0.3f, Offset(c.x - r * 0.3f, c.y - r * 0.3f))
                         }
-                        Kind.VAPOR -> Unit
+                        Kind.FLAKE -> {
+                            // Mientras cae se mece un poco; en el fondo queda quieto
+                            val c = position(g, p, if (p.v > 0.02f) 0.02f else 0f)
+                            val r = g.unit * p.size
+                            val crystal = Path().apply {
+                                moveTo(c.x, c.y - r)
+                                lineTo(c.x + r * 0.7f, c.y)
+                                lineTo(c.x, c.y + r)
+                                lineTo(c.x - r * 0.7f, c.y)
+                                close()
+                            }
+                            drawPath(crystal, lerp(liquidColor, Color.White, 0.5f))
+                        }
+                        Kind.SPARKLE -> {
+                            // Destello que aparece y se apaga
+                            val flash = sin(PI.toFloat() * p.age / p.life)
+                            val c = position(g, p, 0f)
+                            drawCircle(liquidColor.copy(alpha = 0.5f * flash), g.unit * p.size * 3f, c)
+                            drawCircle(Color.White.copy(alpha = 0.9f * flash), g.unit * p.size, c)
+                        }
+                        Kind.VAPOR, Kind.SPARK -> Unit
                     }
                 }
             }
         }
     }
 
-    fun drawVapor(scope: DrawScope, g: VesselGeometry) = with(scope) {
+    fun drawVapor(scope: DrawScope, g: VesselGeometry, vaporColor: Color, sparkColor: Color) = with(scope) {
         for (p in particles) {
+            if (p.kind == Kind.SPARK) {
+                // Chispa del color de la llama del elemento, con centro blanco
+                val fade = 1f - p.age / p.life
+                val c = position(g, p, 0.05f)
+                val r = g.unit * p.size
+                drawCircle(sparkColor.copy(alpha = 0.8f * fade), r * 2.2f, c)
+                drawCircle(Color.White.copy(alpha = fade), r, c)
+                continue
+            }
             if (p.kind != Kind.VAPOR) continue
             val progress = p.age / p.life
             val center = position(g, p, 0.15f)
             val radius = g.unit * p.size * (1f + progress)
             val alpha = 0.35f * (1f - progress) * (progress * 6f).coerceAtMost(1f)
             drawCircle(
-                Brush.radialGradient(listOf(Color.White.copy(alpha = alpha), Color.White.copy(alpha = 0f)), center, radius),
+                Brush.radialGradient(listOf(vaporColor.copy(alpha = alpha), vaporColor.copy(alpha = 0f)), center, radius),
                 radius,
                 center,
             )
