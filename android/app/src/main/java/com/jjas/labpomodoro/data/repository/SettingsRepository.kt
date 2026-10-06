@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.jjas.labpomodoro.BuildConfig
 import com.jjas.labpomodoro.domain.model.AppSettings
 import com.jjas.labpomodoro.domain.model.FocusSound
 import com.jjas.labpomodoro.domain.model.PlanRounding
@@ -63,7 +64,11 @@ class SettingsRepository @Inject constructor(
 
     suspend fun setFocusVolume(volume: Float) = dataStore.edit { it[Keys.FOCUS_VOLUME] = volume.coerceIn(0f, 1f) }
 
+    /** Interruptor "Activar Pro (solo pruebas)"; en release se ignora. */
     suspend fun setPro(enabled: Boolean) = dataStore.edit { it[Keys.PRO] = enabled }
+
+    /** Lo llama la tienda al confirmar o revocar la compra. */
+    suspend fun setProPurchased(purchased: Boolean) = dataStore.edit { it[Keys.PRO_PURCHASED] = purchased }
 
     private fun Preferences.toAppSettings(): AppSettings {
         val defaults = AppSettings()
@@ -86,7 +91,8 @@ class SettingsRepository @Inject constructor(
             ambientDelayMinutes = this[Keys.AMBIENT_DELAY]?.takeIf { it in AppSettings.AMBIENT_DELAYS }
                 ?: defaults.ambientDelayMinutes,
             dynamicColor = this[Keys.DYNAMIC_COLOR] ?: defaults.dynamicColor,
-            isPro = this[Keys.PRO] ?: defaults.isPro,
+            proPurchased = this[Keys.PRO_PURCHASED] ?: defaults.proPurchased,
+            proTesting = BuildConfig.DEBUG && (this[Keys.PRO] ?: defaults.proTesting),
             guideSeen = this[Keys.GUIDE_SEEN] ?: defaults.guideSeen,
             vesselElement = this[Keys.VESSEL_ELEMENT] ?: defaults.vesselElement,
             focusSound = this[Keys.FOCUS_SOUND]?.let { name -> FocusSound.entries.firstOrNull { it.name == name } } ?: defaults.focusSound,
@@ -109,6 +115,7 @@ class SettingsRepository @Inject constructor(
         val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
         val PRO = booleanPreferencesKey("pro_unlocked")
         val GUIDE_SEEN = booleanPreferencesKey("guide_seen")
+        val PRO_PURCHASED = booleanPreferencesKey("pro_purchased")
         val VESSEL_ELEMENT = intPreferencesKey("vessel_element")
         val FOCUS_SOUND = stringPreferencesKey("focus_sound")
         val FOCUS_VOLUME = floatPreferencesKey("focus_volume")

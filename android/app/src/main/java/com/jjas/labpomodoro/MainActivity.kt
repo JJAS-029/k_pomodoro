@@ -13,9 +13,13 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.compose.rememberNavController
+import com.jjas.labpomodoro.ads.AdsManager
+import com.jjas.labpomodoro.data.billing.BillingRepository
 import com.jjas.labpomodoro.data.repository.SettingsRepository
 import com.jjas.labpomodoro.service.TimerService
 import com.jjas.labpomodoro.timer.TimerEngine
@@ -24,6 +28,10 @@ import com.jjas.labpomodoro.ui.navigation.LabNavHost
 import com.jjas.labpomodoro.ui.pip.PipScreen
 import com.jjas.labpomodoro.ui.theme.LabPomodoroTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -33,6 +41,10 @@ class MainActivity : ComponentActivity() {
     @Inject lateinit var engine: TimerEngine
 
     @Inject lateinit var settingsRepository: SettingsRepository
+
+    @Inject lateinit var ads: AdsManager
+
+    @Inject lateinit var billing: BillingRepository
 
     private var isInPip by mutableStateOf(false)
 
@@ -54,6 +66,28 @@ class MainActivity : ComponentActivity() {
             }
         }
 
+        // Versión gratis: consentimiento de privacidad y anuncios. En Pro no se carga nada de esto
+        lifecycleScope.launch {
+            if (!settingsRepository.settings.first().isPro) ads.gatherConsent(this@MainActivity)
+        }
+        // Anuncio de pantalla completa al terminar el plan, nunca durante una sesión
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                engine.state
+                    .filterIsInstance<TimerState.Finished>()
+                    // Una sola vez por plan: al cerrar el anuncio la app vuelve aquí con el mismo resumen
+                    .filter { it !== ads.endAdShownFor }
+                    .collect { finished ->
+                        // Primero se ve el resumen del experimento
+                        delay(END_AD_DELAY_MILLIS)
+                        if (!settingsRepository.settings.first().isPro && !isInPip) {
+                            ads.endAdShownFor = finished
+                            ads.showInterstitial(this@MainActivity)
+                        }
+                    }
+            }
+        }
+
         setContent {
             val settings by settingsRepository.settings.collectAsStateWithLifecycle(initialValue = null)
             LabPomodoroTheme(dynamicColor = settings?.dynamicColorActive == true) {
@@ -62,6 +96,12 @@ class MainActivity : ComponentActivity() {
                 if (isInPip) PipScreen() else LabNavHost(navController)
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Una suscripción pudo renovarse o cancelarse mientras la app estaba cerrada
+        billing.refresh()
     }
 
     /** Antes de Android 12 no hay entrada automática: se entra a PiP al salir de la app con Home. */
@@ -98,5 +138,9 @@ class MainActivity : ComponentActivity() {
             builder.setAutoEnterEnabled(active != null)
         }
         return builder.build()
+    }
+
+    private companion object {
+        const val END_AD_DELAY_MILLIS = 2_500L
     }
 }

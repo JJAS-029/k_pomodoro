@@ -15,6 +15,9 @@ hilt = "2.60.1"
 androidxHilt = "1.4.0"
 room = "2.8.5"
 kotlinxSerialization = "1.11.0"
+billing = "9.1.0"
+playServicesAds = "25.5.0"
+ump = "4.0.0"
 coroutines = "1.11.0"
 datastore = "1.2.1"
 firebaseBom = "34.19.0"
@@ -57,6 +60,9 @@ androidx-room-runtime = { group = "androidx.room", name = "room-runtime", versio
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 androidx-room-testing = { group = "androidx.room", name = "room-testing", version.ref = "room" }
+billing-ktx = { group = "com.android.billingclient", name = "billing-ktx", version.ref = "billing" }
+play-services-ads = { group = "com.google.android.gms", name = "play-services-ads", version.ref = "playServicesAds" }
+ump = { group = "com.google.android.ump", name = "user-messaging-platform", version.ref = "ump" }
 kotlinx-serialization-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-core", version.ref = "kotlinxSerialization" }
 
 # Corrutinas y preferencias

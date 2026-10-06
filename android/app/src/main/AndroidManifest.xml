@@ -24,6 +24,12 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.LabPomodoro">
+
+        <!-- AdMob: el ID sale de build.gradle.kts (de prueba hasta tener cuenta) -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="${admobAppId}" />
+
         <!-- PiP preparado para la Fase 3: configChanges evita recrear la Activity al entrar/salir de PiP -->
         <activity
             android:name=".MainActivity"

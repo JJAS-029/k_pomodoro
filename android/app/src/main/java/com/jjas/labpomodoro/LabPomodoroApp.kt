@@ -1,6 +1,7 @@
 package com.jjas.labpomodoro
 
 import android.app.Application
+import com.jjas.labpomodoro.data.billing.BillingRepository
 import com.jjas.labpomodoro.service.FocusSoundController
 import com.jjas.labpomodoro.service.RewardSync
 import com.jjas.labpomodoro.service.TimerEffects
@@ -16,10 +17,13 @@ class LabPomodoroApp : Application() {
 
     @Inject lateinit var focusSound: FocusSoundController
 
+    @Inject lateinit var billing: BillingRepository
+
     override fun onCreate() {
         super.onCreate()
         timerEffects.start()
         rewardSync.start()
         focusSound.start()
+        billing.start()
     }
 }

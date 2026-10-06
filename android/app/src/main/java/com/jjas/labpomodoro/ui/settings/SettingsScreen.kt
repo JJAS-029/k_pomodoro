@@ -1,6 +1,9 @@
 package com.jjas.labpomodoro.ui.settings
 
 import android.os.Build
+import androidx.activity.compose.LocalActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,14 +12,17 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -34,6 +40,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.jjas.labpomodoro.ads.AdBanner
 import com.jjas.labpomodoro.domain.model.AppSettings
 import com.jjas.labpomodoro.domain.model.PlanRounding
 import com.jjas.labpomodoro.domain.model.SessionConfig
@@ -47,25 +54,74 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
+    val exportMessage by viewModel.message.collectAsStateWithLifecycle()
+    val activity = LocalActivity.current
+    // El usuario elige dónde guardar el archivo (Descargas, Drive…)
+    val exportLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { uri ->
+        uri?.let(viewModel::exportCsv)
+    }
 
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         val current = settings
         if (current == null) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
         } else {
-            SettingsContent(
-                settings = current,
-                onBack = onBack,
-                onSessionChange = viewModel::updateSession,
-                onSoundChange = viewModel::setSoundEnabled,
-                onVibrationChange = viewModel::setVibrationEnabled,
-                onKeepScreenOnChange = viewModel::setKeepScreenOn,
-                onAmbientChange = viewModel::setAmbientMode,
-                onAmbientDelayChange = viewModel::setAmbientDelayMinutes,
-                onDynamicColorChange = viewModel::setDynamicColor,
-                soundSection = { FocusSoundPanel(onOpenPro = onOpenPro) },
-            )
+            Column {
+                SettingsContent(
+                    modifier = Modifier.weight(1f),
+                    settings = current,
+                    onBack = onBack,
+                    onSessionChange = viewModel::updateSession,
+                    onSoundChange = viewModel::setSoundEnabled,
+                    onVibrationChange = viewModel::setVibrationEnabled,
+                    onKeepScreenOnChange = viewModel::setKeepScreenOn,
+                    onAmbientChange = viewModel::setAmbientMode,
+                    onAmbientDelayChange = viewModel::setAmbientDelayMinutes,
+                    onDynamicColorChange = viewModel::setDynamicColor,
+                    soundSection = { FocusSoundPanel(onOpenPro = onOpenPro) },
+                    dataSection = {
+                        DataSection(
+                            isPro = current.isPro,
+                            message = exportMessage,
+                            onExport = { exportLauncher.launch("lab-pomodoro-historial.csv") },
+                            onOpenPro = onOpenPro,
+                            showPrivacy = !current.isPro && viewModel.privacyOptionsRequired,
+                            onPrivacy = { activity?.let(viewModel::showPrivacyOptions) },
+                        )
+                    },
+                )
+                // Solo en la versión gratis; no tapa nada porque va debajo del contenido
+                AdBanner(Modifier.navigationBarsPadding())
+            }
         }
+    }
+}
+
+@Composable
+private fun DataSection(
+    isPro: Boolean,
+    message: String?,
+    onExport: () -> Unit,
+    onOpenPro: () -> Unit,
+    showPrivacy: Boolean,
+    onPrivacy: () -> Unit,
+) {
+    Text(
+        "Descarga todas tus sesiones (fecha, tipo, minutos y si se completó) para verlas en una hoja de cálculo.",
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    Spacer(Modifier.height(8.dp))
+    if (isPro) {
+        OutlinedButton(onClick = onExport) { Text("Exportar historial (CSV)") }
+    } else {
+        FilledTonalButton(onClick = onOpenPro) { Text("Exportar historial · Pro") }
+    }
+    message?.let {
+        Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
+    }
+    if (showPrivacy) {
+        TextButton(onClick = onPrivacy) { Text("Privacidad de anuncios") }
     }
 }
 
@@ -80,11 +136,13 @@ private fun SettingsContent(
     onAmbientChange: (Boolean) -> Unit,
     onAmbientDelayChange: (Int) -> Unit,
     onDynamicColorChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
     soundSection: @Composable () -> Unit = {},
+    dataSection: @Composable () -> Unit = {},
 ) {
     val session = settings.session
     Column(
-        modifier = Modifier
+        modifier = modifier
             .safeDrawingPadding()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp, vertical = 16.dp),
@@ -200,6 +258,9 @@ private fun SettingsContent(
 
         SectionTitle(if (settings.isPro) "Sonido de concentración" else "Sonido de concentración · Pro")
         soundSection()
+
+        SectionTitle(if (settings.isPro) "Tus datos" else "Tus datos · Pro")
+        dataSection()
         Spacer(Modifier.height(24.dp))
     }
 }

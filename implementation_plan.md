@@ -353,7 +353,34 @@ Esquema de Room exportado en `android/app/schemas/` (versión 1): versionarlo si
 
 ---
 
-## 9. Hoja de ruta
+## 9. Fase 5 — Pro con Google Play, anuncios y exportar CSV (implementada, falta probar la compra real)
+
+Decisiones: Pro con **suscripción (mensual y anual) y pago único**; anuncios **de pantalla completa al terminar el plan y banner en Config y Logros**.
+
+| Pieza | Archivo | Notas |
+|---|---|---|
+| Estado Pro | `AppSettings` (`proPurchased`, `proTesting`, `isPro`) | `isPro = proPurchased || proTesting`. `proPurchased` lo pone la tienda y se guarda para funcionar sin conexión; `proTesting` es el interruptor de pruebas y en release se ignora |
+| Compras | `data/billing/BillingRepository.kt` | Play Billing 9.1. Productos: suscripción `pro_subscription` con planes base `monthly` y `yearly`, y pago único `pro_lifetime`. Una consulta por tipo de producto (Google lo exige). Confirma (acknowledge) las compras, avisa de pagos pendientes y solo quita Pro cuando Google Play confirma que no hay compra vigente; un error de red no lo quita. Se revisa al abrir la app y al volver a ella |
+| Pantalla Pro | `ui/pro/ProScreen.kt` | Beneficios, tarjetas Mensual / Anual (con "Ahorras x %") / Para siempre con precios locales de Google Play, "Restaurar compras" y, si ya es Pro, enlace para administrar la suscripción. Sin productos muestra un aviso en lugar de fallar |
+| Anuncios | `ads/AdsManager.kt`, `ads/AdBanner.kt` | AdMob 25.5 + consentimiento UMP 4.0 (formulario de privacidad obligatorio en la UE y otras regiones; "Privacidad de anuncios" en Config cuando aplica). Pantalla completa 2.5 s después del resumen, una sola vez por plan y nunca en PiP. Banner adaptable abajo de Config y Logros. Nada de esto se carga en Pro |
+| IDs de AdMob | `app/build.gradle.kts` | Usa los IDs de prueba oficiales de Google. Los reales se ponen en `gradle.properties`: `admobAppId`, `admobBannerId`, `admobInterstitialId` |
+| Exportar CSV (Pro) | `domain/usecase/HistoryCsv.kt`, Config › Tus datos | El usuario elige dónde guardar. Columnas: fecha, inicio, fin, tipo, minutos planeados, minutos reales, completada. Con BOM para que Excel lea los acentos |
+
+**Tests:** `HistoryCsvTest` (2). Probado en el emulador: banner y anuncio de prueba, que el anuncio no se repita al cerrarlo, exportación de 29 sesiones.
+
+### Pendiente cuando haya cuenta de Google Play Console (25 USD, pago único)
+1. Crear la app con el paquete `com.jjas.labpomodoro` y subir un AAB firmado a **prueba interna**.
+2. En *Monetizar › Productos*: suscripción `pro_subscription` con planes base `monthly` y `yearly`, y producto único `pro_lifetime`, con sus precios.
+3. Agregar tu cuenta como *tester de licencias* para comprar sin cobro real.
+4. Política de privacidad publicada (obligatoria por los anuncios) y el formulario de *Seguridad de los datos*.
+5. Justificar el servicio en primer plano `specialUse` y el permiso `USE_EXACT_ALARM` (es un timer).
+
+### Pendiente cuando haya cuenta de AdMob
+Crear la app y dos bloques (banner adaptable e intersticial) y poner sus IDs en `gradle.properties`. Configurar el mensaje de consentimiento (GDPR) en *Privacidad y mensajería*.
+
+---
+
+## 10. Hoja de ruta
 
 | Fase | Contenido clave |
 |---|---|
@@ -361,7 +388,7 @@ Esquema de Room exportado en `android/app/schemas/` (versión 1): versionarlo si
 | 2 | `SessionPlanGenerator` (lógica de `generarPlan`), `TimerEngine` por timestamps, `ForegroundService` con notificación, sonidos/vibración, modo AOD |
 | 3 | `BeakerView` Canvas (vapor desde la superficie, burbujas desde el fondo), repisa de tubos, PiP nativo, pantalla principal |
 | 4 | ✅ Tabla periódica, recompensas (25 min → básico, 60 min → raro), sintetizador |
-| 5 | Play Billing (Pro, reemplaza la marca provisional), AdMob (solo al configurar o terminar un ciclo), exportar CSV |
+| 5 | ✅ Play Billing (suscripción + pago único), AdMob (final del plan + banner en Config y Logros), exportar CSV. Falta probar la compra real con Play Console |
 
 ### Ideas Pro para más adelante
 - **Más sonidos**: ✅ los generados ya están. Faltan ambientes grabados con licencia CC0 (cafetería, bosque) en loop con `ExoPlayer`/Media3 y mezclar varios a la vez.

@@ -49,8 +49,10 @@ data class AppSettings(
     val ambientDelayMinutes: Int = 3,
     /** Pro: colores de Material You tomados del fondo de pantalla (Android 12+). */
     val dynamicColor: Boolean = false,
-    /** Provisional hasta la Fase 5: ahí lo decidirá Play Billing. */
-    val isPro: Boolean = false,
+    /** Pro comprado en Google Play (suscripción vigente o pago único). Lo actualiza la tienda. */
+    val proPurchased: Boolean = false,
+    /** Interruptor de pruebas: solo tiene efecto en compilaciones debug. */
+    val proTesting: Boolean = false,
     /** La guía de uso se muestra sola la primera vez. */
     val guideSeen: Boolean = false,
     /**
@@ -64,6 +66,8 @@ data class AppSettings(
     val focusVolume: Float = 0.5f,
 ) {
     /** El modo ambiente solo aplica si el usuario es Pro. */
+    val isPro: Boolean get() = proPurchased || proTesting
+
     val ambientActive: Boolean get() = isPro && ambientMode
 
     val dynamicColorActive: Boolean get() = isPro && dynamicColor

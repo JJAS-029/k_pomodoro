@@ -18,6 +18,15 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // AdMob: mientras no haya cuenta se usan los IDs de prueba oficiales de Google. Los reales
+        // van en gradle.properties (admobAppId, admobBannerId, admobInterstitialId)
+        val admobAppId = providers.gradleProperty("admobAppId").getOrElse("ca-app-pub-3940256099942544~3347511713")
+        val admobBanner = providers.gradleProperty("admobBannerId").getOrElse("ca-app-pub-3940256099942544/9214589741")
+        val admobInterstitial = providers.gradleProperty("admobInterstitialId").getOrElse("ca-app-pub-3940256099942544/1033173712")
+        manifestPlaceholders["admobAppId"] = admobAppId
+        buildConfigField("String", "AD_BANNER_ID", "\"$admobBanner\"")
+        buildConfigField("String", "AD_INTERSTITIAL_ID", "\"$admobInterstitial\"")
     }
 
     buildTypes {
@@ -76,6 +85,11 @@ dependencies {
     ksp(libs.androidx.room.compiler)
     // La navegación trae la 1.7.3, que choca con room-testing (AbstractMethodError); se sube a la estable
     implementation(libs.kotlinx.serialization.core)
+
+    // Fase 5: compras (Pro), anuncios y consentimiento de privacidad para anuncios
+    implementation(libs.billing.ktx)
+    implementation(libs.play.services.ads)
+    implementation(libs.ump)
 
     // Corrutinas + DataStore
     implementation(libs.kotlinx.coroutines.android)

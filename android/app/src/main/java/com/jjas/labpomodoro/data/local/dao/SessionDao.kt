@@ -34,4 +34,7 @@ interface SessionDao {
 
     @Query("SELECT COALESCE(SUM(actualSeconds), 0) FROM sessions WHERE type = 'WORK' AND completed = 1")
     fun observeTotalWorkSeconds(): Flow<Long>
+
+    @Query("SELECT * FROM sessions ORDER BY startedAtMillis")
+    suspend fun all(): List<SessionEntity>
 }

@@ -60,6 +60,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.jjas.labpomodoro.ads.AdBanner
 import com.jjas.labpomodoro.data.repository.InventoryItem
 import com.jjas.labpomodoro.domain.model.Element
 import com.jjas.labpomodoro.domain.model.ElementCategory
@@ -107,15 +108,23 @@ fun LabScreen(onBack: () -> Unit, viewModel: LabViewModel = hiltViewModel()) {
     }
 
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-        Box(Modifier.safeDrawingPadding()) {
-            val current = state
-            if (current == null) {
-                CircularProgressIndicator(Modifier.align(Alignment.Center))
-            } else {
-                LabContent(current, newOnes, onBack, viewModel::fuse, viewModel::setVesselElement)
+        Column {
+            Box(
+                Modifier
+                    .weight(1f)
+                    .safeDrawingPadding()
+            ) {
+                val current = state
+                if (current == null) {
+                    CircularProgressIndicator(Modifier.align(Alignment.Center))
+                } else {
+                    LabContent(current, newOnes, onBack, viewModel::fuse, viewModel::setVesselElement)
+                }
+                FusionFlash(fused, Modifier.align(Alignment.Center))
+                SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter))
             }
-            FusionFlash(fused, Modifier.align(Alignment.Center))
-            SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter))
+            // Solo en la versión gratis
+            AdBanner(Modifier.navigationBarsPadding())
         }
     }
 }
