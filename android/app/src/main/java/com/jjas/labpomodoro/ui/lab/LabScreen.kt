@@ -32,6 +32,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -55,6 +57,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -63,6 +67,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.jjas.labpomodoro.R
 import com.jjas.labpomodoro.ads.AdBanner
 import com.jjas.labpomodoro.data.repository.InventoryItem
 import com.jjas.labpomodoro.domain.model.Element
@@ -89,6 +94,9 @@ import com.jjas.labpomodoro.ui.components.VesselView
 import com.jjas.labpomodoro.ui.components.color
 import com.jjas.labpomodoro.ui.components.look
 import com.jjas.labpomodoro.ui.components.metalColor
+import com.jjas.labpomodoro.ui.promo.ShareText
+import com.jjas.labpomodoro.ui.promo.shareText
+import com.jjas.labpomodoro.ui.stats.formatFocus
 import kotlinx.coroutines.delay
 import java.time.Instant
 import java.time.ZoneId
@@ -172,6 +180,23 @@ private fun LabContent(
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.weight(1f),
             )
+            val context = LocalContext.current
+            IconButton(onClick = {
+                val counts = state.masteryCounts
+                context.shareText(
+                    ShareText.progress(
+                        discovered = state.discoveredCount,
+                        total = PeriodicTable.SIZE,
+                        bronze = counts[Mastery.BRONZE] ?: 0,
+                        silver = counts[Mastery.SILVER] ?: 0,
+                        gold = counts[Mastery.GOLD] ?: 0,
+                        streak = state.streak.current,
+                        focus = formatFocus(state.totalWorkSeconds),
+                    )
+                )
+            }) {
+                Icon(painterResource(R.drawable.ic_share), contentDescription = "Compartir mi progreso")
+            }
             TextButton(onClick = onBack) { Text("Listo") }
         }
         Stats(state, Modifier.padding(horizontal = 24.dp, vertical = 12.dp))

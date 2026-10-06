@@ -70,6 +70,10 @@ data class AppSettings(
     val tableCelebrated: Boolean = false,
     /** Nivel de maestría de la tabla completa ya celebrado (ordinal de [Mastery]). */
     val masteryCelebrated: Int = 0,
+    /** Recordatorio diario si ese día no hubo pomodoros. */
+    val reminderEnabled: Boolean = false,
+    /** Hora del recordatorio (0..23). */
+    val reminderHour: Int = 20,
 ) {
     /** El modo ambiente solo aplica si el usuario es Pro. */
     val isPro: Boolean get() = proPurchased || proTesting
@@ -80,5 +84,8 @@ data class AppSettings(
 
     companion object {
         val AMBIENT_DELAYS = listOf(3, 5)
+
+        /** Horas para el recordatorio de racha. */
+        val REMINDER_HOURS = listOf(18, 20, 22)
     }
 }

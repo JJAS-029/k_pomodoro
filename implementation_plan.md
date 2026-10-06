@@ -446,6 +446,13 @@ Se revisaron las tres; ninguna se agregó como dependencia porque nuestro sistem
 
 **Tests:** `BackupCodecTest` (3, con `org.json` real en los tests de JVM). Falta la prueba de punta a punta con una cuenta de Google real.
 
+### Recordatorio de racha y compartir
+
+| Pieza | Archivo | Notas |
+|---|---|---|
+| Recordatorio | `domain/usecase/StreakReminder.kt`, `service/StreakReminderScheduler.kt` | Opcional (Config › Avisos, 18:00 / 20:00 / 22:00). Alarma inexacta diaria; si ese día no hubo pomodoros: "Tu racha de N días te espera" o, sin racha, "¿Un experimento hoy?". Se reprograma cada día y al reiniciar (`RECEIVE_BOOT_COMPLETED`) |
+| Compartir | `ui/promo/Share.kt` | Al terminar el plan ("¡Experimento completado! …"), en Logros (elementos, maestría, enfoque y racha) y "Recomendar a un amigo" en Acerca de. Siempre con el enlace de Play Store |
+
 ### Ideas Pro para más adelante
 - **Más sonidos**: ✅ los generados ya están. Faltan ambientes grabados con licencia CC0 (cafetería, bosque) en loop con `ExoPlayer`/Media3 y mezclar varios a la vez.
 - **Efectos del líquido**: hervor en el último minuto, condensación en el vidrio vacío, chapoteo al cambiar de sesión, brillo tenue en modo ambiente, inclinación con el acelerómetro.

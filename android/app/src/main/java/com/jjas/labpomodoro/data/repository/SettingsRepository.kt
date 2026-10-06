@@ -68,6 +68,10 @@ class SettingsRepository @Inject constructor(
 
     suspend fun setMasteryCelebrated(level: Int) = dataStore.edit { it[Keys.MASTERY_CELEBRATED] = level }
 
+    suspend fun setReminder(enabled: Boolean) = dataStore.edit { it[Keys.REMINDER] = enabled }
+
+    suspend fun setReminderHour(hour: Int) = dataStore.edit { it[Keys.REMINDER_HOUR] = hour.coerceIn(0, 23) }
+
     suspend fun setPlacesEnabled(enabled: Boolean) = dataStore.edit { it[Keys.PLACES] = enabled }
 
     suspend fun setFocusVolume(volume: Float) = dataStore.edit { it[Keys.FOCUS_VOLUME] = volume.coerceIn(0f, 1f) }
@@ -129,6 +133,8 @@ class SettingsRepository @Inject constructor(
             placesEnabled = this[Keys.PLACES] ?: defaults.placesEnabled,
             tableCelebrated = this[Keys.TABLE_CELEBRATED] ?: defaults.tableCelebrated,
             masteryCelebrated = this[Keys.MASTERY_CELEBRATED] ?: defaults.masteryCelebrated,
+            reminderEnabled = this[Keys.REMINDER] ?: defaults.reminderEnabled,
+            reminderHour = this[Keys.REMINDER_HOUR] ?: defaults.reminderHour,
         )
     }
 
@@ -159,5 +165,7 @@ class SettingsRepository @Inject constructor(
         val PLACES = booleanPreferencesKey("places_enabled")
         val TABLE_CELEBRATED = booleanPreferencesKey("table_celebrated")
         val MASTERY_CELEBRATED = intPreferencesKey("mastery_celebrated")
+        val REMINDER = booleanPreferencesKey("streak_reminder")
+        val REMINDER_HOUR = intPreferencesKey("streak_reminder_hour")
     }
 }

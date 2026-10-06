@@ -90,6 +90,14 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { repository.setVesselElement(0) }
     }
 
+    fun setReminder(enabled: Boolean) {
+        viewModelScope.launch { repository.setReminder(enabled) }
+    }
+
+    fun setReminderHour(hour: Int) {
+        viewModelScope.launch { repository.setReminderHour(hour) }
+    }
+
     fun setAmbientDelayMinutes(minutes: Int) {
         viewModelScope.launch { repository.setAmbientDelayMinutes(minutes) }
     }

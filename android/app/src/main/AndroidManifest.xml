@@ -8,6 +8,8 @@
     <!-- Android 16+: Live Updates (chip de la barra de estado / Now Bar) -->
     <uses-permission android:name="android.permission.POST_PROMOTED_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- Para volver a programar el recordatorio de racha después de reiniciar -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <!-- Lugares (Pro, opcional): solo ubicación aproximada y solo con la app abierta -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <!-- Alarma exacta al terminar cada sesión, aunque el teléfono esté en reposo -->
@@ -60,6 +62,13 @@
         <receiver
             android:name=".service.TimerAlarmReceiver"
             android:exported="false" />
+        <receiver
+            android:name=".service.StreakReminderReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

@@ -6,6 +6,7 @@ import com.jjas.labpomodoro.service.AutoBackup
 import com.jjas.labpomodoro.service.FocusSoundController
 import com.jjas.labpomodoro.service.PlaceTracker
 import com.jjas.labpomodoro.service.RewardSync
+import com.jjas.labpomodoro.service.StreakReminderScheduler
 import com.jjas.labpomodoro.service.TimerEffects
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
@@ -25,6 +26,8 @@ class LabPomodoroApp : Application() {
 
     @Inject lateinit var autoBackup: AutoBackup
 
+    @Inject lateinit var streakReminder: StreakReminderScheduler
+
     override fun onCreate() {
         super.onCreate()
         timerEffects.start()
@@ -33,5 +36,6 @@ class LabPomodoroApp : Application() {
         billing.start()
         placeTracker.start()
         autoBackup.start()
+        streakReminder.start()
     }
 }

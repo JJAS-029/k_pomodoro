@@ -45,6 +45,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -94,6 +95,8 @@ import com.jjas.labpomodoro.ui.components.VesselShape
 import com.jjas.labpomodoro.ui.components.VesselShelf
 import com.jjas.labpomodoro.ui.components.VesselView
 import com.jjas.labpomodoro.ui.components.look
+import com.jjas.labpomodoro.ui.promo.ShareText
+import com.jjas.labpomodoro.ui.promo.shareText
 import com.jjas.labpomodoro.ui.sound.FocusSoundPanel
 import com.jjas.labpomodoro.ui.theme.LabPomodoroTheme
 import kotlinx.coroutines.delay
@@ -643,6 +646,16 @@ private fun FinishedPanel(finished: TimerUi.Finished) {
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(horizontal = 16.dp),
         )
+        if (finished.workSessions > 0) {
+            val context = LocalContext.current
+            TextButton(onClick = {
+                context.shareText(ShareText.finished(finished.workSessions, formatDuration(finished.workMinutes.toInt())))
+            }) {
+                Icon(painterResource(R.drawable.ic_share), contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(8.dp))
+                Text("Compartir")
+            }
+        }
     }
 }
 

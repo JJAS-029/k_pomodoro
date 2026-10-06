@@ -57,8 +57,10 @@ import com.jjas.labpomodoro.domain.model.SessionConfig
 import com.jjas.labpomodoro.ui.promo.GITHUB_URL
 import com.jjas.labpomodoro.ui.promo.Podcast
 import com.jjas.labpomodoro.ui.promo.SUGGESTIONS_EMAIL
+import com.jjas.labpomodoro.ui.promo.ShareText
 import com.jjas.labpomodoro.ui.promo.openUrl
 import com.jjas.labpomodoro.ui.promo.sendSuggestion
+import com.jjas.labpomodoro.ui.promo.shareText
 import com.jjas.labpomodoro.ui.sound.FocusSoundPanel
 import com.jjas.labpomodoro.ui.theme.LabPomodoroTheme
 
@@ -94,6 +96,8 @@ fun SettingsScreen(
                     onAmbientDelayChange = viewModel::setAmbientDelayMinutes,
                     onDynamicColorChange = viewModel::setDynamicColor,
                     onResetVesselElement = viewModel::resetVesselElement,
+                    onReminderChange = viewModel::setReminder,
+                    onReminderHourChange = viewModel::setReminderHour,
                     soundSection = { FocusSoundPanel(onOpenPro = onOpenPro) },
                     backupSection = { CloudBackupSection() },
                     dataSection = {
@@ -155,6 +159,8 @@ private fun SettingsContent(
     onDynamicColorChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
     onResetVesselElement: () -> Unit = {},
+    onReminderChange: (Boolean) -> Unit = {},
+    onReminderHourChange: (Int) -> Unit = {},
     soundSection: @Composable () -> Unit = {},
     dataSection: @Composable () -> Unit = {},
     backupSection: @Composable () -> Unit = {},
@@ -223,6 +229,25 @@ private fun SettingsContent(
         SwitchRow("Sonidos", settings.soundEnabled, onSoundChange)
         SwitchRow("Vibración", settings.vibrationEnabled, onVibrationChange)
         SwitchRow("Mantener la pantalla encendida", settings.keepScreenOn, onKeepScreenOnChange)
+        SwitchRow("Recordarme mi racha", settings.reminderEnabled, onReminderChange)
+        Text(
+            "Un aviso al día, solo si ese día aún no has hecho ningún pomodoro.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        if (settings.reminderEnabled) {
+            Spacer(Modifier.height(8.dp))
+            val hours = AppSettings.REMINDER_HOURS
+            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                hours.forEachIndexed { index, hour ->
+                    SegmentedButton(
+                        selected = settings.reminderHour == hour,
+                        onClick = { onReminderHourChange(hour) },
+                        shape = SegmentedButtonDefaults.itemShape(index, hours.size),
+                    ) { Text("$hour:00") }
+                }
+            }
+        }
 
         SectionTitle(if (settings.isPro) "Modo ambiente" else "Modo ambiente · Pro")
         SwitchRow(
@@ -413,5 +438,6 @@ private fun AboutSection() {
     )
     OutlinedButton(onClick = { context.sendSuggestion(BuildConfig.VERSION_NAME) }) { Text("Enviar sugerencias") }
     Text(SUGGESTIONS_EMAIL, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    FilledTonalButton(onClick = { context.shareText(ShareText.invite()) }) { Text("Recomendar a un amigo") }
     TextButton(onClick = { context.openUrl(GITHUB_URL) }) { Text("Mi GitHub: JJAS-029") }
 }
