@@ -10,6 +10,7 @@ import com.jjas.labpomodoro.ui.lab.LabScreen
 import com.jjas.labpomodoro.ui.main.MainScreen
 import com.jjas.labpomodoro.ui.pro.ProScreen
 import com.jjas.labpomodoro.ui.settings.SettingsScreen
+import com.jjas.labpomodoro.ui.stats.StatsScreen
 
 object Routes {
     const val MAIN = "main"
@@ -17,6 +18,7 @@ object Routes {
     const val ACHIEVEMENTS = "achievements"
     const val PRO = "pro"
     const val GUIDE = "guide"
+    const val STATS = "stats"
 }
 
 @Composable
@@ -28,6 +30,7 @@ fun LabNavHost(navController: NavHostController = rememberNavController()) {
                 onOpenAchievements = { navController.navigate(Routes.ACHIEVEMENTS) },
                 onOpenPro = { navController.navigate(Routes.PRO) },
                 onOpenGuide = { navController.navigate(Routes.GUIDE) { launchSingleTop = true } },
+                onOpenStats = { navController.navigate(Routes.STATS) },
             )
         }
         composable(Routes.SETTINGS) {
@@ -36,6 +39,9 @@ fun LabNavHost(navController: NavHostController = rememberNavController()) {
         // Destinos provisionales; cada uno se implementa en su fase
         composable(Routes.ACHIEVEMENTS) {
             LabScreen(onBack = navController::popBackStack)
+        }
+        composable(Routes.STATS) {
+            StatsScreen(onBack = navController::popBackStack, onOpenPro = { navController.navigate(Routes.PRO) })
         }
         composable(Routes.PRO) {
             ProScreen(onBack = navController::popBackStack)

@@ -14,6 +14,7 @@ import com.google.android.ump.ConsentRequestParameters
 import com.google.android.ump.UserMessagingPlatform
 import com.jjas.labpomodoro.BuildConfig
 import com.jjas.labpomodoro.core.di.ApplicationScope
+import com.jjas.labpomodoro.ui.promo.Podcast
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -27,7 +28,8 @@ import javax.inject.Singleton
 
 /**
  * Anuncios de la versión gratis: pantalla completa al terminar un plan y banner en Config y
- * Logros. Nunca durante una sesión. Antes de pedir anuncios se obtiene el consentimiento de
+ * Logros. Nunca durante una sesión. Se alternan con anuncios propios de los podcasts del creador,
+ * que también cubren los casos en que AdMob no tiene anuncio o no hay consentimiento. Antes de pedir anuncios se obtiene el consentimiento de
  * privacidad (UMP), que Google exige en la Unión Europea, Reino Unido y otras regiones.
  */
 @Singleton
@@ -48,6 +50,13 @@ class AdsManager @Inject constructor(
      * Activity para que tampoco se repita al girar la pantalla.
      */
     var endAdShownFor: Any? = null
+
+    private val _housePromo = MutableStateFlow<Podcast?>(null)
+
+    /** Podcast a mostrar en el diálogo de fin de plan (anuncio propio); null si no hay. */
+    val housePromo: StateFlow<Podcast?> = _housePromo.asStateFlow()
+
+    private var endOfPlanCount = 0
 
     private var interstitial: InterstitialAd? = null
     private var loadingInterstitial = false
@@ -107,14 +116,33 @@ class AdsManager @Inject constructor(
         )
     }
 
-    /** Muestra el anuncio de pantalla completa si hay uno listo. */
-    fun showInterstitial(activity: Activity) {
-        val ad = interstitial ?: return preloadInterstitial()
+    /**
+     * Anuncio de fin de plan: uno de AdMob y uno propio, por turnos. Si AdMob no tiene anuncio
+     * listo, sale el propio.
+     */
+    fun showEndOfPlan(activity: Activity) {
+        val turn = endOfPlanCount++
+        if (turn % 2 == 1 || !showInterstitial(activity)) {
+            _housePromo.value = Podcast.entries[(turn / 2) % Podcast.entries.size]
+        }
+    }
+
+    fun dismissHousePromo() {
+        _housePromo.value = null
+    }
+
+    /** Muestra el anuncio de pantalla completa si hay uno listo; devuelve si lo mostró. */
+    private fun showInterstitial(activity: Activity): Boolean {
+        val ad = interstitial ?: run {
+            preloadInterstitial()
+            return false
+        }
         interstitial = null
         ad.fullScreenContentCallback = object : FullScreenContentCallback() {
             override fun onAdDismissedFullScreenContent() = preloadInterstitial()
             override fun onAdFailedToShowFullScreenContent(error: AdError) = preloadInterstitial()
         }
         ad.show(activity)
+        return true
     }
 }

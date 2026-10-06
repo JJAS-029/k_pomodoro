@@ -1,5 +1,6 @@
 package com.jjas.labpomodoro.ui.guide
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,6 +18,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -28,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
@@ -76,6 +79,7 @@ private val LongColor = LiquidPalette.liquid(SessionType.LONG_BREAK, SEED, 7)
 @Composable
 fun GuideScreen(onDone: () -> Unit, viewModel: GuideViewModel = hiltViewModel()) {
     val pages: List<@Composable () -> Unit> = listOf(
+        { WelcomePage() },
         { LabPage() },
         { SymbolsPage() },
         { ControlsPage() },
@@ -321,5 +325,30 @@ private fun ElementsPage() {
     Body("Tus elementos llenan los recipientes de trabajo y se comportan como en la realidad: el sodio burbujea, el neón brilla, el mercurio refleja como metal. Toca uno en la tabla para saber qué es y para qué sirve.")
     Spacer(Modifier.height(12.dp))
     LegendRow({ LegendIcon(R.drawable.ic_headphones, MaterialTheme.colorScheme.secondary) }, "Sonido (Pro): ruido blanco, rosa o café, lluvia u olas mientras trabajas.")
+}
+
+/** Saludo para quien abre la app por primera vez. */
+@Composable
+private fun WelcomePage() {
+    Image(
+        painterResource(R.drawable.koala_mascot),
+        contentDescription = "Koala, la mascota de Lab Pomodoro",
+        modifier = Modifier
+            .size(120.dp)
+            .clip(RoundedCornerShape(28.dp)),
+    )
+    Spacer(Modifier.height(20.dp))
+    PageTitle("¡Hola! Te damos la bienvenida a tu laboratorio")
+    Body(
+        "Aquí cada sesión de enfoque es un experimento. Mientras trabajas, el líquido se evapora; " +
+            "al descansar, el recipiente se vuelve a llenar."
+    )
+    Spacer(Modifier.height(12.dp))
+    Body(
+        "Con tu tiempo de enfoque ganas elementos de la tabla periódica, y con el tiempo descubrirás " +
+            "a qué hora y qué días rindes más."
+    )
+    Spacer(Modifier.height(12.dp))
+    Body("Te explico cómo funciona en unos pasos. Si ya lo conoces, toca Saltar.")
 }
 

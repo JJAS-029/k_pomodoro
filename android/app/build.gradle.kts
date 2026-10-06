@@ -90,6 +90,8 @@ dependencies {
     implementation(libs.billing.ktx)
     implementation(libs.play.services.ads)
     implementation(libs.ump)
+    // Lugares (Pro): ubicación aproximada al iniciar el plan
+    implementation(libs.play.services.location)
 
     // Corrutinas + DataStore
     implementation(libs.kotlinx.coroutines.android)

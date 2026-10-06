@@ -204,14 +204,18 @@ private fun Offers(offers: List<ProOffer>, onBuy: (ProOffer) -> Unit) {
             }
             OfferCard(
                 title = title,
-                price = offer.price,
+                price = offer.trialDays?.let { "${it} días gratis, luego ${offer.price}" } ?: offer.price,
                 period = period,
                 badge = savings?.let { "Ahorras $it %" } ?: if (offer.plan == ProPlan.LIFETIME) "Sin suscripción" else null,
                 highlighted = offer.plan == ProPlan.YEARLY,
+                action = if (offer.trialDays != null) "Probar" else "Elegir",
                 onClick = { onBuy(offer) },
             )
         }
-        Note("Las suscripciones se renuevan solas y puedes cancelarlas cuando quieras en Google Play.")
+        Note(
+            "Las suscripciones se renuevan solas y puedes cancelarlas cuando quieras en Google Play. " +
+                "Si cancelas durante la prueba gratis, no se te cobra nada."
+        )
     }
 }
 
@@ -222,6 +226,7 @@ private fun OfferCard(
     period: String,
     badge: String?,
     highlighted: Boolean,
+    action: String,
     onClick: () -> Unit,
 ) {
     Surface(
@@ -236,7 +241,7 @@ private fun OfferCard(
                 Text("$price $period", style = MaterialTheme.typography.bodyLarge)
                 badge?.let { Text(it, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary) }
             }
-            Button(onClick = onClick) { Text("Elegir") }
+            Button(onClick = onClick) { Text(action) }
         }
     }
 }

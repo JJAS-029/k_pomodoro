@@ -64,6 +64,7 @@ import com.jjas.labpomodoro.ads.AdBanner
 import com.jjas.labpomodoro.data.repository.InventoryItem
 import com.jjas.labpomodoro.domain.model.Element
 import com.jjas.labpomodoro.domain.model.ElementCategory
+import com.jjas.labpomodoro.domain.model.ElementDiscoveries
 import com.jjas.labpomodoro.domain.model.ElementFacts
 import com.jjas.labpomodoro.domain.model.PeriodicTable
 import com.jjas.labpomodoro.domain.model.Rarity
@@ -402,6 +403,8 @@ private fun ElementDetail(
             }
         }
         Spacer(Modifier.height(16.dp))
+        DiscoveryCard(element)
+        Spacer(Modifier.height(16.dp))
         Text(fact.description, style = MaterialTheme.typography.bodyLarge)
         Spacer(Modifier.height(8.dp))
         Text("Para qué sirve", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
@@ -477,6 +480,47 @@ private fun ElementDetail(
             Spacer(Modifier.height(16.dp))
             FilledTonalButton(onClick = onSynthesize) { Text("Fabricar en el sintetizador") }
         }
+    }
+}
+
+/** Ficha técnica: cuándo, quién y dónde se descubrió, y su lugar en la tabla. */
+@Composable
+private fun DiscoveryCard(element: Element) {
+    val discovery = ElementDiscoveries[element.atomicNumber]
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            if (discovery.year != null) {
+                FactRow("Descubierto en", discovery.year.toString())
+                FactRow("Por", discovery.discoverers)
+                discovery.country?.let { FactRow("Dónde", it) }
+            } else {
+                FactRow("Descubierto", "Se conoce desde la ${discovery.era?.lowercase() ?: "Antigüedad"}")
+            }
+            FactRow(
+                "En la tabla",
+                buildString {
+                    append(element.group?.let { "Grupo $it" } ?: if (element.category == ElementCategory.LANTHANIDE) "Lantánidos" else "Actínidos")
+                    append(" · Periodo ${element.period}")
+                },
+            )
+        }
+    }
+}
+
+@Composable
+private fun FactRow(label: String, value: String) {
+    Row {
+        Text(
+            label,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.width(120.dp),
+        )
+        Text(value, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
     }
 }
 

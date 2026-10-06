@@ -4,6 +4,8 @@ import android.os.Build
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,8 +17,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalButton
@@ -35,15 +40,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.jjas.labpomodoro.BuildConfig
 import com.jjas.labpomodoro.ads.AdBanner
 import com.jjas.labpomodoro.domain.model.AppSettings
+import com.jjas.labpomodoro.domain.model.PeriodicTable
 import com.jjas.labpomodoro.domain.model.PlanRounding
 import com.jjas.labpomodoro.domain.model.SessionConfig
+import com.jjas.labpomodoro.ui.promo.GITHUB_URL
+import com.jjas.labpomodoro.ui.promo.Podcast
+import com.jjas.labpomodoro.ui.promo.openUrl
 import com.jjas.labpomodoro.ui.sound.FocusSoundPanel
 import com.jjas.labpomodoro.ui.theme.LabPomodoroTheme
 
@@ -78,6 +91,7 @@ fun SettingsScreen(
                     onAmbientChange = viewModel::setAmbientMode,
                     onAmbientDelayChange = viewModel::setAmbientDelayMinutes,
                     onDynamicColorChange = viewModel::setDynamicColor,
+                    onResetVesselElement = viewModel::resetVesselElement,
                     soundSection = { FocusSoundPanel(onOpenPro = onOpenPro) },
                     dataSection = {
                         DataSection(
@@ -137,6 +151,7 @@ private fun SettingsContent(
     onAmbientDelayChange: (Int) -> Unit,
     onDynamicColorChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
+    onResetVesselElement: () -> Unit = {},
     soundSection: @Composable () -> Unit = {},
     dataSection: @Composable () -> Unit = {},
 ) {
@@ -237,6 +252,26 @@ private fun SettingsContent(
             }
         }
 
+        SectionTitle("Recipientes")
+        val fixed = settings.vesselElement.takeIf { it in 1..PeriodicTable.SIZE }?.let { PeriodicTable[it] }
+        Text(
+            text = if (fixed == null) {
+                "Variados: cada sesión de trabajo usa un elemento distinto de tu colección."
+            } else {
+                "Fijo: todos los recipientes usan ${fixed.name.lowercase()}."
+            },
+            style = MaterialTheme.typography.bodyLarge,
+        )
+        if (fixed != null) {
+            TextButton(onClick = onResetVesselElement) { Text("Volver a variados") }
+        } else {
+            Text(
+                "Para fijar uno, ábrelo en Logros › Tabla periódica y toca \"Usar en todos mis recipientes\".",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+
         // Material You existe desde Android 12
         val dynamicAvailable = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
         SectionTitle(if (settings.isPro) "Apariencia" else "Apariencia · Pro")
@@ -261,6 +296,9 @@ private fun SettingsContent(
 
         SectionTitle(if (settings.isPro) "Tus datos" else "Tus datos · Pro")
         dataSection()
+
+        SectionTitle("Acerca de")
+        AboutSection()
         Spacer(Modifier.height(24.dp))
     }
 }
@@ -325,4 +363,40 @@ private fun SettingsContentPreview() {
     LabPomodoroTheme {
         SettingsContent(AppSettings(), {}, {}, {}, {}, {}, {}, {}, {})
     }
+}
+
+/** Créditos: el creador, sus podcasts y su GitHub. Se ve también en Pro. */
+@Composable
+private fun AboutSection() {
+    val context = LocalContext.current
+    Text(
+        "Lab Pomodoro ${BuildConfig.VERSION_NAME} · hecho por JJAS. Si te gusta la ciencia, escucha mis podcasts:",
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    Spacer(Modifier.height(8.dp))
+    Podcast.entries.forEach { podcast ->
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .clickable { context.openUrl(podcast.spotifyUrl) }
+                .padding(vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Image(
+                painterResource(podcast.cover),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(52.dp)
+                    .clip(RoundedCornerShape(10.dp)),
+            )
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                Text(podcast.title, style = MaterialTheme.typography.titleSmall)
+                Text(podcast.tagline, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            Text("Escuchar", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+        }
+    }
+    TextButton(onClick = { context.openUrl(GITHUB_URL) }) { Text("Mi GitHub: JJAS-029") }
 }

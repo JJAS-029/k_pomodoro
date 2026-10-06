@@ -37,4 +37,7 @@ interface SessionDao {
 
     @Query("SELECT * FROM sessions ORDER BY startedAtMillis")
     suspend fun all(): List<SessionEntity>
+
+    @Query("SELECT * FROM sessions ORDER BY startedAtMillis")
+    fun observeAll(): Flow<List<SessionEntity>>
 }

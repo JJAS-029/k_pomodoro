@@ -62,6 +62,8 @@ class SettingsRepository @Inject constructor(
 
     suspend fun setFocusSound(sound: FocusSound) = dataStore.edit { it[Keys.FOCUS_SOUND] = sound.name }
 
+    suspend fun setPlacesEnabled(enabled: Boolean) = dataStore.edit { it[Keys.PLACES] = enabled }
+
     suspend fun setFocusVolume(volume: Float) = dataStore.edit { it[Keys.FOCUS_VOLUME] = volume.coerceIn(0f, 1f) }
 
     /** Interruptor "Activar Pro (solo pruebas)"; en release se ignora. */
@@ -97,6 +99,7 @@ class SettingsRepository @Inject constructor(
             vesselElement = this[Keys.VESSEL_ELEMENT] ?: defaults.vesselElement,
             focusSound = this[Keys.FOCUS_SOUND]?.let { name -> FocusSound.entries.firstOrNull { it.name == name } } ?: defaults.focusSound,
             focusVolume = this[Keys.FOCUS_VOLUME] ?: defaults.focusVolume,
+            placesEnabled = this[Keys.PLACES] ?: defaults.placesEnabled,
         )
     }
 
@@ -119,5 +122,6 @@ class SettingsRepository @Inject constructor(
         val VESSEL_ELEMENT = intPreferencesKey("vessel_element")
         val FOCUS_SOUND = stringPreferencesKey("focus_sound")
         val FOCUS_VOLUME = floatPreferencesKey("focus_volume")
+        val PLACES = booleanPreferencesKey("places_enabled")
     }
 }

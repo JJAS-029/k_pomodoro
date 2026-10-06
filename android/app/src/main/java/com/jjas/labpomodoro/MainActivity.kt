@@ -26,6 +26,7 @@ import com.jjas.labpomodoro.timer.TimerEngine
 import com.jjas.labpomodoro.timer.TimerState
 import com.jjas.labpomodoro.ui.navigation.LabNavHost
 import com.jjas.labpomodoro.ui.pip.PipScreen
+import com.jjas.labpomodoro.ui.promo.PodcastPromoDialog
 import com.jjas.labpomodoro.ui.theme.LabPomodoroTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
@@ -82,7 +83,7 @@ class MainActivity : ComponentActivity() {
                         delay(END_AD_DELAY_MILLIS)
                         if (!settingsRepository.settings.first().isPro && !isInPip) {
                             ads.endAdShownFor = finished
-                            ads.showInterstitial(this@MainActivity)
+                            ads.showEndOfPlan(this@MainActivity)
                         }
                     }
             }
@@ -94,6 +95,9 @@ class MainActivity : ComponentActivity() {
                 // Fuera del if para conservar la pantalla en la que estaba al volver de PiP
                 val navController = rememberNavController()
                 if (isInPip) PipScreen() else LabNavHost(navController)
+                // Anuncio propio de fin de plan (podcast)
+                val promo by ads.housePromo.collectAsStateWithLifecycle()
+                promo?.let { PodcastPromoDialog(it, onDismiss = ads::dismissHousePromo) }
             }
         }
     }

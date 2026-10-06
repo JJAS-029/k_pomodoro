@@ -368,6 +368,23 @@ Decisiones: Pro con **suscripción (mensual y anual) y pago único**; anuncios *
 
 **Tests:** `HistoryCsvTest` (2). Probado en el emulador: banner y anuncio de prueba, que el anuncio no se repita al cerrarlo, exportación de 29 sesiones.
 
+### Después de la Fase 5: podcasts, prueba gratis, estadísticas y lugares
+
+| Pieza | Archivo | Notas |
+|---|---|---|
+| Anuncios propios | `ui/promo/Podcasts.kt`, `ads/AdsManager.kt`, `ads/AdBanner.kt` | Los podcasts del creador (**CiencIAficción** y **CiencIA**, con portadas incluidas en la app) ocupan los espacios de anuncios de la versión gratis: al terminar el plan se alternan AdMob y el podcast; el banner es mitad y mitad. Si AdMob no tiene anuncio o no hay consentimiento, sale el podcast. "Escuchar" abre Spotify |
+| Acerca de | Config › Acerca de | Versión, autor, los dos podcasts y el GitHub (JJAS-029). Visible también en Pro |
+| Prueba gratis | `BillingRepository.toOffers`, `ProScreen` | Si el plan base tiene una oferta con fase gratis (se configura en Play Console, p. ej. 3 días), la tarjeta dice "3 días gratis, luego $X al mes" y el botón "Probar". Google solo la ofrece a quien no la ha usado |
+| Progreso | `domain/usecase/StatsCalculator.kt`, `ui/stats/` | Rangos 7 días / 30 días / Todo. Cifras: enfoque, pomodoros, % completados sin saltar, racha y promedio por día activo. Gráficas de barras de una sola serie (la más alta resaltada, tocar una barra muestra su valor): por día (o por mes en Todo), por día de la semana y por hora. En el dock como "Progreso" |
+| Lugares (Pro, opcional) | `service/PlaceTracker.kt`, `data/repository/PlaceRepository.kt`, Room v3 (`places`, `sessions.placeId`) | Apagado por defecto; se activa en Progreso y pide ubicación **aproximada**. Se toma una vez al iniciar el plan (con la app abierta: no requiere permiso en segundo plano) y se asigna a cada sesión del plan, incluso a las que terminen antes de tener la ubicación. Ubicaciones a menos de 150 m se juntan; el nombre sugerido es la colonia o la calle (Geocoder) y se puede cambiar. Muestra horas y % de pomodoros completados por lugar. Solo en el teléfono |
+
+| Bienvenida | `ui/guide/GuideScreen.kt` (`WelcomePage`) | Primera página de la guía con el koala: "¡Hola! Te damos la bienvenida a tu laboratorio" |
+| Saludo y ánimo | `ui/main/Encouragement.kt` | Saludo según la hora en la pantalla de inicio y un mensaje motivacional con temática de laboratorio al terminar el plan (uno amable si no se completó ningún pomodoro) |
+| Recipientes | Config › Recipientes | Muestra si los recipientes son variados o qué elemento está fijo, con "Volver a variados" |
+| Ficha completa | `domain/model/ElementDiscovery.kt`, `LabScreen.DiscoveryCard` | Para los 118: año (o "Se conoce desde la Prehistoria/Antigüedad"), quién lo descubrió y dónde, más grupo y periodo. En los casos debatidos se usa la atribución más citada (p. ej. vanadio: Andrés Manuel del Río, México, 1801) |
+
+**Tests:** `StatsCalculatorTest` (5). `ElementDiscoveryTest` (2). Probado en el emulador: migración v2 → v3 con datos reales, lugar "Centro" creado y asignado, anuncio de AdMob y luego el del podcast al terminar dos planes.
+
 ### Pendiente cuando haya cuenta de Google Play Console (25 USD, pago único)
 1. Crear la app con el paquete `com.jjas.labpomodoro` y subir un AAB firmado a **prueba interna**.
 2. En *Monetizar › Productos*: suscripción `pro_subscription` con planes base `monthly` y `yearly`, y producto único `pro_lifetime`, con sus precios.

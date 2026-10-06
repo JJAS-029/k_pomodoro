@@ -1,5 +1,6 @@
 package com.jjas.labpomodoro.data.local.entity
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
@@ -24,6 +25,8 @@ data class SessionEntity(
     val completed: Boolean,
     val epochDay: Long,
     val hourOfDay: Int,
+    /** Lugar donde se hizo (Pro, si el usuario activó los lugares). */
+    @ColumnInfo(defaultValue = "NULL") val placeId: Long? = null,
 )
 
 /** Fila de la consulta de horas productivas. */

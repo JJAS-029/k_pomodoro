@@ -92,6 +92,7 @@ import com.jjas.labpomodoro.ui.components.VesselView
 import com.jjas.labpomodoro.ui.sound.FocusSoundPanel
 import com.jjas.labpomodoro.ui.theme.LabPomodoroTheme
 import kotlinx.coroutines.delay
+import java.time.LocalTime
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -100,6 +101,7 @@ fun MainScreen(
     onOpenAchievements: () -> Unit,
     onOpenPro: () -> Unit,
     onOpenGuide: () -> Unit,
+    onOpenStats: () -> Unit = {},
     viewModel: MainViewModel = hiltViewModel(),
     timerViewModel: TimerViewModel = hiltViewModel(),
     discoveryViewModel: DiscoveryViewModel = hiltViewModel(),
@@ -233,6 +235,7 @@ fun MainScreen(
                     onOpenAchievements = onOpenAchievements,
                     onOpenPro = onOpenPro,
                     onOpenGuide = onOpenGuide,
+                    onOpenStats = onOpenStats,
                     onDismissDiscoveries = discoveryViewModel::dismiss,
                     onOpenSound = { soundSheet = true },
                     onSignIn = { viewModel.signIn(context) },
@@ -256,6 +259,7 @@ data class MainActions(
     val onOpenAchievements: () -> Unit = {},
     val onOpenPro: () -> Unit = {},
     val onOpenGuide: () -> Unit = {},
+    val onOpenStats: () -> Unit = {},
     val onOpenSound: () -> Unit = {},
     val onDismissDiscoveries: () -> Unit = {},
     val onSignIn: () -> Unit = {},
@@ -387,6 +391,7 @@ private fun LabDock(timer: TimerUi?, account: MainUiState, actions: MainActions,
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                         DockItem(R.drawable.ic_tune, "Config", run(actions.onOpenSettings))
                         DockItem(R.drawable.ic_star, "Logros", run(actions.onOpenAchievements))
+                        DockItem(R.drawable.ic_chart, "Progreso", run(actions.onOpenStats))
                         DockItem(R.drawable.ic_diamond, "Pro", run(actions.onOpenPro))
                     }
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
@@ -504,6 +509,14 @@ private fun ClockText(millis: Long, color: Color = MaterialTheme.colorScheme.onB
 @Composable
 private fun IdlePanel(idle: TimerUi.Idle, clockColor: Color) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        // La hora se toma al mostrar la pantalla; no hace falta que cambie mientras está abierta
+        val greeting = remember { Encouragement.greeting(LocalTime.now().hour) }
+        Text(
+            greeting,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+        )
         ClockText(idle.firstSessionMillis, clockColor)
         Text(
             text = "${idle.pomodoros} pomodoros · ${formatDuration(idle.workMinutes)} de trabajo",
@@ -555,6 +568,16 @@ private fun FinishedPanel(finished: TimerUi.Finished) {
         Text(
             text = "${finished.workSessions} pomodoros · ${formatDuration(finished.workMinutes.toInt())} de trabajo",
             style = MaterialTheme.typography.bodyLarge,
+        )
+        // Mensaje de ánimo; se elige una vez y no cambia al girar la pantalla
+        val seed = rememberSaveable { System.nanoTime() }
+        Spacer(Modifier.height(12.dp))
+        Text(
+            text = Encouragement.finished(finished.workSessions, seed),
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(horizontal = 16.dp),
         )
     }
 }

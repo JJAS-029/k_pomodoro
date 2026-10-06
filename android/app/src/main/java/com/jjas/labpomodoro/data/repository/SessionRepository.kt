@@ -58,6 +58,9 @@ class SessionRepository @Inject constructor(
 
     val totalWorkSeconds: Flow<Long> = sessionDao.observeTotalWorkSeconds()
 
+    /** Todo el historial, para las estadísticas. */
+    val allSessions: Flow<List<SessionEntity>> = sessionDao.observeAll()
+
     /** Todo el historial, para exportarlo. */
     suspend fun all(): List<SessionEntity> = sessionDao.all()
 }

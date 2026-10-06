@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.time.Period
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -37,6 +38,8 @@ data class ProOffer(
     val price: String,
     /** Precio en millonésimas de la moneda, para calcular el ahorro del plan anual. */
     val priceMicros: Long,
+    /** Días de prueba gratis (solo suscripciones, si Google Play se la ofrece a este usuario). */
+    val trialDays: Int? = null,
     internal val details: ProductDetails,
     internal val offerToken: String?,
 )
@@ -164,21 +167,26 @@ class BillingRepository @Inject constructor(
     private fun toOffers(details: ProductDetails): List<ProOffer> = when (details.productId) {
         PRO_LIFETIME -> listOfNotNull(
             details.oneTimePurchaseOfferDetailsList?.firstOrNull()?.let {
-                ProOffer(ProPlan.LIFETIME, it.formattedPrice, it.priceAmountMicros, details, it.offerToken)
+                ProOffer(ProPlan.LIFETIME, it.formattedPrice, it.priceAmountMicros, details = details, offerToken = it.offerToken)
             }
         )
         PRO_SUBSCRIPTION -> details.subscriptionOfferDetails.orEmpty()
-            // Solo los planes base, sin ofertas especiales (offerId nulo)
-            .filter { it.offerId == null }
-            .mapNotNull { offer ->
-                val plan = when (offer.basePlanId) {
+            .groupBy { it.basePlanId }
+            .mapNotNull { (basePlanId, offers) ->
+                val plan = when (basePlanId) {
                     BASE_PLAN_MONTHLY -> ProPlan.MONTHLY
                     BASE_PLAN_YEARLY -> ProPlan.YEARLY
                     else -> return@mapNotNull null
                 }
-                // La última fase es el precio normal (las anteriores serían pruebas gratis o descuentos)
+                // Google Play solo manda la oferta de prueba a quien todavía puede usarla
+                val trial = offers.firstOrNull { offer ->
+                    offer.pricingPhases.pricingPhaseList.firstOrNull()?.priceAmountMicros == 0L
+                }
+                val offer = trial ?: offers.firstOrNull { it.offerId == null } ?: return@mapNotNull null
+                // La última fase es el precio normal (las anteriores son la prueba o descuentos)
                 val phase = offer.pricingPhases.pricingPhaseList.lastOrNull() ?: return@mapNotNull null
-                ProOffer(plan, phase.formattedPrice, phase.priceAmountMicros, details, offer.offerToken)
+                val trialDays = trial?.pricingPhases?.pricingPhaseList?.firstOrNull()?.billingPeriod?.let(::periodDays)
+                ProOffer(plan, phase.formattedPrice, phase.priceAmountMicros, trialDays, details, offer.offerToken)
             }
         else -> emptyList()
     }
@@ -214,6 +222,12 @@ class BillingRepository @Inject constructor(
             !fromCheckout -> settings.setProPurchased(false)
         }
     }
+
+    /** Días de un periodo ISO 8601 de Google Play ("P3D", "P1W"). */
+    private fun periodDays(period: String): Int? = runCatching { Period.parse(period) }
+        .getOrNull()
+        ?.let { it.days + it.months * 30 + it.years * 365 }
+        ?.takeIf { it > 0 }
 
     private fun product(id: String, type: String) =
         QueryProductDetailsParams.Product.newBuilder().setProductId(id).setProductType(type).build()

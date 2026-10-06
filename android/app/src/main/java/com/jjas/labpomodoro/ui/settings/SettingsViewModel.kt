@@ -85,6 +85,11 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { repository.setDynamicColor(enabled) }
     }
 
+    /** Vuelve a un elemento distinto en cada recipiente. */
+    fun resetVesselElement() {
+        viewModelScope.launch { repository.setVesselElement(0) }
+    }
+
     fun setAmbientDelayMinutes(minutes: Int) {
         viewModelScope.launch { repository.setAmbientDelayMinutes(minutes) }
     }
