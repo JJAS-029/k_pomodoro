@@ -59,6 +59,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
@@ -78,6 +79,8 @@ import com.jjas.labpomodoro.domain.model.DiscoverySource
 import com.jjas.labpomodoro.domain.model.SessionType
 import com.jjas.labpomodoro.service.formatMinutesSeconds
 import com.jjas.labpomodoro.service.label
+import com.jjas.labpomodoro.ui.components.Celebration
+import com.jjas.labpomodoro.ui.components.ConfettiBurst
 import com.jjas.labpomodoro.ui.components.DotState
 import com.jjas.labpomodoro.ui.components.ElementTile
 import com.jjas.labpomodoro.ui.components.LiquidEffect
@@ -89,6 +92,7 @@ import com.jjas.labpomodoro.ui.components.UpNext
 import com.jjas.labpomodoro.ui.components.VesselShape
 import com.jjas.labpomodoro.ui.components.VesselShelf
 import com.jjas.labpomodoro.ui.components.VesselView
+import com.jjas.labpomodoro.ui.components.look
 import com.jjas.labpomodoro.ui.sound.FocusSoundPanel
 import com.jjas.labpomodoro.ui.theme.LabPomodoroTheme
 import kotlinx.coroutines.delay
@@ -341,6 +345,8 @@ private fun MainContent(
                 )
             }
 
+            Celebrations(timer, discoveries)
+
             LabDock(
                 timer = timer,
                 account = account,
@@ -352,6 +358,55 @@ private fun MainContent(
         }
     }
 }
+
+/**
+ * Confeti en los momentos que valen la pena: un pomodoro completado (con el color de su
+ * recipiente), el plan terminado y elementos nuevos (con los colores de los elementos).
+ */
+@Composable
+private fun Celebrations(timer: TimerUi?, discoveries: List<Discovery>) {
+    var celebration by remember { mutableStateOf<Celebration?>(null) }
+
+    val active = timer as? TimerUi.Active
+    // Se recuerda al girar la pantalla para no repetir la ráfaga
+    var lastCompleted by rememberSaveable { mutableStateOf<Int?>(null) }
+    LaunchedEffect(active?.completedWork) {
+        val now = active?.completedWork ?: return@LaunchedEffect
+        val before = lastCompleted
+        lastCompleted = now
+        if (before != null && now > before) {
+            val color = active.dots.lastOrNull { it.state == DotState.DONE }?.color ?: active.vessel.liquid
+            celebration = Celebration(System.nanoTime(), listOf(color, lerp(color, Color.White, 0.5f)), originY = 0.35f)
+        }
+    }
+
+    val finished = timer as? TimerUi.Finished
+    var finishedCelebrated by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(finished != null) {
+        if (finished == null) {
+            finishedCelebrated = false
+        } else if (!finishedCelebrated && finished.workSessions > 0) {
+            finishedCelebrated = true
+            celebration = Celebration(System.nanoTime(), ConfettiPalette, big = true, originY = 0.45f)
+        }
+    }
+
+    val rewards = discoveries.filter { it.source != DiscoverySource.FUSION }
+    var lastRewards by rememberSaveable { mutableStateOf(-1) }
+    LaunchedEffect(rewards.size) {
+        val before = lastRewards
+        lastRewards = rewards.size
+        if (before >= 0 && rewards.size > before) {
+            celebration = Celebration(System.nanoTime(), rewards.map { it.element.look().color }, originY = 0.12f)
+        }
+    }
+
+    ConfettiBurst(celebration, Modifier.fillMaxSize())
+}
+
+private val ConfettiPalette = listOf(
+    Color(0xFF39FF14), Color(0xFFFFC107), Color(0xFF29B6F6), Color(0xFFF06292), Color(0xFFB388FF), Color(0xFFFF7043),
+)
 
 /**
  * Barra flotante inferior: el botón principal siempre visible y el resto de opciones

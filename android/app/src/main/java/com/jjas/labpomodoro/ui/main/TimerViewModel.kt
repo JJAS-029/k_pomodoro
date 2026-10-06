@@ -59,6 +59,8 @@ sealed interface TimerUi {
         val shelf: List<ShelfItemUi>,
         val upNext: UpNext?,
         val dots: List<PlanDot>,
+        /** Pomodoros completados en este plan; cuando sube, hay confeti. */
+        val completedWork: Int = 0,
     ) : TimerUi {
         /** Para lectores de pantalla: lo que el indicador simbólico dice con íconos. */
         val description: String
@@ -194,6 +196,7 @@ class TimerViewModel @Inject constructor(
                                 cycleEnd = timer.plan.getOrNull(i + 1)?.type == SessionType.LONG_BREAK,
                             )
                         },
+                    completedWork = timer.completedWorkSessions,
                     shelf = timer.plan.mapIndexed { i, session ->
                         ShelfItemUi(
                             shape = LiquidPalette.vessel(timer.planSeed, i),

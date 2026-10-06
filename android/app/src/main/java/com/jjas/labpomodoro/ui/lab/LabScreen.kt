@@ -72,6 +72,8 @@ import com.jjas.labpomodoro.domain.model.label
 import com.jjas.labpomodoro.domain.model.rarity
 import com.jjas.labpomodoro.domain.usecase.Fusion
 import com.jjas.labpomodoro.domain.usecase.RewardSchedule
+import com.jjas.labpomodoro.ui.components.Celebration
+import com.jjas.labpomodoro.ui.components.ConfettiBurst
 import com.jjas.labpomodoro.ui.components.ElementTile
 import com.jjas.labpomodoro.ui.components.LiquidEffect
 import com.jjas.labpomodoro.ui.components.VesselShape
@@ -121,6 +123,11 @@ fun LabScreen(onBack: () -> Unit, viewModel: LabViewModel = hiltViewModel()) {
                 } else {
                     LabContent(current, newOnes, onBack, viewModel::fuse, viewModel::setVesselElement)
                 }
+                // Ráfaga con los colores del elemento recién fabricado, una por fusión
+                val burst = remember(fused) {
+                    fused?.let { Celebration(System.nanoTime(), listOf(it.look().color, it.category.color())) }
+                }
+                ConfettiBurst(burst, Modifier.fillMaxSize())
                 FusionFlash(fused, Modifier.align(Alignment.Center))
                 SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter))
             }

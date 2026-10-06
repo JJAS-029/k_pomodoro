@@ -410,6 +410,16 @@ Crear la app y dos bloques (banner adaptable e intersticial) y poner sus IDs en 
 | 4 | ✅ Tabla periódica, recompensas (25 min → básico, 60 min → raro), sintetizador |
 | 5 | ✅ Play Billing (suscripción + pago único), AdMob (final del plan + banner en Config y Logros), exportar CSV. Falta probar la compra real con Play Console |
 
+### Animaciones de los recipientes (inspiradas en ParticleEmitter, Quarks y skydoves/compose-animations)
+
+Se revisaron las tres; ninguna se agregó como dependencia porque nuestro sistema de partículas vive dentro de la forma de cada recipiente y sigue el nivel del líquido. Se tomaron sus ideas (todas Apache 2.0):
+
+| Grupo | Estado | Qué |
+|---|---|---|
+| 1 | ✅ | **Ondas en capas** (dos capas, cada una con dos ondas en sentidos opuestos; el menisco sigue la ola) y **chapoteo** amortiguado al cambiar de sesión. **Física**: chispas en arco que vuelven a caer, cristales con velocidad límite que rebotan una vez en el fondo, burbujas que aceleran al subir y burbujitas pegadas a la pared un momento. **Confeti propio** (`ui/components/Confetti.kt`): papelitos y puntos que giran, aletean, caen con resistencia del aire y se desvanecen; al completar un pomodoro (color de su recipiente), al terminar el plan (grande), al ganar elementos y al fusionar (colores del elemento) |
+| 2 | Pendiente | Metaballs para metales líquidos y luminosos; aurora detrás de los luminosos |
+| 3 | Pendiente | Lluvia detrás del recipiente en modo ambiente con el sonido de lluvia; vidrio con refracción por shader AGSL (Android 13+, Pro) |
+
 ### Ideas Pro para más adelante
 - **Más sonidos**: ✅ los generados ya están. Faltan ambientes grabados con licencia CC0 (cafetería, bosque) en loop con `ExoPlayer`/Media3 y mezclar varios a la vez.
 - **Efectos del líquido**: hervor en el último minuto, condensación en el vidrio vacío, chapoteo al cambiar de sesión, brillo tenue en modo ambiente, inclinación con el acelerómetro.

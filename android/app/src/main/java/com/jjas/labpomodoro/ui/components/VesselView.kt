@@ -27,6 +27,7 @@ import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.lerp
 import kotlin.math.PI
+import kotlin.math.exp
 import kotlin.math.sin
 import kotlin.random.Random
 
@@ -41,6 +42,9 @@ enum class LiquidEffect {
 }
 
 private val GlassColor = Color(0xFFCCCCCC)
+
+/** Lo que dura el chapoteo al cambiar de sesión. */
+private const val SLOSH_SECONDS = 3f
 
 /**
  * Recipiente de laboratorio con líquido animado. Además del efecto principal, mientras [animate]
@@ -70,6 +74,8 @@ fun VesselView(
     // Al cambiar de recipiente las partículas viejas ya no tienen sentido
     val particles = remember(shape) { ParticleSystem() }
     var frameNanos by remember { mutableLongStateOf(0L) }
+    // Cambio de sesión: el líquido nuevo llega chapoteando y se calma solo
+    val sloshStart = remember(shape, effect) { System.nanoTime() }
 
     LaunchedEffect(animate, effect, shape, behavior) {
         var last = 0L
@@ -88,8 +94,9 @@ fun VesselView(
         val t = frameNanos / 1_000_000_000f
         // El halo va fuera del recorte: debe difuminarse más allá del lienzo, sin bordes rectos
         drawHalo(g, animatedFill, animatedColor, behavior, t)
+        val sloshAge = ((frameNanos - sloshStart) / 1_000_000_000f).takeIf { frameNanos > sloshStart && it < SLOSH_SECONDS }
         clipRect {
-            drawLiquid(g, animatedFill, animatedColor, t, waving = animate, behavior = behavior)
+            drawLiquid(g, animatedFill, animatedColor, t, waving = animate, behavior = behavior, sloshAge = sloshAge)
             particles.drawInLiquid(this, g, animatedFill, bubbleColor, animatedColor)
             drawGlass(g)
             particles.drawVapor(
@@ -147,23 +154,43 @@ private fun DrawScope.drawLiquid(
     t: Float,
     waving: Boolean,
     behavior: ElementBehavior? = null,
+    sloshAge: Float? = null,
 ) {
     if (fill <= 0.001f) return
     clipPath(g.interior) {
         val surface = g.surfaceY(fill)
-        val amplitude = if (waving) g.unit * 0.015f else 0f
-        val path = Path().apply {
-            moveTo(g.left, surface)
-            val steps = 24
-            for (i in 0..steps) {
-                val x = g.left + g.width * i / steps
-                val y = surface + amplitude * sin((i.toFloat() / steps) * 2f * PI.toFloat() * 1.5f + t * 2.2f)
-                lineTo(x, y)
-            }
-            lineTo(g.right, g.bottom)
-            lineTo(g.left, g.bottom)
-            close()
+        val amplitude = if (waving) g.unit * 0.012f else 0f
+        // Chapoteo: el líquido se inclina de lado a lado y se amortigua en un par de segundos
+        val slosh = if (waving && sloshAge != null) g.unit * 0.05f * exp(-sloshAge * 2.2f) * sin(sloshAge * 7f) else 0f
+
+        /** Altura de la superficie: dos ondas que viajan en sentidos opuestos, más el chapoteo. */
+        fun waveY(xn: Float, phase: Float, scale: Float): Float {
+            val a = amplitude * scale
+            val x = xn * 2f * PI.toFloat()
+            return surface + a * sin(x * 1.5f + t * 2.2f + phase) + a * 0.55f * sin(x * 2.7f - t * 1.5f + phase * 1.7f) +
+                slosh * (xn - 0.5f) * 2f
         }
+
+        fun surfacePath(phase: Float, scale: Float, lift: Float, closed: Boolean) = Path().apply {
+            val steps = 28
+            for (i in 0..steps) {
+                val xn = i.toFloat() / steps
+                val x = g.left + g.width * xn
+                val y = waveY(xn, phase, scale) - lift
+                if (i == 0) moveTo(x, y) else lineTo(x, y)
+            }
+            if (closed) {
+                lineTo(g.right, g.bottom)
+                lineTo(g.left, g.bottom)
+                close()
+            }
+        }
+
+        // Capa de atrás, un poco más alta y oscura: da profundidad a la superficie
+        if (waving) {
+            drawPath(surfacePath(phase = 2.1f, scale = 1.3f, lift = amplitude * 0.8f, closed = true), lerp(liquid, Color.Black, 0.25f).copy(alpha = 0.55f))
+        }
+        val path = surfacePath(phase = 0f, scale = 1f, lift = 0f, closed = true)
         // Profundidad: más claro en la superficie y más oscuro al fondo
         val (top, bottom) = when (behavior) {
             // Metal: opaco y con mucho contraste, como un espejo
@@ -189,8 +216,12 @@ private fun DrawScope.drawLiquid(
                 )
             }
         }
-        // Menisco: línea brillante en la superficie
-        drawLine(Color.White.copy(alpha = 0.3f), Offset(g.left, surface), Offset(g.right, surface), g.stroke * 0.6f)
+        // Menisco: brillo que sigue la ola de enfrente
+        drawPath(
+            surfacePath(phase = 0f, scale = 1f, lift = 0f, closed = false),
+            Color.White.copy(alpha = 0.3f),
+            style = Stroke(width = g.stroke * 0.6f, cap = StrokeCap.Round),
+        )
     }
 }
 
@@ -250,16 +281,24 @@ private enum class Kind {
 
 private class Particle(
     /** Carril horizontal −1..1: se escala con el ancho del recipiente a esa altura. */
-    val lane: Float,
+    var lane: Float,
     /** Altura en "fracción de llenado": 1 = superficie con el recipiente lleno; el vapor pasa de 1. */
     var v: Float,
-    val speed: Float,
+    /** Velocidad vertical (fracciones por segundo); cambia con [gravity]. */
+    var speed: Float,
     val life: Float,
     val size: Float,
     val phase: Float,
     val kind: Kind,
+    /** Aceleración vertical: negativa = cae. */
+    var gravity: Float = 0f,
+    /** Deriva horizontal en carriles por segundo (chispas que salen en arco). */
+    val drift: Float = 0f,
+    /** Segundos que se queda pegada a la pared antes de moverse. */
+    val stick: Float = 0f,
 ) {
     var age = 0f
+    var bounced = false
 }
 
 private class ParticleSystem {
@@ -276,12 +315,33 @@ private class ParticleSystem {
         while (iterator.hasNext()) {
             val p = iterator.next()
             p.age += dt
-            // Los cristales se quedan quietos al tocar el fondo
-            p.v = (p.v + p.speed * dt).coerceAtLeast(0.015f)
+            // Pegada a la pared: espera antes de soltarse
+            if (p.age >= p.stick) {
+                p.speed += p.gravity * dt
+                // Los cristales caen con la resistencia del líquido: velocidad límite
+                if (p.kind == Kind.FLAKE) p.speed = p.speed.coerceAtLeast(-0.12f)
+                p.v += p.speed * dt
+                p.lane = (p.lane + p.drift * dt).coerceIn(-1f, 1f)
+            }
+            if (p.v <= FLOOR) {
+                p.v = FLOOR
+                if (p.kind == Kind.FLAKE) {
+                    // Rebota una vez al tocar el fondo y luego se queda quieto
+                    if (!p.bounced && p.speed < -0.04f) {
+                        p.speed = -p.speed * 0.35f
+                        p.bounced = true
+                    } else {
+                        p.speed = 0f
+                        p.gravity = 0f
+                    }
+                }
+            }
             val popped = (p.kind == Kind.FIZZ || p.kind == Kind.BUBBLE) && p.v >= fill
             // Si el líquido baja de su altura, el destello ya no tiene dónde estar
             val stranded = (p.kind == Kind.SPARKLE || p.kind == Kind.FLAKE) && p.v > fill
-            if (p.age >= p.life || popped || stranded) iterator.remove()
+            // La chispa vuelve a caer al líquido y se apaga
+            val landed = p.kind == Kind.SPARK && p.speed < 0f && p.v < fill
+            if (p.age >= p.life || popped || stranded || landed) iterator.remove()
         }
 
         if (!spawn || effect == LiquidEffect.NONE || dt == 0f || fill <= 0.02f) return
@@ -308,6 +368,8 @@ private class ParticleSystem {
                 size = 0.008f + random.nextFloat() * 0.01f,
                 phase = random.nextFloat() * 6.28f,
                 kind = Kind.FIZZ,
+                // Las de la pared se quedan pegadas un momento, como en un vaso de refresco
+                stick = if (fromWall) 0.3f + random.nextFloat() * 1.2f else 0f,
             )
         }
 
@@ -338,11 +400,14 @@ private class ParticleSystem {
                 Particle(
                     lane = random.nextFloat() * 1.6f - 0.8f,
                     v = 0.02f,
-                    speed = 0.15f + random.nextFloat() * 0.15f,
-                    life = 8f,
+                    speed = 0.06f,
+                    life = 9f,
                     size = 0.025f + random.nextFloat() * 0.035f,
                     phase = random.nextFloat() * 6.28f,
                     kind = Kind.BUBBLE,
+                    // Arranca lenta y acelera al subir, como una burbuja de verdad
+                    gravity = 0.08f + random.nextFloat() * 0.08f,
+                    stick = random.nextFloat() * 0.4f,
                 )
             }
         }
@@ -365,8 +430,9 @@ private class ParticleSystem {
                 ElementBehavior.PRECIPITATE -> Particle(
                     lane = random.nextFloat() * 1.6f - 0.8f,
                     v = fill * (0.7f + random.nextFloat() * 0.3f),
-                    speed = -(0.05f + random.nextFloat() * 0.05f),
-                    life = 14f,
+                    speed = -0.01f,
+                    gravity = -(0.12f + random.nextFloat() * 0.08f),
+                    life = 16f,
                     size = 0.012f + random.nextFloat() * 0.012f,
                     phase = random.nextFloat() * 6.28f,
                     kind = Kind.FLAKE,
@@ -382,9 +448,12 @@ private class ParticleSystem {
                 )
                 else -> Particle(
                     lane = random.nextFloat() * 1.4f - 0.7f,
-                    v = fill,
-                    speed = 0.25f + random.nextFloat() * 0.25f,
-                    life = 0.5f + random.nextFloat() * 0.5f,
+                    v = fill + 0.01f,
+                    // Sale disparada hacia arriba, describe un arco y vuelve a caer
+                    speed = 0.45f + random.nextFloat() * 0.35f,
+                    gravity = -1.6f,
+                    drift = random.nextFloat() * 1.2f - 0.6f,
+                    life = 1.4f,
                     size = 0.008f + random.nextFloat() * 0.008f,
                     phase = random.nextFloat() * 6.28f,
                     kind = Kind.SPARK,
@@ -467,5 +536,8 @@ private class ParticleSystem {
 
     private companion object {
         const val MAX_PARTICLES = 90
+
+        /** Altura del fondo, para que nada atraviese el vidrio. */
+        const val FLOOR = 0.015f
     }
 }
