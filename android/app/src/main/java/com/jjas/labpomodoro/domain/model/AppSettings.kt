@@ -66,6 +66,8 @@ data class AppSettings(
     val focusVolume: Float = 0.5f,
     /** Pro, opcional: guardar dónde se hace cada plan (ubicación aproximada, solo en el teléfono). */
     val placesEnabled: Boolean = false,
+    /** Ya se mostró la celebración por completar la tabla periódica. */
+    val tableCelebrated: Boolean = false,
 ) {
     /** El modo ambiente solo aplica si el usuario es Pro. */
     val isPro: Boolean get() = proPurchased || proTesting

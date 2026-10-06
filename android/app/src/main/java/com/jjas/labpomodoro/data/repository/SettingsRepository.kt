@@ -62,6 +62,8 @@ class SettingsRepository @Inject constructor(
 
     suspend fun setFocusSound(sound: FocusSound) = dataStore.edit { it[Keys.FOCUS_SOUND] = sound.name }
 
+    suspend fun setTableCelebrated() = dataStore.edit { it[Keys.TABLE_CELEBRATED] = true }
+
     suspend fun setPlacesEnabled(enabled: Boolean) = dataStore.edit { it[Keys.PLACES] = enabled }
 
     suspend fun setFocusVolume(volume: Float) = dataStore.edit { it[Keys.FOCUS_VOLUME] = volume.coerceIn(0f, 1f) }
@@ -100,6 +102,7 @@ class SettingsRepository @Inject constructor(
             focusSound = this[Keys.FOCUS_SOUND]?.let { name -> FocusSound.entries.firstOrNull { it.name == name } } ?: defaults.focusSound,
             focusVolume = this[Keys.FOCUS_VOLUME] ?: defaults.focusVolume,
             placesEnabled = this[Keys.PLACES] ?: defaults.placesEnabled,
+            tableCelebrated = this[Keys.TABLE_CELEBRATED] ?: defaults.tableCelebrated,
         )
     }
 
@@ -123,5 +126,6 @@ class SettingsRepository @Inject constructor(
         val FOCUS_SOUND = stringPreferencesKey("focus_sound")
         val FOCUS_VOLUME = floatPreferencesKey("focus_volume")
         val PLACES = booleanPreferencesKey("places_enabled")
+        val TABLE_CELEBRATED = booleanPreferencesKey("table_celebrated")
     }
 }

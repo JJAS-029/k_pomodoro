@@ -2,6 +2,8 @@ package com.jjas.labpomodoro.ui.promo
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
+import android.os.Build
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -57,6 +59,16 @@ enum class Podcast(
 }
 
 const val GITHUB_URL = "https://github.com/JJAS-029"
+
+/** Correo para sugerencias y reportes. */
+const val SUGGESTIONS_EMAIL = "ciencia.koala@gmail.com"
+
+/** Abre el correo con el asunto y la versión ya escritos, para que solo haya que contar la idea. */
+fun Context.sendSuggestion(appVersion: String) {
+    val body = "\n\n—\nLab Pomodoro $appVersion · Android ${Build.VERSION.RELEASE} · ${Build.MANUFACTURER} ${Build.MODEL}"
+    val uri = "mailto:$SUGGESTIONS_EMAIL?subject=${Uri.encode("Sugerencia para Lab Pomodoro")}&body=${Uri.encode(body)}".toUri()
+    runCatching { startActivity(Intent(Intent.ACTION_SENDTO, uri).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
+}
 
 /** Abre un enlace: Spotify lo toma si está instalado, si no el navegador. */
 fun Context.openUrl(url: String) {

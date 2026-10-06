@@ -379,7 +379,10 @@ Decisiones: Pro con **suscripción (mensual y anual) y pago único**; anuncios *
 | Lugares (Pro, opcional) | `service/PlaceTracker.kt`, `data/repository/PlaceRepository.kt`, Room v3 (`places`, `sessions.placeId`) | Apagado por defecto; se activa en Progreso y pide ubicación **aproximada**. Se toma una vez al iniciar el plan (con la app abierta: no requiere permiso en segundo plano) y se asigna a cada sesión del plan, incluso a las que terminen antes de tener la ubicación. Ubicaciones a menos de 150 m se juntan; el nombre sugerido es la colonia o la calle (Geocoder) y se puede cambiar. Muestra horas y % de pomodoros completados por lugar. Solo en el teléfono |
 
 | Bienvenida | `ui/guide/GuideScreen.kt` (`WelcomePage`) | Primera página de la guía con el koala: "¡Hola! Te damos la bienvenida a tu laboratorio" |
-| Saludo y ánimo | `ui/main/Encouragement.kt` | Saludo según la hora en la pantalla de inicio y un mensaje motivacional con temática de laboratorio al terminar el plan (uno amable si no se completó ningún pomodoro) |
+| Saludo y ánimo | `ui/main/Encouragement.kt` | Saludos al azar según la hora (17 en total) y mensajes al terminar el plan al azar: 20 normales, 3 especiales para planes de 8+ pomodoros y 3 amables si no se completó ninguno |
+| Tabla completa | `ui/main/TableCompleteDialog.kt` | Mensaje emotivo con el koala, una sola vez en la vida, al descubrir los 118 elementos (`AppSettings.tableCelebrated`). En debug: "Completar la tabla (solo pruebas)" |
+| Koala | `ui/components/KoalaAvatar.kt` | La mascota recortada en círculo (ampliada para ocultar el marco verde del ícono) |
+| Sugerencias | Config › Acerca de | "Enviar sugerencias" abre el correo a ciencia.koala@gmail.com con asunto, versión de la app y del teléfono ya escritos |
 | Recipientes | Config › Recipientes | Muestra si los recipientes son variados o qué elemento está fijo, con "Volver a variados" |
 | Ficha completa | `domain/model/ElementDiscovery.kt`, `LabScreen.DiscoveryCard` | Para los 118: año (o "Se conoce desde la Prehistoria/Antigüedad"), quién lo descubrió y dónde, más grupo y periodo. En los casos debatidos se usa la atribución más citada (p. ej. vanadio: Andrés Manuel del Río, México, 1801) |
 

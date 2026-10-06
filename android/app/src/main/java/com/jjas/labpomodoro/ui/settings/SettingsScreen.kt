@@ -56,7 +56,9 @@ import com.jjas.labpomodoro.domain.model.PlanRounding
 import com.jjas.labpomodoro.domain.model.SessionConfig
 import com.jjas.labpomodoro.ui.promo.GITHUB_URL
 import com.jjas.labpomodoro.ui.promo.Podcast
+import com.jjas.labpomodoro.ui.promo.SUGGESTIONS_EMAIL
 import com.jjas.labpomodoro.ui.promo.openUrl
+import com.jjas.labpomodoro.ui.promo.sendSuggestion
 import com.jjas.labpomodoro.ui.sound.FocusSoundPanel
 import com.jjas.labpomodoro.ui.theme.LabPomodoroTheme
 
@@ -398,5 +400,13 @@ private fun AboutSection() {
             Text("Escuchar", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
         }
     }
+    Spacer(Modifier.height(8.dp))
+    Text(
+        "¿Una idea, algo que no funciona o un elemento que te encantó? Escríbeme.",
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    OutlinedButton(onClick = { context.sendSuggestion(BuildConfig.VERSION_NAME) }) { Text("Enviar sugerencias") }
+    Text(SUGGESTIONS_EMAIL, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     TextButton(onClick = { context.openUrl(GITHUB_URL) }) { Text("Mi GitHub: JJAS-029") }
 }

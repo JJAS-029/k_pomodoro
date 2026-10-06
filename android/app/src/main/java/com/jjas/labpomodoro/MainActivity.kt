@@ -20,10 +20,13 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.compose.rememberNavController
 import com.jjas.labpomodoro.ads.AdsManager
 import com.jjas.labpomodoro.data.billing.BillingRepository
+import com.jjas.labpomodoro.data.repository.InventoryRepository
 import com.jjas.labpomodoro.data.repository.SettingsRepository
+import com.jjas.labpomodoro.domain.model.PeriodicTable
 import com.jjas.labpomodoro.service.TimerService
 import com.jjas.labpomodoro.timer.TimerEngine
 import com.jjas.labpomodoro.timer.TimerState
+import com.jjas.labpomodoro.ui.main.TableCompleteDialog
 import com.jjas.labpomodoro.ui.navigation.LabNavHost
 import com.jjas.labpomodoro.ui.pip.PipScreen
 import com.jjas.labpomodoro.ui.promo.PodcastPromoDialog
@@ -46,6 +49,8 @@ class MainActivity : ComponentActivity() {
     @Inject lateinit var ads: AdsManager
 
     @Inject lateinit var billing: BillingRepository
+
+    @Inject lateinit var inventory: InventoryRepository
 
     private var isInPip by mutableStateOf(false)
 
@@ -98,6 +103,11 @@ class MainActivity : ComponentActivity() {
                 // Anuncio propio de fin de plan (podcast)
                 val promo by ads.housePromo.collectAsStateWithLifecycle()
                 promo?.let { PodcastPromoDialog(it, onDismiss = ads::dismissHousePromo) }
+                // Una sola vez en la vida: al descubrir los 118 elementos
+                val discovered by inventory.discoveredCount.collectAsStateWithLifecycle(initialValue = 0)
+                if (discovered >= PeriodicTable.SIZE && settings?.tableCelebrated == false) {
+                    TableCompleteDialog(onDismiss = { lifecycleScope.launch { settingsRepository.setTableCelebrated() } })
+                }
             }
         }
     }

@@ -44,6 +44,7 @@ import com.jjas.labpomodoro.domain.model.PeriodicTable
 import com.jjas.labpomodoro.domain.model.SessionType
 import com.jjas.labpomodoro.ui.components.DotState
 import com.jjas.labpomodoro.ui.components.ElementTile
+import com.jjas.labpomodoro.ui.components.KoalaAvatar
 import com.jjas.labpomodoro.ui.components.LiquidEffect
 import com.jjas.labpomodoro.ui.components.LiquidPalette
 import com.jjas.labpomodoro.ui.components.MiniVessel
@@ -330,13 +331,7 @@ private fun ElementsPage() {
 /** Saludo para quien abre la app por primera vez. */
 @Composable
 private fun WelcomePage() {
-    Image(
-        painterResource(R.drawable.koala_mascot),
-        contentDescription = "Koala, la mascota de Lab Pomodoro",
-        modifier = Modifier
-            .size(120.dp)
-            .clip(RoundedCornerShape(28.dp)),
-    )
+    KoalaAvatar()
     Spacer(Modifier.height(20.dp))
     PageTitle("¡Hola! Te damos la bienvenida a tu laboratorio")
     Body(

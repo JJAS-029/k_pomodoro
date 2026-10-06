@@ -41,6 +41,7 @@ import com.jjas.labpomodoro.data.billing.BillingRepository
 import com.jjas.labpomodoro.data.billing.ProOffer
 import com.jjas.labpomodoro.data.billing.ProPlan
 import com.jjas.labpomodoro.data.billing.StoreState
+import com.jjas.labpomodoro.data.repository.InventoryRepository
 import com.jjas.labpomodoro.data.repository.SessionRepository
 import com.jjas.labpomodoro.data.repository.SettingsRepository
 import com.jjas.labpomodoro.domain.model.AppSettings
@@ -48,6 +49,7 @@ import com.jjas.labpomodoro.domain.model.SessionType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.Clock
@@ -59,6 +61,7 @@ class ProViewModel @Inject constructor(
     private val settings: SettingsRepository,
     private val sessions: SessionRepository,
     private val billing: BillingRepository,
+    private val inventory: InventoryRepository,
     private val clock: Clock,
 ) : ViewModel() {
 
@@ -80,6 +83,14 @@ class ProViewModel @Inject constructor(
 
     fun setPro(enabled: Boolean) {
         viewModelScope.launch { settings.setPro(enabled) }
+    }
+
+    /** Solo pruebas: descubre los elementos que falten, para ver la celebración final. */
+    fun completeTable() {
+        viewModelScope.launch {
+            val missing = inventory.items.first().filter { it.firstObtainedAtMillis == null }
+            missing.forEach { inventory.add(it.element.atomicNumber) }
+        }
     }
 
     /** Solo pruebas: guarda una hora de trabajo completada para ganar elementos sin esperar. */
@@ -176,6 +187,7 @@ fun ProScreen(onBack: () -> Unit, viewModel: ProViewModel = hiltViewModel()) {
                     Switch(checked = prefs?.proTesting == true, onCheckedChange = viewModel::setPro)
                 }
                 TextButton(onClick = viewModel::addTestFocusHour) { Text("Sumar 1 h de enfoque (solo pruebas)") }
+                TextButton(onClick = viewModel::completeTable) { Text("Completar la tabla (solo pruebas)") }
             }
         }
     }
