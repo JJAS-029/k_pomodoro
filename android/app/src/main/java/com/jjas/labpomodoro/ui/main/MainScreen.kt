@@ -201,6 +201,7 @@ fun MainScreen(
             AmbientScreen(
                 active,
                 dynamicColor = timer.dynamicColor,
+                rain = timer.rainAmbience,
                 onWake = {
                     ambient = false
                     lastTouch = SystemClock.uptimeMillis()
@@ -306,6 +307,8 @@ private fun MainContent(
                         .weight(1f)
                         .fillMaxWidth()
                         .padding(vertical = 8.dp),
+                    // Pro: vidrio con refracción (Android 13+)
+                    refraction = !showTitle,
                 )
                 when (timer) {
                     null -> CircularProgressIndicator()
@@ -650,7 +653,7 @@ fun ActiveIndicator(active: TimerUi.Active, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun Vessel(vessel: VesselUi, modifier: Modifier = Modifier) {
+fun Vessel(vessel: VesselUi, modifier: Modifier = Modifier, refraction: Boolean = false) {
     VesselView(
         shape = vessel.shape,
         fill = vessel.fill,
@@ -660,6 +663,7 @@ fun Vessel(vessel: VesselUi, modifier: Modifier = Modifier) {
         animate = vessel.animate,
         modifier = modifier,
         behavior = vessel.behavior,
+        refraction = refraction,
     )
 }
 

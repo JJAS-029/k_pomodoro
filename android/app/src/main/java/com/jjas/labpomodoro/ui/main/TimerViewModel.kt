@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.jjas.labpomodoro.data.repository.InventoryRepository
 import com.jjas.labpomodoro.data.repository.SettingsRepository
 import com.jjas.labpomodoro.domain.model.Element
+import com.jjas.labpomodoro.domain.model.FocusSound
 import com.jjas.labpomodoro.domain.model.SessionType
 import com.jjas.labpomodoro.domain.usecase.SessionPlanGenerator
 import com.jjas.labpomodoro.service.label
@@ -98,6 +99,8 @@ data class TimerScreenState(
     val dynamicColor: Boolean = false,
     /** null mientras carga; false = hay que mostrar la guía la primera vez. */
     val guideSeen: Boolean? = null,
+    /** Pro con el sonido de lluvia elegido: en modo ambiente se ve llover detrás del recipiente. */
+    val rainAmbience: Boolean = false,
     /** Si no es null, tras este tiempo sin tocar la pantalla se entra al modo ambiente. */
     val ambientDelayMillis: Long? = null,
 )
@@ -222,6 +225,7 @@ class TimerViewModel @Inject constructor(
             isPro = settings.isPro,
             dynamicColor = settings.dynamicColorActive,
             guideSeen = settings.guideSeen,
+            rainAmbience = settings.isPro && settings.focusSound == FocusSound.RAIN,
             ambientDelayMillis = if (running && settings.ambientActive) settings.ambientDelayMinutes * 60_000L else null,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), TimerScreenState())

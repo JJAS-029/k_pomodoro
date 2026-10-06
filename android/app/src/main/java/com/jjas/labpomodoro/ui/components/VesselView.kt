@@ -66,7 +66,10 @@ fun VesselView(
     animate: Boolean,
     modifier: Modifier = Modifier,
     behavior: ElementBehavior? = null,
+    /** Pro, Android 13+: el vidrio deforma el líquido como una lente. */
+    refraction: Boolean = false,
 ) {
+    val glassShader = remember { createGlassShader() }
     val animatedFill by animateFloatAsState(fill.coerceIn(0f, 1f), tween(300, easing = LinearEasing), label = "fill")
     val animatedColor by animateColorAsState(liquidColor, tween(600), label = "liquid")
     val currentFill by rememberUpdatedState(animatedFill)
@@ -92,28 +95,34 @@ fun VesselView(
         }
     }
 
-    // Tres capas: líquido, gotas (metales y luminosos) y vidrio con el vapor encima
+    // Capas: halo o aurora, líquido y gotas (a través de la lente del vidrio) y el vidrio con el vapor
     Box(modifier) {
+        // Fuera de la lente: los efectos de render recortan a su borde y el halo debe salirse
         Canvas(Modifier.matchParentSize()) {
             val g = VesselGeometry.fit(shape, size.width, size.height, headroom = 0.18f)
             val t = frameNanos / 1_000_000_000f
-            // El halo y la aurora van fuera del recorte: deben difuminarse más allá del lienzo
             if (behavior == ElementBehavior.GLOW) drawAurora(g, animatedFill, animatedColor, t) else drawHalo(g, animatedFill, animatedColor, behavior, t)
-            val sloshAge = ((frameNanos - sloshStart) / 1_000_000_000f).takeIf { frameNanos > sloshStart && it < SLOSH_SECONDS }
-            clipRect {
-                drawLiquid(g, animatedFill, animatedColor, t, waving = animate, behavior = behavior, sloshAge = sloshAge)
-                particles.drawInLiquid(this, g, animatedFill, bubbleColor, animatedColor)
-            }
         }
-        if (behavior == ElementBehavior.METALLIC || behavior == ElementBehavior.GLOW) {
-            LiquidBlobs(
-                shape = shape,
-                fill = animatedFill,
-                color = animatedColor,
-                hot = behavior == ElementBehavior.GLOW,
-                time = frameNanos / 1_000_000_000f,
-                modifier = Modifier.matchParentSize(),
-            )
+        Box(Modifier.matchParentSize().glassRefraction(shape, if (refraction) glassShader else null)) {
+            Canvas(Modifier.matchParentSize()) {
+                val g = VesselGeometry.fit(shape, size.width, size.height, headroom = 0.18f)
+                val t = frameNanos / 1_000_000_000f
+                val sloshAge = ((frameNanos - sloshStart) / 1_000_000_000f).takeIf { frameNanos > sloshStart && it < SLOSH_SECONDS }
+                clipRect {
+                    drawLiquid(g, animatedFill, animatedColor, t, waving = animate, behavior = behavior, sloshAge = sloshAge)
+                    particles.drawInLiquid(this, g, animatedFill, bubbleColor, animatedColor)
+                }
+            }
+            if (behavior == ElementBehavior.METALLIC || behavior == ElementBehavior.GLOW) {
+                LiquidBlobs(
+                    shape = shape,
+                    fill = animatedFill,
+                    color = animatedColor,
+                    hot = behavior == ElementBehavior.GLOW,
+                    time = frameNanos / 1_000_000_000f,
+                    modifier = Modifier.matchParentSize(),
+                )
+            }
         }
         Canvas(Modifier.matchParentSize()) {
             val g = VesselGeometry.fit(shape, size.width, size.height, headroom = 0.18f)

@@ -107,6 +107,7 @@ private val BENEFITS = listOf(
     "🎧" to "Sonidos de concentración: ruido blanco, rosa, café, lluvia y olas",
     "🎨" to "Colores de Material You tomados de tu fondo de pantalla",
     "✨" to "Pantalla limpia, sin título",
+    "🔍" to "Vidrio realista que deforma el líquido como una lente (Android 13+)",
     "📄" to "Exportar tu historial a CSV",
     "🚫" to "Sin anuncios",
 )

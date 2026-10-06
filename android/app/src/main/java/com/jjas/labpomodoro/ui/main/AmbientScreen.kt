@@ -37,7 +37,9 @@ import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import com.jjas.labpomodoro.domain.model.SessionType
 import com.jjas.labpomodoro.service.formatMinutesSeconds
+import com.jjas.labpomodoro.ui.components.RainBackground
 import kotlinx.coroutines.delay
 import kotlin.random.Random
 
@@ -47,7 +49,7 @@ import kotlin.random.Random
  * Todo se desplaza un poco cada minuto para no marcar la pantalla. Un toque vuelve a la vista normal.
  */
 @Composable
-fun AmbientScreen(active: TimerUi.Active, onWake: () -> Unit, dynamicColor: Boolean = false) {
+fun AmbientScreen(active: TimerUi.Active, onWake: () -> Unit, dynamicColor: Boolean = false, rain: Boolean = false) {
     var dx by remember { mutableIntStateOf(0) }
     var dy by remember { mutableIntStateOf(0) }
     LaunchedEffect(Unit) {
@@ -64,6 +66,10 @@ fun AmbientScreen(active: TimerUi.Active, onWake: () -> Unit, dynamicColor: Bool
             .background(Color.Black)
             .clickable(interactionSource = null, indication = null, onClick = onWake),
     ) {
+        // Llueve solo mientras suena la lluvia: en sesiones de trabajo que están corriendo
+        if (rain && active.type == SessionType.WORK && !active.isPaused) {
+            RainBackground(Modifier.fillMaxSize())
+        }
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
@@ -80,6 +86,8 @@ fun AmbientScreen(active: TimerUi.Active, onWake: () -> Unit, dynamicColor: Bool
                 modifier = Modifier
                     .weight(1f, fill = false)
                     .aspectRatio(active.vessel.shape.aspect / 0.8f, matchHeightConstraintsFirst = true),
+                // El modo ambiente ya es Pro
+                refraction = true,
             )
             Text(
                 text = formatMinutesSeconds(active.remainingMillis),
