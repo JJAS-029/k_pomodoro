@@ -5,6 +5,7 @@ import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -26,7 +27,9 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.graphics.toArgb
 import kotlin.math.PI
+import kotlin.math.cos
 import kotlin.math.exp
 import kotlin.math.sin
 import kotlin.random.Random
@@ -89,22 +92,40 @@ fun VesselView(
         }
     }
 
-    Canvas(modifier) {
-        val g = VesselGeometry.fit(shape, size.width, size.height, headroom = 0.18f)
-        val t = frameNanos / 1_000_000_000f
-        // El halo va fuera del recorte: debe difuminarse más allá del lienzo, sin bordes rectos
-        drawHalo(g, animatedFill, animatedColor, behavior, t)
-        val sloshAge = ((frameNanos - sloshStart) / 1_000_000_000f).takeIf { frameNanos > sloshStart && it < SLOSH_SECONDS }
-        clipRect {
-            drawLiquid(g, animatedFill, animatedColor, t, waving = animate, behavior = behavior, sloshAge = sloshAge)
-            particles.drawInLiquid(this, g, animatedFill, bubbleColor, animatedColor)
-            drawGlass(g)
-            particles.drawVapor(
-                this,
-                g,
-                vaporColor = if (behavior == ElementBehavior.COLORED_VAPOR) animatedColor else Color.White,
-                sparkColor = animatedColor,
+    // Tres capas: líquido, gotas (metales y luminosos) y vidrio con el vapor encima
+    Box(modifier) {
+        Canvas(Modifier.matchParentSize()) {
+            val g = VesselGeometry.fit(shape, size.width, size.height, headroom = 0.18f)
+            val t = frameNanos / 1_000_000_000f
+            // El halo y la aurora van fuera del recorte: deben difuminarse más allá del lienzo
+            if (behavior == ElementBehavior.GLOW) drawAurora(g, animatedFill, animatedColor, t) else drawHalo(g, animatedFill, animatedColor, behavior, t)
+            val sloshAge = ((frameNanos - sloshStart) / 1_000_000_000f).takeIf { frameNanos > sloshStart && it < SLOSH_SECONDS }
+            clipRect {
+                drawLiquid(g, animatedFill, animatedColor, t, waving = animate, behavior = behavior, sloshAge = sloshAge)
+                particles.drawInLiquid(this, g, animatedFill, bubbleColor, animatedColor)
+            }
+        }
+        if (behavior == ElementBehavior.METALLIC || behavior == ElementBehavior.GLOW) {
+            LiquidBlobs(
+                shape = shape,
+                fill = animatedFill,
+                color = animatedColor,
+                hot = behavior == ElementBehavior.GLOW,
+                time = frameNanos / 1_000_000_000f,
+                modifier = Modifier.matchParentSize(),
             )
+        }
+        Canvas(Modifier.matchParentSize()) {
+            val g = VesselGeometry.fit(shape, size.width, size.height, headroom = 0.18f)
+            clipRect {
+                drawGlass(g)
+                particles.drawVapor(
+                    this,
+                    g,
+                    vaporColor = if (behavior == ElementBehavior.COLORED_VAPOR) animatedColor else Color.White,
+                    sparkColor = animatedColor,
+                )
+            }
         }
     }
 }
@@ -131,6 +152,28 @@ fun MiniVessel(
                 pathEffect = if (dashed) PathEffect.dashPathEffect(floatArrayOf(6f, 6f)) else null,
             ),
         )
+    }
+}
+
+/**
+ * Aurora de los luminosos: tres resplandores de tonos vecinos que giran despacio alrededor del
+ * recipiente y se mezclan entre sí.
+ */
+private fun DrawScope.drawAurora(g: VesselGeometry, fill: Float, color: Color, t: Float) {
+    if (fill <= 0.02f) return
+    val hsv = FloatArray(3)
+    android.graphics.Color.colorToHSV(color.toArgb(), hsv)
+    val center = Offset(g.px(0.5f), g.py(fill * g.maxFill / 2f))
+    val orbit = g.width * 0.28f
+    val radius = g.width * 0.85f
+    listOf(0f, 35f, -35f).forEachIndexed { i, shift ->
+        val hue = (hsv[0] + shift + 360f) % 360f
+        val tint = Color.hsv(hue, hsv[1].coerceAtLeast(0.5f), 1f)
+        // Cada resplandor gira a su ritmo y en su propio sentido
+        val angle = t * (0.25f + 0.1f * i) * (if (i % 2 == 0) 1f else -1f) + i * 2.1f
+        val c = Offset(center.x + orbit * cos(angle), center.y + orbit * 0.6f * sin(angle))
+        val alpha = 0.22f + 0.05f * sin(t * 1.3f + i)
+        drawCircle(Brush.radialGradient(listOf(tint.copy(alpha = alpha), Color.Transparent), c, radius), radius, c)
     }
 }
 

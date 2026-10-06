@@ -417,7 +417,7 @@ Se revisaron las tres; ninguna se agregó como dependencia porque nuestro sistem
 | Grupo | Estado | Qué |
 |---|---|---|
 | 1 | ✅ | **Ondas en capas** (dos capas, cada una con dos ondas en sentidos opuestos; el menisco sigue la ola) y **chapoteo** amortiguado al cambiar de sesión. **Física**: chispas en arco que vuelven a caer, cristales con velocidad límite que rebotan una vez en el fondo, burbujas que aceleran al subir y burbujitas pegadas a la pared un momento. **Confeti propio** (`ui/components/Confetti.kt`): papelitos y puntos que giran, aletean, caen con resistencia del aire y se desvanecen; al completar un pomodoro (color de su recipiente), al terminar el plan (grande), al ganar elementos y al fusionar (colores del elemento) |
-| 2 | Pendiente | Metaballs para metales líquidos y luminosos; aurora detrás de los luminosos |
+| 2 | ✅ | **Gotas que se funden** (`ui/components/LiquidBlobs.kt`, técnica de metaballs: desenfoque + umbral de alfa con `RenderEffect`, Android 12+; antes, gotas sueltas) dentro de metales y luminosos, con centro claro como lámpara de lava. **Aurora** (`drawAurora`): tres resplandores de tonos vecinos que giran despacio detrás de los luminosos. El recipiente se dibuja en tres capas: líquido, gotas y vidrio con vapor. La ficha del elemento se abre completa |
 | 3 | Pendiente | Lluvia detrás del recipiente en modo ambiente con el sonido de lluvia; vidrio con refracción por shader AGSL (Android 13+, Pro) |
 
 ### Ideas Pro para más adelante
