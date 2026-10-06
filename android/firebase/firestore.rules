@@ -1,10 +1,38 @@
 // Copia de las reglas publicadas en Firebase Console › Firestore Database › Reglas.
-// Cada usuario solo puede leer y escribir dentro de users/{suUid}.
 rules_version = '2';
 service cloud.firestore {
   match /databases/{db}/documents {
+
+    // Perfil, respaldo y liga de cada usuario: solo el dueño lee y escribe
     match /users/{uid}/{document=**} {
       allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // Ligas semanales: con sesión se ven los grupos; el contador solo sube de uno en uno (máx. 30)
+    match /leagueGroups/{groupId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasOnly(['week', 'tier', 'count'])
+        && request.resource.data.count == 1;
+      allow update: if request.auth != null
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['count'])
+        && request.resource.data.count == resource.data.count + 1
+        && request.resource.data.count <= 30;
+
+      // Cada quien solo escribe su propia fila: apodo corto, avatar válido y minutos posibles
+      match /members/{uid} {
+        allow read: if request.auth != null;
+        allow create, update: if request.auth != null && request.auth.uid == uid
+          && request.resource.data.keys().hasOnly(['nickname', 'avatar', 'xp', 'updatedAt'])
+          && request.resource.data.nickname is string
+          && request.resource.data.nickname.size() > 0
+          && request.resource.data.nickname.size() <= 20
+          && request.resource.data.avatar is int
+          && request.resource.data.avatar >= 1 && request.resource.data.avatar <= 118
+          && request.resource.data.xp is int
+          && request.resource.data.xp >= 0 && request.resource.data.xp <= 10080;
+        allow delete: if request.auth != null && request.auth.uid == uid;
+      }
     }
   }
 }

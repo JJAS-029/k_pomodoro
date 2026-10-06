@@ -94,6 +94,7 @@ import com.jjas.labpomodoro.ui.components.VesselView
 import com.jjas.labpomodoro.ui.components.color
 import com.jjas.labpomodoro.ui.components.look
 import com.jjas.labpomodoro.ui.components.metalColor
+import com.jjas.labpomodoro.ui.league.LeaguePanel
 import com.jjas.labpomodoro.ui.promo.ShareText
 import com.jjas.labpomodoro.ui.promo.shareText
 import com.jjas.labpomodoro.ui.stats.formatFocus
@@ -207,6 +208,7 @@ private fun LabContent(
         PrimaryTabRow(selectedTabIndex = tab) {
             Tab(selected = tab == 0, onClick = { tab = 0 }, text = { Text("Tabla periódica") })
             Tab(selected = tab == 1, onClick = { tab = 1 }, text = { Text("Sintetizador") })
+            Tab(selected = tab == 2, onClick = { tab = 2 }, text = { Text("Liga") })
         }
         Spacer(Modifier.height(16.dp))
         when (tab) {
@@ -221,11 +223,12 @@ private fun LabContent(
                 Spacer(Modifier.height(12.dp))
                 Legend(Modifier.padding(horizontal = 24.dp))
             }
-            else -> Synthesizer(
+            1 -> Synthesizer(
                 state = state,
                 onTarget = { target = it },
                 modifier = Modifier.padding(horizontal = 24.dp),
             )
+            else -> LeaguePanel(Modifier.padding(horizontal = 24.dp))
         }
     }
 

@@ -453,6 +453,19 @@ Se revisaron las tres; ninguna se agregó como dependencia porque nuestro sistem
 | Recordatorio | `domain/usecase/StreakReminder.kt`, `service/StreakReminderScheduler.kt` | Opcional (Config › Avisos, 18:00 / 20:00 / 22:00). Alarma inexacta diaria; si ese día no hubo pomodoros: "Tu racha de N días te espera" o, sin racha, "¿Un experimento hoy?". Se reprograma cada día y al reiniciar (`RECEIVE_BOOT_COMPLETED`) |
 | Compartir | `ui/promo/Share.kt` | Al terminar el plan ("¡Experimento completado! …"), en Logros (elementos, maestría, enfoque y racha) y "Recomendar a un amigo" en Acerca de. Siempre con el enlace de Play Store |
 
+### Ligas semanales (tipo Duolingo)
+
+| Pieza | Archivo | Notas |
+|---|---|---|
+| Reglas | `domain/model/League.kt` | 10 ligas: Hidrógeno → Helio → Carbono → Nitrógeno → Oxígeno → Neón → Hierro → Plata → Oro → Platino. Semana ISO en UTC (lunes a domingo, todos cierran a la vez). Puntos = minutos de enfoque completados en la semana. Suben 7 y bajan 5 de 30 (proporcional en grupos chicos; con menos de 10 nadie baja) |
+| Bots | `LeagueRules.bots` | Si el grupo tiene menos de 10 personas se completa con "Asistente Curie", "Asistente Newton"… marcados como bots; son deterministas por grupo y semana (iguales en todos los teléfonos) y su ritmo sube con la liga |
+| Firestore | `data/league/LeagueRepository.kt` | Perfil en `users/{uid}.league`; grupos `leagueGroups/{semana}_{liga}_{n}` llenados en orden con transacciones (sin consultas ni índices); filas `members/{uid}` que solo escribe el dueño. Al empezar otra semana se cierra la anterior (posición final con bots) y se entra a un grupo nuevo |
+| Sincronización | `service/LeagueSync.kt` | Publica los minutos de la semana al cambiar (pausa de 5 s) y cierra la semana al abrir la app |
+| Pantalla | `ui/league/LeaguePanel.kt` (Logros › Liga) | Sin sesión invita a iniciarla; para unirse se elige apodo (solo eso es visible) y un elemento como avatar; ranking con zona de ascenso verde y de descenso roja, tu fila resaltada, días restantes y aviso del resultado de la semana |
+| Seguridad | `android/firebase/firestore.rules` | **Hay que publicarlas en la consola.** Contador de grupo que solo sube de 1 en 1 hasta 30; filas solo del dueño, apodo ≤ 20, avatar 1–118, minutos 0–10 080 |
+
+**Tests:** `LeagueTest` (6). Falta la prueba en línea con cuentas reales.
+
 ### Ideas Pro para más adelante
 - **Más sonidos**: ✅ los generados ya están. Faltan ambientes grabados con licencia CC0 (cafetería, bosque) en loop con `ExoPlayer`/Media3 y mezclar varios a la vez.
 - **Efectos del líquido**: hervor en el último minuto, condensación en el vidrio vacío, chapoteo al cambiar de sesión, brillo tenue en modo ambiente, inclinación con el acelerómetro.

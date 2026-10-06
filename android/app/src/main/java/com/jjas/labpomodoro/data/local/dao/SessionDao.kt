@@ -48,4 +48,8 @@ interface SessionDao {
 
     @Query("DELETE FROM sessions")
     suspend fun deleteAll()
+
+    /** Segundos de trabajo completado desde [sinceMillis] (los puntos de la liga de esta semana). */
+    @Query("SELECT COALESCE(SUM(actualSeconds), 0) FROM sessions WHERE type = 'WORK' AND completed = 1 AND startedAtMillis >= :sinceMillis")
+    fun observeWorkSecondsSince(sinceMillis: Long): Flow<Long>
 }

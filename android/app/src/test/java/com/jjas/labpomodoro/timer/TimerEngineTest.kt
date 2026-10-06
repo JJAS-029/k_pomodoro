@@ -38,6 +38,7 @@ class TimerEngineTest {
         override fun observeAll(): Flow<List<SessionEntity>> = emptyFlow()
         override suspend fun insertAll(sessions: List<SessionEntity>) { inserted += sessions }
         override suspend fun deleteAll() = inserted.clear()
+        override fun observeWorkSecondsSince(sinceMillis: Long): Flow<Long> = emptyFlow()
     }
 
     private class FakeScheduler : DeadlineScheduler {

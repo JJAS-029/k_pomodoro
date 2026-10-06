@@ -4,6 +4,7 @@ import android.app.Application
 import com.jjas.labpomodoro.data.billing.BillingRepository
 import com.jjas.labpomodoro.service.AutoBackup
 import com.jjas.labpomodoro.service.FocusSoundController
+import com.jjas.labpomodoro.service.LeagueSync
 import com.jjas.labpomodoro.service.PlaceTracker
 import com.jjas.labpomodoro.service.RewardSync
 import com.jjas.labpomodoro.service.StreakReminderScheduler
@@ -28,6 +29,8 @@ class LabPomodoroApp : Application() {
 
     @Inject lateinit var streakReminder: StreakReminderScheduler
 
+    @Inject lateinit var leagueSync: LeagueSync
+
     override fun onCreate() {
         super.onCreate()
         timerEffects.start()
@@ -37,5 +40,6 @@ class LabPomodoroApp : Application() {
         placeTracker.start()
         autoBackup.start()
         streakReminder.start()
+        leagueSync.start()
     }
 }
