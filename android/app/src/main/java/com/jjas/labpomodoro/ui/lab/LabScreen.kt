@@ -7,6 +7,7 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -54,6 +55,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -67,20 +69,26 @@ import com.jjas.labpomodoro.domain.model.Element
 import com.jjas.labpomodoro.domain.model.ElementCategory
 import com.jjas.labpomodoro.domain.model.ElementDiscoveries
 import com.jjas.labpomodoro.domain.model.ElementFacts
+import com.jjas.labpomodoro.domain.model.Mastery
+import com.jjas.labpomodoro.domain.model.MasteryRules
 import com.jjas.labpomodoro.domain.model.PeriodicTable
 import com.jjas.labpomodoro.domain.model.Rarity
 import com.jjas.labpomodoro.domain.model.label
 import com.jjas.labpomodoro.domain.model.rarity
 import com.jjas.labpomodoro.domain.usecase.Fusion
 import com.jjas.labpomodoro.domain.usecase.RewardSchedule
+import com.jjas.labpomodoro.ui.components.BronzeColor
 import com.jjas.labpomodoro.ui.components.Celebration
 import com.jjas.labpomodoro.ui.components.ConfettiBurst
 import com.jjas.labpomodoro.ui.components.ElementTile
+import com.jjas.labpomodoro.ui.components.GoldColor
 import com.jjas.labpomodoro.ui.components.LiquidEffect
+import com.jjas.labpomodoro.ui.components.SilverColor
 import com.jjas.labpomodoro.ui.components.VesselShape
 import com.jjas.labpomodoro.ui.components.VesselView
 import com.jjas.labpomodoro.ui.components.color
 import com.jjas.labpomodoro.ui.components.look
+import com.jjas.labpomodoro.ui.components.metalColor
 import kotlinx.coroutines.delay
 import java.time.Instant
 import java.time.ZoneId
@@ -167,6 +175,7 @@ private fun LabContent(
             TextButton(onClick = onBack) { Text("Listo") }
         }
         Stats(state, Modifier.padding(horizontal = 24.dp, vertical = 12.dp))
+        MasterySummary(state, Modifier.padding(horizontal = 24.dp).padding(bottom = 12.dp))
         RewardProgress(state.totalWorkSeconds, Modifier.padding(horizontal = 24.dp))
         Spacer(Modifier.height(16.dp))
 
@@ -177,7 +186,13 @@ private fun LabContent(
         Spacer(Modifier.height(16.dp))
         when (tab) {
             0 -> {
-                PeriodicTableGrid(state.items, newOnes, onSelect = { selected = it }, Modifier.padding(horizontal = 12.dp))
+                PeriodicTableGrid(
+                    state.items,
+                    newOnes,
+                    onSelect = { selected = it },
+                    modifier = Modifier.padding(horizontal = 12.dp),
+                    mastery = state::mastery,
+                )
                 Spacer(Modifier.height(12.dp))
                 Legend(Modifier.padding(horizontal = 24.dp))
             }
@@ -200,6 +215,7 @@ private fun LabContent(
                 item = item,
                 canCraft = Fusion.recipesFor(z, state.quantities).isNotEmpty(),
                 inVessels = state.vesselElement == z,
+                obtained = state.obtained(z),
                 onToggleVessel = { onVesselElement(if (state.vesselElement == z) 0 else z) },
                 onSynthesize = {
                     target = z
@@ -306,6 +322,7 @@ private fun PeriodicTableGrid(
     newOnes: Set<Int>,
     onSelect: (Int) -> Unit,
     modifier: Modifier = Modifier,
+    mastery: (Element) -> Mastery = { Mastery.NONE },
 ) {
     BoxWithConstraints(modifier.fillMaxWidth()) {
         val gap = 2.dp
@@ -331,6 +348,7 @@ private fun PeriodicTableGrid(
                                 quantity = item.quantity,
                                 size = cell,
                                 highlighted = element.atomicNumber in newOnes,
+                                mastery = mastery(element),
                                 modifier = Modifier.clickable { onSelect(element.atomicNumber) },
                             )
                         }
@@ -386,6 +404,7 @@ private fun ElementDetail(
     inVessels: Boolean,
     onToggleVessel: () -> Unit,
     onSynthesize: () -> Unit,
+    obtained: Int = 0,
 ) {
     val element = item.element
     val fact = ElementFacts[element.atomicNumber]
@@ -413,6 +432,10 @@ private fun ElementDetail(
                     color = element.category.color(),
                 )
             }
+        }
+        if (item.discovered) {
+            Spacer(Modifier.height(16.dp))
+            MasteryProgress(element, obtained)
         }
         Spacer(Modifier.height(16.dp))
         DiscoveryCard(element)
@@ -492,6 +515,73 @@ private fun ElementDetail(
             Spacer(Modifier.height(16.dp))
             FilledTonalButton(onClick = onSynthesize) { Text("Fabricar en el sintetizador") }
         }
+    }
+}
+
+/** Cuántos elementos hay en bronce, plata y oro. */
+@Composable
+private fun MasterySummary(state: LabUi, modifier: Modifier = Modifier) {
+    val counts = state.masteryCounts
+    val bronze = counts[Mastery.BRONZE] ?: 0
+    val silver = counts[Mastery.SILVER] ?: 0
+    val gold = counts[Mastery.GOLD] ?: 0
+    // Hasta descubrir algo en bronce no hay nada que contar
+    if (bronze + silver + gold == 0 && state.discoveredCount < PeriodicTable.SIZE) return
+    Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
+        Text("Maestría", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        MasteryCount(BronzeColor, "Bronce", bronze)
+        MasteryCount(SilverColor, "Plata", silver)
+        MasteryCount(GoldColor, "Oro", gold)
+    }
+}
+
+@Composable
+private fun MasteryCount(color: Color, label: String, count: Int) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.semantics(mergeDescendants = true) {}) {
+        Box(
+            Modifier
+                .size(12.dp)
+                .border(2.dp, color, RoundedCornerShape(3.dp))
+        )
+        Spacer(Modifier.width(6.dp))
+        Text("$count", style = MaterialTheme.typography.titleSmall)
+        Spacer(Modifier.width(4.dp))
+        Text(label, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
+/** Nivel de maestría del elemento y cuánto falta para el siguiente. */
+@Composable
+private fun MasteryProgress(element: Element, obtained: Int) {
+    val level = MasteryRules.level(element, obtained)
+    val next = MasteryRules.next(element, obtained)
+    val thresholds = MasteryRules.thresholds(element)
+    val levelColor = level.metalColor() ?: MaterialTheme.colorScheme.onSurfaceVariant
+    Column {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("Maestría: ", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(level.label, style = MaterialTheme.typography.titleSmall, color = levelColor)
+            Spacer(Modifier.weight(1f))
+            Text(
+                "Obtenido $obtained ${if (obtained == 1) "vez" else "veces"}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Spacer(Modifier.height(6.dp))
+        LinearProgressIndicator(
+            progress = { (obtained.toFloat() / thresholds[2]).coerceIn(0f, 1f) },
+            // La barra toma el color de la meta que viene
+            color = (next?.first ?: Mastery.GOLD).metalColor() ?: GoldColor,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Text(
+            text = next?.let { (goal, left) -> "Te ${if (left == 1) "falta" else "faltan"} $left para ${goal.label.lowercase()}." }
+                ?: "¡Dominado! Llegaste al nivel más alto.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 4.dp),
+        )
     }
 }
 

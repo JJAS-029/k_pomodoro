@@ -21,11 +21,15 @@ import androidx.navigation.compose.rememberNavController
 import com.jjas.labpomodoro.ads.AdsManager
 import com.jjas.labpomodoro.data.billing.BillingRepository
 import com.jjas.labpomodoro.data.repository.InventoryRepository
+import com.jjas.labpomodoro.data.repository.LabRepository
 import com.jjas.labpomodoro.data.repository.SettingsRepository
+import com.jjas.labpomodoro.domain.model.Mastery
+import com.jjas.labpomodoro.domain.model.MasteryRules
 import com.jjas.labpomodoro.domain.model.PeriodicTable
 import com.jjas.labpomodoro.service.TimerService
 import com.jjas.labpomodoro.timer.TimerEngine
 import com.jjas.labpomodoro.timer.TimerState
+import com.jjas.labpomodoro.ui.main.MasteryTableDialog
 import com.jjas.labpomodoro.ui.main.TableCompleteDialog
 import com.jjas.labpomodoro.ui.navigation.LabNavHost
 import com.jjas.labpomodoro.ui.pip.PipScreen
@@ -51,6 +55,8 @@ class MainActivity : ComponentActivity() {
     @Inject lateinit var billing: BillingRepository
 
     @Inject lateinit var inventory: InventoryRepository
+
+    @Inject lateinit var lab: LabRepository
 
     private var isInPip by mutableStateOf(false)
 
@@ -107,6 +113,16 @@ class MainActivity : ComponentActivity() {
                 val discovered by inventory.discoveredCount.collectAsStateWithLifecycle(initialValue = 0)
                 if (discovered >= PeriodicTable.SIZE && settings?.tableCelebrated == false) {
                     TableCompleteDialog(onDismiss = { lifecycleScope.launch { settingsRepository.setTableCelebrated() } })
+                } else {
+                    // Tabla de bronce, plata y oro: una vez cada una
+                    val counts by lab.obtainedCounts.collectAsStateWithLifecycle(initialValue = emptyMap())
+                    val tableLevel = MasteryRules.tableLevel(counts)
+                    val celebrated = settings?.masteryCelebrated
+                    if (celebrated != null && tableLevel >= Mastery.BRONZE && tableLevel.ordinal > celebrated) {
+                        MasteryTableDialog(tableLevel, onDismiss = {
+                            lifecycleScope.launch { settingsRepository.setMasteryCelebrated(tableLevel.ordinal) }
+                        })
+                    }
                 }
             }
         }

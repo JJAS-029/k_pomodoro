@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import com.jjas.labpomodoro.data.local.entity.DiscoveryEntity
+import com.jjas.labpomodoro.data.local.entity.ElementCount
 import com.jjas.labpomodoro.domain.model.DiscoverySource
 import kotlinx.coroutines.flow.Flow
 
@@ -21,4 +22,11 @@ interface DiscoveryDao {
 
     @Query("UPDATE discoveries SET seen = 1 WHERE seen = 0")
     suspend fun markAllSeen()
+
+    /** Veces que se ha obtenido cada elemento, contando recompensas y fusiones. */
+    @Query("SELECT atomicNumber, COUNT(*) AS total FROM discoveries GROUP BY atomicNumber")
+    suspend fun countsByElement(): List<ElementCount>
+
+    @Query("SELECT atomicNumber, COUNT(*) AS total FROM discoveries GROUP BY atomicNumber")
+    fun observeCountsByElement(): Flow<List<ElementCount>>
 }

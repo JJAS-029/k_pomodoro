@@ -8,6 +8,8 @@ import com.jjas.labpomodoro.data.repository.LabRepository
 import com.jjas.labpomodoro.data.repository.SessionRepository
 import com.jjas.labpomodoro.data.repository.SettingsRepository
 import com.jjas.labpomodoro.domain.model.Element
+import com.jjas.labpomodoro.domain.model.Mastery
+import com.jjas.labpomodoro.domain.model.MasteryRules
 import com.jjas.labpomodoro.domain.usecase.Fusion
 import com.jjas.labpomodoro.domain.usecase.Streak
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -29,7 +31,17 @@ data class LabUi(
     val totalWorkSeconds: Long,
     /** Elemento elegido para los recipientes; 0 = automático. */
     val vesselElement: Int = 0,
+    /** Veces que se ha obtenido cada elemento (maestría). */
+    val obtained: Map<Int, Int> = emptyMap(),
 ) {
+    fun obtained(atomicNumber: Int): Int = obtained[atomicNumber] ?: 0
+
+    fun mastery(element: Element): Mastery = MasteryRules.level(element, obtained(element.atomicNumber))
+
+    /** Cuántos elementos hay en cada nivel de maestría. */
+    val masteryCounts: Map<Mastery, Int>
+        get() = items.groupingBy { mastery(it.element) }.eachCount()
+
     val discoveredCount: Int get() = items.count { it.discovered }
     val quantities: Map<Int, Int> get() = items.associate { it.element.atomicNumber to it.quantity }
 
@@ -60,8 +72,9 @@ class LabViewModel @Inject constructor(
         sessions.streak,
         sessions.totalWorkSeconds,
         settings.settings,
-    ) { items, streak, total, prefs ->
-        LabUi(items, streak, total, prefs.vesselElement)
+        lab.obtainedCounts,
+    ) { items, streak, total, prefs, obtained ->
+        LabUi(items, streak, total, prefs.vesselElement, obtained)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     /** Los hallazgos que aún no se habían visto al abrir la pantalla, para marcarlos como nuevos. */

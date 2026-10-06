@@ -68,6 +68,8 @@ data class AppSettings(
     val placesEnabled: Boolean = false,
     /** Ya se mostró la celebración por completar la tabla periódica. */
     val tableCelebrated: Boolean = false,
+    /** Nivel de maestría de la tabla completa ya celebrado (ordinal de [Mastery]). */
+    val masteryCelebrated: Int = 0,
 ) {
     /** El modo ambiente solo aplica si el usuario es Pro. */
     val isPro: Boolean get() = proPurchased || proTesting

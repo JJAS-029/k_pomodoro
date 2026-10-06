@@ -420,6 +420,19 @@ Se revisaron las tres; ninguna se agregó como dependencia porque nuestro sistem
 | 2 | ✅ | **Gotas que se funden** (`ui/components/LiquidBlobs.kt`, técnica de metaballs: desenfoque + umbral de alfa con `RenderEffect`, Android 12+; antes, gotas sueltas) dentro de metales y luminosos, con centro claro como lámpara de lava. **Aurora** (`drawAurora`): tres resplandores de tonos vecinos que giran despacio detrás de los luminosos. El recipiente se dibuja en tres capas: líquido, gotas y vidrio con vapor. La ficha del elemento se abre completa |
 | 3 | ✅ | **Lluvia** (`ui/components/RainBackground.kt`) detrás del recipiente en modo ambiente cuando suena la lluvia (Pro, sesión de trabajo en curso): 90 gotas en tres planos de profundidad con paralaje y algo de viento. **Vidrio con refracción** (`GlassRefraction.kt`, shader AGSL, Android 13+, Pro): lente que deforma el líquido y las gotas cerca de las paredes, con leve aberración cromática; no deforma donde no hay líquido. Sigue la forma de cada recipiente: el medio ancho real del vidrio se mide fila por fila del contorno (64 alturas) y viaja al shader en una textura de 64×1 (en el alfa), porque AGSL no permite indexar arreglos con variables. El halo y la aurora van en su propia capa para que la lente no los recorte |
 
+### Maestría por elemento (bronce, plata y oro)
+
+| Pieza | Archivo | Notas |
+|---|---|---|
+| Reglas | `domain/model/Mastery.kt` | Cuenta **todas las veces obtenido** (gastar en el sintetizador no baja el nivel): bronce 5, plata 10, oro 15; sintéticos 2, 4 y 6. Nivel de la tabla = el más bajo de los 118 |
+| Datos | `DiscoveryDao.countsByElement`, `LabRepository.obtainedCounts` | Sale del registro de hallazgos, sin cambiar la base de datos; los descubiertos sin registro cuentan como 1 |
+| Recompensas | `ElementPicker.pick` | 75 %: primero los que faltan y, con la tabla completa, los más atrasados en maestría, para que suban parejo |
+| Tabla | `ElementTile(mastery)` | Contorno bronce o plata; el oro con un destello que lo recorre |
+| Logros | `LabScreen` | Conteo "Maestría: N bronce · N plata · N oro" y en la ficha el nivel, las veces obtenido, una barra y "te faltan N para plata" |
+| Celebraciones | `ui/main/MasteryTableDialog.kt` | Tabla de bronce, de plata y de oro, una vez cada una (`AppSettings.masteryCelebrated`). En debug: "Sumar 5 de cada elemento" |
+
+**Tests:** `MasteryTest` (4) y el selector con maestría en `RewardsTest`.
+
 ### Ideas Pro para más adelante
 - **Más sonidos**: ✅ los generados ya están. Faltan ambientes grabados con licencia CC0 (cafetería, bosque) en loop con `ExoPlayer`/Media3 y mezclar varios a la vez.
 - **Efectos del líquido**: hervor en el último minuto, condensación en el vidrio vacío, chapoteo al cambiar de sesión, brillo tenue en modo ambiente, inclinación con el acelerómetro.

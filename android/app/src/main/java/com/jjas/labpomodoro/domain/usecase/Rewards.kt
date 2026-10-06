@@ -34,21 +34,23 @@ object RewardSchedule {
 class ElementPicker(private val random: Random = Random.Default) {
 
     /**
-     * Favorece los que aún no se tienen (75 %) para que la tabla avance, pero a veces repite:
-     * los repetidos sirven como material para el sintetizador.
+     * Favorece lo que más hace avanzar (75 %): primero los que aún no se tienen y, con todos
+     * descubiertos, los que van más atrasados en maestría, para que suban parejo. A veces repite
+     * al azar: los repetidos sirven como material para el sintetizador.
+     *
+     * @param counts número atómico → veces que se ha obtenido.
      */
-    fun pick(rarity: Rarity, owned: Set<Int>): Element {
+    fun pick(rarity: Rarity, counts: Map<Int, Int>): Element {
         val pool = PeriodicTable.ofRarity(rarity)
-        val missing = pool.filter { it.atomicNumber !in owned }
-        return if (missing.isNotEmpty() && random.nextFloat() < NEW_ELEMENT_CHANCE) {
-            missing.random(random)
-        } else {
-            pool.random(random)
-        }
+        if (random.nextFloat() >= FOCUSED_CHANCE) return pool.random(random)
+        val missing = pool.filter { (counts[it.atomicNumber] ?: 0) == 0 }
+        if (missing.isNotEmpty()) return missing.random(random)
+        val lowest = pool.minOf { counts[it.atomicNumber] ?: 0 }
+        return pool.filter { (counts[it.atomicNumber] ?: 0) == lowest }.random(random)
     }
 
     private companion object {
-        const val NEW_ELEMENT_CHANCE = 0.75f
+        const val FOCUSED_CHANCE = 0.75f
     }
 }
 

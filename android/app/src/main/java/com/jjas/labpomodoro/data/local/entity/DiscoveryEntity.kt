@@ -17,3 +17,6 @@ data class DiscoveryEntity(
     val obtainedAtMillis: Long,
     val seen: Boolean = false,
 )
+
+/** Cuántas veces se ha obtenido un elemento (fila de la consulta de maestría). */
+data class ElementCount(val atomicNumber: Int, val total: Int)

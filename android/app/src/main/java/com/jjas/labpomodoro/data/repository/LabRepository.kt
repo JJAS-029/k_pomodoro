@@ -13,6 +13,7 @@ import com.jjas.labpomodoro.domain.usecase.ElementPicker
 import com.jjas.labpomodoro.domain.usecase.Fusion
 import com.jjas.labpomodoro.domain.usecase.RewardSchedule
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -53,16 +54,33 @@ class LabRepository @Inject constructor(
                 grantedRare = discoveryDao.countBySource(DiscoverySource.RARE_REWARD),
             )
             if (pending.isEmpty) return@withTransaction
-            val discovered = inventoryDao.discoveredAtomicNumbers().toMutableSet()
-            repeat(pending.basic) { grant(Rarity.BASIC, DiscoverySource.BASIC_REWARD, discovered) }
-            repeat(pending.rare) { grant(Rarity.RARE, DiscoverySource.RARE_REWARD, discovered) }
+            val counts = currentCounts().toMutableMap()
+            repeat(pending.basic) { grant(Rarity.BASIC, DiscoverySource.BASIC_REWARD, counts) }
+            repeat(pending.rare) { grant(Rarity.RARE, DiscoverySource.RARE_REWARD, counts) }
         }
     }
 
-    private suspend fun grant(rarity: Rarity, source: DiscoverySource, discovered: MutableSet<Int>) {
-        val element = picker.pick(rarity, discovered)
+    private suspend fun grant(rarity: Rarity, source: DiscoverySource, counts: MutableMap<Int, Int>) {
+        val element = picker.pick(rarity, counts)
         give(element.atomicNumber, source)
-        discovered += element.atomicNumber
+        counts[element.atomicNumber] = (counts[element.atomicNumber] ?: 0) + 1
+    }
+
+    /** Veces obtenido; los descubiertos sin registro (de antes de la tabla de hallazgos) cuentan como 1. */
+    private suspend fun currentCounts(): Map<Int, Int> {
+        val counts = discoveryDao.countsByElement().associate { it.atomicNumber to it.total }.toMutableMap()
+        inventoryDao.discoveredAtomicNumbers().forEach { z -> counts[z] = maxOf(counts[z] ?: 0, 1) }
+        return counts
+    }
+
+    /** Veces que se ha obtenido cada elemento, para la maestría (bronce, plata y oro). */
+    val obtainedCounts: Flow<Map<Int, Int>> = combine(
+        discoveryDao.observeCountsByElement(),
+        inventoryDao.observeAll(),
+    ) { rows, inventory ->
+        val counts = rows.associate { it.atomicNumber to it.total }.toMutableMap()
+        inventory.filter { it.firstObtainedAtMillis != null }.forEach { counts[it.atomicNumber] = maxOf(counts[it.atomicNumber] ?: 0, 1) }
+        counts
     }
 
     /**
@@ -86,6 +104,17 @@ class LabRepository @Inject constructor(
             true
         } catch (_: NotEnoughMaterial) {
             false
+        }
+    }
+
+    /** Solo pruebas (botón en debug): obtiene [times] veces cada elemento, ya vistos. */
+    suspend fun grantEachForTesting(times: Int) = mutex.withLock {
+        db.withTransaction {
+            val now = clock.millis()
+            for (z in 1..PeriodicTable.SIZE) repeat(times) {
+                inventoryDao.add(z, 1, now)
+                discoveryDao.insert(DiscoveryEntity(atomicNumber = z, source = DiscoverySource.FUSION, obtainedAtMillis = now, seen = true))
+            }
         }
     }
 

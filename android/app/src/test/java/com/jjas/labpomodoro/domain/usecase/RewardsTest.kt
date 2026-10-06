@@ -47,8 +47,8 @@ class RewardsTest {
     fun `el selector solo da elementos de la rareza pedida`() {
         val picker = ElementPicker(Random(7))
         repeat(200) {
-            assertEquals(Rarity.BASIC, picker.pick(Rarity.BASIC, emptySet()).rarity)
-            assertEquals(Rarity.RARE, picker.pick(Rarity.RARE, emptySet()).rarity)
+            assertEquals(Rarity.BASIC, picker.pick(Rarity.BASIC, emptyMap()).rarity)
+            assertEquals(Rarity.RARE, picker.pick(Rarity.RARE, emptyMap()).rarity)
         }
     }
 
@@ -56,9 +56,18 @@ class RewardsTest {
     fun `el selector prefiere los que faltan`() {
         val picker = ElementPicker(Random(1))
         // Falta solo el hidrógeno: debe salir la mayoría de las veces
-        val owned = (2..30).toSet()
+        val owned = (2..30).associateWith { 3 }
         val hydrogen = (1..400).count { picker.pick(Rarity.BASIC, owned).atomicNumber == 1 }
         assertTrue("salió $hydrogen veces", hydrogen > 250)
+    }
+
+    @Test
+    fun `con todo descubierto prefiere los mas atrasados en maestria`() {
+        val picker = ElementPicker(Random(3))
+        // Todos con 10 menos el helio, que va en 2
+        val counts = (1..30).associateWith { if (it == 2) 2 else 10 }
+        val helium = (1..400).count { picker.pick(Rarity.BASIC, counts).atomicNumber == 2 }
+        assertTrue("salió $helium veces", helium > 250)
     }
 
     @Test

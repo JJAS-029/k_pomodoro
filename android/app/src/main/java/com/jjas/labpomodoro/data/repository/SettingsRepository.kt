@@ -64,6 +64,8 @@ class SettingsRepository @Inject constructor(
 
     suspend fun setTableCelebrated() = dataStore.edit { it[Keys.TABLE_CELEBRATED] = true }
 
+    suspend fun setMasteryCelebrated(level: Int) = dataStore.edit { it[Keys.MASTERY_CELEBRATED] = level }
+
     suspend fun setPlacesEnabled(enabled: Boolean) = dataStore.edit { it[Keys.PLACES] = enabled }
 
     suspend fun setFocusVolume(volume: Float) = dataStore.edit { it[Keys.FOCUS_VOLUME] = volume.coerceIn(0f, 1f) }
@@ -103,6 +105,7 @@ class SettingsRepository @Inject constructor(
             focusVolume = this[Keys.FOCUS_VOLUME] ?: defaults.focusVolume,
             placesEnabled = this[Keys.PLACES] ?: defaults.placesEnabled,
             tableCelebrated = this[Keys.TABLE_CELEBRATED] ?: defaults.tableCelebrated,
+            masteryCelebrated = this[Keys.MASTERY_CELEBRATED] ?: defaults.masteryCelebrated,
         )
     }
 
@@ -127,5 +130,6 @@ class SettingsRepository @Inject constructor(
         val FOCUS_VOLUME = floatPreferencesKey("focus_volume")
         val PLACES = booleanPreferencesKey("places_enabled")
         val TABLE_CELEBRATED = booleanPreferencesKey("table_celebrated")
+        val MASTERY_CELEBRATED = intPreferencesKey("mastery_celebrated")
     }
 }

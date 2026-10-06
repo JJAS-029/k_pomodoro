@@ -42,6 +42,7 @@ import com.jjas.labpomodoro.data.billing.ProOffer
 import com.jjas.labpomodoro.data.billing.ProPlan
 import com.jjas.labpomodoro.data.billing.StoreState
 import com.jjas.labpomodoro.data.repository.InventoryRepository
+import com.jjas.labpomodoro.data.repository.LabRepository
 import com.jjas.labpomodoro.data.repository.SessionRepository
 import com.jjas.labpomodoro.data.repository.SettingsRepository
 import com.jjas.labpomodoro.domain.model.AppSettings
@@ -62,6 +63,7 @@ class ProViewModel @Inject constructor(
     private val sessions: SessionRepository,
     private val billing: BillingRepository,
     private val inventory: InventoryRepository,
+    private val lab: LabRepository,
     private val clock: Clock,
 ) : ViewModel() {
 
@@ -91,6 +93,11 @@ class ProViewModel @Inject constructor(
             val missing = inventory.items.first().filter { it.firstObtainedAtMillis == null }
             missing.forEach { inventory.add(it.element.atomicNumber) }
         }
+    }
+
+    /** Solo pruebas: obtiene cinco veces cada elemento, para ver la maestría y sus celebraciones. */
+    fun addFiveOfEach() {
+        viewModelScope.launch { lab.grantEachForTesting(5) }
     }
 
     /** Solo pruebas: guarda una hora de trabajo completada para ganar elementos sin esperar. */
@@ -189,6 +196,7 @@ fun ProScreen(onBack: () -> Unit, viewModel: ProViewModel = hiltViewModel()) {
                 }
                 TextButton(onClick = viewModel::addTestFocusHour) { Text("Sumar 1 h de enfoque (solo pruebas)") }
                 TextButton(onClick = viewModel::completeTable) { Text("Completar la tabla (solo pruebas)") }
+                TextButton(onClick = viewModel::addFiveOfEach) { Text("Sumar 5 de cada elemento (solo pruebas)") }
             }
         }
     }
