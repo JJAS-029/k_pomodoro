@@ -1,6 +1,5 @@
 package com.jjas.labpomodoro.ui.components
 
-import android.graphics.Bitmap
 import android.graphics.BitmapShader
 import android.graphics.RectF
 import android.graphics.Region
@@ -9,6 +8,8 @@ import android.graphics.RuntimeShader
 import android.graphics.Shader
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.set
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asAndroidPath
 import androidx.compose.ui.graphics.asComposeRenderEffect
@@ -95,8 +96,8 @@ private fun refraction(shader: RuntimeShader, g: VesselGeometry): RenderEffect? 
     shader.setFloatUniform("topY", bounds.top)
     shader.setFloatUniform("strength", STRENGTH)
     val max = widths.max().coerceAtLeast(1f)
-    val texture = Bitmap.createBitmap(ROWS, 1, Bitmap.Config.ARGB_8888)
-    widths.forEachIndexed { i, w -> texture.setPixel(i, 0, android.graphics.Color.argb((w / max * 255f).roundToInt(), 0, 0, 0)) }
+    val texture = createBitmap(ROWS, 1)
+    widths.forEachIndexed { i, w -> texture[i, 0] = android.graphics.Color.argb((w / max * 255f).roundToInt(), 0, 0, 0) }
     val widthShader = BitmapShader(texture, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP).apply {
         filterMode = BitmapShader.FILTER_MODE_LINEAR
     }

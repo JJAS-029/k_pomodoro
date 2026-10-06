@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.jjas.labpomodoro.BuildConfig
 import com.jjas.labpomodoro.domain.model.AppSettings
@@ -15,6 +16,7 @@ import com.jjas.labpomodoro.domain.model.PlanRounding
 import com.jjas.labpomodoro.domain.model.SessionConfig
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import java.io.IOException
 import javax.inject.Inject
@@ -76,6 +78,27 @@ class SettingsRepository @Inject constructor(
     /** Lo llama la tienda al confirmar o revocar la compra. */
     suspend fun setProPurchased(purchased: Boolean) = dataStore.edit { it[Keys.PRO_PURCHASED] = purchased }
 
+    /** Ajustes para el respaldo en la nube, por nombre de clave. */
+    suspend fun exportForBackup(): Map<String, Any> =
+        settingsPrefs().asMap()
+            .filterKeys { it.name !in NOT_BACKED_UP }
+            .mapKeys { it.key.name }
+
+    /** Aplica los ajustes de un respaldo; la compra de Pro y el permiso de lugares no viajan. */
+    suspend fun importFromBackup(values: Map<String, Any>) = dataStore.edit { prefs ->
+        values.filterKeys { it !in NOT_BACKED_UP }.forEach { (name, value) ->
+            when (value) {
+                is Boolean -> prefs[booleanPreferencesKey(name)] = value
+                is Int -> prefs[intPreferencesKey(name)] = value
+                is Long -> prefs[longPreferencesKey(name)] = value
+                is Float -> prefs[floatPreferencesKey(name)] = value
+                is String -> prefs[stringPreferencesKey(name)] = value
+            }
+        }
+    }
+
+    private suspend fun settingsPrefs(): Preferences = dataStore.data.first()
+
     private fun Preferences.toAppSettings(): AppSettings {
         val defaults = AppSettings()
         val session = SessionConfig(
@@ -107,6 +130,11 @@ class SettingsRepository @Inject constructor(
             tableCelebrated = this[Keys.TABLE_CELEBRATED] ?: defaults.tableCelebrated,
             masteryCelebrated = this[Keys.MASTERY_CELEBRATED] ?: defaults.masteryCelebrated,
         )
+    }
+
+    private companion object {
+        /** De cada teléfono: la compra la restaura Google Play y el permiso de ubicación se pide de nuevo. */
+        val NOT_BACKED_UP = setOf("pro_unlocked", "pro_purchased", "places_enabled")
     }
 
     private object Keys {

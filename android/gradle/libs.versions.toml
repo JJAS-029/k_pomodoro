@@ -19,6 +19,7 @@ billing = "9.1.0"
 playServicesAds = "25.5.0"
 ump = "4.0.0"
 playServicesLocation = "21.4.0"
+orgJson = "20260814"
 coroutines = "1.11.0"
 datastore = "1.2.1"
 firebaseBom = "34.19.0"
@@ -63,6 +64,7 @@ androidx-room-compiler = { group = "androidx.room", name = "room-compiler", vers
 androidx-room-testing = { group = "androidx.room", name = "room-testing", version.ref = "room" }
 billing-ktx = { group = "com.android.billingclient", name = "billing-ktx", version.ref = "billing" }
 play-services-ads = { group = "com.google.android.gms", name = "play-services-ads", version.ref = "playServicesAds" }
+org-json = { group = "org.json", name = "json", version.ref = "orgJson" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 ump = { group = "com.google.android.ump", name = "user-messaging-platform", version.ref = "ump" }
 kotlinx-serialization-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-core", version.ref = "kotlinxSerialization" }

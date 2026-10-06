@@ -49,6 +49,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -153,6 +154,11 @@ fun MainScreen(
         if (active == null) ambient = false
     }
     val showAmbient = ambient && active != null
+
+    // Teléfono nuevo con respaldo en la nube: se ofrece recuperar el progreso
+    account.restoreOffer?.let { info ->
+        RestoreOfferDialog(info, onRestore = viewModel::acceptRestore, onDismiss = viewModel::declineRestore)
+    }
 
     // Hoja para elegir el sonido de concentración sin salir del timer
     var soundSheet by rememberSaveable { mutableStateOf(false) }
@@ -395,7 +401,7 @@ private fun Celebrations(timer: TimerUi?, discoveries: List<Discovery>) {
     }
 
     val rewards = discoveries.filter { it.source != DiscoverySource.FUSION }
-    var lastRewards by rememberSaveable { mutableStateOf(-1) }
+    var lastRewards by rememberSaveable { mutableIntStateOf(-1) }
     LaunchedEffect(rewards.size) {
         val before = lastRewards
         lastRewards = rewards.size

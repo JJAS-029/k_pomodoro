@@ -5,6 +5,8 @@ import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.credentials.exceptions.NoCredentialException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jjas.labpomodoro.data.backup.BackupInfo
+import com.jjas.labpomodoro.data.backup.BackupRepository
 import com.jjas.labpomodoro.data.remote.AnalyticsTracker
 import com.jjas.labpomodoro.data.remote.AuthRepository
 import com.jjas.labpomodoro.data.remote.MissingWebClientIdException
@@ -23,6 +25,8 @@ data class MainUiState(
     val isSignedIn: Boolean = false,
     val isBusy: Boolean = false,
     val message: String? = null,
+    /** Respaldo encontrado al iniciar sesión en un teléfono sin progreso: se ofrece restaurarlo. */
+    val restoreOffer: BackupInfo? = null,
 )
 
 @HiltViewModel
@@ -30,6 +34,7 @@ class MainViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val userProfileRepository: UserProfileRepository,
     private val analytics: AnalyticsTracker,
+    private val backup: BackupRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(MainUiState())
@@ -53,9 +58,8 @@ class MainViewModel @Inject constructor(
             val message = try {
                 val user = authRepository.signInWithGoogle(activityContext)
                 analytics.logLogin()
-                // Prueba de punta a punta: Auth + escritura en Firestore
                 userProfileRepository.upsertProfile(user)
-                "Perfil guardado en users/${user.uid}"
+                afterSignIn()
             } catch (e: CancellationException) {
                 throw e
             } catch (_: GetCredentialCancellationException) {
@@ -69,6 +73,41 @@ class MainViewModel @Inject constructor(
             }
             _uiState.update { it.copy(isBusy = false, message = message) }
         }
+    }
+
+    /**
+     * Con sesión nueva: si este teléfono está vacío y hay un respaldo, se ofrece restaurarlo; si
+     * no hay respaldo, se hace el primero en ese momento.
+     */
+    private suspend fun afterSignIn(): String {
+        val remote = backup.refreshInfo()
+        return when {
+            remote != null && backup.isLocalEmpty() -> {
+                _uiState.update { it.copy(restoreOffer = remote) }
+                "Sesión iniciada."
+            }
+            remote == null -> {
+                backup.backup()
+                backup.clearStatus()
+                "Sesión iniciada. Tu progreso queda respaldado en la nube."
+            }
+            else -> "Sesión iniciada. Tu progreso se respalda al terminar cada plan."
+        }
+    }
+
+    fun acceptRestore() {
+        _uiState.update { it.copy(restoreOffer = null, isBusy = true) }
+        viewModelScope.launch {
+            val ok = backup.restore()
+            backup.clearStatus()
+            _uiState.update {
+                it.copy(isBusy = false, message = if (ok) "¡Listo! Recuperaste tu progreso." else "No se pudo restaurar el respaldo.")
+            }
+        }
+    }
+
+    fun declineRestore() {
+        _uiState.update { it.copy(restoreOffer = null) }
     }
 
     fun signOut() {

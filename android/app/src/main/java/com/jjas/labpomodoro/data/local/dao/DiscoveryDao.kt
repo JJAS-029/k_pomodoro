@@ -7,6 +7,7 @@ import com.jjas.labpomodoro.data.local.entity.DiscoveryEntity
 import com.jjas.labpomodoro.data.local.entity.ElementCount
 import com.jjas.labpomodoro.domain.model.DiscoverySource
 import kotlinx.coroutines.flow.Flow
+import androidx.room.OnConflictStrategy
 
 @Dao
 interface DiscoveryDao {
@@ -29,4 +30,13 @@ interface DiscoveryDao {
 
     @Query("SELECT atomicNumber, COUNT(*) AS total FROM discoveries GROUP BY atomicNumber")
     fun observeCountsByElement(): Flow<List<ElementCount>>
+
+    @Query("SELECT * FROM discoveries ORDER BY id")
+    suspend fun all(): List<DiscoveryEntity>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(rows: List<DiscoveryEntity>)
+
+    @Query("DELETE FROM discoveries")
+    suspend fun deleteAll()
 }

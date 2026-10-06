@@ -2,6 +2,7 @@ package com.jjas.labpomodoro
 
 import android.app.Application
 import com.jjas.labpomodoro.data.billing.BillingRepository
+import com.jjas.labpomodoro.service.AutoBackup
 import com.jjas.labpomodoro.service.FocusSoundController
 import com.jjas.labpomodoro.service.PlaceTracker
 import com.jjas.labpomodoro.service.RewardSync
@@ -22,6 +23,8 @@ class LabPomodoroApp : Application() {
 
     @Inject lateinit var placeTracker: PlaceTracker
 
+    @Inject lateinit var autoBackup: AutoBackup
+
     override fun onCreate() {
         super.onCreate()
         timerEffects.start()
@@ -29,5 +32,6 @@ class LabPomodoroApp : Application() {
         focusSound.start()
         billing.start()
         placeTracker.start()
+        autoBackup.start()
     }
 }

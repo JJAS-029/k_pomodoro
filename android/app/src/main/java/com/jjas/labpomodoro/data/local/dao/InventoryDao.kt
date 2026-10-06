@@ -4,6 +4,8 @@ import androidx.room.Dao
 import androidx.room.Query
 import com.jjas.labpomodoro.data.local.entity.InventoryEntity
 import kotlinx.coroutines.flow.Flow
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 
 @Dao
 interface InventoryDao {
@@ -33,4 +35,10 @@ interface InventoryDao {
     /** Los que se han conseguido alguna vez (aunque ya se hayan gastado en el sintetizador). */
     @Query("SELECT atomicNumber FROM inventory WHERE firstObtainedAtMillis IS NOT NULL")
     suspend fun discoveredAtomicNumbers(): List<Int>
+
+    @Query("SELECT * FROM inventory ORDER BY atomicNumber")
+    suspend fun all(): List<InventoryEntity>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(rows: List<InventoryEntity>)
 }

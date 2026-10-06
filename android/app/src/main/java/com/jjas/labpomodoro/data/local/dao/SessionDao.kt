@@ -6,6 +6,7 @@ import androidx.room.Query
 import com.jjas.labpomodoro.data.local.entity.HourTotal
 import com.jjas.labpomodoro.data.local.entity.SessionEntity
 import kotlinx.coroutines.flow.Flow
+import androidx.room.OnConflictStrategy
 
 @Dao
 interface SessionDao {
@@ -40,4 +41,11 @@ interface SessionDao {
 
     @Query("SELECT * FROM sessions ORDER BY startedAtMillis")
     fun observeAll(): Flow<List<SessionEntity>>
+
+    // Para restaurar un respaldo: se reemplaza todo el historial
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(sessions: List<SessionEntity>)
+
+    @Query("DELETE FROM sessions")
+    suspend fun deleteAll()
 }

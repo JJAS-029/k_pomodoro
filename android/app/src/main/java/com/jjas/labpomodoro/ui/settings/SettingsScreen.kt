@@ -95,6 +95,7 @@ fun SettingsScreen(
                     onDynamicColorChange = viewModel::setDynamicColor,
                     onResetVesselElement = viewModel::resetVesselElement,
                     soundSection = { FocusSoundPanel(onOpenPro = onOpenPro) },
+                    backupSection = { CloudBackupSection() },
                     dataSection = {
                         DataSection(
                             isPro = current.isPro,
@@ -156,6 +157,7 @@ private fun SettingsContent(
     onResetVesselElement: () -> Unit = {},
     soundSection: @Composable () -> Unit = {},
     dataSection: @Composable () -> Unit = {},
+    backupSection: @Composable () -> Unit = {},
 ) {
     val session = settings.session
     Column(
@@ -295,6 +297,9 @@ private fun SettingsContent(
 
         SectionTitle(if (settings.isPro) "Sonido de concentración" else "Sonido de concentración · Pro")
         soundSection()
+
+        SectionTitle("Respaldo en la nube")
+        backupSection()
 
         SectionTitle(if (settings.isPro) "Tus datos" else "Tus datos · Pro")
         dataSection()

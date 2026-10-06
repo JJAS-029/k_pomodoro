@@ -112,6 +112,8 @@ dependencies {
     // Tests
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
+    // org.json viene en Android; en los tests de JVM hace falta la implementación real
+    testImplementation(libs.org.json)
     androidTestImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.room.testing)
     androidTestImplementation(libs.androidx.junit)

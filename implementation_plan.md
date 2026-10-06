@@ -433,6 +433,19 @@ Se revisaron las tres; ninguna se agregó como dependencia porque nuestro sistem
 
 **Tests:** `MasteryTest` (4) y el selector con maestría en `RewardsTest`.
 
+### Respaldo en la nube (gratis)
+
+| Pieza | Archivo | Notas |
+|---|---|---|
+| Formato | `data/backup/BackupCodec.kt` | JSON compacto (arreglos por fila) comprimido con gzip: sesiones, inventario, hallazgos, lugares y ajustes con su tipo. Mil sesiones ocupan < 60 KB. Rechaza respaldos de versiones más nuevas |
+| Nube | `data/backup/BackupRepository.kt` | Firestore `users/{uid}/backup/`: `meta` (fecha, partes, sesiones, elementos, teléfono) y `part_N` con el contenido (Blob, partes de 900 KB). Las reglas ya publicadas cubren la ruta. Restaurar es todo o nada (transacción de Room) |
+| No viaja | `SettingsRepository.NOT_BACKED_UP` | La compra de Pro (la restaura Google Play), el interruptor de pruebas y el permiso de lugares |
+| Automático | `service/AutoBackup.kt` | Al terminar cada plan, si hay sesión |
+| Al iniciar sesión | `MainViewModel.afterSignIn`, `RestoreOfferDialog` | Teléfono vacío + respaldo existente → "Encontramos tu laboratorio" para recuperarlo; sin respaldo → se hace el primero |
+| Config | `ui/settings/CloudBackupSection.kt` | Último respaldo, "Respaldar ahora" y "Recuperar" (con confirmación). Sin sesión, invita a iniciarla |
+
+**Tests:** `BackupCodecTest` (3, con `org.json` real en los tests de JVM). Falta la prueba de punta a punta con una cuenta de Google real.
+
 ### Ideas Pro para más adelante
 - **Más sonidos**: ✅ los generados ya están. Faltan ambientes grabados con licencia CC0 (cafetería, bosque) en loop con `ExoPlayer`/Media3 y mezclar varios a la vez.
 - **Efectos del líquido**: hervor en el último minuto, condensación en el vidrio vacío, chapoteo al cambiar de sesión, brillo tenue en modo ambiente, inclinación con el acelerómetro.

@@ -6,6 +6,7 @@ import androidx.room.Query
 import com.jjas.labpomodoro.data.local.entity.PlaceEntity
 import com.jjas.labpomodoro.data.local.entity.PlaceTotal
 import kotlinx.coroutines.flow.Flow
+import androidx.room.OnConflictStrategy
 
 @Dao
 interface PlaceDao {
@@ -37,4 +38,10 @@ interface PlaceDao {
         """
     )
     fun observeTotals(fromEpochDay: Long): Flow<List<PlaceTotal>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(rows: List<PlaceEntity>)
+
+    @Query("DELETE FROM places")
+    suspend fun deleteAll()
 }
