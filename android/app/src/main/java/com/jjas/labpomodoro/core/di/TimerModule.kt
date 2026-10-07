@@ -3,10 +3,12 @@ package com.jjas.labpomodoro.core.di
 import android.content.Context
 import android.os.SystemClock
 import com.jjas.labpomodoro.service.AlarmDeadlineScheduler
+import com.jjas.labpomodoro.service.FileTimerStore
 import com.jjas.labpomodoro.service.TimerService
 import com.jjas.labpomodoro.timer.DeadlineScheduler
 import com.jjas.labpomodoro.timer.TimeSource
 import com.jjas.labpomodoro.timer.TimerServiceLauncher
+import com.jjas.labpomodoro.timer.TimerStore
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -32,6 +34,9 @@ abstract class TimerModule {
 
     @Binds
     abstract fun bindDeadlineScheduler(impl: AlarmDeadlineScheduler): DeadlineScheduler
+
+    @Binds
+    abstract fun bindTimerStore(impl: FileTimerStore): TimerStore
 
     companion object {
         @Provides

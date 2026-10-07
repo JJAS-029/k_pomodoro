@@ -500,6 +500,15 @@ Se revisaron las tres; ninguna se agregó como dependencia porque nuestro sistem
 | Modelos | `labelRes`, `titleRes`, `descriptionRes` | Los enums guardan el id del texto, no el texto; notificaciones, widget y ajustes rápidos usan `context.getString` |
 | Fechas y plurales | `pluralStringResource`, formatos del idioma actual | "4/7 days" / "4/7 días"; días y meses en el idioma de la app |
 
+### Plan a salvo si Android cierra la app
+
+| Pieza | Archivo | Notas |
+|---|---|---|
+| Guardado | `timer/TimerPorts.kt` (`TimerStore`, `TimerSnapshot`), `service/FileTimerStore.kt` | Cada cambio del plan se escribe en `no_backup/timer_plan.json` con `AtomicFile`; al detener o terminar se borra. Fuera del respaldo de Android |
+| Recuperar | `TimerEngine.ensureRestored` | Una vez por proceso, antes de cualquier acción; lo llaman la app al arrancar, el servicio (ahora `START_STICKY`), la alarma, los botones, el widget y los ajustes rápidos |
+| Reinicio del teléfono | `TimerRestoreReceiver` (BOOT_COMPLETED, MY_PACKAGE_REPLACED) | Si cambió el arranque (`hora de pared − elapsedRealtime` se movió más de 1 min), el fin de sesión se traduce con la hora de pared; vuelve a programar la alarma y la notificación |
+| Lo que pasó mientras | `finishCurrent(atElapsed, late)` | Las sesiones que acabaron con la app cerrada se registran como completadas a la hora en que terminaron, sin sonido (`SessionEnded.late`). Un plan guardado hace más de 24 h se descarta |
+
 ### Ideas Pro para más adelante
 - **Más sonidos**: ✅ los generados ya están. Faltan ambientes grabados con licencia CC0 (cafetería, bosque) en loop con `ExoPlayer`/Media3 y mezclar varios a la vez.
 - **Efectos del líquido**: hervor en el último minuto, condensación en el vidrio vacío, chapoteo al cambiar de sesión, brillo tenue en modo ambiente, inclinación con el acelerómetro.

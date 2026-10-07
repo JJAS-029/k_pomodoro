@@ -62,6 +62,15 @@
         <receiver
             android:name=".service.TimerAlarmReceiver"
             android:exported="false" />
+        <!-- Recupera el plan en curso tras reiniciar el teléfono o actualizar la app -->
+        <receiver
+            android:name=".service.TimerRestoreReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
         <!-- Botón de los ajustes rápidos -->
         <service
             android:name=".service.TimerTileService"

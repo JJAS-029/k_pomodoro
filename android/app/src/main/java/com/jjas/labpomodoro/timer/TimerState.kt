@@ -58,5 +58,7 @@ sealed interface TimerEvent {
         val startedAt: Instant,
         val completed: Boolean,
         val next: PlannedSession?,
+        /** Terminó mientras la app estaba cerrada y se registra al recuperar el plan: sin sonido. */
+        val late: Boolean = false,
     ) : TimerEvent
 }

@@ -21,3 +21,20 @@ interface DeadlineScheduler {
 fun interface TimerServiceLauncher {
     fun start()
 }
+
+/**
+ * El plan en curso tal como quedó guardado, para recuperarlo si Android cierra el proceso.
+ * [savedAtWallMillis] y [savedAtElapsed] son el mismo instante en los dos relojes: sirven para saber
+ * si el teléfono se reinició (el reloj de `elapsedRealtime` vuelve a cero) y traducir los tiempos.
+ */
+data class TimerSnapshot(
+    val state: TimerState.Active,
+    val savedAtWallMillis: Long,
+    val savedAtElapsed: Long,
+)
+
+/** Guarda el plan en curso fuera de la memoria; null lo borra. */
+interface TimerStore {
+    suspend fun save(snapshot: TimerSnapshot?)
+    suspend fun load(): TimerSnapshot?
+}

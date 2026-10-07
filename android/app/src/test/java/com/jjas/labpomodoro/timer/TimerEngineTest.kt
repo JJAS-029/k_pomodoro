@@ -6,9 +6,13 @@ import com.jjas.labpomodoro.data.local.entity.SessionEntity
 import com.jjas.labpomodoro.data.repository.SessionRepository
 import com.jjas.labpomodoro.domain.model.SessionConfig
 import com.jjas.labpomodoro.domain.model.SessionType
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
@@ -51,23 +55,38 @@ class TimerEngineTest {
     // 1 h con pomodoros de 25 min: 25 · 5 · 25 · 5 · 10 (recortado)
     private val config = SessionConfig(totalHours = 1, workMinutes = 25, shortBreakMinutes = 5)
 
-    private class Fixture(scope: TestScope) {
-        val dao = FakeSessionDao()
+    /** Guarda en memoria; se comparte entre dos Fixture para simular que Android cerró el proceso. */
+    private class FakeStore : TimerStore {
+        var saved: TimerSnapshot? = null
+        override suspend fun save(snapshot: TimerSnapshot?) { saved = snapshot }
+        override suspend fun load(): TimerSnapshot? = saved
+    }
+
+    /**
+     * Un proceso de la app. [bootAt] simula un reinicio del teléfono: elapsedRealtime vuelve a
+     * contar desde ese momento de la prueba.
+     */
+    private class Fixture(scope: TestScope, val store: FakeStore = FakeStore(), val dao: FakeSessionDao = FakeSessionDao(), bootAt: Long = 0) {
         val scheduler = FakeScheduler()
         var serviceStarts = 0
         private val start = Instant.parse("2026-10-04T15:00:00Z")
         val time = object : TimeSource {
-            override fun elapsedRealtime() = scope.testScheduler.currentTime
+            override fun elapsedRealtime() = scope.testScheduler.currentTime - bootAt
             override fun now(): Instant = start.plusMillis(scope.testScheduler.currentTime)
         }
+        // Scope propio para poder "matar" el proceso sin que su delay siga corriendo
+        private val processScope = CoroutineScope(scope.backgroundScope.coroutineContext + Job())
         val engine = TimerEngine(
             time = time,
             sessions = SessionRepository(dao, Clock.fixed(start, ZoneOffset.UTC)),
             scheduler = scheduler,
             serviceLauncher = { serviceStarts++ },
-            scope = scope.backgroundScope,
+            store = store,
+            scope = processScope,
         )
         val active get() = engine.state.value as TimerState.Active
+
+        fun kill() = processScope.cancel()
     }
 
     @Test
@@ -175,5 +194,108 @@ class TimerEngineTest {
         assertEquals(TimerState.Idle, f.engine.state.value)
         assertTrue(f.dao.inserted.isEmpty())
         assertEquals(null, f.scheduler.scheduledAt)
+    }
+
+    @Test
+    fun `si Android cierra la app el plan sigue donde iba`() = runTest {
+        val first = Fixture(this)
+        first.engine.start(config)
+        advanceTimeBy(10 * minute)
+        first.kill()
+
+        advanceTimeBy(5 * minute)
+        val second = Fixture(this, first.store, first.dao)
+        second.engine.ensureRestored()
+
+        assertEquals(0, second.active.index)
+        assertEquals(10 * minute, second.active.remainingMillis(second.time.elapsedRealtime()))
+        assertEquals(second.active.endsAtElapsed, second.scheduler.scheduledAt)
+        assertEquals(1, second.serviceStarts)
+        assertTrue(second.dao.inserted.isEmpty())
+    }
+
+    @Test
+    fun `lo que termino con la app cerrada se registra a su hora`() = runTest {
+        val first = Fixture(this)
+        first.engine.start(config)
+        first.kill()
+
+        // 25 de trabajo + 5 de descanso ya pasaron; van 2 min del segundo pomodoro
+        advanceTimeBy(32 * minute)
+        val second = Fixture(this, first.store, first.dao)
+        val events = mutableListOf<TimerEvent>()
+        backgroundScope.launch { second.engine.events.collect { events += it } }
+        runCurrent()
+        second.engine.ensureRestored()
+        runCurrent()
+
+        assertEquals(2, second.active.index)
+        assertEquals(23 * minute, second.active.remainingMillis(second.time.elapsedRealtime()))
+        assertEquals(1, second.active.completedWorkSessions)
+        val (work, rest) = second.dao.inserted
+        assertTrue(work.completed && rest.completed)
+        assertEquals(25 * minute, work.endedAtMillis - work.startedAtMillis)
+        assertEquals(work.endedAtMillis, rest.startedAtMillis)
+        // Sin sonido para lo que ya pasó
+        assertTrue(events.filterIsInstance<TimerEvent.SessionEnded>().all { it.late })
+    }
+
+    @Test
+    fun `tras reiniciar el telefono se traduce el tiempo con la hora de pared`() = runTest {
+        val first = Fixture(this)
+        advanceTimeBy(3 * 60 * minute) // El teléfono llevaba 3 h encendido
+        first.engine.start(config)
+        advanceTimeBy(10 * minute)
+        first.kill()
+
+        advanceTimeBy(2 * minute)
+        // Reinicio: elapsedRealtime vuelve a empezar desde aquí
+        val second = Fixture(this, first.store, first.dao, bootAt = testScheduler.currentTime)
+        second.engine.ensureRestored()
+
+        assertEquals(0, second.active.index)
+        assertEquals(13 * minute, second.active.remainingMillis(second.time.elapsedRealtime()))
+    }
+
+    @Test
+    fun `un plan en pausa se recupera en pausa`() = runTest {
+        val first = Fixture(this)
+        first.engine.start(config)
+        advanceTimeBy(10 * minute)
+        first.engine.pause()
+        first.kill()
+
+        advanceTimeBy(60 * minute)
+        val second = Fixture(this, first.store, first.dao)
+        second.engine.ensureRestored()
+
+        assertTrue(second.active.isPaused)
+        assertEquals(15 * minute, second.active.remainingMillis(second.time.elapsedRealtime()))
+        assertEquals(null, second.scheduler.scheduledAt)
+    }
+
+    @Test
+    fun `un plan de hace mas de un dia se descarta`() = runTest {
+        val first = Fixture(this)
+        first.engine.start(config)
+        first.engine.pause()
+        first.kill()
+
+        advanceTimeBy(25 * 60 * minute)
+        val second = Fixture(this, first.store, first.dao)
+        second.engine.ensureRestored()
+
+        assertEquals(TimerState.Idle, second.engine.state.value)
+        assertEquals(null, second.store.saved)
+    }
+
+    @Test
+    fun `detener o terminar borra el plan guardado`() = runTest {
+        val f = Fixture(this)
+        f.engine.start(config)
+        assertTrue(f.store.saved != null)
+
+        f.engine.reset()
+        assertEquals(null, f.store.saved)
     }
 }

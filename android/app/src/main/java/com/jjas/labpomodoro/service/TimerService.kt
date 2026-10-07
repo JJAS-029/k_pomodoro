@@ -38,6 +38,8 @@ class TimerService : Service() {
         notifications.ensureChannel()
         startInForeground()
         scope.launch {
+            // Si Android reinició el servicio tras cerrar la app, primero se recupera el plan
+            engine.ensureRestored()
             engine.state.collectLatest { state ->
                 if (state is TimerState.Active) {
                     // El cronómetro avanza solo; la barra del plan se refresca cada 30 s mientras corre
@@ -67,8 +69,8 @@ class TimerService : Service() {
             ACTION_SKIP -> scope.launch { engine.skip() }
             ACTION_STOP -> scope.launch { engine.reset() }
         }
-        // Si el sistema mata el proceso el plan en memoria se pierde: no tiene caso recrear el servicio
-        return START_NOT_STICKY
+        // Si el sistema mata el proceso, lo vuelve a crear y el motor recupera el plan guardado
+        return START_STICKY
     }
 
     private fun startInForeground() {

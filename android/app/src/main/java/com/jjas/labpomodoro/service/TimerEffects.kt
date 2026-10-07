@@ -68,6 +68,8 @@ class TimerEffects @Inject constructor(
             TimerEvent.PlanStarted -> if (prefs.soundEnabled) play(startSound)
 
             is TimerEvent.SessionEnded -> {
+                // Terminó con la app cerrada: se registra sin sonar a destiempo
+                if (event.late) return
                 if (event.completed) {
                     // El sonido anuncia lo que sigue; al acabar el plan suena el de descanso largo
                     if (prefs.soundEnabled) {

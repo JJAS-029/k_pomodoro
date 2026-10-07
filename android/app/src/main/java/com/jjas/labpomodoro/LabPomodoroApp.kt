@@ -1,6 +1,7 @@
 package com.jjas.labpomodoro
 
 import android.app.Application
+import com.jjas.labpomodoro.core.di.ApplicationScope
 import com.jjas.labpomodoro.data.billing.BillingRepository
 import com.jjas.labpomodoro.service.AutoBackup
 import com.jjas.labpomodoro.service.FocusSoundController
@@ -9,8 +10,11 @@ import com.jjas.labpomodoro.service.PlaceTracker
 import com.jjas.labpomodoro.service.RewardSync
 import com.jjas.labpomodoro.service.StreakReminderScheduler
 import com.jjas.labpomodoro.service.TimerEffects
+import com.jjas.labpomodoro.timer.TimerEngine
 import com.jjas.labpomodoro.widget.TimerWidgetSync
 import dagger.hilt.android.HiltAndroidApp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltAndroidApp
@@ -34,6 +38,10 @@ class LabPomodoroApp : Application() {
 
     @Inject lateinit var widgetSync: TimerWidgetSync
 
+    @Inject lateinit var engine: TimerEngine
+
+    @Inject @ApplicationScope lateinit var scope: CoroutineScope
+
     override fun onCreate() {
         super.onCreate()
         timerEffects.start()
@@ -45,5 +53,7 @@ class LabPomodoroApp : Application() {
         streakReminder.start()
         leagueSync.start()
         widgetSync.start()
+        // Si Android cerró la app con un plan en curso, se retoma donde iba
+        scope.launch { engine.ensureRestored() }
     }
 }
