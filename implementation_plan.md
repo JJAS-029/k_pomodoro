@@ -466,7 +466,7 @@ Se revisaron las tres; ninguna se agregó como dependencia porque nuestro sistem
 
 **Tests:** `LeagueTest` (6). Falta la prueba en línea con cuentas reales.
 
-### Widget de la pantalla de inicio
+### Atajos: widget y ajustes rápidos
 
 | Pieza | Archivo | Notas |
 |---|---|---|
@@ -474,6 +474,7 @@ Se revisaron las tres; ninguna se agregó como dependencia porque nuestro sistem
 | Al día | `TimerWidgetSync` | Cambia con el estado del timer y redibuja el recipiente cada 30 s mientras corre; no hace nada si no hay widgets |
 | Iniciar | `WidgetActionReceiver` | Arranca el plan sin abrir la app (tocar un widget permite iniciar el servicio en primer plano) |
 | Agregar | Config › Widget | "Agregar a la pantalla de inicio" con `requestPinAppWidget` |
+| Ajustes rápidos | `service/TimerTileService.kt` | Botón de la cortina: sin plan lo inicia (si Android no deja iniciar el servicio desde ahí, abre la app); con plan pausa o continúa. Encendido mientras hay plan, con "Trabajo · 23 min" o "En pausa". Config › Atajos lo agrega con un toque (Android 13+) |
 | Elemento por sesión | `ui/components/VesselReagents.kt` | Función pura compartida con la app: usa los elementos que se tenían al empezar el plan (la semilla es la hora de inicio), así coincide en todas partes aunque la app se reinicie |
 
 ### Ideas Pro para más adelante

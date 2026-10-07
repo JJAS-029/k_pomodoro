@@ -54,6 +54,7 @@ import com.jjas.labpomodoro.domain.model.AppSettings
 import com.jjas.labpomodoro.domain.model.PeriodicTable
 import com.jjas.labpomodoro.domain.model.PlanRounding
 import com.jjas.labpomodoro.domain.model.SessionConfig
+import com.jjas.labpomodoro.service.requestAddTimerTile
 import com.jjas.labpomodoro.ui.promo.GITHUB_URL
 import com.jjas.labpomodoro.ui.promo.Podcast
 import com.jjas.labpomodoro.ui.promo.SUGGESTIONS_EMAIL
@@ -282,14 +283,18 @@ private fun SettingsContent(
             }
         }
 
-        SectionTitle("Widget")
+        SectionTitle("Atajos")
         val context = LocalContext.current
         Text(
-            "El recipiente, el tiempo y los controles en tu pantalla de inicio.",
+            "Controla el timer sin abrir la app: un widget en la pantalla de inicio o un botón en los ajustes rápidos.",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         OutlinedButton(onClick = { context.requestPinTimerWidget() }) { Text("Agregar a la pantalla de inicio") }
+        // Android 13+ permite agregar el botón de los ajustes rápidos desde la app
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            OutlinedButton(onClick = { context.requestAddTimerTile() }) { Text("Agregar a los ajustes rápidos") }
+        }
 
         SectionTitle("Recipientes")
         val fixed = settings.vesselElement.takeIf { it in 1..PeriodicTable.SIZE }?.let { PeriodicTable[it] }
