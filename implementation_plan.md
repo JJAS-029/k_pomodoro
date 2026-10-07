@@ -466,6 +466,16 @@ Se revisaron las tres; ninguna se agregó como dependencia porque nuestro sistem
 
 **Tests:** `LeagueTest` (6). Falta la prueba en línea con cuentas reales.
 
+### Widget de la pantalla de inicio
+
+| Pieza | Archivo | Notas |
+|---|---|---|
+| Widget | `widget/TimerWidget.kt`, `res/layout/widget_timer.xml` | `RemoteViews` clásico (no Glance) para usar el **cronómetro del sistema en cuenta regresiva**: el tiempo avanza sin despertar a la app. Recipiente dibujado como imagen con el color de su elemento y el nivel del líquido; "Trabajo · Neón", tiempo, lo que sigue y botones (iniciar/pausar/continuar, saltar, detener) debajo del texto para que quepa en cualquier ancho |
+| Al día | `TimerWidgetSync` | Cambia con el estado del timer y redibuja el recipiente cada 30 s mientras corre; no hace nada si no hay widgets |
+| Iniciar | `WidgetActionReceiver` | Arranca el plan sin abrir la app (tocar un widget permite iniciar el servicio en primer plano) |
+| Agregar | Config › Widget | "Agregar a la pantalla de inicio" con `requestPinAppWidget` |
+| Elemento por sesión | `ui/components/VesselReagents.kt` | Función pura compartida con la app: usa los elementos que se tenían al empezar el plan (la semilla es la hora de inicio), así coincide en todas partes aunque la app se reinicie |
+
 ### Ideas Pro para más adelante
 - **Más sonidos**: ✅ los generados ya están. Faltan ambientes grabados con licencia CC0 (cafetería, bosque) en loop con `ExoPlayer`/Media3 y mezclar varios a la vez.
 - **Efectos del líquido**: hervor en el último minuto, condensación en el vidrio vacío, chapoteo al cambiar de sesión, brillo tenue en modo ambiente, inclinación con el acelerómetro.

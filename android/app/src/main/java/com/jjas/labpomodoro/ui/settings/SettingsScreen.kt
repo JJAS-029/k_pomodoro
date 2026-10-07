@@ -63,6 +63,7 @@ import com.jjas.labpomodoro.ui.promo.sendSuggestion
 import com.jjas.labpomodoro.ui.promo.shareText
 import com.jjas.labpomodoro.ui.sound.FocusSoundPanel
 import com.jjas.labpomodoro.ui.theme.LabPomodoroTheme
+import com.jjas.labpomodoro.widget.requestPinTimerWidget
 
 @Composable
 fun SettingsScreen(
@@ -280,6 +281,15 @@ private fun SettingsContent(
                 }
             }
         }
+
+        SectionTitle("Widget")
+        val context = LocalContext.current
+        Text(
+            "El recipiente, el tiempo y los controles en tu pantalla de inicio.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        OutlinedButton(onClick = { context.requestPinTimerWidget() }) { Text("Agregar a la pantalla de inicio") }
 
         SectionTitle("Recipientes")
         val fixed = settings.vesselElement.takeIf { it in 1..PeriodicTable.SIZE }?.let { PeriodicTable[it] }

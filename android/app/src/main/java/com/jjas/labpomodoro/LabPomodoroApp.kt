@@ -9,6 +9,7 @@ import com.jjas.labpomodoro.service.PlaceTracker
 import com.jjas.labpomodoro.service.RewardSync
 import com.jjas.labpomodoro.service.StreakReminderScheduler
 import com.jjas.labpomodoro.service.TimerEffects
+import com.jjas.labpomodoro.widget.TimerWidgetSync
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
 
@@ -31,6 +32,8 @@ class LabPomodoroApp : Application() {
 
     @Inject lateinit var leagueSync: LeagueSync
 
+    @Inject lateinit var widgetSync: TimerWidgetSync
+
     override fun onCreate() {
         super.onCreate()
         timerEffects.start()
@@ -41,5 +44,6 @@ class LabPomodoroApp : Application() {
         autoBackup.start()
         streakReminder.start()
         leagueSync.start()
+        widgetSync.start()
     }
 }

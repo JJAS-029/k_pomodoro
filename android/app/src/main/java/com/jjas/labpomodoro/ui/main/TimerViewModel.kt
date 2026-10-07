@@ -20,6 +20,7 @@ import com.jjas.labpomodoro.ui.components.LiquidPalette
 import com.jjas.labpomodoro.ui.components.PlanDot
 import com.jjas.labpomodoro.ui.components.ShelfItemUi
 import com.jjas.labpomodoro.ui.components.UpNext
+import com.jjas.labpomodoro.ui.components.VesselReagents
 import com.jjas.labpomodoro.ui.components.VesselShape
 import com.jjas.labpomodoro.ui.components.look
 import com.jjas.labpomodoro.ui.theme.NeonGreen
@@ -37,7 +38,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.random.Random
 
 sealed interface TimerUi {
     /** Vista previa del plan que se generaría con la configuración actual. */
@@ -114,15 +114,7 @@ class TimerViewModel @Inject constructor(
     inventory: InventoryRepository,
 ) : ViewModel() {
 
-    private val discovered = inventory.items.map { items -> items.filter { it.firstObtainedAtMillis != null }.map { it.element } }
-
-    // Los elementos se reparten al empezar el plan y no cambian mientras dura, aunque ganes nuevos
-    private var reagentPool: Pair<Long, List<Element>>? = null
-
-    private fun poolFor(planSeed: Long, current: List<Element>): List<Element> {
-        reagentPool?.takeIf { it.first == planSeed }?.let { return it.second }
-        return current.also { reagentPool = planSeed to it }
-    }
+    private val inventoryItems = inventory.items
 
     // Solo hace falta "tic" en pantalla mientras corre; el motor no depende de esto
     private val ticking = engine.state.flatMapLatest { state ->
@@ -138,7 +130,7 @@ class TimerViewModel @Inject constructor(
         }
     }
 
-    val state: StateFlow<TimerScreenState> = combine(ticking, settingsRepository.settings, discovered) { timer, settings, owned ->
+    val state: StateFlow<TimerScreenState> = combine(ticking, settingsRepository.settings, inventoryItems) { timer, settings, items ->
         val ui = when (timer) {
             TimerState.Idle -> {
                 val plan = SessionPlanGenerator.generate(settings.session)
@@ -154,15 +146,10 @@ class TimerViewModel @Inject constructor(
                 val total = timer.current.durationSeconds * 1000f
                 val progress = (1f - remaining / total).coerceIn(0f, 1f)
                 val type = timer.current.type
-                val pool = poolFor(timer.planSeed, owned)
-                val favorite = pool.firstOrNull { it.atomicNumber == settings.vesselElement }
-                // El favorito si lo elegiste; si no, uno distinto de tu colección en cada sesión
-                fun reagent(i: Int): Element? = when {
-                    timer.plan[i].type != SessionType.WORK -> null
-                    favorite != null -> favorite
-                    pool.isEmpty() -> null
-                    else -> pool[Random(timer.planSeed * 17 + i).nextInt(pool.size)]
-                }
+                // La semilla del plan es su hora de inicio: se usan los elementos que ya se tenían
+                val pool = VesselReagents.pool(items, timer.planSeed)
+                fun reagent(i: Int): Element? =
+                    VesselReagents.reagent(timer.plan, i, timer.planSeed, pool, settings.vesselElement)
                 fun liquid(i: Int): Color =
                     reagent(i)?.look()?.color ?: LiquidPalette.liquid(timer.plan[i].type, timer.planSeed, i)
                 TimerUi.Active(
