@@ -479,6 +479,17 @@ Se revisaron las tres; ninguna se agregó como dependencia porque nuestro sistem
 | Ajustes rápidos | `service/TimerTileService.kt` | Botón de la cortina: sin plan lo inicia (si Android no deja iniciar el servicio desde ahí, abre la app); con plan pausa o continúa. Encendido mientras hay plan, con "Trabajo · 23 min" o "En pausa". Config › Atajos lo agrega con un toque (Android 13+) |
 | Elemento por sesión | `ui/components/VesselReagents.kt` | Función pura compartida con la app: usa los elementos que se tenían al empezar el plan (la semilla es la hora de inicio), así coincide en todas partes aunque la app se reinicie |
 
+### Medallas por logros
+
+| Pieza | Archivo | Notas |
+|---|---|---|
+| Catálogo | `domain/model/Medal.kt` | 17 medallas de bronce, plata y oro: primer pomodoro, rachas de 3/7/30/100 días, 10/50/100 h de enfoque, maratón (8 en un día), madrugador (5 antes de las 7), búho nocturno (5 después de las 10 p. m.), primera síntesis y 25 fusiones, 10/59/118 elementos y un elemento en oro |
+| Cálculo | `domain/usecase/MedalCalculator.kt`, `MedalRepository` | Se calculan del historial cada vez (no se guardan): un respaldo restaurado las trae solas. La racha usa la más larga, así no se pierden. Solo cuentan pomodoros completados |
+| Ya vistas | `SettingsRepository.addMedalsSeen` | Texto con los nombres ya celebrados (`medals_seen`); viaja en el respaldo para no repetir avisos |
+| Pantalla | `ui/medals/MedalViews.kt`, sección "Medallas" en Progreso | Medalla de metal con su símbolo; las que faltan, apagadas con un anillo de avance. Al tocar: qué pide, cuánto falta ("2/3 días") y compartir si ya se ganó |
+| Aviso | `MedalBanner` en la pantalla principal | "¡Nueva medalla!" con confeti de su metal; "Ver" lleva a Progreso |
+| Guía | `GuideScreen.ProgressPage` | Última página: maestría (Au en sus 4 niveles), medallas y ligas; el menú explica Logros y Progreso |
+
 ### Ideas Pro para más adelante
 - **Más sonidos**: ✅ los generados ya están. Faltan ambientes grabados con licencia CC0 (cafetería, bosque) en loop con `ExoPlayer`/Media3 y mezclar varios a la vez.
 - **Efectos del líquido**: hervor en el último minuto, condensación en el vidrio vacío, chapoteo al cambiar de sesión, brillo tenue en modo ambiente, inclinación con el acelerómetro.

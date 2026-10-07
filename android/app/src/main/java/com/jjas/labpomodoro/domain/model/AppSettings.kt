@@ -70,6 +70,8 @@ data class AppSettings(
     val tableCelebrated: Boolean = false,
     /** Nivel de maestría de la tabla completa ya celebrado (ordinal de [Mastery]). */
     val masteryCelebrated: Int = 0,
+    /** Medallas ya celebradas (nombres de [Medal]). */
+    val medalsSeen: Set<String> = emptySet(),
     /** Recordatorio diario si ese día no hubo pomodoros. */
     val reminderEnabled: Boolean = false,
     /** Hora del recordatorio (0..23). */

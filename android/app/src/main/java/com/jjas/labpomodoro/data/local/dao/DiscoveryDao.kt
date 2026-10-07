@@ -18,6 +18,9 @@ interface DiscoveryDao {
     @Query("SELECT COUNT(*) FROM discoveries WHERE source = :source")
     suspend fun countBySource(source: DiscoverySource): Int
 
+    @Query("SELECT COUNT(*) FROM discoveries WHERE source = :source")
+    fun observeCountBySource(source: DiscoverySource): Flow<Int>
+
     @Query("SELECT * FROM discoveries WHERE seen = 0 ORDER BY id")
     fun observeUnseen(): Flow<List<DiscoveryEntity>>
 

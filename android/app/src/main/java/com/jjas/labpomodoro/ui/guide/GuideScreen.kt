@@ -40,6 +40,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jjas.labpomodoro.R
 import com.jjas.labpomodoro.data.repository.SettingsRepository
+import com.jjas.labpomodoro.domain.model.League
+import com.jjas.labpomodoro.domain.model.Mastery
+import com.jjas.labpomodoro.domain.model.Medal
+import com.jjas.labpomodoro.domain.model.MedalProgress
 import com.jjas.labpomodoro.domain.model.PeriodicTable
 import com.jjas.labpomodoro.domain.model.SessionType
 import com.jjas.labpomodoro.ui.components.DotState
@@ -55,6 +59,7 @@ import com.jjas.labpomodoro.ui.components.UpNext
 import com.jjas.labpomodoro.ui.components.VesselShape
 import com.jjas.labpomodoro.ui.components.VesselView
 import com.jjas.labpomodoro.ui.components.icon
+import com.jjas.labpomodoro.ui.medals.MedalBadge
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -86,6 +91,7 @@ fun GuideScreen(onDone: () -> Unit, viewModel: GuideViewModel = hiltViewModel())
         { ControlsPage() },
         { ShelfAndAmbientPage() },
         { ElementsPage() },
+        { ProgressPage() },
     )
     val pager = rememberPagerState { pages.size }
     val scope = rememberCoroutineScope()
@@ -267,7 +273,8 @@ private fun ControlsPage() {
     Text("En el menú", style = MaterialTheme.typography.titleMedium)
     Spacer(Modifier.height(4.dp))
     LegendRow({ LegendIcon(R.drawable.ic_tune, MaterialTheme.colorScheme.onSurface) }, "Config: horas, duraciones y avisos")
-    LegendRow({ LegendIcon(R.drawable.ic_star, MaterialTheme.colorScheme.onSurface) }, "Logros y tabla periódica")
+    LegendRow({ LegendIcon(R.drawable.ic_star, MaterialTheme.colorScheme.onSurface) }, "Logros: tabla periódica, sintetizador y liga")
+    LegendRow({ LegendIcon(R.drawable.ic_chart, MaterialTheme.colorScheme.onSurface) }, "Progreso: estadísticas y medallas")
     LegendRow({ LegendIcon(R.drawable.ic_moon, MaterialTheme.colorScheme.onSurface) }, "Modo ambiente al instante (Pro)")
     LegendRow({ LegendIcon(R.drawable.ic_help, MaterialTheme.colorScheme.onSurface) }, "Volver a ver esta guía")
     Body("Los mismos controles aparecen en la notificación.")
@@ -326,6 +333,53 @@ private fun ElementsPage() {
     Body("Tus elementos llenan los recipientes de trabajo y se comportan como en la realidad: el sodio burbujea, el neón brilla, el mercurio refleja como metal. Toca uno en la tabla para saber qué es y para qué sirve.")
     Spacer(Modifier.height(12.dp))
     LegendRow({ LegendIcon(R.drawable.ic_headphones, MaterialTheme.colorScheme.secondary) }, "Sonido (Pro): ruido blanco, rosa o café, lluvia u olas mientras trabajas.")
+}
+
+@Composable
+private fun ProgressPage() {
+    PageTitle("Maestría, medallas y ligas")
+    // La misma pieza con cada nivel de maestría
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        listOf(Mastery.DISCOVERED, Mastery.BRONZE, Mastery.SILVER, Mastery.GOLD).forEach {
+            ElementTile(PeriodicTable[79], discovered = true, size = 48.dp, mastery = it)
+        }
+    }
+    Spacer(Modifier.height(12.dp))
+    Body(
+        "Los repetidos no se desperdician: cada vez que obtienes un elemento sube su maestría, de bronce a plata " +
+            "y a oro (5, 10 y 15 veces; los sintéticos, 2, 4 y 6). Si toda la tabla llega a un nivel, lo celebramos."
+    )
+    Spacer(Modifier.height(20.dp))
+    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        listOf(Medal.STREAK_3, Medal.MARATHON, Medal.HOURS_100).forEach { MedalBadge(MedalProgress(it, it.target), 48.dp) }
+        MedalBadge(MedalProgress(Medal.STREAK_30, 12), 48.dp)
+    }
+    Spacer(Modifier.height(12.dp))
+    Body(
+        "En Progreso están tus medallas: rachas, horas de enfoque, madrugadas, fusiones y más. Las que te faltan " +
+            "se ven apagadas, con un anillo que muestra cuánto llevas."
+    )
+    Spacer(Modifier.height(20.dp))
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        listOf(League.HYDROGEN, League.NEON, League.GOLD, League.PLATINUM).forEach { LeagueChip(it) }
+    }
+    Spacer(Modifier.height(12.dp))
+    Body(
+        "En ★ Logros › Liga compites cada semana con hasta 30 personas: tus puntos son tus minutos de enfoque. " +
+            "Los primeros suben de liga y los últimos bajan, del Hidrógeno al Platino. Necesitas entrar con tu cuenta."
+    )
+}
+
+@Composable
+private fun LeagueChip(league: League) {
+    Box(
+        Modifier
+            .size(48.dp)
+            .background(Color(league.color), CircleShape),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(league.symbol, style = MaterialTheme.typography.titleMedium, color = Color.Black.copy(alpha = 0.8f))
+    }
 }
 
 /** Saludo para quien abre la app por primera vez. */

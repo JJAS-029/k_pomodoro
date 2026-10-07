@@ -3,9 +3,11 @@ package com.jjas.labpomodoro.ui.stats
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jjas.labpomodoro.data.local.entity.PlaceTotal
+import com.jjas.labpomodoro.data.repository.MedalRepository
 import com.jjas.labpomodoro.data.repository.PlaceRepository
 import com.jjas.labpomodoro.data.repository.SessionRepository
 import com.jjas.labpomodoro.data.repository.SettingsRepository
+import com.jjas.labpomodoro.domain.model.MedalProgress
 import com.jjas.labpomodoro.domain.usecase.FocusStats
 import com.jjas.labpomodoro.domain.usecase.StatsCalculator
 import com.jjas.labpomodoro.domain.usecase.StatsRange
@@ -34,6 +36,7 @@ data class StatsUi(
     val stats: FocusStats,
     val streak: Streak,
     val places: PlacesUi,
+    val medals: List<MedalProgress>,
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -42,6 +45,7 @@ class StatsViewModel @Inject constructor(
     sessions: SessionRepository,
     private val settings: SettingsRepository,
     private val placeRepository: PlaceRepository,
+    private val medalRepository: MedalRepository,
     private val clock: Clock,
 ) : ViewModel() {
 
@@ -54,7 +58,8 @@ class StatsViewModel @Inject constructor(
             sessions.streak,
             settings.settings,
             placeRepository.totals(range.days),
-        ) { all, streak, prefs, places ->
+            medalRepository.progress,
+        ) { all, streak, prefs, places, medals ->
             StatsUi(
                 stats = StatsCalculator.calculate(all, LocalDate.now(clock), range),
                 streak = streak,
@@ -63,9 +68,16 @@ class StatsViewModel @Inject constructor(
                     !prefs.placesEnabled -> PlacesUi.Disabled
                     else -> PlacesUi.Enabled(places)
                 },
+                medals = medals,
             )
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    /** Al ver las medallas aquí ya no hace falta el aviso de la pantalla principal. */
+    fun markMedalsSeen(medals: List<MedalProgress>) {
+        val earned = medals.filter { it.earned }.map { it.medal }
+        if (earned.isNotEmpty()) viewModelScope.launch { medalRepository.markSeen(earned) }
+    }
 
     fun setRange(range: StatsRange) {
         _range.value = range

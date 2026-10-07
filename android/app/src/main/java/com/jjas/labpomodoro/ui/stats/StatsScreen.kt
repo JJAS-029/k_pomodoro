@@ -31,6 +31,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,7 +44,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jjas.labpomodoro.ads.AdBanner
+import com.jjas.labpomodoro.ui.medals.MedalDialog
+import com.jjas.labpomodoro.ui.medals.MedalGrid
 import com.jjas.labpomodoro.data.local.entity.PlaceTotal
+import com.jjas.labpomodoro.domain.model.MedalProgress
 import com.jjas.labpomodoro.domain.usecase.FocusStats
 import com.jjas.labpomodoro.domain.usecase.StatsRange
 import java.time.DayOfWeek
@@ -97,6 +101,8 @@ fun StatsScreen(onBack: () -> Unit, onOpenPro: () -> Unit, viewModel: StatsViewM
                     Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
                 } else {
                     Summary(current.stats, current.streak.current)
+                    LaunchedEffect(current.medals) { viewModel.markMedalsSeen(current.medals) }
+                    Medals(current.medals)
                     if (current.stats.isEmpty) {
                         Spacer(Modifier.height(24.dp))
                         Text(
@@ -154,6 +160,17 @@ private fun Summary(stats: FocusStats, streak: Int) {
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+    }
+}
+
+@Composable
+private fun Medals(medals: List<MedalProgress>) {
+    var selected by remember { mutableStateOf<MedalProgress?>(null) }
+    Section("Medallas", "${medals.count { it.earned }} de ${medals.size} · Toca una para ver cómo ganarla")
+    MedalGrid(medals, onSelect = { selected = it })
+    selected?.let { chosen ->
+        // Se busca de nuevo para que el progreso se actualice si la ventana sigue abierta
+        MedalDialog(medals.firstOrNull { it.medal == chosen.medal } ?: chosen, onDismiss = { selected = null })
     }
 }
 

@@ -68,6 +68,12 @@ class SettingsRepository @Inject constructor(
 
     suspend fun setMasteryCelebrated(level: Int) = dataStore.edit { it[Keys.MASTERY_CELEBRATED] = level }
 
+    /** Suma [medals] a las ya celebradas (se guardan como texto para que viajen en el respaldo). */
+    suspend fun addMedalsSeen(medals: Collection<String>) = dataStore.edit { prefs ->
+        val seen = prefs[Keys.MEDALS_SEEN].toMedalSet() + medals
+        prefs[Keys.MEDALS_SEEN] = seen.sorted().joinToString(",")
+    }
+
     suspend fun setReminder(enabled: Boolean) = dataStore.edit { it[Keys.REMINDER] = enabled }
 
     suspend fun setReminderHour(hour: Int) = dataStore.edit { it[Keys.REMINDER_HOUR] = hour.coerceIn(0, 23) }
@@ -133,10 +139,13 @@ class SettingsRepository @Inject constructor(
             placesEnabled = this[Keys.PLACES] ?: defaults.placesEnabled,
             tableCelebrated = this[Keys.TABLE_CELEBRATED] ?: defaults.tableCelebrated,
             masteryCelebrated = this[Keys.MASTERY_CELEBRATED] ?: defaults.masteryCelebrated,
+            medalsSeen = this[Keys.MEDALS_SEEN].toMedalSet(),
             reminderEnabled = this[Keys.REMINDER] ?: defaults.reminderEnabled,
             reminderHour = this[Keys.REMINDER_HOUR] ?: defaults.reminderHour,
         )
     }
+
+    private fun String?.toMedalSet(): Set<String> = this?.split(',')?.filter { it.isNotBlank() }?.toSet().orEmpty()
 
     private companion object {
         /** De cada teléfono: la compra la restaura Google Play y el permiso de ubicación se pide de nuevo. */
@@ -165,6 +174,7 @@ class SettingsRepository @Inject constructor(
         val PLACES = booleanPreferencesKey("places_enabled")
         val TABLE_CELEBRATED = booleanPreferencesKey("table_celebrated")
         val MASTERY_CELEBRATED = intPreferencesKey("mastery_celebrated")
+        val MEDALS_SEEN = stringPreferencesKey("medals_seen")
         val REMINDER = booleanPreferencesKey("streak_reminder")
         val REMINDER_HOUR = intPreferencesKey("streak_reminder_hour")
     }

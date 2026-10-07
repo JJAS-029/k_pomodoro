@@ -78,6 +78,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jjas.labpomodoro.R
 import com.jjas.labpomodoro.data.repository.Discovery
 import com.jjas.labpomodoro.domain.model.DiscoverySource
+import com.jjas.labpomodoro.domain.model.Medal
 import com.jjas.labpomodoro.domain.model.SessionType
 import com.jjas.labpomodoro.service.formatMinutesSeconds
 import com.jjas.labpomodoro.service.label
@@ -95,6 +96,9 @@ import com.jjas.labpomodoro.ui.components.VesselShape
 import com.jjas.labpomodoro.ui.components.VesselShelf
 import com.jjas.labpomodoro.ui.components.VesselView
 import com.jjas.labpomodoro.ui.components.look
+import com.jjas.labpomodoro.ui.medals.MedalBanner
+import com.jjas.labpomodoro.ui.medals.MedalViewModel
+import com.jjas.labpomodoro.ui.medals.colors
 import com.jjas.labpomodoro.ui.promo.ShareText
 import com.jjas.labpomodoro.ui.promo.shareText
 import com.jjas.labpomodoro.ui.sound.FocusSoundPanel
@@ -113,9 +117,11 @@ fun MainScreen(
     viewModel: MainViewModel = hiltViewModel(),
     timerViewModel: TimerViewModel = hiltViewModel(),
     discoveryViewModel: DiscoveryViewModel = hiltViewModel(),
+    medalViewModel: MedalViewModel = hiltViewModel(),
 ) {
     val account by viewModel.uiState.collectAsStateWithLifecycle()
     val discoveries by discoveryViewModel.unseen.collectAsStateWithLifecycle()
+    val medals by medalViewModel.unseen.collectAsStateWithLifecycle()
     val timer by timerViewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
@@ -226,6 +232,7 @@ fun MainScreen(
                 showTitle = !timer.isPro,
                 dynamicColor = timer.dynamicColor,
                 discoveries = discoveries,
+                medals = medals,
                 // Observa los toques sin consumirlos, para reiniciar la cuenta del modo ambiente
                 modifier = Modifier.pointerInput(Unit) {
                     awaitPointerEventScope {
@@ -251,6 +258,7 @@ fun MainScreen(
                     onOpenGuide = onOpenGuide,
                     onOpenStats = onOpenStats,
                     onDismissDiscoveries = discoveryViewModel::dismiss,
+                    onDismissMedals = medalViewModel::dismiss,
                     onOpenSound = { soundSheet = true },
                     onSignIn = { viewModel.signIn(context) },
                     onSignOut = viewModel::signOut,
@@ -276,6 +284,7 @@ data class MainActions(
     val onOpenStats: () -> Unit = {},
     val onOpenSound: () -> Unit = {},
     val onDismissDiscoveries: () -> Unit = {},
+    val onDismissMedals: () -> Unit = {},
     val onSignIn: () -> Unit = {},
     val onSignOut: () -> Unit = {},
     val onEnterAmbient: () -> Unit = {},
@@ -290,6 +299,7 @@ private fun MainContent(
     showTitle: Boolean = true,
     dynamicColor: Boolean = false,
     discoveries: List<Discovery> = emptyList(),
+    medals: List<Medal> = emptyList(),
 ) {
     // Con Material You el reloj toma el color del sistema
     val clockColor = if (dynamicColor) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
@@ -340,24 +350,44 @@ private fun MainContent(
                 }
             }
 
-            // Elementos ganados con el tiempo de enfoque; "Ver" lleva a la tabla periódica
-            AnimatedVisibility(
-                visible = discoveries.any { it.source != DiscoverySource.FUSION },
-                enter = slideInVertically { -it } + fadeIn(),
-                exit = slideOutVertically { -it } + fadeOut(),
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .padding(horizontal = 16.dp, vertical = 8.dp),
             ) {
-                DiscoveryBanner(
-                    discoveries = discoveries,
-                    onOpen = actions.onOpenAchievements,
-                    onDismiss = actions.onDismissDiscoveries,
-                    modifier = Modifier.fillMaxWidth(),
-                )
+                // Elementos ganados con el tiempo de enfoque; "Ver" lleva a la tabla periódica
+                AnimatedVisibility(
+                    visible = discoveries.any { it.source != DiscoverySource.FUSION },
+                    enter = slideInVertically { -it } + fadeIn(),
+                    exit = slideOutVertically { -it } + fadeOut(),
+                ) {
+                    DiscoveryBanner(
+                        discoveries = discoveries,
+                        onOpen = actions.onOpenAchievements,
+                        onDismiss = actions.onDismissDiscoveries,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+                // Medallas nuevas; "Ver" lleva a Progreso, donde están todas
+                AnimatedVisibility(
+                    visible = medals.isNotEmpty(),
+                    enter = slideInVertically { -it } + fadeIn(),
+                    exit = slideOutVertically { -it } + fadeOut(),
+                ) {
+                    // Se conserva la última lista mientras se anima la salida
+                    var shown by remember { mutableStateOf(medals) }
+                    if (medals.isNotEmpty()) shown = medals
+                    MedalBanner(
+                        medals = shown,
+                        onOpen = actions.onOpenStats,
+                        onDismiss = actions.onDismissMedals,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
             }
 
-            Celebrations(timer, discoveries)
+            Celebrations(timer, discoveries, medals)
 
             LabDock(
                 timer = timer,
@@ -376,7 +406,7 @@ private fun MainContent(
  * recipiente), el plan terminado y elementos nuevos (con los colores de los elementos).
  */
 @Composable
-private fun Celebrations(timer: TimerUi?, discoveries: List<Discovery>) {
+private fun Celebrations(timer: TimerUi?, discoveries: List<Discovery>, medals: List<Medal>) {
     var celebration by remember { mutableStateOf<Celebration?>(null) }
 
     val active = timer as? TimerUi.Active
@@ -410,6 +440,15 @@ private fun Celebrations(timer: TimerUi?, discoveries: List<Discovery>) {
         lastRewards = rewards.size
         if (before >= 0 && rewards.size > before) {
             celebration = Celebration(System.nanoTime(), rewards.map { it.element.look().color }, originY = 0.12f)
+        }
+    }
+
+    var lastMedals by rememberSaveable { mutableIntStateOf(-1) }
+    LaunchedEffect(medals.size) {
+        val before = lastMedals
+        lastMedals = medals.size
+        if (before >= 0 && medals.size > before) {
+            celebration = Celebration(System.nanoTime(), medals.flatMap { it.tier.colors() }, originY = 0.2f)
         }
     }
 

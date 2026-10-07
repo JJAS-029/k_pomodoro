@@ -17,6 +17,9 @@ object ShareText {
         "¡Experimento completado! 🧪 Hoy hice $pomodoros ${if (pomodoros == 1) "pomodoro" else "pomodoros"} " +
             "($focus de enfoque) en Lab Pomodoro. ¿Te animas? $PLAY_STORE_URL"
 
+    fun medal(title: String, description: String): String =
+        "¡Gané la medalla «$title» en Lab Pomodoro! 🏅 ($description). ¿Te animas? $PLAY_STORE_URL"
+
     fun progress(discovered: Int, total: Int, bronze: Int, silver: Int, gold: Int, streak: Int, focus: String): String {
         val mastery = listOfNotNull(
             bronze.takeIf { it > 0 }?.let { "🥉$it" },
