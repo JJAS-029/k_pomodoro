@@ -20,6 +20,9 @@ interface PlaceDao {
     @Query("UPDATE places SET name = :name WHERE id = :id")
     suspend fun rename(id: Long, name: String)
 
+    @Query("UPDATE places SET latitude = :latitude, longitude = :longitude WHERE id = :id")
+    suspend fun setCoordinates(id: Long, latitude: Double, longitude: Double)
+
     /** Asigna el lugar a la sesión que empezó en [startedAtMillis] (se llama justo después de guardarla). */
     @Query("UPDATE sessions SET placeId = :placeId WHERE startedAtMillis = :startedAtMillis")
     suspend fun tagSession(startedAtMillis: Long, placeId: Long)

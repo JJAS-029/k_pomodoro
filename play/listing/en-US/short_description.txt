@@ -1,0 +1,1 @@
+Pomodoro timer where your focus time earns elements of the periodic table.

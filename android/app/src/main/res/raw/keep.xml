@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Recursos que R8 no debe quitar aunque no vea quién los usa: AuthRepository busca por nombre el
+     ID de cliente web que genera el plugin google-services -->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@string/default_web_client_id" />

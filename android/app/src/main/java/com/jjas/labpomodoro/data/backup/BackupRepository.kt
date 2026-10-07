@@ -121,6 +121,14 @@ class BackupRepository @Inject constructor(
         )
     }
 
+    /** Borra el respaldo de la nube (al borrar la cuenta); el progreso del teléfono no se toca. */
+    suspend fun deleteCloud() = lock.withLock {
+        val uid = auth.currentUser?.uid ?: return@withLock
+        folder(uid).get().await().documents.forEach { it.reference.delete().await() }
+        _info.value = null
+        _status.value = BackupStatus.Idle
+    }
+
     /** Reemplaza el progreso de este teléfono por el del respaldo. */
     suspend fun restore(): Boolean = lock.withLock {
         val uid = auth.currentUser?.uid ?: return false

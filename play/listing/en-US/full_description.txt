@@ -1,0 +1,35 @@
+Lab Pomodoro turns your focus sessions into lab experiments. While you work, the liquid in your flask evaporates; when you rest, it fills back up. And every minute you focus brings you closer to a new element of the periodic table.
+
+🧪 A POMODORO TIMER THAT LOOKS AND FEELS DIFFERENT
+• Tell it how many hours you want to work and get the whole plan: pomodoros, short and long breaks.
+• Every session uses its own vessel and color: flasks, beakers and test tubes.
+• Follow the time from the notification, a floating window, the widget or the Quick Settings tile.
+• If Android closes the app or you restart your phone, your plan picks up where it left off.
+
+⚛️ COLLECT THE PERIODIC TABLE
+• Every 25 minutes of focus earns you a basic element, and every 60 minutes a rare one.
+• Fuse elements in the synthesizer: their atomic numbers add up (H + U → Np). It's the only way to get the synthetic ones.
+• Your elements fill your vessels and behave like the real thing: sodium fizzes, neon glows, mercury shines like metal.
+• Tap any element to learn what it is, what it's used for, who discovered it and where.
+• Level up each element's mastery to bronze, silver and gold.
+
+🏅 MEDALS, STREAKS AND LEAGUES
+• 17 medals: daily streaks, focus hours, early mornings, marathons, fusions and more.
+• Optional weekly leagues: compete with up to 30 people on focus minutes and climb from Hydrogen to Platinum.
+• Optional reminder so you don't break your streak.
+
+📊 LEARN HOW YOU FOCUS
+• Stats by day, month, weekday and hour: find out when you do your best work.
+• Free cloud backup with your Google account, so you can switch phones without losing anything.
+
+✨ LAB POMODORO PRO
+• No ads.
+• Ambient mode: just the vessel and the clock, dimmed, when you're not touching the screen.
+• Focus sounds: white, pink and brown noise, rain and waves.
+• Material You colors and realistic glass that bends the liquid like a lens.
+• Places: find out where you focus best (your location stays on your phone).
+• Export your history to CSV.
+
+The app works offline and without an account. Available in English and Spanish.
+
+Ideas or suggestions? Write to us at ciencia.koala@gmail.com.

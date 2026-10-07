@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -29,13 +31,32 @@ android {
         buildConfigField("String", "AD_INTERSTITIAL_ID", "\"$admobInterstitial\"")
     }
 
+    // Llave de subida a Play: android/keystore.properties (no se sube a git) con storeFile,
+    // storePassword, keyAlias y keyPassword. Sin ese archivo, el release se firma con la llave de
+    // debug para poder probarlo en el emulador (Play rechaza esos paquetes)
+    val keystoreFile = rootProject.file("keystore.properties")
+    val uploadKey = Properties().apply { if (keystoreFile.exists()) keystoreFile.inputStream().use(::load) }
+    signingConfigs {
+        if (!uploadKey.isEmpty) {
+            create("upload") {
+                storeFile = rootProject.file(uploadKey.getProperty("storeFile"))
+                storePassword = uploadKey.getProperty("storePassword")
+                keyAlias = uploadKey.getProperty("keyAlias")
+                keyPassword = uploadKey.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
-            isMinifyEnabled = false
+            // R8 encoge y ofusca el código y quita los recursos que no se usan
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.findByName("upload") ?: signingConfigs.getByName("debug")
         }
     }
     // AGP 9 compila Kotlin de forma nativa y toma el jvmTarget de aquí

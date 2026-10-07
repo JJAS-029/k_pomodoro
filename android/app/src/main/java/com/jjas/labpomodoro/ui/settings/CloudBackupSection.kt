@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
@@ -34,9 +35,11 @@ import com.jjas.labpomodoro.R
 import com.jjas.labpomodoro.data.backup.BackupInfo
 import com.jjas.labpomodoro.data.backup.BackupRepository
 import com.jjas.labpomodoro.data.backup.BackupStatus
+import com.jjas.labpomodoro.data.remote.AccountRepository
 import com.jjas.labpomodoro.data.remote.AuthRepository
 import com.jjas.labpomodoro.ui.main.formattedDate
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -48,7 +51,12 @@ import javax.inject.Inject
 class CloudBackupViewModel @Inject constructor(
     private val backup: BackupRepository,
     private val auth: AuthRepository,
+    private val account: AccountRepository,
 ) : ViewModel() {
+
+    /** Borrado de la cuenta: null sin hacer, o en curso / terminado / con error. */
+    private val _deletion = MutableStateFlow<Deletion?>(null)
+    val deletion: StateFlow<Deletion?> = _deletion
 
     val signedIn: StateFlow<Boolean?> = auth.currentUser.map { it != null }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
@@ -76,7 +84,17 @@ class CloudBackupViewModel @Inject constructor(
     fun restore() {
         viewModelScope.launch { backup.restore() }
     }
+
+    fun deleteAccount(activityContext: Context) {
+        _deletion.value = Deletion.Working
+        viewModelScope.launch {
+            _deletion.value = runCatching { account.deleteAccount(activityContext) }
+                .fold(onSuccess = { Deletion.Done }, onFailure = { Deletion.Failed })
+        }
+    }
 }
+
+enum class Deletion { Working, Done, Failed }
 
 /** Respaldo del progreso en la nube: gratis, con la cuenta de Google. */
 @Composable
@@ -85,7 +103,9 @@ fun CloudBackupSection(viewModel: CloudBackupViewModel = hiltViewModel()) {
     val info by viewModel.info.collectAsStateWithLifecycle()
     val status by viewModel.status.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val deletion by viewModel.deletion.collectAsStateWithLifecycle()
     var confirmRestore by rememberSaveable { mutableStateOf(false) }
+    var confirmDelete by rememberSaveable { mutableStateOf(false) }
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         when (signedIn) {
@@ -97,6 +117,9 @@ fun CloudBackupSection(viewModel: CloudBackupViewModel = hiltViewModel()) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 FilledTonalButton(onClick = { viewModel.signIn(context) }) { Text(stringResource(R.string.set_sign_in_google)) }
+                if (deletion == Deletion.Done) {
+                    Text(stringResource(R.string.set_delete_account_done), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
+                }
             }
             true -> {
                 Text(
@@ -128,9 +151,37 @@ fun CloudBackupSection(viewModel: CloudBackupViewModel = hiltViewModel()) {
                     is BackupStatus.Failed -> Text(stringResource(s.messageRes), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
                     else -> Unit
                 }
+                // Lo exige Google Play: borrar la cuenta y lo que hay en la nube
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    TextButton(onClick = { confirmDelete = true }, enabled = deletion != Deletion.Working) {
+                        Text(stringResource(R.string.set_delete_account), color = MaterialTheme.colorScheme.error)
+                    }
+                    if (deletion == Deletion.Working) CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
+                }
+                if (deletion == Deletion.Failed) {
+                    Text(stringResource(R.string.set_delete_account_failed), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
+                }
             }
         }
         Spacer(Modifier.height(4.dp))
+    }
+
+    if (confirmDelete) {
+        AlertDialog(
+            onDismissRequest = { confirmDelete = false },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        confirmDelete = false
+                        viewModel.deleteAccount(context)
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                ) { Text(stringResource(R.string.set_delete_account_confirm)) }
+            },
+            dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text(stringResource(R.string.set_cancel)) } },
+            title = { Text(stringResource(R.string.set_delete_account_title)) },
+            text = { Text(stringResource(R.string.set_delete_account_text)) },
+        )
     }
 
     if (confirmRestore) {

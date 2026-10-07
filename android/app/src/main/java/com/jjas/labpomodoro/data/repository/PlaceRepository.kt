@@ -41,6 +41,12 @@ class PlaceRepository @Inject constructor(
         if (nearest != null && distance(latitude, longitude, nearest.latitude, nearest.longitude) <= SAME_PLACE_METERS) {
             return nearest.id
         }
+        // Lugares restaurados de un respaldo (sin coordenadas): se reconocen por el nombre
+        val restored = places.firstOrNull { it.latitude.isNaN() && it.name == suggestedName }
+        if (restored != null) {
+            placeDao.setCoordinates(restored.id, latitude, longitude)
+            return restored.id
+        }
         return placeDao.insert(
             PlaceEntity(
                 name = suggestedName?.takeIf { it.isNotBlank() } ?: context.getString(R.string.prog_place_default, places.size + 1),

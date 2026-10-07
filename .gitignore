@@ -32,6 +32,8 @@ android/local.properties
 android/.idea/
 android/captures/
 *.keystore
+# Contraseñas de la llave de subida a Play
+android/keystore.properties
 *.jks
 # Config de Firebase: se copia a mano en cada máquina
 android/app/google-services.json

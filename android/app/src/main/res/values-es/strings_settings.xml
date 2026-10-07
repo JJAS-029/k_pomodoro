@@ -216,4 +216,10 @@
     <string name="set_league_stayed_title">Sigues en la liga %1$s</string>
     <string name="set_league_stayed_text">Quedaste en el lugar %1$d de %2$d. Un poco más y subes.</string>
     <string name="set_league_lets_go">¡Vamos!</string>
+    <string name="set_delete_account">Borrar mi cuenta</string>
+    <string name="set_delete_account_title">¿Borrar tu cuenta?</string>
+    <string name="set_delete_account_text">Se borran tu respaldo en la nube, tu lugar en las ligas y tu cuenta de Lab Pomodoro. El progreso guardado en este teléfono se queda; para borrarlo también, desinstala la app. No se puede deshacer.</string>
+    <string name="set_delete_account_confirm">Borrar</string>
+    <string name="set_delete_account_done">Se borraron tu cuenta y tus datos en la nube.</string>
+    <string name="set_delete_account_failed">No se pudo borrar tu cuenta. Revisa tu conexión e inténtalo de nuevo.</string>
 </resources>

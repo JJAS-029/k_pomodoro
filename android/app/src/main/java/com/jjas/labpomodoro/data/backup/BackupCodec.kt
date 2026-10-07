@@ -49,7 +49,8 @@ object BackupCodec {
                 snapshot.discoveries.forEach { d -> put(JSONArray(listOf(d.id, d.atomicNumber, d.source.name, d.obtainedAtMillis, d.seen))) }
             })
             .put("places", JSONArray().apply {
-                snapshot.places.forEach { p -> put(JSONArray(listOf(p.id, p.name, p.latitude, p.longitude, p.createdAtMillis))) }
+                // Sin coordenadas: la ubicación nunca sale del teléfono, solo el nombre del lugar
+                snapshot.places.forEach { p -> put(JSONArray(listOf(p.id, p.name, JSONObject.NULL, JSONObject.NULL, p.createdAtMillis))) }
             })
             .put("settings", JSONObject().apply {
                 snapshot.settings.forEach { (key, value) ->
@@ -93,7 +94,8 @@ object BackupCodec {
                 DiscoveryEntity(r.getLong(0), r.getInt(1), DiscoverySource.valueOf(r.getString(2)), r.getLong(3), r.getBoolean(4))
             },
             places = json.getJSONArray("places").rows { r ->
-                PlaceEntity(r.getLong(0), r.getString(1), r.getDouble(2), r.getDouble(3), r.getLong(4))
+                // Llegan sin coordenadas (NaN): las recupera la primera ubicación con el mismo nombre
+                PlaceEntity(r.getLong(0), r.getString(1), r.optCoordinate(2), r.optCoordinate(3), r.getLong(4))
             },
             settings = json.getJSONObject("settings").let { s ->
                 s.keys().asSequence().associateWith { key ->
@@ -117,3 +119,6 @@ object BackupCodec {
 
     private fun gunzip(data: ByteArray): ByteArray = GZIPInputStream(ByteArrayInputStream(data)).use { it.readBytes() }
 }
+
+/** Coordenada de un lugar; los respaldos nuevos no las traen. */
+private fun JSONArray.optCoordinate(i: Int): Double = if (isNull(i)) Double.NaN else getDouble(i)

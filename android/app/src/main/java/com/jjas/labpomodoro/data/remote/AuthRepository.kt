@@ -8,7 +8,9 @@ import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -45,7 +47,25 @@ class AuthRepository @Inject constructor(
      * Requiere el contexto de una Activity: Credential Manager muestra su hoja de selección de cuenta
      * sobre ella.
      */
-    suspend fun signInWithGoogle(activityContext: Context): FirebaseUser {
+    suspend fun signInWithGoogle(activityContext: Context): FirebaseUser =
+        checkNotNull(auth.signInWithCredential(googleCredential(activityContext)).await().user)
+
+    /**
+     * Borra la cuenta de Firebase. Si el inicio de sesión ya es viejo, Firebase lo exige reciente:
+     * se vuelve a elegir la cuenta de Google y se reintenta.
+     */
+    suspend fun deleteUser(activityContext: Context) {
+        val user = auth.currentUser ?: return
+        try {
+            user.delete().await()
+        } catch (_: FirebaseAuthRecentLoginRequiredException) {
+            user.reauthenticate(googleCredential(activityContext)).await()
+            user.delete().await()
+        }
+        CredentialManager.create(appContext).clearCredentialState(ClearCredentialStateRequest())
+    }
+
+    private suspend fun googleCredential(activityContext: Context): AuthCredential {
         val option = GetSignInWithGoogleOption.Builder(webClientId()).build()
         val request = GetCredentialRequest.Builder()
             .addCredentialOption(option)
@@ -61,8 +81,7 @@ class AuthRepository @Inject constructor(
         ) { "Tipo de credencial inesperado: ${credential.type}" }
 
         val idToken = GoogleIdTokenCredential.createFrom(credential.data).idToken
-        val firebaseCredential = GoogleAuthProvider.getCredential(idToken, null)
-        return checkNotNull(auth.signInWithCredential(firebaseCredential).await().user)
+        return GoogleAuthProvider.getCredential(idToken, null)
     }
 
     suspend fun signOut() {

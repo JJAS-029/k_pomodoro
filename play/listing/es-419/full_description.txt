@@ -1,0 +1,35 @@
+Lab Pomodoro convierte tus sesiones de enfoque en experimentos de laboratorio. Mientras trabajas, el líquido de tu matraz se evapora; al descansar, se vuelve a llenar. Y cada minuto que te concentras te acerca a un nuevo elemento de la tabla periódica.
+
+🧪 UN TIMER POMODORO QUE SE VE Y SE SIENTE DISTINTO
+• Dile cuántas horas quieres trabajar y arma el plan completo: pomodoros, descansos cortos y largos.
+• Cada sesión usa un recipiente y un color distintos: matraces, vasos y tubos de ensayo.
+• Sigue el tiempo desde la notificación, una ventana flotante, el widget o el botón de ajustes rápidos.
+• Si Android cierra la app o reinicias el teléfono, tu plan sigue donde iba.
+
+⚛️ COLECCIONA LA TABLA PERIÓDICA
+• Cada 25 minutos de enfoque ganas un elemento básico y cada 60 minutos uno raro.
+• Fusiona elementos en el sintetizador: sus números atómicos se suman (H + U → Np). Es la única forma de conseguir los sintéticos.
+• Tus elementos llenan los recipientes y se comportan como en la realidad: el sodio burbujea, el neón brilla, el mercurio refleja como metal.
+• Toca cualquier elemento para saber qué es, para qué sirve, quién lo descubrió y dónde.
+• Sube la maestría de cada elemento a bronce, plata y oro.
+
+🏅 MEDALLAS, RACHAS Y LIGAS
+• 17 medallas: rachas de días seguidos, horas de enfoque, madrugadas, maratones, fusiones y más.
+• Ligas semanales opcionales: compite con hasta 30 personas por minutos de enfoque y sube del Hidrógeno al Platino.
+• Recordatorio opcional para no romper tu racha.
+
+📊 CONOCE CÓMO TE CONCENTRAS
+• Estadísticas por día, mes, día de la semana y hora: descubre cuándo rindes más.
+• Respaldo gratis en la nube con tu cuenta de Google, para cambiar de teléfono sin perder nada.
+
+✨ LAB POMODORO PRO
+• Sin anuncios.
+• Modo ambiente: solo el recipiente y el reloj, atenuados, cuando no tocas la pantalla.
+• Sonidos de concentración: ruido blanco, rosa y café, lluvia y olas.
+• Colores de Material You y vidrio realista que deforma el líquido como una lente.
+• Lugares: descubre dónde te concentras mejor (la ubicación se queda en tu teléfono).
+• Exporta tu historial a CSV.
+
+La app funciona sin internet y sin cuenta. Disponible en español e inglés.
+
+¿Ideas o sugerencias? Escríbenos a ciencia.koala@gmail.com.

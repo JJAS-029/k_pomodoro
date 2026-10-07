@@ -388,15 +388,17 @@ Decisiones: Pro con **suscripción (mensual y anual) y pago único**; anuncios *
 
 **Tests:** `StatsCalculatorTest` (5). `ElementDiscoveryTest` (2). Probado en el emulador: migración v2 → v3 con datos reales, lugar "Centro" creado y asignado, anuncio de AdMob y luego el del podcast al terminar dos planes.
 
-### Pendiente cuando haya cuenta de Google Play Console (25 USD, pago único)
-1. Crear la app con el paquete `com.jjas.labpomodoro` y subir un AAB firmado a **prueba interna**.
-2. En *Monetizar › Productos*: suscripción `pro_subscription` con planes base `monthly` y `yearly`, y producto único `pro_lifetime`, con sus precios.
-3. Agregar tu cuenta como *tester de licencias* para comprar sin cobro real.
-4. Política de privacidad publicada (obligatoria por los anuncios) y el formulario de *Seguridad de los datos*.
-5. Justificar el servicio en primer plano `specialUse` y el permiso `USE_EXACT_ALARM` (es un timer).
+### Preparación para Google Play
 
-### Pendiente cuando haya cuenta de AdMob
-Crear la app y dos bloques (banner adaptable e intersticial) y poner sus IDs en `gradle.properties`. Configurar el mensaje de consentimiento (GDPR) en *Privacidad y mensajería*.
+| Pieza | Archivo | Notas |
+|---|---|---|
+| Versión de publicación | `app/build.gradle.kts` | R8 (`isMinifyEnabled`, `isShrinkResources`) y firma con la llave de subida de `android/keystore.properties` (fuera de git); sin ella usa la de debug para probar |
+| Recurso que R8 debe conservar | `res/raw/keep.xml` | `default_web_client_id` se busca por nombre al iniciar sesión con Google |
+| Borrar la cuenta | `data/remote/AccountRepository.kt`, Config › Respaldo en la nube | Lo exige Play: sale de la liga, borra el respaldo, el perfil y la cuenta de Firebase (si el login es viejo, pide elegir la cuenta otra vez). Lo del teléfono se queda |
+| Lugares sin coordenadas en la nube | `BackupCodec`, `PlaceRepository.resolve` | El respaldo sube solo el nombre del lugar; al restaurar, el lugar recupera sus coordenadas la primera vez que se está en un sitio con ese nombre |
+| Ficha, privacidad y pasos en Play Console | `play/README.md`, `play/listing/`, `privacy/` | Textos e imágenes en es-419 y en-US, política de privacidad y página para borrar la cuenta (GitHub Pages), respuestas de *Seguridad de los datos* y declaraciones |
+
+Lo que falta hacer a mano (llave, AdMob, Firebase, Play Console y prueba cerrada) está en `play/README.md`.
 
 ---
 

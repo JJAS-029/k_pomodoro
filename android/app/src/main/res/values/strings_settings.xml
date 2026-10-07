@@ -209,4 +209,10 @@
     <string name="set_league_stayed_title">You\'re still in the %1$s League</string>
     <string name="set_league_stayed_text">You finished #%1$d of %2$d. A little more and you\'ll move up.</string>
     <string name="set_league_lets_go">Let\'s go!</string>
+    <string name="set_delete_account">Delete my account</string>
+    <string name="set_delete_account_title">Delete your account?</string>
+    <string name="set_delete_account_text">This deletes your cloud backup, your spot in the leagues and your Lab Pomodoro account. The progress saved on this phone stays; to erase it too, uninstall the app. This can\'t be undone.</string>
+    <string name="set_delete_account_confirm">Delete</string>
+    <string name="set_delete_account_done">Your account and your cloud data were deleted.</string>
+    <string name="set_delete_account_failed">Couldn\'t delete your account. Check your connection and try again.</string>
 </resources>
