@@ -22,7 +22,7 @@ La llave está en `android/upload-key.jks` y sus contraseñas en `android/keysto
 Si algún día hay que crearla de nuevo, en la terminal de Android Studio (PowerShell), dentro de `android/`:
 
 ```powershell
-& "C:\Program Files\Android\Android Studio1\jbrin\keytool.exe" -genkeypair -v -keystore upload-key.jks -alias upload -keyalg RSA -keysize 2048 -validity 10000
+& "C:\Program Files\Android\Android Studio1\jbr\bin\keytool.exe" -genkeypair -v -keystore upload-key.jks -alias upload -keyalg RSA -keysize 2048 -validity 10000
 ```
 
 O con el asistente: *Build › Generate Signed App Bundle or APK… › Android App Bundle › Create new…* (se puede cancelar después de crear la llave). Luego `android/keystore.properties`:
