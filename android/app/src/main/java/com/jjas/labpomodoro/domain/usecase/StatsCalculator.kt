@@ -1,15 +1,17 @@
 package com.jjas.labpomodoro.domain.usecase
 
+import androidx.annotation.StringRes
+import com.jjas.labpomodoro.R
 import com.jjas.labpomodoro.data.local.entity.SessionEntity
 import com.jjas.labpomodoro.domain.model.SessionType
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
 
-enum class StatsRange(val label: String, val days: Long?) {
-    WEEK("7 días", 7),
-    MONTH("30 días", 30),
-    ALL("Todo", null),
+enum class StatsRange(@StringRes val labelRes: Int, val days: Long?) {
+    WEEK(R.string.prog_range_week, 7),
+    MONTH(R.string.prog_range_month, 30),
+    ALL(R.string.prog_range_all, null),
 }
 
 /** Una barra de la línea de tiempo: un día (7 y 30 días) o un mes (Todo). */

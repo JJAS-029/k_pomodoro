@@ -5,6 +5,7 @@ import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.credentials.exceptions.NoCredentialException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jjas.labpomodoro.R
 import com.jjas.labpomodoro.data.backup.BackupInfo
 import com.jjas.labpomodoro.data.backup.BackupRepository
 import com.jjas.labpomodoro.data.remote.AnalyticsTracker
@@ -12,6 +13,7 @@ import com.jjas.labpomodoro.data.remote.AuthRepository
 import com.jjas.labpomodoro.data.remote.MissingWebClientIdException
 import com.jjas.labpomodoro.data.repository.UserProfileRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -35,6 +37,7 @@ class MainViewModel @Inject constructor(
     private val userProfileRepository: UserProfileRepository,
     private val analytics: AnalyticsTracker,
     private val backup: BackupRepository,
+    @ApplicationContext private val context: Context,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(MainUiState())
@@ -65,11 +68,11 @@ class MainViewModel @Inject constructor(
             } catch (_: GetCredentialCancellationException) {
                 null
             } catch (_: NoCredentialException) {
-                "No hay cuentas de Google disponibles en este dispositivo"
+                context.getString(R.string.set_main_no_accounts)
             } catch (e: MissingWebClientIdException) {
                 e.message
             } catch (e: Exception) {
-                "Error al iniciar sesión: ${e.message}"
+                context.getString(R.string.set_main_sign_in_error, e.message.orEmpty())
             }
             _uiState.update { it.copy(isBusy = false, message = message) }
         }
@@ -84,14 +87,14 @@ class MainViewModel @Inject constructor(
         return when {
             remote != null && backup.isLocalEmpty() -> {
                 _uiState.update { it.copy(restoreOffer = remote) }
-                "Sesión iniciada."
+                context.getString(R.string.set_main_signed_in)
             }
             remote == null -> {
                 backup.backup()
                 backup.clearStatus()
-                "Sesión iniciada. Tu progreso queda respaldado en la nube."
+                context.getString(R.string.set_main_signed_in_backed_up)
             }
-            else -> "Sesión iniciada. Tu progreso se respalda al terminar cada plan."
+            else -> context.getString(R.string.set_main_signed_in_auto)
         }
     }
 
@@ -101,7 +104,7 @@ class MainViewModel @Inject constructor(
             val ok = backup.restore()
             backup.clearStatus()
             _uiState.update {
-                it.copy(isBusy = false, message = if (ok) "¡Listo! Recuperaste tu progreso." else "No se pudo restaurar el respaldo.")
+                it.copy(isBusy = false, message = context.getString(if (ok) R.string.set_main_restored else R.string.set_restore_failed))
             }
         }
     }

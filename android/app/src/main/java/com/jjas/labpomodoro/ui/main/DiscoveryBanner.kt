@@ -15,13 +15,18 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jjas.labpomodoro.R
 import com.jjas.labpomodoro.data.repository.Discovery
 import com.jjas.labpomodoro.data.repository.LabRepository
 import com.jjas.labpomodoro.domain.model.DiscoverySource
 import com.jjas.labpomodoro.ui.components.ElementTile
+import com.jjas.labpomodoro.ui.components.localizedName
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -60,8 +65,12 @@ fun DiscoveryBanner(
     ) {
         Column(Modifier.padding(start = 16.dp, end = 8.dp, top = 12.dp, bottom = 4.dp)) {
             Text(
-                text = if (rewards.size == 1) "¡Descubriste ${rewards[0].element.name.lowercase()}!"
-                else "¡${rewards.size} elementos nuevos!",
+                text = if (rewards.size == 1) {
+                    val locale = LocalConfiguration.current.locales[0]
+                    stringResource(R.string.el_banner_discovered, rewards[0].element.localizedName().lowercase(locale))
+                } else {
+                    pluralStringResource(R.plurals.el_banner_new_elements, rewards.size, rewards.size)
+                },
                 style = MaterialTheme.typography.titleMedium,
             )
             Spacer(Modifier.padding(top = 8.dp))
@@ -77,8 +86,8 @@ fun DiscoveryBanner(
                     }
                 }
                 Spacer(Modifier.width(8.dp))
-                TextButton(onClick = onDismiss) { Text("Cerrar") }
-                TextButton(onClick = onOpen) { Text("Ver") }
+                TextButton(onClick = onDismiss) { Text(stringResource(R.string.el_banner_close)) }
+                TextButton(onClick = onOpen) { Text(stringResource(R.string.el_banner_view)) }
             }
         }
     }

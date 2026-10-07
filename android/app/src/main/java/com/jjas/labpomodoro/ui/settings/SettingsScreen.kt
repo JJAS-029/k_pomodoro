@@ -1,7 +1,11 @@
 package com.jjas.labpomodoro.ui.settings
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Build
+import android.provider.Settings
 import androidx.activity.compose.LocalActivity
+import androidx.annotation.StringRes
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -41,20 +45,24 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jjas.labpomodoro.BuildConfig
+import com.jjas.labpomodoro.R
 import com.jjas.labpomodoro.ads.AdBanner
 import com.jjas.labpomodoro.domain.model.AppSettings
 import com.jjas.labpomodoro.domain.model.PeriodicTable
 import com.jjas.labpomodoro.domain.model.PlanRounding
 import com.jjas.labpomodoro.domain.model.SessionConfig
 import com.jjas.labpomodoro.service.requestAddTimerTile
+import com.jjas.labpomodoro.ui.components.localizedName
 import com.jjas.labpomodoro.ui.promo.GITHUB_URL
 import com.jjas.labpomodoro.ui.promo.Podcast
 import com.jjas.labpomodoro.ui.promo.SUGGESTIONS_EMAIL
@@ -75,6 +83,7 @@ fun SettingsScreen(
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     val exportMessage by viewModel.message.collectAsStateWithLifecycle()
     val activity = LocalActivity.current
+    val exportFileName = stringResource(R.string.set_export_file_name)
     // El usuario elige dónde guardar el archivo (Descargas, Drive…)
     val exportLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { uri ->
         uri?.let(viewModel::exportCsv)
@@ -106,7 +115,7 @@ fun SettingsScreen(
                         DataSection(
                             isPro = current.isPro,
                             message = exportMessage,
-                            onExport = { exportLauncher.launch("lab-pomodoro-historial.csv") },
+                            onExport = { exportLauncher.launch(exportFileName) },
                             onOpenPro = onOpenPro,
                             showPrivacy = !current.isPro && viewModel.privacyOptionsRequired,
                             onPrivacy = { activity?.let(viewModel::showPrivacyOptions) },
@@ -130,21 +139,21 @@ private fun DataSection(
     onPrivacy: () -> Unit,
 ) {
     Text(
-        "Descarga todas tus sesiones (fecha, tipo, minutos y si se completó) para verlas en una hoja de cálculo.",
+        stringResource(R.string.set_export_desc),
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
     Spacer(Modifier.height(8.dp))
     if (isPro) {
-        OutlinedButton(onClick = onExport) { Text("Exportar historial (CSV)") }
+        OutlinedButton(onClick = onExport) { Text(stringResource(R.string.set_export_csv)) }
     } else {
-        FilledTonalButton(onClick = onOpenPro) { Text("Exportar historial · Pro") }
+        FilledTonalButton(onClick = onOpenPro) { Text(stringResource(R.string.set_export_pro)) }
     }
     message?.let {
         Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
     }
     if (showPrivacy) {
-        TextButton(onClick = onPrivacy) { Text("Privacidad de anuncios") }
+        TextButton(onClick = onPrivacy) { Text(stringResource(R.string.set_ads_privacy)) }
     }
 }
 
@@ -176,37 +185,39 @@ private fun SettingsContent(
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = "Configuración",
+                text = stringResource(R.string.set_title),
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.weight(1f),
             )
-            TextButton(onClick = onBack) { Text("Listo") }
+            TextButton(onClick = onBack) { Text(stringResource(R.string.set_done)) }
         }
 
-        SectionTitle("Plan de sesiones")
-        StepperRow("Horas totales de trabajo", session.totalHours, SessionConfig.TOTAL_HOURS, "h") { v ->
+        LanguageSection()
+
+        SectionTitle(stringResource(R.string.set_section_plan))
+        StepperRow(stringResource(R.string.set_total_hours), session.totalHours, SessionConfig.TOTAL_HOURS, "h") { v ->
             onSessionChange { it.copy(totalHours = v) }
         }
-        StepperRow("Pomodoro", session.workMinutes, SessionConfig.WORK_MINUTES, "min", step = 5) { v ->
+        StepperRow(stringResource(R.string.set_pomodoro), session.workMinutes, SessionConfig.WORK_MINUTES, "min", step = 5) { v ->
             onSessionChange { it.copy(workMinutes = v) }
         }
-        StepperRow("Descanso corto", session.shortBreakMinutes, SessionConfig.SHORT_BREAK_MINUTES, "min") { v ->
+        StepperRow(stringResource(R.string.set_short_break), session.shortBreakMinutes, SessionConfig.SHORT_BREAK_MINUTES, "min") { v ->
             onSessionChange { it.copy(shortBreakMinutes = v) }
         }
-        StepperRow("Descanso largo", session.longBreakMinutes, SessionConfig.LONG_BREAK_MINUTES, "min", step = 5) { v ->
+        StepperRow(stringResource(R.string.set_long_break), session.longBreakMinutes, SessionConfig.LONG_BREAK_MINUTES, "min", step = 5) { v ->
             onSessionChange { it.copy(longBreakMinutes = v) }
         }
-        StepperRow("Pomodoros antes del descanso largo", session.pomodorosUntilLong, SessionConfig.POMODOROS_UNTIL_LONG, "") { v ->
+        StepperRow(stringResource(R.string.set_pomodoros_until_long), session.pomodorosUntilLong, SessionConfig.POMODOROS_UNTIL_LONG, "") { v ->
             onSessionChange { it.copy(pomodorosUntilLong = v) }
         }
 
         Spacer(Modifier.height(12.dp))
-        Text("Si las horas no cuadran exacto", style = MaterialTheme.typography.bodyLarge)
+        Text(stringResource(R.string.set_rounding_title), style = MaterialTheme.typography.bodyLarge)
         Spacer(Modifier.height(8.dp))
         val options = listOf(
-            PlanRounding.TRIM_LAST to "Recortar el último",
-            PlanRounding.WHOLE_POMODOROS to "Pomodoros enteros",
+            PlanRounding.TRIM_LAST to stringResource(R.string.set_rounding_trim),
+            PlanRounding.WHOLE_POMODOROS to stringResource(R.string.set_rounding_whole),
         )
         SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
             options.forEachIndexed { index, (mode, label) ->
@@ -219,21 +230,21 @@ private fun SettingsContent(
         }
         Text(
             text = when (session.rounding) {
-                PlanRounding.TRIM_LAST -> "Nunca te pasas de las horas pedidas."
-                PlanRounding.WHOLE_POMODOROS -> "Todos los pomodoros duran lo mismo; puede pasarse un poco."
+                PlanRounding.TRIM_LAST -> stringResource(R.string.set_rounding_trim_desc)
+                PlanRounding.WHOLE_POMODOROS -> stringResource(R.string.set_rounding_whole_desc)
             },
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = 6.dp),
         )
 
-        SectionTitle("Avisos")
-        SwitchRow("Sonidos", settings.soundEnabled, onSoundChange)
-        SwitchRow("Vibración", settings.vibrationEnabled, onVibrationChange)
-        SwitchRow("Mantener la pantalla encendida", settings.keepScreenOn, onKeepScreenOnChange)
-        SwitchRow("Recordarme mi racha", settings.reminderEnabled, onReminderChange)
+        SectionTitle(stringResource(R.string.set_section_alerts))
+        SwitchRow(stringResource(R.string.set_sounds), settings.soundEnabled, onSoundChange)
+        SwitchRow(stringResource(R.string.set_vibration), settings.vibrationEnabled, onVibrationChange)
+        SwitchRow(stringResource(R.string.set_keep_screen_on), settings.keepScreenOn, onKeepScreenOnChange)
+        SwitchRow(stringResource(R.string.set_streak_reminder), settings.reminderEnabled, onReminderChange)
         Text(
-            "Un aviso al día, solo si ese día aún no has hecho ningún pomodoro.",
+            stringResource(R.string.set_streak_reminder_desc),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -251,25 +262,21 @@ private fun SettingsContent(
             }
         }
 
-        SectionTitle(if (settings.isPro) "Modo ambiente" else "Modo ambiente · Pro")
+        SectionTitle(proTitle(R.string.set_section_ambient, settings.isPro))
         SwitchRow(
-            label = "Solo el reloj si no tocas la pantalla",
+            label = stringResource(R.string.set_ambient_switch),
             checked = settings.ambientActive,
             onCheckedChange = onAmbientChange,
             enabled = settings.isPro,
         )
         Text(
-            text = if (settings.isPro) {
-                "Mientras corre el timer, la pantalla se atenúa y queda solo el tiempo. Tócala para volver."
-            } else {
-                "Disponible en la versión Pro."
-            },
+            text = stringResource(if (settings.isPro) R.string.set_ambient_desc else R.string.set_available_in_pro),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         if (settings.ambientActive) {
             Spacer(Modifier.height(12.dp))
-            Text("Activar después de", style = MaterialTheme.typography.bodyLarge)
+            Text(stringResource(R.string.set_ambient_after), style = MaterialTheme.typography.bodyLarge)
             Spacer(Modifier.height(8.dp))
             val delays = AppSettings.AMBIENT_DELAYS
             SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
@@ -283,34 +290,35 @@ private fun SettingsContent(
             }
         }
 
-        SectionTitle("Atajos")
+        SectionTitle(stringResource(R.string.set_section_shortcuts))
         val context = LocalContext.current
         Text(
-            "Controla el timer sin abrir la app: un widget en la pantalla de inicio o un botón en los ajustes rápidos.",
+            stringResource(R.string.set_shortcuts_desc),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        OutlinedButton(onClick = { context.requestPinTimerWidget() }) { Text("Agregar a la pantalla de inicio") }
+        OutlinedButton(onClick = { context.requestPinTimerWidget() }) { Text(stringResource(R.string.set_add_home_screen)) }
         // Android 13+ permite agregar el botón de los ajustes rápidos desde la app
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            OutlinedButton(onClick = { context.requestAddTimerTile() }) { Text("Agregar a los ajustes rápidos") }
+            OutlinedButton(onClick = { context.requestAddTimerTile() }) { Text(stringResource(R.string.set_add_quick_settings)) }
         }
 
-        SectionTitle("Recipientes")
+        SectionTitle(stringResource(R.string.set_section_vessels))
         val fixed = settings.vesselElement.takeIf { it in 1..PeriodicTable.SIZE }?.let { PeriodicTable[it] }
         Text(
             text = if (fixed == null) {
-                "Variados: cada sesión de trabajo usa un elemento distinto de tu colección."
+                stringResource(R.string.set_vessels_varied)
             } else {
-                "Fijo: todos los recipientes usan ${fixed.name.lowercase()}."
+                val locale = LocalConfiguration.current.locales[0]
+                stringResource(R.string.set_vessels_fixed, fixed.localizedName().lowercase(locale))
             },
             style = MaterialTheme.typography.bodyLarge,
         )
         if (fixed != null) {
-            TextButton(onClick = onResetVesselElement) { Text("Volver a variados") }
+            TextButton(onClick = onResetVesselElement) { Text(stringResource(R.string.set_vessels_reset)) }
         } else {
             Text(
-                "Para fijar uno, ábrelo en Logros › Tabla periódica y toca \"Usar en todos mis recipientes\".",
+                stringResource(R.string.set_vessels_hint),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -318,35 +326,69 @@ private fun SettingsContent(
 
         // Material You existe desde Android 12
         val dynamicAvailable = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-        SectionTitle(if (settings.isPro) "Apariencia" else "Apariencia · Pro")
+        SectionTitle(proTitle(R.string.set_section_appearance, settings.isPro))
         SwitchRow(
-            label = "Colores del sistema (Material You)",
+            label = stringResource(R.string.set_dynamic_color),
             checked = settings.dynamicColorActive,
             onCheckedChange = onDynamicColorChange,
             enabled = settings.isPro && dynamicAvailable,
         )
         Text(
             text = when {
-                !dynamicAvailable -> "Requiere Android 12 o superior."
-                !settings.isPro -> "Disponible en la versión Pro."
-                else -> "Los botones y acentos toman los colores de tu fondo de pantalla. El fondo sigue negro."
+                !dynamicAvailable -> stringResource(R.string.set_requires_android_12)
+                !settings.isPro -> stringResource(R.string.set_available_in_pro)
+                else -> stringResource(R.string.set_dynamic_color_desc)
             },
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 
-        SectionTitle(if (settings.isPro) "Sonido de concentración" else "Sonido de concentración · Pro")
+        SectionTitle(proTitle(R.string.set_section_focus_sound, settings.isPro))
         soundSection()
 
-        SectionTitle("Respaldo en la nube")
+        SectionTitle(stringResource(R.string.set_section_backup))
         backupSection()
 
-        SectionTitle(if (settings.isPro) "Tus datos" else "Tus datos · Pro")
+        SectionTitle(proTitle(R.string.set_section_data, settings.isPro))
         dataSection()
 
-        SectionTitle("Acerca de")
+        SectionTitle(stringResource(R.string.set_section_about))
         AboutSection()
         Spacer(Modifier.height(24.dp))
+    }
+}
+
+/** Título de sección con " · Pro" si el usuario aún no es Pro. */
+@Composable
+private fun proTitle(@StringRes title: Int, isPro: Boolean): String =
+    if (isPro) stringResource(title) else stringResource(R.string.set_pro_suffix, stringResource(title))
+
+/**
+ * Idioma de la app. Desde Android 13 se elige por app en los ajustes del sistema; antes, la app
+ * sigue el idioma del teléfono y la fila no se muestra.
+ */
+@Composable
+private fun LanguageSection() {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
+    val context = LocalContext.current
+    val locale = LocalConfiguration.current.locales[0]
+    SectionTitle(stringResource(R.string.set_section_general))
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .clickable {
+                context.startActivity(
+                    Intent(Settings.ACTION_APP_LOCALE_SETTINGS, Uri.fromParts("package", context.packageName, null))
+                )
+            }
+            .padding(vertical = 6.dp),
+    ) {
+        Text(stringResource(R.string.set_language), style = MaterialTheme.typography.bodyLarge)
+        Text(
+            locale.getDisplayLanguage(locale).replaceFirstChar { it.titlecase(locale) },
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 
@@ -417,7 +459,7 @@ private fun SettingsContentPreview() {
 private fun AboutSection() {
     val context = LocalContext.current
     Text(
-        "Lab Pomodoro ${BuildConfig.VERSION_NAME} · hecho por JJAS. Si te gusta la ciencia, escucha mis podcasts:",
+        stringResource(R.string.set_about_credits, BuildConfig.VERSION_NAME),
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
@@ -440,19 +482,19 @@ private fun AboutSection() {
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
                 Text(podcast.title, style = MaterialTheme.typography.titleSmall)
-                Text(podcast.tagline, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(stringResource(podcast.taglineRes), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            Text("Escuchar", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+            Text(stringResource(R.string.set_listen), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
         }
     }
     Spacer(Modifier.height(8.dp))
     Text(
-        "¿Una idea, algo que no funciona o un elemento que te encantó? Escríbeme.",
+        stringResource(R.string.set_suggest_prompt),
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
-    OutlinedButton(onClick = { context.sendSuggestion(BuildConfig.VERSION_NAME) }) { Text("Enviar sugerencias") }
+    OutlinedButton(onClick = { context.sendSuggestion(BuildConfig.VERSION_NAME) }) { Text(stringResource(R.string.set_send_suggestions)) }
     Text(SUGGESTIONS_EMAIL, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-    FilledTonalButton(onClick = { context.shareText(ShareText.invite()) }) { Text("Recomendar a un amigo") }
-    TextButton(onClick = { context.openUrl(GITHUB_URL) }) { Text("Mi GitHub: JJAS-029") }
+    FilledTonalButton(onClick = { context.shareText(ShareText.invite(context)) }) { Text(stringResource(R.string.set_recommend)) }
+    TextButton(onClick = { context.openUrl(GITHUB_URL) }) { Text(stringResource(R.string.set_github)) }
 }

@@ -12,6 +12,16 @@ class HistoryCsvTest {
 
     private val zone = ZoneOffset.ofHours(-6)
 
+    // Los mismos textos que values-es/strings_progress.xml (las pruebas de JVM no leen recursos)
+    private val labels = HistoryCsv.Labels(
+        header = "fecha,inicio,fin,tipo,minutos_planeados,minutos_reales,completada",
+        work = "trabajo",
+        shortBreak = "descanso corto",
+        longBreak = "descanso largo",
+        yes = "sí",
+        no = "no",
+    )
+
     private fun session(hour: Int, minutes: Int, type: SessionType, completed: Boolean, actual: Int = minutes * 60): SessionEntity {
         val start = LocalDateTime.of(2026, 10, 5, hour, 0).atZone(zone).toInstant().toEpochMilli()
         return SessionEntity(
@@ -34,6 +44,7 @@ class HistoryCsvTest {
                 session(9, 25, SessionType.WORK, completed = false, actual = 754),
             ),
             zone,
+            labels,
         )
         assertTrue(csv.startsWith(HistoryCsv.BOM))
         val lines = csv.removePrefix(HistoryCsv.BOM).lines().filter { it.isNotEmpty() }
@@ -49,7 +60,7 @@ class HistoryCsvTest {
 
     @Test
     fun `sin historial queda solo el encabezado`() {
-        val lines = HistoryCsv.build(emptyList(), zone).removePrefix(HistoryCsv.BOM).lines().filter { it.isNotEmpty() }
+        val lines = HistoryCsv.build(emptyList(), zone, labels).removePrefix(HistoryCsv.BOM).lines().filter { it.isNotEmpty() }
         assertEquals(1, lines.size)
     }
 }

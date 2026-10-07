@@ -44,7 +44,7 @@ class PeriodicTableTest {
     @Test
     fun `algunos elementos conocidos`() {
         assertEquals("Fe", PeriodicTable[26].symbol)
-        assertEquals("Oro", PeriodicTable[79].name)
+        assertEquals("Oro", ElementDataXml.spanish.getValue("element_names")[79 - 1])
         assertEquals(18, PeriodicTable[118].group)
     }
 }

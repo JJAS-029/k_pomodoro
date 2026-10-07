@@ -23,12 +23,14 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.jjas.labpomodoro.R
 import com.jjas.labpomodoro.domain.model.Element
 import com.jjas.labpomodoro.domain.model.ElementCategory
 import com.jjas.labpomodoro.domain.model.Mastery
@@ -74,6 +76,12 @@ fun ElementTile(
     val scale = size.value / 40f
     // Casillas chicas (tabla completa en vertical): solo el símbolo, más grande en proporción
     val compact = size < 32.dp
+    val name = element.localizedName()
+    val description = when {
+        !discovered -> stringResource(R.string.el_tile_undiscovered, name)
+        quantity > 0 -> stringResource(R.string.el_tile_quantity, name, quantity)
+        else -> name
+    }
     Box(
         modifier = modifier
             .size(size)
@@ -81,10 +89,7 @@ fun ElementTile(
             .background(if (discovered) color.copy(alpha = 0.85f) else Color.Transparent)
             .border(border, shape)
             .semantics {
-                contentDescription = buildString {
-                    append(element.name)
-                    if (!discovered) append(", sin descubrir") else if (quantity > 0) append(", $quantity")
-                }
+                contentDescription = description
             },
     ) {
         val textColor = if (discovered) Color(0xFF111111) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)

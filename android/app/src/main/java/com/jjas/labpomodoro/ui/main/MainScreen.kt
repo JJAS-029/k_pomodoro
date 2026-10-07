@@ -66,8 +66,11 @@ import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -81,7 +84,7 @@ import com.jjas.labpomodoro.domain.model.DiscoverySource
 import com.jjas.labpomodoro.domain.model.Medal
 import com.jjas.labpomodoro.domain.model.SessionType
 import com.jjas.labpomodoro.service.formatMinutesSeconds
-import com.jjas.labpomodoro.service.label
+import com.jjas.labpomodoro.service.labelRes
 import com.jjas.labpomodoro.ui.components.Celebration
 import com.jjas.labpomodoro.ui.components.ConfettiBurst
 import com.jjas.labpomodoro.ui.components.DotState
@@ -95,6 +98,7 @@ import com.jjas.labpomodoro.ui.components.UpNext
 import com.jjas.labpomodoro.ui.components.VesselShape
 import com.jjas.labpomodoro.ui.components.VesselShelf
 import com.jjas.labpomodoro.ui.components.VesselView
+import com.jjas.labpomodoro.ui.components.localizedName
 import com.jjas.labpomodoro.ui.components.look
 import com.jjas.labpomodoro.ui.medals.MedalBanner
 import com.jjas.labpomodoro.ui.medals.MedalViewModel
@@ -179,7 +183,7 @@ fun MainScreen(
                     .padding(horizontal = 24.dp)
                     .padding(bottom = 24.dp)
             ) {
-                Text("Sonido de concentración", style = MaterialTheme.typography.titleLarge)
+                Text(stringResource(R.string.main_focus_sound_title), style = MaterialTheme.typography.titleLarge)
                 Spacer(Modifier.height(8.dp))
                 FocusSoundPanel(onOpenPro = {
                     soundSheet = false
@@ -315,7 +319,7 @@ private fun MainContent(
                 // En Pro la pantalla queda limpia, sin título
                 if (showTitle) {
                     Text(
-                        text = "Lab Pomodoro",
+                        text = stringResource(R.string.app_name),
                         style = MaterialTheme.typography.headlineMedium,
                         color = MaterialTheme.colorScheme.primary,
                     )
@@ -495,19 +499,19 @@ private fun LabDock(timer: TimerUi?, account: MainUiState, actions: MainActions,
             ) {
                 Column {
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                        DockItem(R.drawable.ic_tune, "Config", run(actions.onOpenSettings))
-                        DockItem(R.drawable.ic_star, "Logros", run(actions.onOpenAchievements))
-                        DockItem(R.drawable.ic_chart, "Progreso", run(actions.onOpenStats))
-                        DockItem(R.drawable.ic_diamond, "Pro", run(actions.onOpenPro))
+                        DockItem(R.drawable.ic_tune, stringResource(R.string.main_dock_settings), run(actions.onOpenSettings))
+                        DockItem(R.drawable.ic_star, stringResource(R.string.main_dock_achievements), run(actions.onOpenAchievements))
+                        DockItem(R.drawable.ic_chart, stringResource(R.string.main_dock_progress), run(actions.onOpenStats))
+                        DockItem(R.drawable.ic_diamond, stringResource(R.string.main_dock_pro), run(actions.onOpenPro))
                     }
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                        DockItem(R.drawable.ic_help, "Guía", run(actions.onOpenGuide))
-                        if (timer is TimerUi.Active) DockItem(R.drawable.ic_moon, "Ambiente", run(actions.onEnterAmbient))
-                        DockItem(R.drawable.ic_headphones, "Sonido", run(actions.onOpenSound))
+                        DockItem(R.drawable.ic_help, stringResource(R.string.main_dock_guide), run(actions.onOpenGuide))
+                        if (timer is TimerUi.Active) DockItem(R.drawable.ic_moon, stringResource(R.string.main_dock_ambient), run(actions.onEnterAmbient))
+                        DockItem(R.drawable.ic_headphones, stringResource(R.string.main_dock_sound), run(actions.onOpenSound))
                         when {
                             account.isBusy -> DockItem(R.drawable.ic_person, "…", onClick = {})
-                            account.isSignedIn -> DockItem(R.drawable.ic_person, "Salir", run(actions.onSignOut))
-                            else -> DockItem(R.drawable.ic_person, "Entrar", run(actions.onSignIn))
+                            account.isSignedIn -> DockItem(R.drawable.ic_person, stringResource(R.string.main_dock_sign_out), run(actions.onSignOut))
+                            else -> DockItem(R.drawable.ic_person, stringResource(R.string.main_dock_sign_in), run(actions.onSignIn))
                         }
                     }
                     Spacer(Modifier.height(8.dp))
@@ -517,7 +521,7 @@ private fun LabDock(timer: TimerUi?, account: MainUiState, actions: MainActions,
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (timer is TimerUi.Active) {
                     // Controles tipo reproductor: detener · pausar/continuar · saltar
-                    PlayerButton(R.drawable.ic_stop, "Detener", actions.onStop)
+                    PlayerButton(R.drawable.ic_stop, stringResource(R.string.main_action_stop), actions.onStop)
                     Spacer(Modifier.size(8.dp))
                     Button(
                         onClick = if (timer.isPaused) actions.onResume else actions.onPause,
@@ -528,16 +532,16 @@ private fun LabDock(timer: TimerUi?, account: MainUiState, actions: MainActions,
                     ) {
                         Icon(
                             painterResource(if (timer.isPaused) R.drawable.ic_play else R.drawable.ic_pause),
-                            contentDescription = if (timer.isPaused) "Continuar" else "Pausar",
+                            contentDescription = stringResource(if (timer.isPaused) R.string.main_action_resume else R.string.main_action_pause),
                             modifier = Modifier.size(26.dp),
                         )
                     }
                     Spacer(Modifier.size(8.dp))
-                    PlayerButton(R.drawable.ic_skip, "Saltar", actions.onSkip)
+                    PlayerButton(R.drawable.ic_skip, stringResource(R.string.main_action_skip), actions.onSkip)
                 } else {
                     val (label, onClick) = when (timer) {
-                        is TimerUi.Finished -> "Nuevo experimento" to actions.onDismissSummary
-                        else -> "Start" to actions.onStart
+                        is TimerUi.Finished -> stringResource(R.string.main_new_experiment) to actions.onDismissSummary
+                        else -> stringResource(R.string.main_start_button) to actions.onStart
                     }
                     Button(
                         onClick = onClick,
@@ -559,7 +563,7 @@ private fun LabDock(timer: TimerUi?, account: MainUiState, actions: MainActions,
                 ) {
                     Icon(
                         painterResource(R.drawable.ic_chevron_up),
-                        contentDescription = if (expanded) "Ocultar opciones" else "Más opciones",
+                        contentDescription = stringResource(if (expanded) R.string.main_hide_options else R.string.main_more_options),
                         tint = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.rotate(arrowRotation),
                     )
@@ -616,7 +620,8 @@ private fun ClockText(millis: Long, color: Color = MaterialTheme.colorScheme.onB
 private fun IdlePanel(idle: TimerUi.Idle, clockColor: Color) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         // La hora se toma al mostrar la pantalla; no hace falta que cambie mientras está abierta
-        val greeting = remember { Encouragement.greeting(LocalTime.now().hour) }
+        val resources = LocalResources.current
+        val greeting = remember { Encouragement.greeting(resources, LocalTime.now().hour) }
         Text(
             greeting,
             style = MaterialTheme.typography.bodyLarge,
@@ -625,11 +630,11 @@ private fun IdlePanel(idle: TimerUi.Idle, clockColor: Color) {
         )
         ClockText(idle.firstSessionMillis, clockColor)
         Text(
-            text = "${idle.pomodoros} pomodoros · ${formatDuration(idle.workMinutes)} de trabajo",
+            text = pluralStringResource(R.plurals.main_plan_summary, idle.pomodoros, idle.pomodoros, formatDuration(idle.workMinutes)),
             style = MaterialTheme.typography.bodyLarge,
         )
         Text(
-            text = "Con descansos: ${formatDuration(idle.totalMinutes)}",
+            text = stringResource(R.string.main_with_breaks, formatDuration(idle.totalMinutes)),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -641,8 +646,9 @@ private fun ActivePanel(active: TimerUi.Active, clockColor: Color) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             val element = active.vessel.element
+            val typeLabel = stringResource(active.type.labelRes())
             Text(
-                text = if (element != null) "${active.type.label()} · ${element.name}" else active.type.label(),
+                text = if (element != null) stringResource(R.string.main_label_with_element, typeLabel, element.localizedName()) else typeLabel,
                 style = MaterialTheme.typography.titleLarge,
                 color = active.vessel.liquid,
             )
@@ -654,7 +660,7 @@ private fun ActivePanel(active: TimerUi.Active, clockColor: Color) {
         }
         ClockText(active.remainingMillis, color = if (active.isPaused) MaterialTheme.colorScheme.onSurfaceVariant else clockColor)
         if (active.isPaused) {
-            Text("En pausa", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(stringResource(R.string.main_paused), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         Spacer(Modifier.height(4.dp))
         ActiveIndicator(active)
@@ -665,21 +671,27 @@ private fun ActivePanel(active: TimerUi.Active, clockColor: Color) {
 private fun FinishedPanel(finished: TimerUi.Finished) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
-            text = "¡Experimento completado!",
+            text = stringResource(R.string.main_experiment_complete),
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.primary,
             textAlign = TextAlign.Center,
         )
         Spacer(Modifier.height(8.dp))
         Text(
-            text = "${finished.workSessions} pomodoros · ${formatDuration(finished.workMinutes.toInt())} de trabajo",
+            text = pluralStringResource(
+                R.plurals.main_plan_summary,
+                finished.workSessions,
+                finished.workSessions,
+                formatDuration(finished.workMinutes.toInt()),
+            ),
             style = MaterialTheme.typography.bodyLarge,
         )
         // Mensaje de ánimo; se elige una vez y no cambia al girar la pantalla
         val seed = rememberSaveable { System.nanoTime() }
+        val resources = LocalResources.current
         Spacer(Modifier.height(12.dp))
         Text(
-            text = Encouragement.finished(finished.workSessions, seed),
+            text = Encouragement.finished(resources, finished.workSessions, seed),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
@@ -688,11 +700,11 @@ private fun FinishedPanel(finished: TimerUi.Finished) {
         if (finished.workSessions > 0) {
             val context = LocalContext.current
             TextButton(onClick = {
-                context.shareText(ShareText.finished(finished.workSessions, formatDuration(finished.workMinutes.toInt())))
+                context.shareText(ShareText.finished(context, finished.workSessions, formatDuration(finished.workMinutes.toInt())))
             }) {
                 Icon(painterResource(R.drawable.ic_share), contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(8.dp))
-                Text("Compartir")
+                Text(stringResource(R.string.main_share))
             }
         }
     }
@@ -705,7 +717,15 @@ fun ActiveIndicator(active: TimerUi.Active, modifier: Modifier = Modifier) {
         currentColor = active.vessel.liquid,
         next = active.upNext,
         dots = active.dots,
-        description = active.description,
+        // Para lectores de pantalla: lo que el indicador simbólico dice con íconos
+        description = active.next?.let {
+            stringResource(
+                R.string.main_session_description_next,
+                active.sessionNumber,
+                active.totalSessions,
+                stringResource(it.labelRes()).lowercase(),
+            )
+        } ?: stringResource(R.string.main_session_description_last, active.sessionNumber, active.totalSessions),
         modifier = modifier,
     )
 }

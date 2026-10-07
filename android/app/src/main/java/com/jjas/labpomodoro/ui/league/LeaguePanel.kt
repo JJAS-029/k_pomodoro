@@ -36,12 +36,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
+import com.jjas.labpomodoro.R
 import com.jjas.labpomodoro.data.league.LeagueProfile
 import com.jjas.labpomodoro.data.league.LeagueRepository
 import com.jjas.labpomodoro.data.league.LeagueResult
@@ -102,8 +105,8 @@ class LeagueViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val refresh = MutableStateFlow(0)
-    private val _error = MutableStateFlow<String?>(null)
-    val error: StateFlow<String?> = _error
+    private val _error = MutableStateFlow<Int?>(null)
+    val error: StateFlow<Int?> = _error
 
     private val discovered = inventory.items.map { items -> items.filter { it.firstObtainedAtMillis != null }.map { it.element } }
 
@@ -144,7 +147,7 @@ class LeagueViewModel @Inject constructor(
             _error.value = null
             runCatching { leagues.join(nickname, avatar, sync.currentXp()) }
                 .onSuccess { refresh.value++ }
-                .onFailure { _error.value = "No se pudo entrar a la liga. Revisa tu conexión." }
+                .onFailure { _error.value = R.string.set_league_join_failed }
         }
     }
 
@@ -162,6 +165,8 @@ class LeagueViewModel @Inject constructor(
         }
     }
 }
+
+private const val BOT_PREFIX = "Asistente "
 
 private val Promote = Color(0xFF2E7D32)
 private val Demote = Color(0xFFC62828)
@@ -181,16 +186,14 @@ fun LeaguePanel(modifier: Modifier = Modifier, viewModel: LeagueViewModel = hilt
                 s.profile.lastResult?.takeIf { !it.seen }?.let { ResultDialog(it, onDismiss = viewModel::resultSeen) }
             }
         }
-        error?.let { Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
+        error?.let { Text(stringResource(it), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
     }
 }
 
 @Composable
 private fun Rules() {
     Text(
-        "Cada semana compites en un grupo de hasta 30 personas de tu liga. Tus puntos son tus minutos de " +
-            "enfoque. Al terminar la semana, los primeros suben de liga y los últimos bajan. Las ligas van del " +
-            "Hidrógeno al Platino.",
+        stringResource(R.string.set_league_rules),
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
@@ -201,10 +204,10 @@ private fun SignedOut(onSignIn: (Context) -> Unit) {
     val context = LocalContext.current
     Rules()
     Text(
-        "Para competir necesitas iniciar sesión con Google. Los demás solo verán el apodo que elijas.",
+        stringResource(R.string.set_league_sign_in_desc),
         style = MaterialTheme.typography.bodyMedium,
     )
-    FilledTonalButton(onClick = { onSignIn(context) }) { Text("Iniciar sesión con Google") }
+    FilledTonalButton(onClick = { onSignIn(context) }) { Text(stringResource(R.string.set_sign_in_google)) }
 }
 
 @Composable
@@ -212,15 +215,15 @@ private fun JoinForm(avatars: List<Element>, onJoin: (String, Int) -> Unit) {
     var nickname by rememberSaveable { mutableStateOf("Koala ${Random.nextInt(100, 1000)}") }
     var avatar by rememberSaveable { mutableIntStateOf(avatars.first().atomicNumber) }
     Rules()
-    Text("Tu apodo", style = MaterialTheme.typography.titleSmall)
+    Text(stringResource(R.string.set_league_nickname), style = MaterialTheme.typography.titleSmall)
     OutlinedTextField(
         value = nickname,
         onValueChange = { nickname = it.take(LeagueRepository.MAX_NICKNAME) },
         singleLine = true,
-        supportingText = { Text("Es lo único que verán los demás; no uses tu nombre completo.") },
+        supportingText = { Text(stringResource(R.string.set_league_nickname_hint)) },
         modifier = Modifier.fillMaxWidth(),
     )
-    Text("Tu avatar: un elemento de tu colección", style = MaterialTheme.typography.titleSmall)
+    Text(stringResource(R.string.set_league_avatar), style = MaterialTheme.typography.titleSmall)
     LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
         items(avatars, key = { it.atomicNumber }) { element ->
             ElementTile(
@@ -232,7 +235,7 @@ private fun JoinForm(avatars: List<Element>, onJoin: (String, Int) -> Unit) {
             )
         }
     }
-    Button(onClick = { onJoin(nickname, avatar) }, enabled = nickname.isNotBlank()) { Text("Unirme a la liga") }
+    Button(onClick = { onJoin(nickname, avatar) }, enabled = nickname.isNotBlank()) { Text(stringResource(R.string.set_league_join)) }
 }
 
 @Composable
@@ -252,12 +255,13 @@ private fun Joined(state: LeagueUi.Joined, onLeave: () -> Unit) {
             ) { Text(league.symbol, style = MaterialTheme.typography.titleLarge, color = Color(0xFF111111), fontWeight = FontWeight.SemiBold) }
             Spacer(Modifier.width(14.dp))
             Column(Modifier.weight(1f)) {
-                Text("Liga ${league.label}", style = MaterialTheme.typography.titleLarge)
+                Text(stringResource(R.string.set_league_name, stringResource(league.labelRes)), style = MaterialTheme.typography.titleLarge)
                 Text(
-                    when (state.daysLeft) {
-                        0L -> "Termina hoy"
-                        1L -> "Termina en 1 día"
-                        else -> "Termina en ${state.daysLeft} días"
+                    if (state.daysLeft == 0L) {
+                        stringResource(R.string.set_league_ends_today)
+                    } else {
+                        val days = state.daysLeft.toInt()
+                        pluralStringResource(R.plurals.set_league_ends_in, days, days)
                     },
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -265,11 +269,14 @@ private fun Joined(state: LeagueUi.Joined, onLeave: () -> Unit) {
             }
         }
     }
+    val promoteText = league.next?.takeIf { promote > 0 }?.let {
+        pluralStringResource(R.plurals.set_league_promote, promote, promote, stringResource(it.labelRes))
+    }
+    val demoteText = league.previous?.takeIf { demote > 0 }?.let {
+        pluralStringResource(R.plurals.set_league_demote, demote, demote, stringResource(it.labelRes))
+    }
     Text(
-        buildString {
-            if (promote > 0) append("Los $promote primeros suben a ${league.next!!.label}. ")
-            if (demote > 0) append("Los $demote últimos bajan a ${league.previous!!.label}.")
-        },
+        listOfNotNull(promoteText, demoteText).joinToString(" "),
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
@@ -284,7 +291,7 @@ private fun Joined(state: LeagueUi.Joined, onLeave: () -> Unit) {
             MemberRow(rank, member, isMe = member.id == state.myId, zone = zone)
         }
     }
-    TextButton(onClick = onLeave) { Text("Salir de las ligas") }
+    TextButton(onClick = onLeave) { Text(stringResource(R.string.set_league_leave)) }
 }
 
 @Composable
@@ -302,14 +309,20 @@ private fun MemberRow(rank: Int, member: LeagueMember, isMe: Boolean, zone: Colo
         ElementTile(PeriodicTable[member.avatar.coerceIn(1, PeriodicTable.SIZE)], discovered = true, size = 30.dp)
         Spacer(Modifier.width(10.dp))
         Column(Modifier.weight(1f)) {
+            // Los bots se llaman "Asistente X" en el modelo; aquí se traduce el prefijo
+            val name = if (member.isBot && member.nickname.startsWith(BOT_PREFIX)) {
+                stringResource(R.string.set_league_bot_name, member.nickname.removePrefix(BOT_PREFIX))
+            } else {
+                member.nickname
+            }
             Text(
-                if (isMe) "${member.nickname} (tú)" else member.nickname,
+                if (isMe) stringResource(R.string.set_league_me, name) else name,
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = if (isMe) FontWeight.SemiBold else FontWeight.Normal,
                 maxLines = 1,
             )
             if (member.isBot) {
-                Text("bot del laboratorio", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(stringResource(R.string.set_league_bot), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
         Text("${member.xp} min", style = MaterialTheme.typography.bodyMedium)
@@ -318,17 +331,16 @@ private fun MemberRow(rank: Int, member: LeagueMember, isMe: Boolean, zone: Colo
 
 @Composable
 private fun ResultDialog(result: LeagueResult, onDismiss: () -> Unit) {
-    val (title, text) = when (result.outcome) {
-        LeagueOutcome.PROMOTED -> "¡Subiste a la liga ${result.to.label}!" to
-            "Quedaste en el lugar ${result.rank} de ${result.size}. Tu constancia te está llevando lejos."
-        LeagueOutcome.DEMOTED -> "Bajaste a la liga ${result.to.label}" to
-            "Quedaste en el lugar ${result.rank} de ${result.size}. Una semana floja le pasa a cualquiera; esta es tuya."
-        LeagueOutcome.STAYED -> "Sigues en la liga ${result.to.label}" to
-            "Quedaste en el lugar ${result.rank} de ${result.size}. Un poco más y subes."
+    val (titleRes, textRes) = when (result.outcome) {
+        LeagueOutcome.PROMOTED -> R.string.set_league_promoted_title to R.string.set_league_promoted_text
+        LeagueOutcome.DEMOTED -> R.string.set_league_demoted_title to R.string.set_league_demoted_text
+        LeagueOutcome.STAYED -> R.string.set_league_stayed_title to R.string.set_league_stayed_text
     }
+    val title = stringResource(titleRes, stringResource(result.to.labelRes))
+    val text = stringResource(textRes, result.rank, result.size)
     AlertDialog(
         onDismissRequest = onDismiss,
-        confirmButton = { Button(onClick = onDismiss) { Text("¡Vamos!") } },
+        confirmButton = { Button(onClick = onDismiss) { Text(stringResource(R.string.set_league_lets_go)) } },
         title = { Text(title) },
         text = { Text(text) },
     )

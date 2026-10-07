@@ -1,10 +1,12 @@
 package com.jjas.labpomodoro.data.backup
 
 import android.os.Build
+import androidx.annotation.StringRes
 import androidx.room.withTransaction
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.Blob
 import com.google.firebase.firestore.FirebaseFirestore
+import com.jjas.labpomodoro.R
 import com.jjas.labpomodoro.data.local.LabDatabase
 import com.jjas.labpomodoro.data.local.dao.DiscoveryDao
 import com.jjas.labpomodoro.data.local.dao.InventoryDao
@@ -34,8 +36,8 @@ data class BackupInfo(
 sealed interface BackupStatus {
     data object Idle : BackupStatus
     data object Working : BackupStatus
-    data class Done(val message: String) : BackupStatus
-    data class Failed(val message: String) : BackupStatus
+    data class Done(@StringRes val messageRes: Int) : BackupStatus
+    data class Failed(@StringRes val messageRes: Int) : BackupStatus
 }
 
 /**
@@ -109,11 +111,11 @@ class BackupRepository @Inject constructor(
             refreshInfo()
         }.fold(
             onSuccess = {
-                _status.value = BackupStatus.Done("Progreso respaldado.")
+                _status.value = BackupStatus.Done(R.string.set_backup_done)
                 true
             },
             onFailure = {
-                _status.value = BackupStatus.Failed("No se pudo respaldar. Revisa tu conexión.")
+                _status.value = BackupStatus.Failed(R.string.set_backup_failed)
                 false
             },
         )
@@ -135,11 +137,11 @@ class BackupRepository @Inject constructor(
             apply(snapshot)
         }.fold(
             onSuccess = {
-                _status.value = BackupStatus.Done("Progreso restaurado.")
+                _status.value = BackupStatus.Done(R.string.set_restore_done)
                 true
             },
             onFailure = {
-                _status.value = BackupStatus.Failed("No se pudo restaurar el respaldo.")
+                _status.value = BackupStatus.Failed(R.string.set_restore_failed)
                 false
             },
         )

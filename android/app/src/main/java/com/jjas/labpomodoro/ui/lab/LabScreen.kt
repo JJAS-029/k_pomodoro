@@ -57,8 +57,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -72,13 +76,11 @@ import com.jjas.labpomodoro.ads.AdBanner
 import com.jjas.labpomodoro.data.repository.InventoryItem
 import com.jjas.labpomodoro.domain.model.Element
 import com.jjas.labpomodoro.domain.model.ElementCategory
-import com.jjas.labpomodoro.domain.model.ElementDiscoveries
-import com.jjas.labpomodoro.domain.model.ElementFacts
 import com.jjas.labpomodoro.domain.model.Mastery
 import com.jjas.labpomodoro.domain.model.MasteryRules
 import com.jjas.labpomodoro.domain.model.PeriodicTable
 import com.jjas.labpomodoro.domain.model.Rarity
-import com.jjas.labpomodoro.domain.model.label
+import com.jjas.labpomodoro.domain.model.labelRes
 import com.jjas.labpomodoro.domain.model.rarity
 import com.jjas.labpomodoro.domain.usecase.Fusion
 import com.jjas.labpomodoro.domain.usecase.RewardSchedule
@@ -92,6 +94,10 @@ import com.jjas.labpomodoro.ui.components.SilverColor
 import com.jjas.labpomodoro.ui.components.VesselShape
 import com.jjas.labpomodoro.ui.components.VesselView
 import com.jjas.labpomodoro.ui.components.color
+import com.jjas.labpomodoro.ui.components.elementDiscovery
+import com.jjas.labpomodoro.ui.components.elementFact
+import com.jjas.labpomodoro.ui.components.elementLookOrigin
+import com.jjas.labpomodoro.ui.components.localizedName
 import com.jjas.labpomodoro.ui.components.look
 import com.jjas.labpomodoro.ui.components.metalColor
 import com.jjas.labpomodoro.ui.league.LeaguePanel
@@ -102,7 +108,7 @@ import kotlinx.coroutines.delay
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.util.Locale
+import java.time.format.FormatStyle
 
 /** Logros: tabla periódica con lo descubierto, avance de recompensas y sintetizador. */
 @Composable
@@ -111,12 +117,13 @@ fun LabScreen(onBack: () -> Unit, viewModel: LabViewModel = hiltViewModel()) {
     val newOnes by viewModel.newAtomicNumbers.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
     var fused by remember { mutableStateOf<Element?>(null) }
+    val fusionFailed = stringResource(R.string.el_lab_fusion_failed)
 
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             when (event) {
                 is LabEvent.Fused -> fused = event.result
-                LabEvent.FusionFailed -> snackbar.showSnackbar("Ya no alcanzan los ingredientes")
+                LabEvent.FusionFailed -> snackbar.showSnackbar(fusionFailed)
             }
         }
     }
@@ -176,29 +183,31 @@ private fun LabContent(
     ) {
         Row(Modifier.padding(horizontal = 24.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = "Logros",
+                text = stringResource(R.string.el_lab_title),
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.weight(1f),
             )
             val context = LocalContext.current
+            val resources = LocalResources.current
             IconButton(onClick = {
                 val counts = state.masteryCounts
                 context.shareText(
                     ShareText.progress(
+                        context = context,
                         discovered = state.discoveredCount,
                         total = PeriodicTable.SIZE,
                         bronze = counts[Mastery.BRONZE] ?: 0,
                         silver = counts[Mastery.SILVER] ?: 0,
                         gold = counts[Mastery.GOLD] ?: 0,
                         streak = state.streak.current,
-                        focus = formatFocus(state.totalWorkSeconds),
+                        focus = formatFocus(state.totalWorkSeconds, resources),
                     )
                 )
             }) {
-                Icon(painterResource(R.drawable.ic_share), contentDescription = "Compartir mi progreso")
+                Icon(painterResource(R.drawable.ic_share), contentDescription = stringResource(R.string.el_lab_share_progress))
             }
-            TextButton(onClick = onBack) { Text("Listo") }
+            TextButton(onClick = onBack) { Text(stringResource(R.string.el_lab_done)) }
         }
         Stats(state, Modifier.padding(horizontal = 24.dp, vertical = 12.dp))
         MasterySummary(state, Modifier.padding(horizontal = 24.dp).padding(bottom = 12.dp))
@@ -206,9 +215,9 @@ private fun LabContent(
         Spacer(Modifier.height(16.dp))
 
         PrimaryTabRow(selectedTabIndex = tab) {
-            Tab(selected = tab == 0, onClick = { tab = 0 }, text = { Text("Tabla periódica") })
-            Tab(selected = tab == 1, onClick = { tab = 1 }, text = { Text("Sintetizador") })
-            Tab(selected = tab == 2, onClick = { tab = 2 }, text = { Text("Liga") })
+            Tab(selected = tab == 0, onClick = { tab = 0 }, text = { Text(stringResource(R.string.el_lab_tab_table)) })
+            Tab(selected = tab == 1, onClick = { tab = 1 }, text = { Text(stringResource(R.string.el_lab_tab_synthesizer)) })
+            Tab(selected = tab == 2, onClick = { tab = 2 }, text = { Text(stringResource(R.string.el_lab_tab_league)) })
         }
         Spacer(Modifier.height(16.dp))
         when (tab) {
@@ -270,16 +279,18 @@ private fun LabContent(
 
 @Composable
 private fun Stats(state: LabUi, modifier: Modifier = Modifier) {
-    val hours = state.totalWorkSeconds / 3600
-    val minutes = state.totalWorkSeconds % 3600 / 60
     Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        StatCard("${state.discoveredCount}/${PeriodicTable.SIZE}", "elementos", Modifier.weight(1f))
+        StatCard("${state.discoveredCount}/${PeriodicTable.SIZE}", stringResource(R.string.el_stat_elements), Modifier.weight(1f))
         StatCard(
-            "${state.streak.current} ${if (state.streak.current == 1) "día" else "días"}",
-            "racha · máx ${state.streak.longest}",
+            pluralStringResource(R.plurals.el_stat_streak_days, state.streak.current, state.streak.current),
+            stringResource(R.string.el_stat_streak_label, state.streak.longest),
             Modifier.weight(1f),
         )
-        StatCard(if (hours > 0) "$hours h $minutes min" else "$minutes min", "de enfoque", Modifier.weight(1f))
+        StatCard(
+            formatFocus(state.totalWorkSeconds),
+            stringResource(R.string.el_stat_focus_label),
+            Modifier.weight(1f),
+        )
     }
 }
 
@@ -306,8 +317,8 @@ private fun StatCard(value: String, label: String, modifier: Modifier = Modifier
 @Composable
 private fun RewardProgress(totalWorkSeconds: Long, modifier: Modifier = Modifier) {
     Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        RewardBar("Siguiente básico", totalWorkSeconds, RewardSchedule.BASIC_EVERY_SECONDS, Color(0xFF80CBC4))
-        RewardBar("Siguiente raro", totalWorkSeconds, RewardSchedule.RARE_EVERY_SECONDS, Color(0xFFCE93D8))
+        RewardBar(stringResource(R.string.el_reward_next_basic), totalWorkSeconds, RewardSchedule.BASIC_EVERY_SECONDS, Color(0xFF80CBC4))
+        RewardBar(stringResource(R.string.el_reward_next_rare), totalWorkSeconds, RewardSchedule.RARE_EVERY_SECONDS, Color(0xFFCE93D8))
     }
 }
 
@@ -318,7 +329,7 @@ private fun RewardBar(label: String, totalWorkSeconds: Long, every: Long, color:
         Row {
             Text(label, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
             Text(
-                "$doneMinutes / ${every / 60} min",
+                stringResource(R.string.el_reward_minutes, doneMinutes.toInt(), (every / 60).toInt()),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -417,13 +428,13 @@ private fun Legend(modifier: Modifier = Modifier) {
                         .background(category.color(), RoundedCornerShape(2.dp))
                 )
                 Spacer(Modifier.width(6.dp))
-                Text(category.label(), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(stringResource(category.labelRes()), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }
 }
 
-private val DATE_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("d 'de' MMMM 'de' yyyy", Locale.forLanguageTag("es"))
+private val DATE_FORMAT: DateTimeFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG)
 
 @Composable
 private fun ElementDetail(
@@ -435,7 +446,8 @@ private fun ElementDetail(
     obtained: Int = 0,
 ) {
     val element = item.element
-    val fact = ElementFacts[element.atomicNumber]
+    val fact = elementFact(element.atomicNumber)
+    val locale = LocalConfiguration.current.locales[0]
     Column(
         Modifier
             .fillMaxWidth()
@@ -448,14 +460,14 @@ private fun ElementDetail(
             ElementTile(element, discovered = item.discovered, quantity = item.quantity, size = 72.dp)
             Spacer(Modifier.width(16.dp))
             Column {
-                Text(element.name, style = MaterialTheme.typography.headlineSmall)
+                Text(element.localizedName(), style = MaterialTheme.typography.headlineSmall)
                 Text(
-                    "Número atómico ${element.atomicNumber} · ${element.category.label()}",
+                    stringResource(R.string.el_detail_subtitle, element.atomicNumber, stringResource(element.category.labelRes())),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Text(
-                    element.rarity.label,
+                    stringResource(element.rarity.labelRes),
                     style = MaterialTheme.typography.labelLarge,
                     color = element.category.color(),
                 )
@@ -470,7 +482,7 @@ private fun ElementDetail(
         Spacer(Modifier.height(16.dp))
         Text(fact.description, style = MaterialTheme.typography.bodyLarge)
         Spacer(Modifier.height(8.dp))
-        Text("Para qué sirve", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+        Text(stringResource(R.string.el_detail_uses_title), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
         Text(fact.uses, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Spacer(Modifier.height(16.dp))
         // Cómo se ve en el timer: es la recompensa visual de tenerlo
@@ -493,15 +505,16 @@ private fun ElementDetail(
                 )
                 Spacer(Modifier.width(12.dp))
                 Column(Modifier.weight(1f)) {
-                    Text("En tus recipientes", style = MaterialTheme.typography.titleSmall)
+                    Text(stringResource(R.string.el_detail_in_vessels), style = MaterialTheme.typography.titleSmall)
                     Text(
-                        look.behavior.description,
+                        stringResource(look.behavior.descriptionRes),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
-                    if (look.origin.isNotEmpty()) {
+                    val origin = elementLookOrigin(element.atomicNumber)
+                    if (origin.isNotEmpty()) {
                         Text(
-                            "Su color: ${look.origin.replaceFirstChar { it.lowercase() }}.",
+                            stringResource(R.string.el_detail_color_origin, origin.replaceFirstChar { it.lowercase(locale) }),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurface,
                         )
@@ -512,36 +525,35 @@ private fun ElementDetail(
         if (item.discovered) {
             Spacer(Modifier.height(8.dp))
             if (inVessels) {
-                OutlinedButton(onClick = onToggleVessel) { Text("Quitar de mis recipientes (volver a variados)") }
+                OutlinedButton(onClick = onToggleVessel) { Text(stringResource(R.string.el_detail_remove_vessels)) }
             } else {
-                FilledTonalButton(onClick = onToggleVessel) { Text("Usar en todos mis recipientes") }
+                FilledTonalButton(onClick = onToggleVessel) { Text(stringResource(R.string.el_detail_use_vessels)) }
             }
         }
         Spacer(Modifier.height(16.dp))
         val owned = when {
-            !item.discovered -> "Aún no lo descubres."
-            item.quantity == 0 -> "Lo descubriste, pero lo usaste todo en el sintetizador."
-            item.quantity == 1 -> "Tienes 1."
-            else -> "Tienes ${item.quantity}."
+            !item.discovered -> stringResource(R.string.el_detail_not_discovered)
+            item.quantity == 0 -> stringResource(R.string.el_detail_used_up)
+            else -> pluralStringResource(R.plurals.el_detail_owned, item.quantity, item.quantity)
         }
         Text(owned, style = MaterialTheme.typography.bodyLarge)
         item.firstObtainedAtMillis?.let {
-            val date = Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).format(DATE_FORMAT)
-            Text("Primer hallazgo: $date", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            val date = Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).format(DATE_FORMAT.withLocale(locale))
+            Text(stringResource(R.string.el_detail_first_found, date), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         Spacer(Modifier.height(8.dp))
         Text(
             when (element.rarity) {
-                Rarity.BASIC -> "Sale como recompensa cada 25 min de enfoque, o en el sintetizador."
-                Rarity.RARE -> "Sale como recompensa cada 60 min de enfoque, o en el sintetizador."
-                Rarity.SYNTHETIC -> "No existe en la naturaleza: solo se fabrica en el sintetizador."
+                Rarity.BASIC -> stringResource(R.string.el_detail_source_basic)
+                Rarity.RARE -> stringResource(R.string.el_detail_source_rare)
+                Rarity.SYNTHETIC -> stringResource(R.string.el_detail_source_synthetic)
             },
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         if (canCraft) {
             Spacer(Modifier.height(16.dp))
-            FilledTonalButton(onClick = onSynthesize) { Text("Fabricar en el sintetizador") }
+            FilledTonalButton(onClick = onSynthesize) { Text(stringResource(R.string.el_detail_synthesize)) }
         }
     }
 }
@@ -556,10 +568,10 @@ private fun MasterySummary(state: LabUi, modifier: Modifier = Modifier) {
     // Hasta descubrir algo en bronce no hay nada que contar
     if (bronze + silver + gold == 0 && state.discoveredCount < PeriodicTable.SIZE) return
     Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
-        Text("Maestría", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        MasteryCount(BronzeColor, "Bronce", bronze)
-        MasteryCount(SilverColor, "Plata", silver)
-        MasteryCount(GoldColor, "Oro", gold)
+        Text(stringResource(R.string.el_mastery_title), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        MasteryCount(BronzeColor, stringResource(Mastery.BRONZE.labelRes), bronze)
+        MasteryCount(SilverColor, stringResource(Mastery.SILVER.labelRes), silver)
+        MasteryCount(GoldColor, stringResource(Mastery.GOLD.labelRes), gold)
     }
 }
 
@@ -587,11 +599,11 @@ private fun MasteryProgress(element: Element, obtained: Int) {
     val levelColor = level.metalColor() ?: MaterialTheme.colorScheme.onSurfaceVariant
     Column {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("Maestría: ", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text(level.label, style = MaterialTheme.typography.titleSmall, color = levelColor)
+            Text(stringResource(R.string.el_mastery_level_prefix), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(stringResource(level.labelRes), style = MaterialTheme.typography.titleSmall, color = levelColor)
             Spacer(Modifier.weight(1f))
             Text(
-                "Obtenido $obtained ${if (obtained == 1) "vez" else "veces"}",
+                pluralStringResource(R.plurals.el_mastery_obtained, obtained, obtained),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -604,8 +616,10 @@ private fun MasteryProgress(element: Element, obtained: Int) {
             modifier = Modifier.fillMaxWidth(),
         )
         Text(
-            text = next?.let { (goal, left) -> "Te ${if (left == 1) "falta" else "faltan"} $left para ${goal.label.lowercase()}." }
-                ?: "¡Dominado! Llegaste al nivel más alto.",
+            text = next?.let { (goal, left) ->
+                val goalLabel = stringResource(goal.labelRes).lowercase(LocalConfiguration.current.locales[0])
+                pluralStringResource(R.plurals.el_mastery_left, left, left, goalLabel)
+            } ?: stringResource(R.string.el_mastery_maxed),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = 4.dp),
@@ -616,7 +630,8 @@ private fun MasteryProgress(element: Element, obtained: Int) {
 /** Ficha técnica: cuándo, quién y dónde se descubrió, y su lugar en la tabla. */
 @Composable
 private fun DiscoveryCard(element: Element) {
-    val discovery = ElementDiscoveries[element.atomicNumber]
+    val discovery = elementDiscovery(element.atomicNumber)
+    val locale = LocalConfiguration.current.locales[0]
     Surface(
         shape = RoundedCornerShape(16.dp),
         color = MaterialTheme.colorScheme.surfaceVariant,
@@ -624,19 +639,20 @@ private fun DiscoveryCard(element: Element) {
     ) {
         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             if (discovery.year != null) {
-                FactRow("Descubierto en", discovery.year.toString())
-                FactRow("Por", discovery.discoverers)
-                discovery.country?.let { FactRow("Dónde", it) }
+                FactRow(stringResource(R.string.el_fact_discovered_in), discovery.year.toString())
+                FactRow(stringResource(R.string.el_fact_by), discovery.discoverers)
+                discovery.country?.let { FactRow(stringResource(R.string.el_fact_where), it) }
             } else {
-                FactRow("Descubierto", "Se conoce desde la ${discovery.era?.lowercase() ?: "Antigüedad"}")
+                val era = discovery.era ?: stringResource(R.string.el_era_antiquity)
+                FactRow(stringResource(R.string.el_fact_discovered), stringResource(R.string.el_fact_known_since, era.lowercase(locale)))
             }
-            FactRow(
-                "En la tabla",
-                buildString {
-                    append(element.group?.let { "Grupo $it" } ?: if (element.category == ElementCategory.LANTHANIDE) "Lantánidos" else "Actínidos")
-                    append(" · Periodo ${element.period}")
-                },
-            )
+            val place = element.group?.let { stringResource(R.string.el_fact_group, it) }
+                ?: if (element.category == ElementCategory.LANTHANIDE) {
+                    stringResource(R.string.el_fact_lanthanides)
+                } else {
+                    stringResource(R.string.el_fact_actinides)
+                }
+            FactRow(stringResource(R.string.el_fact_in_table), stringResource(R.string.el_fact_position, place, element.period))
         }
     }
 }
@@ -663,22 +679,21 @@ private fun Synthesizer(
     val (missing, owned) = state.craftable.partition { !state.items[it.atomicNumber - 1].discovered }
     Column(modifier) {
         Text(
-            "Une dos núcleos y sus números atómicos se suman: H (1) + He (2) → Li (3). " +
-                "Gasta una unidad de cada uno, así que los repetidos sirven de material.",
+            stringResource(R.string.el_synth_intro),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(Modifier.height(16.dp))
         if (missing.isEmpty() && owned.isEmpty()) {
             Text(
-                "Aún no tienes material para fusionar. Sigue enfocándote: cada 25 min sale un elemento nuevo.",
+                stringResource(R.string.el_synth_empty),
                 style = MaterialTheme.typography.bodyLarge,
             )
             return@Column
         }
         // Primero lo que aún no se tiene: es lo que hace avanzar la tabla
-        CraftableGroup("Nuevos para tu tabla", missing, state, onTarget)
-        CraftableGroup("Para juntar más", owned, state, onTarget)
+        CraftableGroup(stringResource(R.string.el_synth_new), missing, state, onTarget)
+        CraftableGroup(stringResource(R.string.el_synth_more), owned, state, onTarget)
     }
 }
 
@@ -712,11 +727,12 @@ private fun RecipesSheetContent(target: Element, quantities: Map<Int, Int>, onFu
             .padding(horizontal = 24.dp)
             .padding(bottom = 24.dp),
     ) {
-        Text("Fabricar ${target.name.lowercase(Locale.forLanguageTag("es"))}", style = MaterialTheme.typography.titleLarge)
+        val locale = LocalConfiguration.current.locales[0]
+        Text(stringResource(R.string.el_recipes_title, target.localizedName().lowercase(locale)), style = MaterialTheme.typography.titleLarge)
         Spacer(Modifier.height(8.dp))
         val recipes = Fusion.recipesFor(target.atomicNumber, quantities)
         if (recipes.isEmpty()) {
-            Text("Ya no alcanzan los ingredientes.", style = MaterialTheme.typography.bodyLarge)
+            Text(stringResource(R.string.el_recipes_none), style = MaterialTheme.typography.bodyLarge)
         }
         recipes.take(MAX_RECIPES).forEach { recipe ->
             RecipeRow(recipe, quantities, onFuse = { onFuse(recipe) })
@@ -740,7 +756,7 @@ private fun RecipeRow(recipe: Fusion.Recipe, quantities: Map<Int, Int>, onFuse: 
         Text("→", Modifier.padding(horizontal = 8.dp), style = MaterialTheme.typography.titleLarge)
         ElementTile(recipe.result, discovered = true, size = 40.dp)
         Spacer(Modifier.weight(1f))
-        Button(onClick = onFuse) { Text("Fusionar") }
+        Button(onClick = onFuse) { Text(stringResource(R.string.el_fuse)) }
     }
 }
 
@@ -766,7 +782,8 @@ private fun FusionFlash(element: Element?, modifier: Modifier = Modifier) {
             Column(Modifier.padding(28.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                 ElementTile(e, discovered = true, size = 96.dp)
                 Spacer(Modifier.height(12.dp))
-                Text("¡Sintetizaste ${e.name.lowercase(Locale.forLanguageTag("es"))}!", fontSize = 18.sp, fontWeight = FontWeight.Medium)
+                val locale = LocalConfiguration.current.locales[0]
+                Text(stringResource(R.string.el_fused, e.localizedName().lowercase(locale)), fontSize = 18.sp, fontWeight = FontWeight.Medium)
             }
         }
     }

@@ -12,12 +12,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.jjas.labpomodoro.R
 import com.jjas.labpomodoro.service.formatMinutesSeconds
 import com.jjas.labpomodoro.ui.main.TimerUi
 import com.jjas.labpomodoro.ui.main.TimerViewModel
@@ -46,7 +48,7 @@ fun PipScreen(viewModel: TimerViewModel = hiltViewModel()) {
             Text(
                 text = when (timer) {
                     is TimerUi.Active -> formatMinutesSeconds(timer.remainingMillis)
-                    is TimerUi.Finished -> "¡Listo!"
+                    is TimerUi.Finished -> stringResource(R.string.main_pip_done)
                     else -> ""
                 },
                 color = (timer as? TimerUi.Active)?.vessel?.liquid ?: MaterialTheme.colorScheme.primary,

@@ -9,7 +9,6 @@ import com.jjas.labpomodoro.domain.model.Element
 import com.jjas.labpomodoro.domain.model.FocusSound
 import com.jjas.labpomodoro.domain.model.SessionType
 import com.jjas.labpomodoro.domain.usecase.SessionPlanGenerator
-import com.jjas.labpomodoro.service.label
 import com.jjas.labpomodoro.timer.TimeSource
 import com.jjas.labpomodoro.timer.TimerEngine
 import com.jjas.labpomodoro.timer.TimerState
@@ -62,12 +61,7 @@ sealed interface TimerUi {
         val dots: List<PlanDot>,
         /** Pomodoros completados en este plan; cuando sube, hay confeti. */
         val completedWork: Int = 0,
-    ) : TimerUi {
-        /** Para lectores de pantalla: lo que el indicador simbólico dice con íconos. */
-        val description: String
-            get() = "Sesión $sessionNumber de $totalSessions. " +
-                (next?.let { "Después: ${it.label().lowercase()}" } ?: "Última sesión")
-    }
+    ) : TimerUi
 
     data class Finished(val workSessions: Int, val workMinutes: Long) : TimerUi
 }

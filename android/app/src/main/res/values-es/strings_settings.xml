@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Configuración -->
+    <string name="set_title">Configuración</string>
+    <string name="set_done">Listo</string>
+    <string name="set_pro_suffix">%1$s · Pro</string>
+    <string name="set_available_in_pro">Disponible en la versión Pro.</string>
+
+    <string name="set_section_general">General</string>
+    <string name="set_language">Idioma</string>
+
+    <string name="set_section_plan">Plan de sesiones</string>
+    <string name="set_total_hours">Horas totales de trabajo</string>
+    <string name="set_pomodoro">Pomodoro</string>
+    <string name="set_short_break">Descanso corto</string>
+    <string name="set_long_break">Descanso largo</string>
+    <string name="set_pomodoros_until_long">Pomodoros antes del descanso largo</string>
+    <string name="set_rounding_title">Si las horas no cuadran exacto</string>
+    <string name="set_rounding_trim">Recortar el último</string>
+    <string name="set_rounding_whole">Pomodoros enteros</string>
+    <string name="set_rounding_trim_desc">Nunca te pasas de las horas pedidas.</string>
+    <string name="set_rounding_whole_desc">Todos los pomodoros duran lo mismo; puede pasarse un poco.</string>
+
+    <string name="set_section_alerts">Avisos</string>
+    <string name="set_sounds">Sonidos</string>
+    <string name="set_vibration">Vibración</string>
+    <string name="set_keep_screen_on">Mantener la pantalla encendida</string>
+    <string name="set_streak_reminder">Recordarme mi racha</string>
+    <string name="set_streak_reminder_desc">Un aviso al día, solo si ese día aún no has hecho ningún pomodoro.</string>
+
+    <string name="set_section_ambient">Modo ambiente</string>
+    <string name="set_ambient_switch">Solo el reloj si no tocas la pantalla</string>
+    <string name="set_ambient_desc">Mientras corre el timer, la pantalla se atenúa y queda solo el tiempo. Tócala para volver.</string>
+    <string name="set_ambient_after">Activar después de</string>
+
+    <string name="set_section_shortcuts">Atajos</string>
+    <string name="set_shortcuts_desc">Controla el timer sin abrir la app: un widget en la pantalla de inicio o un botón en los ajustes rápidos.</string>
+    <string name="set_add_home_screen">Agregar a la pantalla de inicio</string>
+    <string name="set_add_quick_settings">Agregar a los ajustes rápidos</string>
+
+    <string name="set_section_vessels">Recipientes</string>
+    <string name="set_vessels_varied">Variados: cada sesión de trabajo usa un elemento distinto de tu colección.</string>
+    <string name="set_vessels_fixed">Fijo: todos los recipientes usan %1$s.</string>
+    <string name="set_vessels_reset">Volver a variados</string>
+    <string name="set_vessels_hint">Para fijar uno, ábrelo en Logros › Tabla periódica y toca \"Usar en todos mis recipientes\".</string>
+
+    <string name="set_section_appearance">Apariencia</string>
+    <string name="set_dynamic_color">Colores del sistema (Material You)</string>
+    <string name="set_requires_android_12">Requiere Android 12 o superior.</string>
+    <string name="set_dynamic_color_desc">Los botones y acentos toman los colores de tu fondo de pantalla. El fondo sigue negro.</string>
+
+    <string name="set_section_focus_sound">Sonido de concentración</string>
+    <string name="set_section_backup">Respaldo en la nube</string>
+    <string name="set_section_data">Tus datos</string>
+    <string name="set_section_about">Acerca de</string>
+
+    <!-- Tus datos -->
+    <string name="set_export_desc">Descarga todas tus sesiones (fecha, tipo, minutos y si se completó) para verlas en una hoja de cálculo.</string>
+    <string name="set_export_csv">Exportar historial (CSV)</string>
+    <string name="set_export_pro">Exportar historial · Pro</string>
+    <string name="set_export_file_name">lab-pomodoro-historial.csv</string>
+    <plurals name="set_export_done">
+        <item quantity="one">Listo: %1$d sesión exportada.</item>
+        <item quantity="many">Listo: %1$d sesiones exportadas.</item>
+        <item quantity="other">Listo: %1$d sesiones exportadas.</item>
+    </plurals>
+    <string name="set_export_failed">No se pudo exportar el historial.</string>
+    <string name="set_ads_privacy">Privacidad de anuncios</string>
+
+    <!-- Acerca de -->
+    <string name="set_about_credits">Lab Pomodoro %1$s · hecho por JJAS. Si te gusta la ciencia, escucha mis podcasts:</string>
+    <string name="set_listen">Escuchar</string>
+    <string name="set_suggest_prompt">¿Una idea, algo que no funciona o un elemento que te encantó? Escríbeme.</string>
+    <string name="set_send_suggestions">Enviar sugerencias</string>
+    <string name="set_recommend">Recomendar a un amigo</string>
+    <string name="set_github">Mi GitHub: JJAS-029</string>
+
+    <!-- Respaldo en la nube -->
+    <string name="set_backup_signed_out_desc">Inicia sesión con Google y tu tabla, tu historial y tu racha quedan guardados en la nube. Si cambias de teléfono, los recuperas.</string>
+    <string name="set_sign_in_google">Iniciar sesión con Google</string>
+    <string name="set_backup_last">Último respaldo: %1$s · %2$s · %3$s.</string>
+    <plurals name="set_backup_elements">
+        <item quantity="one">%1$d elemento</item>
+        <item quantity="many">%1$d elementos</item>
+        <item quantity="other">%1$d elementos</item>
+    </plurals>
+    <plurals name="set_backup_sessions">
+        <item quantity="one">%1$d sesión</item>
+        <item quantity="many">%1$d sesiones</item>
+        <item quantity="other">%1$d sesiones</item>
+    </plurals>
+    <string name="set_backup_none">Aún no hay respaldo.</string>
+    <string name="set_backup_auto">Se respalda solo al terminar cada plan.</string>
+    <string name="set_backup_now">Respaldar ahora</string>
+    <string name="set_restore">Recuperar</string>
+    <string name="set_cancel">Cancelar</string>
+    <string name="set_restore_confirm_title">¿Recuperar el respaldo?</string>
+    <string name="set_restore_confirm_text">Lo que hay en este teléfono se reemplaza por el respaldo de la nube. No se puede deshacer.</string>
+    <string name="set_backup_done">Progreso respaldado.</string>
+    <string name="set_backup_failed">No se pudo respaldar. Revisa tu conexión.</string>
+    <string name="set_restore_done">Progreso restaurado.</string>
+    <string name="set_restore_failed">No se pudo restaurar el respaldo.</string>
+
+    <!-- Cuenta (pantalla principal) -->
+    <string name="set_main_no_accounts">No hay cuentas de Google disponibles en este dispositivo</string>
+    <string name="set_main_sign_in_error">Error al iniciar sesión: %1$s</string>
+    <string name="set_main_signed_in">Sesión iniciada.</string>
+    <string name="set_main_signed_in_backed_up">Sesión iniciada. Tu progreso queda respaldado en la nube.</string>
+    <string name="set_main_signed_in_auto">Sesión iniciada. Tu progreso se respalda al terminar cada plan.</string>
+    <string name="set_main_restored">¡Listo! Recuperaste tu progreso.</string>
+
+    <!-- Compras -->
+    <string name="set_billing_purchase_failed">No se pudo completar la compra (%1$s).</string>
+    <string name="set_billing_open_failed">No se pudo abrir el pago (%1$d).</string>
+    <string name="set_billing_thanks">¡Gracias! Ya tienes Lab Pomodoro Pro.</string>
+    <string name="set_billing_pending">Tu pago está pendiente. Pro se activará en cuanto se confirme.</string>
+    <string name="set_billing_no_response">La tienda no respondió.</string>
+    <string name="set_billing_no_connection">Sin conexión con Google Play. Revisa tu internet.</string>
+    <string name="set_billing_unavailable">La compra no está disponible por ahora. Revisa que tengas una cuenta de Google Play en el teléfono.</string>
+    <string name="set_billing_error_code">La tienda no respondió (%1$d).</string>
+
+    <!-- Pro -->
+    <string name="set_pro_benefit_ambient">Modo ambiente: solo el recipiente y el reloj, atenuados, cuando no tocas la pantalla</string>
+    <string name="set_pro_benefit_sounds">Sonidos de concentración: ruido blanco, rosa, café, lluvia y olas</string>
+    <string name="set_pro_benefit_colors">Colores de Material You tomados de tu fondo de pantalla</string>
+    <string name="set_pro_benefit_clean">Pantalla limpia, sin título</string>
+    <string name="set_pro_benefit_glass">Vidrio realista que deforma el líquido como una lente (Android 13+)</string>
+    <string name="set_pro_benefit_export">Exportar tu historial a CSV</string>
+    <string name="set_pro_benefit_no_ads">Sin anuncios</string>
+    <string name="set_pro_owned">Ya tienes Pro. ¡Gracias por apoyar Lab Pomodoro!</string>
+    <string name="set_pro_manage">Administrar suscripción en Google Play</string>
+    <string name="set_pro_connecting">Conectando con Google Play…</string>
+    <string name="set_pro_not_published">La compra estará disponible cuando Lab Pomodoro esté publicada en Google Play.</string>
+    <string name="set_pro_restore">Restaurar compras</string>
+    <string name="set_pro_debug_toggle">Activar Pro (solo pruebas)</string>
+    <string name="set_pro_debug_hour">Sumar 1 h de enfoque (solo pruebas)</string>
+    <string name="set_pro_debug_table">Completar la tabla (solo pruebas)</string>
+    <string name="set_pro_debug_five">Sumar 5 de cada elemento (solo pruebas)</string>
+    <string name="set_pro_monthly">Mensual</string>
+    <string name="set_pro_yearly">Anual</string>
+    <string name="set_pro_lifetime">Para siempre</string>
+    <string name="set_pro_per_month">al mes</string>
+    <string name="set_pro_per_year">al año</string>
+    <string name="set_pro_one_time">un solo pago</string>
+    <plurals name="set_pro_trial">
+        <item quantity="one">%1$d día gratis, luego %2$s</item>
+        <item quantity="many">%1$d días gratis, luego %2$s</item>
+        <item quantity="other">%1$d días gratis, luego %2$s</item>
+    </plurals>
+    <string name="set_pro_savings">Ahorras %1$d %%</string>
+    <string name="set_pro_no_subscription">Sin suscripción</string>
+    <string name="set_pro_try">Probar</string>
+    <string name="set_pro_choose">Elegir</string>
+    <string name="set_pro_renew_note">Las suscripciones se renuevan solas y puedes cancelarlas cuando quieras en Google Play. Si cancelas durante la prueba gratis, no se te cobra nada.</string>
+
+    <!-- Sonido de concentración -->
+    <string name="set_sound_intro">Suena solo mientras trabajas; en pausa y en los descansos se apaga solo.</string>
+    <string name="set_sound_volume">Volumen</string>
+    <string name="set_sound_preview">Probar 5 s</string>
+    <string name="set_sound_available_pro">Disponible en Pro</string>
+    <string name="set_sound_off">Sin sonido</string>
+    <string name="set_sound_white">Ruido blanco</string>
+    <string name="set_sound_white_desc">Parejo en todas las frecuencias, como estática: tapa bien las voces.</string>
+    <string name="set_sound_pink">Ruido rosa</string>
+    <string name="set_sound_pink_desc">Más suave en los agudos, como lluvia constante.</string>
+    <string name="set_sound_brown">Ruido café</string>
+    <string name="set_sound_brown_desc">Grave y profundo, como una cascada lejana o el motor de un avión.</string>
+    <string name="set_sound_rain">Lluvia</string>
+    <string name="set_sound_rain_desc">Lluvia sobre una ventana, con gotas que caen al azar.</string>
+    <string name="set_sound_waves">Olas</string>
+    <string name="set_sound_waves_desc">Oleaje que sube y baja lento, para respirar al ritmo.</string>
+
+    <!-- Ligas -->
+    <string name="set_league_hydrogen">Hidrógeno</string>
+    <string name="set_league_helium">Helio</string>
+    <string name="set_league_carbon">Carbono</string>
+    <string name="set_league_nitrogen">Nitrógeno</string>
+    <string name="set_league_oxygen">Oxígeno</string>
+    <string name="set_league_neon">Neón</string>
+    <string name="set_league_iron">Hierro</string>
+    <string name="set_league_silver">Plata</string>
+    <string name="set_league_gold">Oro</string>
+    <string name="set_league_platinum">Platino</string>
+    <string name="set_league_rules">Cada semana compites en un grupo de hasta 30 personas de tu liga. Tus puntos son tus minutos de enfoque. Al terminar la semana, los primeros suben de liga y los últimos bajan. Las ligas van del Hidrógeno al Platino.</string>
+    <string name="set_league_sign_in_desc">Para competir necesitas iniciar sesión con Google. Los demás solo verán el apodo que elijas.</string>
+    <string name="set_league_nickname">Tu apodo</string>
+    <string name="set_league_nickname_hint">Es lo único que verán los demás; no uses tu nombre completo.</string>
+    <string name="set_league_avatar">Tu avatar: un elemento de tu colección</string>
+    <string name="set_league_join">Unirme a la liga</string>
+    <string name="set_league_join_failed">No se pudo entrar a la liga. Revisa tu conexión.</string>
+    <string name="set_league_name">Liga %1$s</string>
+    <string name="set_league_ends_today">Termina hoy</string>
+    <plurals name="set_league_ends_in">
+        <item quantity="one">Termina en %1$d día</item>
+        <item quantity="many">Termina en %1$d días</item>
+        <item quantity="other">Termina en %1$d días</item>
+    </plurals>
+    <plurals name="set_league_promote">
+        <item quantity="one">El primero sube a %2$s.</item>
+        <item quantity="many">Los %1$d primeros suben a %2$s.</item>
+        <item quantity="other">Los %1$d primeros suben a %2$s.</item>
+    </plurals>
+    <plurals name="set_league_demote">
+        <item quantity="one">El último baja a %2$s.</item>
+        <item quantity="many">Los %1$d últimos bajan a %2$s.</item>
+        <item quantity="other">Los %1$d últimos bajan a %2$s.</item>
+    </plurals>
+    <string name="set_league_leave">Salir de las ligas</string>
+    <string name="set_league_me">%1$s (tú)</string>
+    <string name="set_league_bot">bot del laboratorio</string>
+    <string name="set_league_bot_name">Asistente %1$s</string>
+    <string name="set_league_promoted_title">¡Subiste a la liga %1$s!</string>
+    <string name="set_league_promoted_text">Quedaste en el lugar %1$d de %2$d. Tu constancia te está llevando lejos.</string>
+    <string name="set_league_demoted_title">Bajaste a la liga %1$s</string>
+    <string name="set_league_demoted_text">Quedaste en el lugar %1$d de %2$d. Una semana floja le pasa a cualquiera; esta es tuya.</string>
+    <string name="set_league_stayed_title">Sigues en la liga %1$s</string>
+    <string name="set_league_stayed_text">Quedaste en el lugar %1$d de %2$d. Un poco más y subes.</string>
+    <string name="set_league_lets_go">¡Vamos!</string>
+</resources>

@@ -38,7 +38,7 @@ class MedalCalculatorTest {
         val result = MedalCalculator.calculate(sessions, emptyMap(), 0)
         assertTrue(result.of(Medal.STREAK_7).earned)
         assertFalse(result.of(Medal.STREAK_30).earned)
-        assertEquals("7/30 días", result.of(Medal.STREAK_30).label)
+        assertEquals(7L, result.of(Medal.STREAK_30).shown)
     }
 
     @Test

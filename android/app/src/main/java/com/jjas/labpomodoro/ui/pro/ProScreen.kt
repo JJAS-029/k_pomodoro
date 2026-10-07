@@ -30,6 +30,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -37,6 +39,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import com.jjas.labpomodoro.BuildConfig
+import com.jjas.labpomodoro.R
 import com.jjas.labpomodoro.data.billing.BillingRepository
 import com.jjas.labpomodoro.data.billing.ProOffer
 import com.jjas.labpomodoro.data.billing.ProPlan
@@ -110,13 +113,13 @@ class ProViewModel @Inject constructor(
 }
 
 private val BENEFITS = listOf(
-    "🌙" to "Modo ambiente: solo el recipiente y el reloj, atenuados, cuando no tocas la pantalla",
-    "🎧" to "Sonidos de concentración: ruido blanco, rosa, café, lluvia y olas",
-    "🎨" to "Colores de Material You tomados de tu fondo de pantalla",
-    "✨" to "Pantalla limpia, sin título",
-    "🔍" to "Vidrio realista que deforma el líquido como una lente (Android 13+)",
-    "📄" to "Exportar tu historial a CSV",
-    "🚫" to "Sin anuncios",
+    "🌙" to R.string.set_pro_benefit_ambient,
+    "🎧" to R.string.set_pro_benefit_sounds,
+    "🎨" to R.string.set_pro_benefit_colors,
+    "✨" to R.string.set_pro_benefit_clean,
+    "🔍" to R.string.set_pro_benefit_glass,
+    "📄" to R.string.set_pro_benefit_export,
+    "🚫" to R.string.set_pro_benefit_no_ads,
 )
 
 @Composable
@@ -144,14 +147,14 @@ fun ProScreen(onBack: () -> Unit, viewModel: ProViewModel = hiltViewModel()) {
                     color = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier.weight(1f),
                 )
-                TextButton(onClick = onBack) { Text("Listo") }
+                TextButton(onClick = onBack) { Text(stringResource(R.string.set_done)) }
             }
             Spacer(Modifier.height(12.dp))
             BENEFITS.forEach { (icon, text) ->
                 Row(Modifier.padding(vertical = 5.dp)) {
                     Text(icon, style = MaterialTheme.typography.bodyLarge)
                     Spacer(Modifier.width(12.dp))
-                    Text(text, style = MaterialTheme.typography.bodyLarge)
+                    Text(stringResource(text), style = MaterialTheme.typography.bodyLarge)
                 }
             }
             Spacer(Modifier.height(20.dp))
@@ -162,41 +165,41 @@ fun ProScreen(onBack: () -> Unit, viewModel: ProViewModel = hiltViewModel()) {
             }
 
             if (purchased) {
-                Text("Ya tienes Pro. ¡Gracias por apoyar Lab Pomodoro!", style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.set_pro_owned), style = MaterialTheme.typography.titleMedium)
                 TextButton(onClick = {
                     // Las suscripciones se administran (cancelar, cambiar de plan) en Google Play
                     val uri = "https://play.google.com/store/account/subscriptions?package=${context.packageName}".toUri()
                     context.startActivity(Intent(Intent.ACTION_VIEW, uri))
-                }) { Text("Administrar suscripción en Google Play") }
+                }) { Text(stringResource(R.string.set_pro_manage)) }
             } else {
                 when (val s = store) {
                     StoreState.Connecting -> Row(verticalAlignment = Alignment.CenterVertically) {
                         CircularProgressIndicator(Modifier.padding(end = 12.dp))
-                        Text("Conectando con Google Play…")
+                        Text(stringResource(R.string.set_pro_connecting))
                     }
-                    StoreState.NoProducts -> Note("La compra estará disponible cuando Lab Pomodoro esté publicada en Google Play.")
+                    StoreState.NoProducts -> Note(stringResource(R.string.set_pro_not_published))
                     is StoreState.Unavailable -> Note(s.message)
                     is StoreState.Ready -> Offers(s.offers, onBuy = { offer -> activity?.let { viewModel.buy(it, offer) } })
                 }
             }
             Spacer(Modifier.height(8.dp))
-            TextButton(onClick = viewModel::restore) { Text("Restaurar compras") }
+            TextButton(onClick = viewModel::restore) { Text(stringResource(R.string.set_pro_restore)) }
 
             // Solo en compilaciones de prueba, para probar las funciones Pro sin comprar
             if (BuildConfig.DEBUG) {
                 Spacer(Modifier.height(24.dp))
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        "Activar Pro (solo pruebas)",
+                        stringResource(R.string.set_pro_debug_toggle),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.tertiary,
                         modifier = Modifier.weight(1f),
                     )
                     Switch(checked = prefs?.proTesting == true, onCheckedChange = viewModel::setPro)
                 }
-                TextButton(onClick = viewModel::addTestFocusHour) { Text("Sumar 1 h de enfoque (solo pruebas)") }
-                TextButton(onClick = viewModel::completeTable) { Text("Completar la tabla (solo pruebas)") }
-                TextButton(onClick = viewModel::addFiveOfEach) { Text("Sumar 5 de cada elemento (solo pruebas)") }
+                TextButton(onClick = viewModel::addTestFocusHour) { Text(stringResource(R.string.set_pro_debug_hour)) }
+                TextButton(onClick = viewModel::completeTable) { Text(stringResource(R.string.set_pro_debug_table)) }
+                TextButton(onClick = viewModel::addFiveOfEach) { Text(stringResource(R.string.set_pro_debug_five)) }
             }
         }
     }
@@ -213,9 +216,9 @@ private fun Offers(offers: List<ProOffer>, onBuy: (ProOffer) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         offers.forEach { offer ->
             val (title, period) = when (offer.plan) {
-                ProPlan.MONTHLY -> "Mensual" to "al mes"
-                ProPlan.YEARLY -> "Anual" to "al año"
-                ProPlan.LIFETIME -> "Para siempre" to "un solo pago"
+                ProPlan.MONTHLY -> stringResource(R.string.set_pro_monthly) to stringResource(R.string.set_pro_per_month)
+                ProPlan.YEARLY -> stringResource(R.string.set_pro_yearly) to stringResource(R.string.set_pro_per_year)
+                ProPlan.LIFETIME -> stringResource(R.string.set_pro_lifetime) to stringResource(R.string.set_pro_one_time)
             }
             // Cuánto ahorra el anual frente a pagar 12 meses
             val savings = if (offer.plan == ProPlan.YEARLY && monthly != null && monthly.priceMicros > 0) {
@@ -225,18 +228,16 @@ private fun Offers(offers: List<ProOffer>, onBuy: (ProOffer) -> Unit) {
             }
             OfferCard(
                 title = title,
-                price = offer.trialDays?.let { "${it} días gratis, luego ${offer.price}" } ?: offer.price,
+                price = offer.trialDays?.let { pluralStringResource(R.plurals.set_pro_trial, it, it, offer.price) } ?: offer.price,
                 period = period,
-                badge = savings?.let { "Ahorras $it %" } ?: if (offer.plan == ProPlan.LIFETIME) "Sin suscripción" else null,
+                badge = savings?.let { stringResource(R.string.set_pro_savings, it) }
+                    ?: if (offer.plan == ProPlan.LIFETIME) stringResource(R.string.set_pro_no_subscription) else null,
                 highlighted = offer.plan == ProPlan.YEARLY,
-                action = if (offer.trialDays != null) "Probar" else "Elegir",
+                action = stringResource(if (offer.trialDays != null) R.string.set_pro_try else R.string.set_pro_choose),
                 onClick = { onBuy(offer) },
             )
         }
-        Note(
-            "Las suscripciones se renuevan solas y puedes cancelarlas cuando quieras en Google Play. " +
-                "Si cancelas durante la prueba gratis, no se te cobra nada."
-        )
+        Note(stringResource(R.string.set_pro_renew_note))
     }
 }
 

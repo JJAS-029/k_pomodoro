@@ -1,0 +1,5 @@
+<resources>
+    <string name="widget_skip">Saltar</string>
+    <string name="widget_stop">Detener</string>
+    <string name="widget_description">Tu experimento en la pantalla de inicio: el recipiente, el tiempo y los controles.</string>
+</resources>

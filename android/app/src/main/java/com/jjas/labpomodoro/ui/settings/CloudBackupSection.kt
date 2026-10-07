@@ -23,11 +23,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
+import com.jjas.labpomodoro.R
 import com.jjas.labpomodoro.data.backup.BackupInfo
 import com.jjas.labpomodoro.data.backup.BackupRepository
 import com.jjas.labpomodoro.data.backup.BackupStatus
@@ -89,35 +92,40 @@ fun CloudBackupSection(viewModel: CloudBackupViewModel = hiltViewModel()) {
             null -> Unit
             false -> {
                 Text(
-                    "Inicia sesión con Google y tu tabla, tu historial y tu racha quedan guardados en la nube. " +
-                        "Si cambias de teléfono, los recuperas.",
+                    stringResource(R.string.set_backup_signed_out_desc),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                FilledTonalButton(onClick = { viewModel.signIn(context) }) { Text("Iniciar sesión con Google") }
+                FilledTonalButton(onClick = { viewModel.signIn(context) }) { Text(stringResource(R.string.set_sign_in_google)) }
             }
             true -> {
                 Text(
-                    text = info?.let { "Último respaldo: ${it.formattedDate()} · ${it.elements} elementos · ${it.sessions} sesiones." }
-                        ?: "Aún no hay respaldo.",
+                    text = info?.let {
+                        stringResource(
+                            R.string.set_backup_last,
+                            it.formattedDate(),
+                            pluralStringResource(R.plurals.set_backup_elements, it.elements, it.elements),
+                            pluralStringResource(R.plurals.set_backup_sessions, it.sessions, it.sessions),
+                        )
+                    } ?: stringResource(R.string.set_backup_none),
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 Text(
-                    "Se respalda solo al terminar cada plan.",
+                    stringResource(R.string.set_backup_auto),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 val working = status is BackupStatus.Working
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    OutlinedButton(onClick = viewModel::backupNow, enabled = !working) { Text("Respaldar ahora") }
+                    OutlinedButton(onClick = viewModel::backupNow, enabled = !working) { Text(stringResource(R.string.set_backup_now)) }
                     if (info != null) {
-                        TextButton(onClick = { confirmRestore = true }, enabled = !working) { Text("Recuperar") }
+                        TextButton(onClick = { confirmRestore = true }, enabled = !working) { Text(stringResource(R.string.set_restore)) }
                     }
                     if (working) CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
                 }
                 when (val s = status) {
-                    is BackupStatus.Done -> Text(s.message, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
-                    is BackupStatus.Failed -> Text(s.message, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
+                    is BackupStatus.Done -> Text(stringResource(s.messageRes), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
+                    is BackupStatus.Failed -> Text(stringResource(s.messageRes), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
                     else -> Unit
                 }
             }
@@ -132,11 +140,11 @@ fun CloudBackupSection(viewModel: CloudBackupViewModel = hiltViewModel()) {
                 Button(onClick = {
                     confirmRestore = false
                     viewModel.restore()
-                }) { Text("Recuperar") }
+                }) { Text(stringResource(R.string.set_restore)) }
             },
-            dismissButton = { TextButton(onClick = { confirmRestore = false }) { Text("Cancelar") } },
-            title = { Text("¿Recuperar el respaldo?") },
-            text = { Text("Lo que hay en este teléfono se reemplaza por el respaldo de la nube. No se puede deshacer.") },
+            dismissButton = { TextButton(onClick = { confirmRestore = false }) { Text(stringResource(R.string.set_cancel)) } },
+            title = { Text(stringResource(R.string.set_restore_confirm_title)) },
+            text = { Text(stringResource(R.string.set_restore_confirm_text)) },
         )
     }
 }

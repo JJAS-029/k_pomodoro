@@ -2,7 +2,6 @@ package com.jjas.labpomodoro.domain.usecase
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.time.LocalDate
 
@@ -18,12 +17,11 @@ class StreakReminderTest {
     @Test
     fun `racha en riesgo dice cuantos dias lleva`() {
         val days = (1L..5L).map { today.minusDays(it) }
-        assertEquals("Tu racha de 5 días te espera", StreakReminder.message(days, today)?.title)
+        assertEquals(StreakReminder.Message.StreakAtRisk(5), StreakReminder.message(days, today))
     }
 
     @Test
     fun `sin racha invita a empezar una`() {
-        val message = StreakReminder.message(listOf(today.minusDays(4)), today)
-        assertTrue(message!!.title.startsWith("¿Un experimento"))
+        assertEquals(StreakReminder.Message.StartNew, StreakReminder.message(listOf(today.minusDays(4)), today))
     }
 }

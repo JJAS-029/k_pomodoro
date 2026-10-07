@@ -5,6 +5,7 @@ import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jjas.labpomodoro.R
 import com.jjas.labpomodoro.ads.AdsManager
 import com.jjas.labpomodoro.data.repository.SessionRepository
 import com.jjas.labpomodoro.data.repository.SettingsRepository
@@ -49,11 +50,11 @@ class SettingsViewModel @Inject constructor(
                 val all = sessions.all()
                 withContext(Dispatchers.IO) {
                     context.contentResolver.openOutputStream(uri)?.use { out ->
-                        out.write(HistoryCsv.build(all, ZoneId.systemDefault()).toByteArray(Charsets.UTF_8))
+                        out.write(HistoryCsv.build(all, ZoneId.systemDefault(), context.resources).toByteArray(Charsets.UTF_8))
                     } ?: error("sin archivo")
                 }
-                "Listo: ${all.size} sesiones exportadas."
-            }.getOrElse { "No se pudo exportar el historial." }
+                context.resources.getQuantityString(R.plurals.set_export_done, all.size, all.size)
+            }.getOrElse { context.getString(R.string.set_export_failed) }
         }
     }
 

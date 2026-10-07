@@ -1,15 +1,18 @@
 package com.jjas.labpomodoro.domain.model
 
+import androidx.annotation.StringRes
+import com.jjas.labpomodoro.R
+
 /**
  * Maestría de un elemento según cuántas veces se ha obtenido en total (gastarlo en el sintetizador
  * no la baja). Le da sentido a los repetidos una vez descubierta la tabla.
  */
-enum class Mastery(val label: String) {
-    NONE("Sin descubrir"),
-    DISCOVERED("Descubierto"),
-    BRONZE("Bronce"),
-    SILVER("Plata"),
-    GOLD("Oro"),
+enum class Mastery(@StringRes val labelRes: Int) {
+    NONE(R.string.prog_mastery_none),
+    DISCOVERED(R.string.prog_mastery_discovered),
+    BRONZE(R.string.prog_tier_bronze),
+    SILVER(R.string.prog_tier_silver),
+    GOLD(R.string.prog_tier_gold),
 }
 
 object MasteryRules {

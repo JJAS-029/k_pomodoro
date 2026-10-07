@@ -12,8 +12,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.jjas.labpomodoro.R
 import com.jjas.labpomodoro.domain.model.PeriodicTable
 import com.jjas.labpomodoro.ui.components.KoalaAvatar
 
@@ -22,10 +24,10 @@ import com.jjas.labpomodoro.ui.components.KoalaAvatar
 fun TableCompleteDialog(onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        confirmButton = { Button(onClick = onDismiss) { Text("Gracias, koala") } },
+        confirmButton = { Button(onClick = onDismiss) { Text(stringResource(R.string.el_table_complete_confirm)) } },
         title = {
             Text(
-                "¡Completaste la tabla periódica!",
+                stringResource(R.string.el_table_complete_title),
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -38,32 +40,27 @@ fun TableCompleteDialog(onDismiss: () -> Unit) {
             ) {
                 KoalaAvatar(size = 96.dp)
                 Text(
-                    "Los ${PeriodicTable.SIZE} elementos. Cada uno salió de tu tiempo de enfoque: de horas en las " +
-                        "que elegiste concentrarte cuando era más fácil distraerse.",
+                    stringResource(R.string.el_table_complete_body1, PeriodicTable.SIZE),
                     style = MaterialTheme.typography.bodyLarge,
                     textAlign = TextAlign.Center,
                 )
                 Text(
-                    "Mendeléyev tardó años en ordenar esta tabla, y generaciones de científicos dedicaron su vida " +
-                        "a encontrar cada casilla. Tú la llenaste pomodoro a pomodoro, y hasta fabricaste en tu " +
-                        "sintetizador los que no existen en la naturaleza.",
+                    stringResource(R.string.el_table_complete_body2),
                     style = MaterialTheme.typography.bodyLarge,
                     textAlign = TextAlign.Center,
                 )
                 Text(
-                    "Esto no es solo una colección: es la prueba de que la constancia transforma. Así como estos " +
-                        "elementos forman todo lo que existe, tus horas de enfoque están formando a la persona que " +
-                        "quieres ser.",
+                    stringResource(R.string.el_table_complete_body3),
                     style = MaterialTheme.typography.bodyLarge,
                     textAlign = TextAlign.Center,
                 )
                 Text(
-                    "Gracias por dejar que este pequeño laboratorio te acompañara. Aquí seguimos para lo que sigue.",
+                    stringResource(R.string.el_table_complete_body4),
                     style = MaterialTheme.typography.bodyLarge,
                     textAlign = TextAlign.Center,
                 )
                 Text(
-                    "— JJAS y el koala",
+                    stringResource(R.string.el_signature),
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.primary,
                 )

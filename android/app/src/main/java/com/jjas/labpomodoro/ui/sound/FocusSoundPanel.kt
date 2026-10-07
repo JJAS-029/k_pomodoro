@@ -22,12 +22,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
+import com.jjas.labpomodoro.R
 import com.jjas.labpomodoro.data.repository.SettingsRepository
 import com.jjas.labpomodoro.domain.model.AppSettings
 import com.jjas.labpomodoro.domain.model.FocusSound
@@ -77,7 +79,7 @@ fun FocusSoundPanel(
 
     Column(modifier) {
         Text(
-            "Suena solo mientras trabajas; en pausa y en los descansos se apaga solo.",
+            stringResource(R.string.set_sound_intro),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -99,10 +101,10 @@ fun FocusSoundPanel(
                     RadioButton(selected = current.focusSound == sound, onClick = null, enabled = enabled)
                     Spacer(Modifier.width(12.dp))
                     Column {
-                        Text(sound.label, style = MaterialTheme.typography.bodyLarge)
-                        if (sound.description.isNotEmpty()) {
+                        Text(stringResource(sound.labelRes), style = MaterialTheme.typography.bodyLarge)
+                        sound.descriptionRes?.let { description ->
                             Text(
-                                sound.description,
+                                stringResource(description),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -112,7 +114,7 @@ fun FocusSoundPanel(
             }
         }
         Spacer(Modifier.height(8.dp))
-        Text("Volumen", style = MaterialTheme.typography.bodyLarge)
+        Text(stringResource(R.string.set_sound_volume), style = MaterialTheme.typography.bodyLarge)
         Slider(
             value = volume,
             onValueChange = { volume = it },
@@ -123,9 +125,9 @@ fun FocusSoundPanel(
             OutlinedButton(
                 onClick = { viewModel.preview(current.focusSound, volume) },
                 enabled = current.focusSound != FocusSound.OFF,
-            ) { Text("Probar 5 s") }
+            ) { Text(stringResource(R.string.set_sound_preview)) }
         } else {
-            FilledTonalButton(onClick = onOpenPro) { Text("Disponible en Pro") }
+            FilledTonalButton(onClick = onOpenPro) { Text(stringResource(R.string.set_sound_available_pro)) }
         }
     }
 }

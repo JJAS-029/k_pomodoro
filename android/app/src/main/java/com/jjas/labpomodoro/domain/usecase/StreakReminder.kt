@@ -2,10 +2,16 @@ package com.jjas.labpomodoro.domain.usecase
 
 import java.time.LocalDate
 
-/** Qué decirle a la persona a la hora del recordatorio. */
+/** Qué decirle a la persona a la hora del recordatorio (los textos los pone quien notifica). */
 object StreakReminder {
 
-    data class Message(val title: String, val text: String)
+    sealed interface Message {
+        /** La racha de [streak] días sigue viva pero hoy no ha trabajado. */
+        data class StreakAtRisk(val streak: Int) : Message
+
+        /** No hay racha: se invita a empezar una sin presionar. */
+        data object StartNew : Message
+    }
 
     /**
      * null si hoy ya hizo al menos un pomodoro (no hay nada que recordar). Si la racha sigue viva
@@ -14,16 +20,6 @@ object StreakReminder {
     fun message(activeDays: Collection<LocalDate>, today: LocalDate): Message? {
         if (today in activeDays) return null
         val streak = StreakCalculator.calculate(activeDays, today).current
-        return if (streak > 0) {
-            Message(
-                title = "Tu racha de $streak ${if (streak == 1) "día" else "días"} te espera",
-                text = "Un pomodoro antes de dormir y la mantienes viva.",
-            )
-        } else {
-            Message(
-                title = "¿Un experimento hoy?",
-                text = "Con un solo pomodoro empiezas una racha nueva.",
-            )
-        }
+        return if (streak > 0) Message.StreakAtRisk(streak) else Message.StartNew
     }
 }

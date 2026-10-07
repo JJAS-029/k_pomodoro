@@ -18,6 +18,7 @@ import com.android.billingclient.api.QueryPurchasesParams
 import com.android.billingclient.api.acknowledgePurchase
 import com.android.billingclient.api.queryProductDetails
 import com.android.billingclient.api.queryPurchasesAsync
+import com.jjas.labpomodoro.R
 import com.jjas.labpomodoro.core.di.ApplicationScope
 import com.jjas.labpomodoro.data.repository.SettingsRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -67,7 +68,7 @@ sealed interface StoreState {
  */
 @Singleton
 class BillingRepository @Inject constructor(
-    @ApplicationContext context: Context,
+    @ApplicationContext private val context: Context,
     private val settings: SettingsRepository,
     @ApplicationScope private val scope: CoroutineScope,
 ) {
@@ -85,7 +86,10 @@ class BillingRepository @Inject constructor(
             BillingResponseCode.OK -> scope.launch { handlePurchases(purchases.orEmpty(), fromCheckout = true) }
             BillingResponseCode.USER_CANCELED -> Unit
             BillingResponseCode.ITEM_ALREADY_OWNED -> refresh()
-            else -> _message.value = "No se pudo completar la compra (${result.debugMessage.ifBlank { result.responseCode.toString() }})."
+            else -> _message.value = context.getString(
+                R.string.set_billing_purchase_failed,
+                result.debugMessage.ifBlank { result.responseCode.toString() },
+            )
         }
     }
 
@@ -124,7 +128,7 @@ class BillingRepository @Inject constructor(
                 runCatching {
                     loadOffers()
                     syncPurchases()
-                }.onFailure { _state.value = StoreState.Unavailable("La tienda no respondió.") }
+                }.onFailure { _state.value = StoreState.Unavailable(context.getString(R.string.set_billing_no_response)) }
             }
         }
     }
@@ -142,7 +146,7 @@ class BillingRepository @Inject constructor(
         val params = BillingFlowParams.newBuilder().setProductDetailsParamsList(listOf(product)).build()
         val result = client.launchBillingFlow(activity, params)
         if (result.responseCode != BillingResponseCode.OK) {
-            _message.value = "No se pudo abrir el pago (${result.responseCode})."
+            _message.value = context.getString(R.string.set_billing_open_failed, result.responseCode)
         }
     }
 
@@ -214,10 +218,10 @@ class BillingRepository @Inject constructor(
         when {
             owned.isNotEmpty() -> {
                 settings.setProPurchased(true)
-                if (fromCheckout) _message.value = "¡Gracias! Ya tienes Lab Pomodoro Pro."
+                if (fromCheckout) _message.value = context.getString(R.string.set_billing_thanks)
             }
             ours.any { it.purchaseState == Purchase.PurchaseState.PENDING } ->
-                _message.value = "Tu pago está pendiente. Pro se activará en cuanto se confirme."
+                _message.value = context.getString(R.string.set_billing_pending)
             // Desde el pago llegan solo las compras nuevas; la lista completa viene de syncPurchases
             !fromCheckout -> settings.setProPurchased(false)
         }
@@ -233,12 +237,12 @@ class BillingRepository @Inject constructor(
         QueryProductDetailsParams.Product.newBuilder().setProductId(id).setProductType(type).build()
 
     private fun unavailableMessage(result: BillingResult) = when (result.responseCode) {
-        BillingResponseCode.SERVICE_UNAVAILABLE, BillingResponseCode.NETWORK_ERROR -> "Sin conexión con Google Play. Revisa tu internet."
+        BillingResponseCode.SERVICE_UNAVAILABLE, BillingResponseCode.NETWORK_ERROR -> context.getString(R.string.set_billing_no_connection)
         // Pasa cuando no hay cuenta de Google Play o la app aún no está publicada
         BillingResponseCode.BILLING_UNAVAILABLE, BillingResponseCode.SERVICE_DISCONNECTED,
         BillingResponseCode.ITEM_UNAVAILABLE, BillingResponseCode.DEVELOPER_ERROR ->
-            "La compra no está disponible por ahora. Revisa que tengas una cuenta de Google Play en el teléfono."
-        else -> "La tienda no respondió (${result.responseCode})."
+            context.getString(R.string.set_billing_unavailable)
+        else -> context.getString(R.string.set_billing_error_code, result.responseCode)
     }
 
     companion object {

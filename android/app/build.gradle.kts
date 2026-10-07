@@ -43,6 +43,11 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+    // Inglés por defecto (values/) y español (values-es/). Genera la lista de idiomas para que
+    // Android 13+ deje elegir el idioma de la app en sus ajustes; el default va en resources.properties
+    androidResources {
+        generateLocaleConfig = true
+    }
     buildFeatures {
         compose = true
         buildConfig = true

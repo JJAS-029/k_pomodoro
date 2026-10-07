@@ -21,11 +21,13 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.jjas.labpomodoro.R
 
 /**
  * Columnas de una sola serie: todas del mismo tono y la más alta (o la que se toca) al color pleno.
@@ -49,16 +51,18 @@ fun BarChart(
     val muted = accent.copy(alpha = 0.38f)
     val grid = MaterialTheme.colorScheme.outlineVariant
     val max = (values.maxOrNull() ?: 0L).coerceAtLeast(1L)
+    val noData = stringResource(R.string.prog_chart_no_data)
+    val noDataPeriod = stringResource(R.string.prog_chart_no_data_period)
 
     Column(
         modifier.semantics {
             contentDescription = values.indices.filter { values[it] > 0 }.joinToString(". ") { describe(it) }
-                .ifEmpty { "Sin datos" }
+                .ifEmpty { noData }
         },
     ) {
         // Lo que dice la barra destacada (la más alta o la que se tocó)
         Text(
-            text = focus?.let { describe(it) } ?: "Sin datos en este periodo",
+            text = focus?.let { describe(it) } ?: noDataPeriod,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.padding(bottom = 8.dp),

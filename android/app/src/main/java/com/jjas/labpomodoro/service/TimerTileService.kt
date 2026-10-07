@@ -75,20 +75,24 @@ class TimerTileService : TileService() {
     private fun render(state: TimerState) {
         val tile = qsTile ?: return
         tile.icon = Icon.createWithResource(this, R.drawable.ic_stat_timer)
-        tile.label = "Lab Pomodoro"
+        tile.label = getString(R.string.app_name)
         when (state) {
             is TimerState.Active -> {
                 tile.state = Tile.STATE_ACTIVE
                 val minutes = (state.remainingMillis(SystemClock.elapsedRealtime()) + 59_999) / 60_000
-                tile.subtitleOrNull = if (state.isPaused) "En pausa · $minutes min" else "${state.current.type.label()} · $minutes min"
+                tile.subtitleOrNull = if (state.isPaused) {
+                    getString(R.string.main_tile_paused, minutes.toInt())
+                } else {
+                    getString(R.string.main_tile_active, getString(state.current.type.labelRes()), minutes.toInt())
+                }
             }
             is TimerState.Finished -> {
                 tile.state = Tile.STATE_INACTIVE
-                tile.subtitleOrNull = "Experimento completado"
+                tile.subtitleOrNull = getString(R.string.main_experiment_complete_short)
             }
             TimerState.Idle -> {
                 tile.state = Tile.STATE_INACTIVE
-                tile.subtitleOrNull = "Iniciar"
+                tile.subtitleOrNull = getString(R.string.main_action_start)
             }
         }
         tile.updateTile()
@@ -126,7 +130,7 @@ fun Context.requestAddTimerTile(): Boolean {
     val manager = getSystemService(StatusBarManager::class.java) ?: return false
     manager.requestAddTileService(
         ComponentName(this, TimerTileService::class.java),
-        "Lab Pomodoro",
+        getString(R.string.app_name),
         Icon.createWithResource(this, R.drawable.ic_stat_timer),
         mainExecutor,
     ) { }

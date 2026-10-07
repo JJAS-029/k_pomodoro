@@ -12,8 +12,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.jjas.labpomodoro.R
 import com.jjas.labpomodoro.domain.model.Mastery
 import com.jjas.labpomodoro.ui.components.GoldColor
 import com.jjas.labpomodoro.ui.components.KoalaAvatar
@@ -23,28 +25,26 @@ import com.jjas.labpomodoro.ui.components.metalColor
 @Composable
 fun MasteryTableDialog(level: Mastery, onDismiss: () -> Unit) {
     val (title, body) = when (level) {
-        Mastery.BRONZE -> "¡Tabla de bronce!" to listOf(
-            "Los 118 elementos, cinco veces cada uno. Ya no es suerte: es método.",
-            "La plata te espera. Cada pomodoro sigue sumando.",
+        Mastery.BRONZE -> R.string.el_mastery_table_bronze_title to listOf(
+            R.string.el_mastery_table_bronze_body1,
+            R.string.el_mastery_table_bronze_body2,
         )
-        Mastery.SILVER -> "¡Tabla de plata!" to listOf(
-            "Diez veces cada elemento. A estas alturas tu laboratorio tiene más experiencia que muchos.",
-            "Solo queda el oro: el nivel de quienes convierten la constancia en costumbre.",
+        Mastery.SILVER -> R.string.el_mastery_table_silver_title to listOf(
+            R.string.el_mastery_table_silver_body1,
+            R.string.el_mastery_table_silver_body2,
         )
-        else -> "¡Tabla de oro!" to listOf(
-            "Quince veces cada uno de los 118 elementos. Lo que los alquimistas buscaron durante siglos, " +
-                "convertir las cosas en oro, tú lo lograste con tiempo y enfoque.",
-            "Llegaste a la cima de este laboratorio. Lo que construiste aquí, la costumbre de concentrarte, " +
-                "ya es tuyo y va contigo a todo lo que hagas.",
-            "Gracias por cada pomodoro.",
+        else -> R.string.el_mastery_table_gold_title to listOf(
+            R.string.el_mastery_table_gold_body1,
+            R.string.el_mastery_table_gold_body2,
+            R.string.el_mastery_table_gold_body3,
         )
     }
     AlertDialog(
         onDismissRequest = onDismiss,
-        confirmButton = { Button(onClick = onDismiss) { Text("¡Seguimos!") } },
+        confirmButton = { Button(onClick = onDismiss) { Text(stringResource(R.string.el_mastery_table_confirm)) } },
         title = {
             Text(
-                title,
+                stringResource(title),
                 textAlign = TextAlign.Center,
                 color = level.metalColor() ?: GoldColor,
                 modifier = Modifier.fillMaxWidth(),
@@ -58,9 +58,9 @@ fun MasteryTableDialog(level: Mastery, onDismiss: () -> Unit) {
             ) {
                 KoalaAvatar(size = 88.dp)
                 body.forEach {
-                    Text(it, style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
+                    Text(stringResource(it), style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
                 }
-                Text("— JJAS y el koala", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
+                Text(stringResource(R.string.el_signature), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
             }
         },
     )

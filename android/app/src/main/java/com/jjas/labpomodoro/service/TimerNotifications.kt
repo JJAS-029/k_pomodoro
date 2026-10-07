@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import androidx.annotation.StringRes
 import androidx.core.app.NotificationCompat
 import androidx.core.graphics.drawable.IconCompat
 import com.jjas.labpomodoro.MainActivity
@@ -25,8 +26,8 @@ class TimerNotifications @Inject constructor(
 
     fun ensureChannel() {
         // Silencioso: los sonidos los reproduce la app con SoundPool según la configuración
-        val channel = NotificationChannel(CHANNEL_ID, "Temporizador", NotificationManager.IMPORTANCE_LOW).apply {
-            description = "Cuenta regresiva de la sesión en curso"
+        val channel = NotificationChannel(CHANNEL_ID, context.getString(R.string.main_timer_channel_name), NotificationManager.IMPORTANCE_LOW).apply {
+            description = context.getString(R.string.main_timer_channel_description)
             setShowBadge(false)
         }
         manager.createNotificationChannel(channel)
@@ -51,36 +52,39 @@ class TimerNotifications @Inject constructor(
             .setRequestPromotedOngoing(true)
 
         if (state !is TimerState.Active) {
-            return builder.setContentTitle("Lab Pomodoro").build()
+            return builder.setContentTitle(context.getString(R.string.app_name)).build()
         }
 
         val remaining = state.remainingMillis(nowElapsed)
         builder
-            .setContentTitle(state.current.type.label())
-            .setSubText("Sesión ${state.index + 1} de ${state.plan.size}")
+            .setContentTitle(context.getString(state.current.type.labelRes()))
+            .setSubText(context.getString(R.string.main_session_of, state.index + 1, state.plan.size))
             .setStyle(planProgress(state, remaining))
 
         if (state.isPaused) {
             builder
-                .setContentText("En pausa · quedan ${formatMinutesSeconds(remaining)}")
+                .setContentText(context.getString(R.string.main_notification_paused, formatMinutesSeconds(remaining)))
                 .setShowWhen(false)
                 // El chip no puede mostrar un reloj detenido; avisa que está en pausa
-                .setShortCriticalText("Pausa")
-                .addAction(0, "Continuar", serviceIntent(TimerService.ACTION_RESUME))
+                .setShortCriticalText(context.getString(R.string.main_notification_paused_chip))
+                .addAction(0, context.getString(R.string.main_action_resume), serviceIntent(TimerService.ACTION_RESUME))
         } else {
             builder
-                .setContentText(state.next?.let { "Después: ${it.type.label().lowercase()}" } ?: "Última sesión")
+                .setContentText(
+                    state.next?.let { context.getString(R.string.main_next, context.getString(it.type.labelRes()).lowercase()) }
+                        ?: context.getString(R.string.main_last_session)
+                )
                 // Igual que el widget: 1 s de más porque el cronómetro redondea hacia abajo (la
                 // notificación se actualiza justo al cruzar el segundo, en TimerService)
                 .setWhen(nowWallMillis + remaining + 1_000)
                 .setShowWhen(true)
                 .setUsesChronometer(true)
                 .setChronometerCountDown(true)
-                .addAction(0, "Pausar", serviceIntent(TimerService.ACTION_PAUSE))
+                .addAction(0, context.getString(R.string.main_action_pause), serviceIntent(TimerService.ACTION_PAUSE))
         }
         return builder
-            .addAction(0, "Saltar", serviceIntent(TimerService.ACTION_SKIP))
-            .addAction(0, "Detener", serviceIntent(TimerService.ACTION_STOP))
+            .addAction(0, context.getString(R.string.main_action_skip), serviceIntent(TimerService.ACTION_SKIP))
+            .addAction(0, context.getString(R.string.main_action_stop), serviceIntent(TimerService.ACTION_STOP))
             .build()
     }
 
@@ -126,10 +130,11 @@ class TimerNotifications @Inject constructor(
     }
 }
 
-fun SessionType.label(): String = when (this) {
-    SessionType.WORK -> "Trabajo"
-    SessionType.SHORT_BREAK -> "Descanso corto"
-    SessionType.LONG_BREAK -> "Descanso largo"
+@StringRes
+fun SessionType.labelRes(): Int = when (this) {
+    SessionType.WORK -> R.string.main_session_work
+    SessionType.SHORT_BREAK -> R.string.main_session_short_break
+    SessionType.LONG_BREAK -> R.string.main_session_long_break
 }
 
 fun formatMinutesSeconds(millis: Long): String {

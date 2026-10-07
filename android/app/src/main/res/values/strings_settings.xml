@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Configuración -->
+    <string name="set_title">Settings</string>
+    <string name="set_done">Done</string>
+    <string name="set_pro_suffix">%1$s · Pro</string>
+    <string name="set_available_in_pro">Available in the Pro version.</string>
+
+    <string name="set_section_general">General</string>
+    <string name="set_language">Language</string>
+
+    <string name="set_section_plan">Session plan</string>
+    <string name="set_total_hours">Total work hours</string>
+    <string name="set_pomodoro">Pomodoro</string>
+    <string name="set_short_break">Short break</string>
+    <string name="set_long_break">Long break</string>
+    <string name="set_pomodoros_until_long">Pomodoros before the long break</string>
+    <string name="set_rounding_title">If the hours don\'t divide evenly</string>
+    <string name="set_rounding_trim">Trim the last one</string>
+    <string name="set_rounding_whole">Whole pomodoros</string>
+    <string name="set_rounding_trim_desc">You never go over the hours you asked for.</string>
+    <string name="set_rounding_whole_desc">Every pomodoro is the same length; you may go over a little.</string>
+
+    <string name="set_section_alerts">Alerts</string>
+    <string name="set_sounds">Sounds</string>
+    <string name="set_vibration">Vibration</string>
+    <string name="set_keep_screen_on">Keep the screen on</string>
+    <string name="set_streak_reminder">Remind me about my streak</string>
+    <string name="set_streak_reminder_desc">One reminder a day, only if you haven\'t done a pomodoro that day yet.</string>
+
+    <string name="set_section_ambient">Ambient mode</string>
+    <string name="set_ambient_switch">Just the clock when you\'re not touching the screen</string>
+    <string name="set_ambient_desc">While the timer runs, the screen dims and only the time remains. Tap it to come back.</string>
+    <string name="set_ambient_after">Turn on after</string>
+
+    <string name="set_section_shortcuts">Shortcuts</string>
+    <string name="set_shortcuts_desc">Control the timer without opening the app: a widget on your home screen or a button in Quick Settings.</string>
+    <string name="set_add_home_screen">Add to home screen</string>
+    <string name="set_add_quick_settings">Add to Quick Settings</string>
+
+    <string name="set_section_vessels">Vessels</string>
+    <string name="set_vessels_varied">Mixed: each work session uses a different element from your collection.</string>
+    <string name="set_vessels_fixed">Fixed: every vessel uses %1$s.</string>
+    <string name="set_vessels_reset">Back to mixed</string>
+    <string name="set_vessels_hint">To pick one, open it in Achievements › Periodic table and tap \"Use in all my vessels\".</string>
+
+    <string name="set_section_appearance">Appearance</string>
+    <string name="set_dynamic_color">System colors (Material You)</string>
+    <string name="set_requires_android_12">Requires Android 12 or later.</string>
+    <string name="set_dynamic_color_desc">Buttons and accents take on your wallpaper\'s colors. The background stays black.</string>
+
+    <string name="set_section_focus_sound">Focus sound</string>
+    <string name="set_section_backup">Cloud backup</string>
+    <string name="set_section_data">Your data</string>
+    <string name="set_section_about">About</string>
+
+    <!-- Tus datos -->
+    <string name="set_export_desc">Download all your sessions (date, type, minutes and whether it was completed) to view them in a spreadsheet.</string>
+    <string name="set_export_csv">Export history (CSV)</string>
+    <string name="set_export_pro">Export history · Pro</string>
+    <string name="set_export_file_name">lab-pomodoro-history.csv</string>
+    <plurals name="set_export_done">
+        <item quantity="one">Done: %1$d session exported.</item>
+        <item quantity="other">Done: %1$d sessions exported.</item>
+    </plurals>
+    <string name="set_export_failed">Couldn\'t export your history.</string>
+    <string name="set_ads_privacy">Ad privacy</string>
+
+    <!-- Acerca de -->
+    <string name="set_about_credits">Lab Pomodoro %1$s · made by JJAS. If you love science, listen to my podcasts (in Spanish):</string>
+    <string name="set_listen">Listen</string>
+    <string name="set_suggest_prompt">Got an idea, something that isn\'t working, or an element you loved? Write to me.</string>
+    <string name="set_send_suggestions">Send suggestions</string>
+    <string name="set_recommend">Recommend to a friend</string>
+    <string name="set_github">My GitHub: JJAS-029</string>
+
+    <!-- Respaldo en la nube -->
+    <string name="set_backup_signed_out_desc">Sign in with Google and your table, history and streak are saved in the cloud. If you switch phones, you get them back.</string>
+    <string name="set_sign_in_google">Sign in with Google</string>
+    <string name="set_backup_last">Last backup: %1$s · %2$s · %3$s.</string>
+    <plurals name="set_backup_elements">
+        <item quantity="one">%1$d element</item>
+        <item quantity="other">%1$d elements</item>
+    </plurals>
+    <plurals name="set_backup_sessions">
+        <item quantity="one">%1$d session</item>
+        <item quantity="other">%1$d sessions</item>
+    </plurals>
+    <string name="set_backup_none">No backup yet.</string>
+    <string name="set_backup_auto">Backs up automatically when you finish each plan.</string>
+    <string name="set_backup_now">Back up now</string>
+    <string name="set_restore">Restore</string>
+    <string name="set_cancel">Cancel</string>
+    <string name="set_restore_confirm_title">Restore the backup?</string>
+    <string name="set_restore_confirm_text">Everything on this phone will be replaced by the cloud backup. This can\'t be undone.</string>
+    <string name="set_backup_done">Progress backed up.</string>
+    <string name="set_backup_failed">Couldn\'t back up. Check your connection.</string>
+    <string name="set_restore_done">Progress restored.</string>
+    <string name="set_restore_failed">Couldn\'t restore the backup.</string>
+
+    <!-- Cuenta (pantalla principal) -->
+    <string name="set_main_no_accounts">No Google accounts available on this device</string>
+    <string name="set_main_sign_in_error">Sign-in error: %1$s</string>
+    <string name="set_main_signed_in">Signed in.</string>
+    <string name="set_main_signed_in_backed_up">Signed in. Your progress is now backed up in the cloud.</string>
+    <string name="set_main_signed_in_auto">Signed in. Your progress is backed up when you finish each plan.</string>
+    <string name="set_main_restored">All set! Your progress is back.</string>
+
+    <!-- Compras -->
+    <string name="set_billing_purchase_failed">Couldn\'t complete the purchase (%1$s).</string>
+    <string name="set_billing_open_failed">Couldn\'t open the payment (%1$d).</string>
+    <string name="set_billing_thanks">Thank you! You now have Lab Pomodoro Pro.</string>
+    <string name="set_billing_pending">Your payment is pending. Pro will turn on as soon as it\'s confirmed.</string>
+    <string name="set_billing_no_response">The store didn\'t respond.</string>
+    <string name="set_billing_no_connection">Can\'t reach Google Play. Check your internet connection.</string>
+    <string name="set_billing_unavailable">Purchases aren\'t available right now. Make sure there\'s a Google Play account on this phone.</string>
+    <string name="set_billing_error_code">The store didn\'t respond (%1$d).</string>
+
+    <!-- Pro -->
+    <string name="set_pro_benefit_ambient">Ambient mode: just the vessel and the clock, dimmed, when you\'re not touching the screen</string>
+    <string name="set_pro_benefit_sounds">Focus sounds: white, pink and brown noise, rain and waves</string>
+    <string name="set_pro_benefit_colors">Material You colors taken from your wallpaper</string>
+    <string name="set_pro_benefit_clean">Clean screen, no title</string>
+    <string name="set_pro_benefit_glass">Realistic glass that bends the liquid like a lens (Android 13+)</string>
+    <string name="set_pro_benefit_export">Export your history to CSV</string>
+    <string name="set_pro_benefit_no_ads">No ads</string>
+    <string name="set_pro_owned">You already have Pro. Thanks for supporting Lab Pomodoro!</string>
+    <string name="set_pro_manage">Manage subscription on Google Play</string>
+    <string name="set_pro_connecting">Connecting to Google Play…</string>
+    <string name="set_pro_not_published">Purchases will be available once Lab Pomodoro is published on Google Play.</string>
+    <string name="set_pro_restore">Restore purchases</string>
+    <string name="set_pro_debug_toggle">Turn on Pro (testing only)</string>
+    <string name="set_pro_debug_hour">Add 1 h of focus (testing only)</string>
+    <string name="set_pro_debug_table">Complete the table (testing only)</string>
+    <string name="set_pro_debug_five">Add 5 of each element (testing only)</string>
+    <string name="set_pro_monthly">Monthly</string>
+    <string name="set_pro_yearly">Yearly</string>
+    <string name="set_pro_lifetime">Lifetime</string>
+    <string name="set_pro_per_month">per month</string>
+    <string name="set_pro_per_year">per year</string>
+    <string name="set_pro_one_time">one-time payment</string>
+    <plurals name="set_pro_trial">
+        <item quantity="one">%1$d day free, then %2$s</item>
+        <item quantity="other">%1$d days free, then %2$s</item>
+    </plurals>
+    <string name="set_pro_savings">Save %1$d%%</string>
+    <string name="set_pro_no_subscription">No subscription</string>
+    <string name="set_pro_try">Try it</string>
+    <string name="set_pro_choose">Choose</string>
+    <string name="set_pro_renew_note">Subscriptions renew automatically and you can cancel anytime on Google Play. If you cancel during the free trial, you won\'t be charged.</string>
+
+    <!-- Sonido de concentración -->
+    <string name="set_sound_intro">It only plays while you work; it turns off by itself when paused and during breaks.</string>
+    <string name="set_sound_volume">Volume</string>
+    <string name="set_sound_preview">Preview 5 s</string>
+    <string name="set_sound_available_pro">Available in Pro</string>
+    <string name="set_sound_off">No sound</string>
+    <string name="set_sound_white">White noise</string>
+    <string name="set_sound_white_desc">Even across all frequencies, like static: great at masking voices.</string>
+    <string name="set_sound_pink">Pink noise</string>
+    <string name="set_sound_pink_desc">Softer in the highs, like steady rain.</string>
+    <string name="set_sound_brown">Brown noise</string>
+    <string name="set_sound_brown_desc">Deep and low, like a distant waterfall or an airplane engine.</string>
+    <string name="set_sound_rain">Rain</string>
+    <string name="set_sound_rain_desc">Rain on a window, with drops falling at random.</string>
+    <string name="set_sound_waves">Waves</string>
+    <string name="set_sound_waves_desc">Waves that rise and fall slowly, so you can breathe along.</string>
+
+    <!-- Ligas -->
+    <string name="set_league_hydrogen">Hydrogen</string>
+    <string name="set_league_helium">Helium</string>
+    <string name="set_league_carbon">Carbon</string>
+    <string name="set_league_nitrogen">Nitrogen</string>
+    <string name="set_league_oxygen">Oxygen</string>
+    <string name="set_league_neon">Neon</string>
+    <string name="set_league_iron">Iron</string>
+    <string name="set_league_silver">Silver</string>
+    <string name="set_league_gold">Gold</string>
+    <string name="set_league_platinum">Platinum</string>
+    <string name="set_league_rules">Each week you compete in a group of up to 30 people from your league. Your points are your focus minutes. When the week ends, the top players move up a league and the bottom ones move down. Leagues go from Hydrogen to Platinum.</string>
+    <string name="set_league_sign_in_desc">To compete you need to sign in with Google. Others will only see the nickname you choose.</string>
+    <string name="set_league_nickname">Your nickname</string>
+    <string name="set_league_nickname_hint">It\'s the only thing others will see; don\'t use your full name.</string>
+    <string name="set_league_avatar">Your avatar: an element from your collection</string>
+    <string name="set_league_join">Join the league</string>
+    <string name="set_league_join_failed">Couldn\'t join the league. Check your connection.</string>
+    <string name="set_league_name">%1$s League</string>
+    <string name="set_league_ends_today">Ends today</string>
+    <plurals name="set_league_ends_in">
+        <item quantity="one">Ends in %1$d day</item>
+        <item quantity="other">Ends in %1$d days</item>
+    </plurals>
+    <plurals name="set_league_promote">
+        <item quantity="one">The top player moves up to %2$s.</item>
+        <item quantity="other">The top %1$d move up to %2$s.</item>
+    </plurals>
+    <plurals name="set_league_demote">
+        <item quantity="one">The last player moves down to %2$s.</item>
+        <item quantity="other">The bottom %1$d move down to %2$s.</item>
+    </plurals>
+    <string name="set_league_leave">Leave the leagues</string>
+    <string name="set_league_me">%1$s (you)</string>
+    <string name="set_league_bot">lab bot</string>
+    <string name="set_league_bot_name">Assistant %1$s</string>
+    <string name="set_league_promoted_title">You moved up to the %1$s League!</string>
+    <string name="set_league_promoted_text">You finished #%1$d of %2$d. Your consistency is taking you far.</string>
+    <string name="set_league_demoted_title">You moved down to the %1$s League</string>
+    <string name="set_league_demoted_text">You finished #%1$d of %2$d. Everyone has a slow week; this one\'s yours.</string>
+    <string name="set_league_stayed_title">You\'re still in the %1$s League</string>
+    <string name="set_league_stayed_text">You finished #%1$d of %2$d. A little more and you\'ll move up.</string>
+    <string name="set_league_lets_go">Let\'s go!</string>
+</resources>

@@ -34,7 +34,10 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -42,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jjas.labpomodoro.R
 import com.jjas.labpomodoro.data.repository.MedalRepository
 import com.jjas.labpomodoro.domain.model.Medal
 import com.jjas.labpomodoro.domain.model.MedalProgress
@@ -130,7 +134,7 @@ fun MedalGrid(medals: List<MedalProgress>, onSelect: (MedalProgress) -> Unit) {
                         MedalBadge(progress, 56.dp)
                         Spacer(Modifier.height(4.dp))
                         Text(
-                            progress.medal.title,
+                            stringResource(progress.medal.titleRes),
                             style = MaterialTheme.typography.labelSmall,
                             textAlign = TextAlign.Center,
                             maxLines = 2,
@@ -148,31 +152,42 @@ fun MedalGrid(medals: List<MedalProgress>, onSelect: (MedalProgress) -> Unit) {
 @Composable
 fun MedalDialog(progress: MedalProgress, onDismiss: () -> Unit) {
     val context = LocalContext.current
+    val locale = LocalConfiguration.current.locales[0]
     val medal = progress.medal
+    val title = stringResource(medal.titleRes)
+    val description = stringResource(medal.descriptionRes)
     AlertDialog(
         onDismissRequest = onDismiss,
         icon = { MedalBadge(progress, 88.dp) },
-        title = { Text(medal.title, textAlign = TextAlign.Center) },
+        title = { Text(title, textAlign = TextAlign.Center) },
         text = {
             Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-                Text(medal.description, textAlign = TextAlign.Center)
+                Text(description, textAlign = TextAlign.Center)
                 Spacer(Modifier.height(12.dp))
                 if (progress.earned) {
                     Text(
-                        "¡Ganada! · Medalla de ${medal.tier.label.lowercase()}",
+                        stringResource(R.string.prog_medal_earned, stringResource(medal.tier.labelRes).lowercase(locale)),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.primary,
                     )
                 } else {
                     LinearProgressIndicator(progress = { progress.fraction }, modifier = Modifier.fillMaxWidth())
                     Spacer(Modifier.height(6.dp))
-                    Text(progress.label, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(
+                        pluralStringResource(medal.progressRes, medal.target.toInt(), progress.shown, medal.target),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
             }
         },
-        confirmButton = { TextButton(onClick = onDismiss) { Text("Cerrar") } },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.prog_close)) } },
         dismissButton = if (progress.earned) {
-            { TextButton(onClick = { context.shareText(ShareText.medal(medal.title, medal.description)) }) { Text("Compartir") } }
+            {
+                TextButton(onClick = { context.shareText(ShareText.medal(context, title, description)) }) {
+                    Text(stringResource(R.string.prog_share))
+                }
+            }
         } else {
             null
         },
@@ -200,19 +215,19 @@ fun MedalBanner(medals: List<Medal>, onOpen: () -> Unit, onDismiss: () -> Unit, 
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
                 Text(
-                    if (medals.size == 1) "¡Nueva medalla!" else "¡${medals.size} medallas nuevas!",
+                    pluralStringResource(R.plurals.prog_new_medals, medals.size, medals.size),
                     style = MaterialTheme.typography.titleMedium,
                 )
                 Text(
-                    if (medals.size == 1) medals[0].title else medals.joinToString(" · ") { it.title },
+                    medals.map { stringResource(it.titleRes) }.joinToString(" · "),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
             }
-            TextButton(onClick = onDismiss) { Text("Cerrar") }
-            TextButton(onClick = onOpen) { Text("Ver") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.prog_close)) }
+            TextButton(onClick = onOpen) { Text(stringResource(R.string.prog_view)) }
         }
     }
 }

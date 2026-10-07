@@ -150,9 +150,9 @@ class MainActivity : ComponentActivity() {
             emptyList()
         } else {
             val (action, icon, title) = if (active.isPaused) {
-                Triple(TimerService.ACTION_RESUME, R.drawable.ic_play, "Continuar")
+                Triple(TimerService.ACTION_RESUME, R.drawable.ic_play, getString(R.string.main_action_resume))
             } else {
-                Triple(TimerService.ACTION_PAUSE, R.drawable.ic_pause, "Pausar")
+                Triple(TimerService.ACTION_PAUSE, R.drawable.ic_pause, getString(R.string.main_action_pause))
             }
             listOf(
                 RemoteAction(

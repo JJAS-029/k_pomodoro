@@ -16,14 +16,14 @@ enum class ElementCategory {
 
 /**
  * Elemento químico del catálogo (datos fijos). Lo que el usuario ha conseguido vive en Room
- * (inventario); aquí solo está la información para dibujar la tabla periódica.
+ * (inventario); aquí solo está la información para dibujar la tabla periódica. El nombre depende
+ * del idioma: está en el recurso `element_names` (ver `localizedName()` en ui/components/ElementTexts.kt).
  *
  * @param group columna 1–18, o null para lantánidos y actínidos (van en las filas separadas del bloque f).
  */
 data class Element(
     val atomicNumber: Int,
     val symbol: String,
-    val name: String,
     val group: Int?,
     val category: ElementCategory,
 ) {

@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Tiempo de enfoque -->
+    <string name="prog_focus_minutes">%1$d min</string>
+    <string name="prog_focus_hours">%1$d h</string>
+    <string name="prog_focus_hours_minutes">%1$d h %2$d min</string>
+
+    <!-- Pantalla de progreso -->
+    <string name="prog_title">Progreso</string>
+    <string name="prog_done">Listo</string>
+    <string name="prog_range_week">7 días</string>
+    <string name="prog_range_month">30 días</string>
+    <string name="prog_range_all">Todo</string>
+    <string name="prog_empty_period">Aún no hay sesiones en este periodo. Completa un pomodoro y aquí verás tus patrones.</string>
+    <string name="prog_tile_focus">de enfoque</string>
+    <string name="prog_tile_pomodoros">pomodoros</string>
+    <string name="prog_tile_completion">completados sin saltar</string>
+    <string name="prog_tile_streak">de racha</string>
+    <string name="prog_percent">%1$d %%</string>
+    <plurals name="prog_streak_days">
+        <item quantity="one">%d día</item>
+        <item quantity="many">%d días</item>
+        <item quantity="other">%d días</item>
+    </plurals>
+    <string name="prog_average">En promedio, %1$s los días que te concentras.</string>
+    <string name="prog_medals">Medallas</string>
+    <string name="prog_medals_subtitle">%1$d de %2$d · Toca una para ver cómo ganarla</string>
+
+    <!-- Gráficas -->
+    <string name="prog_by_month">Por mes</string>
+    <string name="prog_by_day">Por día</string>
+    <string name="prog_tap_bar">Toca una barra para ver su valor</string>
+    <string name="prog_bar_value">%1$s: %2$s</string>
+    <string name="prog_weekdays_title">Qué días te concentras más</string>
+    <string name="prog_best_day">Tu mejor día: %1$s</string>
+    <string name="prog_hours_title">A qué hora rindes más</string>
+    <string name="prog_best_hour">Tu mejor hora: de %1$d:00 a %2$d:00</string>
+    <string name="prog_hour_axis">%1$d h</string>
+    <string name="prog_hour_range">De %1$d:00 a %2$d:00</string>
+    <string name="prog_chart_no_data">Sin datos</string>
+    <string name="prog_chart_no_data_period">Sin datos en este periodo</string>
+
+    <!-- Lugares -->
+    <string name="prog_places_section">Dónde te concentras</string>
+    <string name="prog_places_explain">Al iniciar un plan se guarda tu ubicación aproximada, solo en el teléfono, para ver en qué lugares rindes más. Nunca se sube a internet.</string>
+    <string name="prog_places_pro">Disponible en Pro</string>
+    <string name="prog_places_enable">Activar lugares</string>
+    <string name="prog_places_empty">Inicia un plan y aquí aparecerá tu primer lugar.</string>
+    <string name="prog_places_tap">Toca un lugar para ponerle nombre.</string>
+    <string name="prog_places_disable">Dejar de guardar lugares</string>
+    <string name="prog_place_stats">%1$d %% de tus pomodoros completados aquí · %2$d en total</string>
+    <string name="prog_place_name">Nombre del lugar</string>
+    <string name="prog_place_hint">Casa, Oficina, Biblioteca…</string>
+    <string name="prog_place_unnamed">Sin nombre</string>
+    <string name="prog_place_default">Lugar %1$d</string>
+    <string name="prog_save">Guardar</string>
+    <string name="prog_cancel">Cancelar</string>
+
+    <!-- Medallas -->
+    <string name="prog_tier_bronze">Bronce</string>
+    <string name="prog_tier_silver">Plata</string>
+    <string name="prog_tier_gold">Oro</string>
+    <string name="prog_medal_earned">¡Ganada! · Medalla de %1$s</string>
+    <string name="prog_close">Cerrar</string>
+    <string name="prog_share">Compartir</string>
+    <string name="prog_view">Ver</string>
+    <plurals name="prog_new_medals">
+        <item quantity="one">¡Nueva medalla!</item>
+        <item quantity="many">¡%d medallas nuevas!</item>
+        <item quantity="other">¡%d medallas nuevas!</item>
+    </plurals>
+
+    <string name="prog_medal_first_pomodoro_title">Primer experimento</string>
+    <string name="prog_medal_first_pomodoro_desc">Completa tu primer pomodoro</string>
+    <string name="prog_medal_streak_3_title">Constancia</string>
+    <string name="prog_medal_streak_3_desc">Racha de 3 días seguidos</string>
+    <string name="prog_medal_streak_7_title">Semana perfecta</string>
+    <string name="prog_medal_streak_7_desc">Racha de 7 días seguidos</string>
+    <string name="prog_medal_streak_30_title">Mes de laboratorio</string>
+    <string name="prog_medal_streak_30_desc">Racha de 30 días seguidos</string>
+    <string name="prog_medal_streak_100_title">Cien días</string>
+    <string name="prog_medal_streak_100_desc">Racha de 100 días seguidos</string>
+    <string name="prog_medal_hours_10_title">Becario</string>
+    <string name="prog_medal_hours_10_desc">10 horas de enfoque en total</string>
+    <string name="prog_medal_hours_50_title">Investigador</string>
+    <string name="prog_medal_hours_50_desc">50 horas de enfoque en total</string>
+    <string name="prog_medal_hours_100_title">Doctorado</string>
+    <string name="prog_medal_hours_100_desc">100 horas de enfoque en total</string>
+    <string name="prog_medal_marathon_title">Maratón</string>
+    <string name="prog_medal_marathon_desc">8 pomodoros en un mismo día</string>
+    <string name="prog_medal_early_bird_title">Madrugador</string>
+    <string name="prog_medal_early_bird_desc">5 pomodoros empezados antes de las 7 de la mañana</string>
+    <string name="prog_medal_night_owl_title">Búho nocturno</string>
+    <string name="prog_medal_night_owl_desc">5 pomodoros empezados después de las 10 de la noche</string>
+    <string name="prog_medal_first_fusion_title">Primera síntesis</string>
+    <string name="prog_medal_first_fusion_desc">Fusiona dos elementos en el sintetizador</string>
+    <string name="prog_medal_fusion_master_title">Maestro de la fusión</string>
+    <string name="prog_medal_fusion_master_desc">25 fusiones en el sintetizador</string>
+    <string name="prog_medal_collector_title">Coleccionista</string>
+    <string name="prog_medal_collector_desc">Descubre 10 elementos</string>
+    <string name="prog_medal_half_table_title">Media tabla</string>
+    <string name="prog_medal_half_table_desc">Descubre 59 elementos</string>
+    <string name="prog_medal_full_table_title">Tabla completa</string>
+    <string name="prog_medal_full_table_desc">Descubre los 118 elementos</string>
+    <string name="prog_medal_first_gold_title">Maestría de oro</string>
+    <string name="prog_medal_first_gold_desc">Lleva un elemento a la maestría de oro</string>
+
+    <!-- Progreso de una medalla: "4/7 días" (el plural va por la meta) -->
+    <plurals name="prog_medal_progress_pomodoros">
+        <item quantity="one">%1$d/%2$d pomodoro</item>
+        <item quantity="many">%1$d/%2$d pomodoros</item>
+        <item quantity="other">%1$d/%2$d pomodoros</item>
+    </plurals>
+    <plurals name="prog_medal_progress_days">
+        <item quantity="one">%1$d/%2$d día</item>
+        <item quantity="many">%1$d/%2$d días</item>
+        <item quantity="other">%1$d/%2$d días</item>
+    </plurals>
+    <plurals name="prog_medal_progress_hours">
+        <item quantity="one">%1$d/%2$d h</item>
+        <item quantity="many">%1$d/%2$d h</item>
+        <item quantity="other">%1$d/%2$d h</item>
+    </plurals>
+    <plurals name="prog_medal_progress_fusions">
+        <item quantity="one">%1$d/%2$d fusión</item>
+        <item quantity="many">%1$d/%2$d fusiones</item>
+        <item quantity="other">%1$d/%2$d fusiones</item>
+    </plurals>
+    <plurals name="prog_medal_progress_elements">
+        <item quantity="one">%1$d/%2$d elemento</item>
+        <item quantity="many">%1$d/%2$d elementos</item>
+        <item quantity="other">%1$d/%2$d elementos</item>
+    </plurals>
+
+    <!-- Maestría -->
+    <string name="prog_mastery_none">Sin descubrir</string>
+    <string name="prog_mastery_discovered">Descubierto</string>
+
+    <!-- Historial en CSV (encabezados para quien abre el archivo) -->
+    <string name="prog_csv_header">fecha,inicio,fin,tipo,minutos_planeados,minutos_reales,completada</string>
+    <string name="prog_csv_work">trabajo</string>
+    <string name="prog_csv_short_break">descanso corto</string>
+    <string name="prog_csv_long_break">descanso largo</string>
+    <string name="prog_csv_yes">sí</string>
+    <string name="prog_csv_no">no</string>
+
+    <!-- Guía -->
+    <string name="prog_guide_title">Cómo funciona</string>
+    <string name="prog_guide_skip">Saltar</string>
+    <string name="prog_guide_start">Empezar</string>
+    <string name="prog_guide_next">Siguiente</string>
+
+    <string name="prog_guide_welcome_title">¡Hola! Te damos la bienvenida a tu laboratorio</string>
+    <string name="prog_guide_welcome_body1">Aquí cada sesión de enfoque es un experimento. Mientras trabajas, el líquido se evapora; al descansar, el recipiente se vuelve a llenar.</string>
+    <string name="prog_guide_welcome_body2">Con tu tiempo de enfoque ganas elementos de la tabla periódica, y con el tiempo descubrirás a qué hora y qué días rindes más.</string>
+    <string name="prog_guide_welcome_body3">Te explico cómo funciona en unos pasos. Si ya lo conoces, toca Saltar.</string>
+
+    <string name="prog_guide_lab_title">Tu laboratorio de enfoque</string>
+    <string name="prog_guide_work">Trabajo</string>
+    <string name="prog_guide_break">Descanso</string>
+    <string name="prog_guide_lab_body">Mientras trabajas, el líquido se evapora poco a poco. En el descanso, el recipiente se vuelve a llenar.\n\nCada sesión del plan usa un recipiente y un color distintos.</string>
+
+    <string name="prog_guide_symbols_title">Qué estás haciendo y qué sigue</string>
+    <string name="prog_guide_indicator_desc">Ejemplo del indicador de sesión</string>
+    <string name="prog_guide_legend_work">Trabajo (pomodoro)</string>
+    <string name="prog_guide_legend_short_break">Descanso corto</string>
+    <string name="prog_guide_legend_long_break">Descanso largo</string>
+    <string name="prog_guide_legend_plan_end">Fin del plan</string>
+    <string name="prog_guide_legend_minutes">Minutos de lo que sigue</string>
+    <string name="prog_guide_legend_done">Pomodoro terminado</string>
+    <string name="prog_guide_legend_current">Pomodoro en curso</string>
+    <string name="prog_guide_legend_pending">Pomodoro pendiente</string>
+    <string name="prog_guide_legend_skipped">Pomodoro saltado</string>
+    <string name="prog_guide_symbols_gap">Un espacio entre puntos marca un descanso largo.</string>
+
+    <string name="prog_guide_controls_title">Controles</string>
+    <string name="prog_guide_pause">Pausar o continuar</string>
+    <string name="prog_guide_skip_session">Saltar a la siguiente sesión (no cuenta como completada)</string>
+    <string name="prog_guide_stop">Detener el plan</string>
+    <string name="prog_guide_open_menu">Abrir el menú</string>
+    <string name="prog_guide_in_menu">En el menú</string>
+    <string name="prog_guide_menu_settings">Config: horas, duraciones y avisos</string>
+    <string name="prog_guide_menu_achievements">Logros: tabla periódica, sintetizador y liga</string>
+    <string name="prog_guide_menu_progress">Progreso: estadísticas y medallas</string>
+    <string name="prog_guide_menu_ambient">Modo ambiente al instante (Pro)</string>
+    <string name="prog_guide_menu_help">Volver a ver esta guía</string>
+    <string name="prog_guide_controls_notification">Los mismos controles aparecen en la notificación.</string>
+
+    <string name="prog_guide_shelf_title">Repisa, modo ambiente y ventana flotante</string>
+    <string name="prog_guide_shelf_body">La repisa guarda la cristalería de todo tu plan: cada recipiente se llena al completar su sesión. Los punteados son sesiones saltadas.</string>
+    <string name="prog_guide_ambient">Modo ambiente (Pro): si no tocas la pantalla (o con 🌙 en el menú), quedan solo el recipiente, el tiempo y lo que sigue, atenuados. Tócala para volver.</string>
+    <string name="prog_guide_floating">Si sales de la app, el timer sigue en una ventana flotante y en la notificación.</string>
+
+    <string name="prog_guide_elements_title">Colecciona la tabla periódica</string>
+    <string name="prog_guide_elements_body1">Tu tiempo de enfoque se convierte en elementos: cada 25 min completados ganas uno básico y cada 60 min uno raro. Saltar una sesión no cuenta.</string>
+    <string name="prog_guide_elements_body2">En ★ Logros › Sintetizador fusiona dos elementos: sus números atómicos se suman (H 1 + U 92 → Np 93). Es la única forma de conseguir los sintéticos.</string>
+    <string name="prog_guide_elements_body3">Tus elementos llenan los recipientes de trabajo y se comportan como en la realidad: el sodio burbujea, el neón brilla, el mercurio refleja como metal. Toca uno en la tabla para saber qué es y para qué sirve.</string>
+    <string name="prog_guide_sound">Sonido (Pro): ruido blanco, rosa o café, lluvia u olas mientras trabajas.</string>
+
+    <string name="prog_guide_progress_title">Maestría, medallas y ligas</string>
+    <string name="prog_guide_mastery_body">Los repetidos no se desperdician: cada vez que obtienes un elemento sube su maestría, de bronce a plata y a oro (5, 10 y 15 veces; los sintéticos, 2, 4 y 6). Si toda la tabla llega a un nivel, lo celebramos.</string>
+    <string name="prog_guide_medals_body">En Progreso están tus medallas: rachas, horas de enfoque, madrugadas, fusiones y más. Las que te faltan se ven apagadas, con un anillo que muestra cuánto llevas.</string>
+    <string name="prog_guide_league_body">En ★ Logros › Liga compites cada semana con hasta 30 personas: tus puntos son tus minutos de enfoque. Los primeros suben de liga y los últimos bajan, del Hidrógeno al Platino. Necesitas entrar con tu cuenta.</string>
+</resources>

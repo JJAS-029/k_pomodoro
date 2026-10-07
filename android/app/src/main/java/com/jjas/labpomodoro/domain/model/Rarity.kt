@@ -1,5 +1,8 @@
 package com.jjas.labpomodoro.domain.model
 
+import androidx.annotation.StringRes
+import com.jjas.labpomodoro.R
+
 /**
  * Qué tan difícil es conseguir un elemento.
  * - [BASIC]: los 30 primeros, los más abundantes. Se ganan cada 25 min de enfoque.
@@ -7,10 +10,10 @@ package com.jjas.labpomodoro.domain.model
  * - [SYNTHETIC]: los que solo se fabrican en laboratorio (Tc, Pm y del 93 en adelante).
  *   No salen como recompensa: solo se consiguen en el sintetizador.
  */
-enum class Rarity(val label: String) {
-    BASIC("Básico"),
-    RARE("Raro"),
-    SYNTHETIC("Sintético"),
+enum class Rarity(@StringRes val labelRes: Int) {
+    BASIC(R.string.el_rarity_basic),
+    RARE(R.string.el_rarity_rare),
+    SYNTHETIC(R.string.el_rarity_synthetic),
 }
 
 private val SYNTHETIC_IN_NATURE_RANGE = setOf(43, 61)
@@ -37,16 +40,17 @@ enum class DiscoverySource {
     FUSION,
 }
 
-fun ElementCategory.label(): String = when (this) {
-    ElementCategory.ALKALI_METAL -> "Metal alcalino"
-    ElementCategory.ALKALINE_EARTH_METAL -> "Metal alcalinotérreo"
-    ElementCategory.TRANSITION_METAL -> "Metal de transición"
-    ElementCategory.POST_TRANSITION_METAL -> "Otro metal"
-    ElementCategory.METALLOID -> "Metaloide"
-    ElementCategory.NONMETAL -> "No metal"
-    ElementCategory.HALOGEN -> "Halógeno"
-    ElementCategory.NOBLE_GAS -> "Gas noble"
-    ElementCategory.LANTHANIDE -> "Lantánido"
-    ElementCategory.ACTINIDE -> "Actínido"
-    ElementCategory.UNKNOWN -> "Propiedades desconocidas"
+@StringRes
+fun ElementCategory.labelRes(): Int = when (this) {
+    ElementCategory.ALKALI_METAL -> R.string.el_category_alkali_metal
+    ElementCategory.ALKALINE_EARTH_METAL -> R.string.el_category_alkaline_earth_metal
+    ElementCategory.TRANSITION_METAL -> R.string.el_category_transition_metal
+    ElementCategory.POST_TRANSITION_METAL -> R.string.el_category_post_transition_metal
+    ElementCategory.METALLOID -> R.string.el_category_metalloid
+    ElementCategory.NONMETAL -> R.string.el_category_nonmetal
+    ElementCategory.HALOGEN -> R.string.el_category_halogen
+    ElementCategory.NOBLE_GAS -> R.string.el_category_noble_gas
+    ElementCategory.LANTHANIDE -> R.string.el_category_lanthanide
+    ElementCategory.ACTINIDE -> R.string.el_category_actinide
+    ElementCategory.UNKNOWN -> R.string.el_category_unknown
 }

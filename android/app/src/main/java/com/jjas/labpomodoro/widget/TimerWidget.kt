@@ -34,13 +34,14 @@ import com.jjas.labpomodoro.domain.model.SessionType
 import com.jjas.labpomodoro.domain.usecase.SessionPlanGenerator
 import com.jjas.labpomodoro.service.TimerService
 import com.jjas.labpomodoro.service.formatMinutesSeconds
-import com.jjas.labpomodoro.service.label
+import com.jjas.labpomodoro.service.labelRes
 import com.jjas.labpomodoro.timer.TimerEngine
 import com.jjas.labpomodoro.timer.TimerState
 import com.jjas.labpomodoro.ui.components.LiquidPalette
 import com.jjas.labpomodoro.ui.components.VesselGeometry
 import com.jjas.labpomodoro.ui.components.VesselReagents
 import com.jjas.labpomodoro.ui.components.VesselShape
+import com.jjas.labpomodoro.ui.components.localizedName
 import com.jjas.labpomodoro.ui.components.look
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -136,19 +137,19 @@ class TimerWidgetSync @Inject constructor(
         when (state) {
             is TimerState.Active -> active(views, state, prefs, items)
             is TimerState.Finished -> {
-                views.setTextViewText(R.id.widget_label, "¡Experimento completado!")
+                views.setTextViewText(R.id.widget_label, context.getString(R.string.main_experiment_complete))
                 staticTime(views, "✓")
-                views.setTextViewText(R.id.widget_next, "${state.completedWorkSessions} pomodoros · ${minutesText((state.completedWorkSeconds / 60).toInt())}")
+                views.setTextViewText(R.id.widget_next, pomodorosText(state.completedWorkSessions, (state.completedWorkSeconds / 60).toInt()))
                 views.setImageViewBitmap(R.id.widget_vessel, vessel(VesselShape.BEAKER, 0.8f, RestingColor))
                 startButton(views)
             }
             TimerState.Idle -> {
                 val plan = SessionPlanGenerator.generate(prefs.session)
-                views.setTextViewText(R.id.widget_label, "Lab Pomodoro")
+                views.setTextViewText(R.id.widget_label, context.getString(R.string.app_name))
                 staticTime(views, formatMinutesSeconds(plan.first().durationSeconds * 1000L))
                 val pomodoros = plan.count { it.type == SessionType.WORK }
                 val workMinutes = plan.filter { it.type == SessionType.WORK }.sumOf { it.durationSeconds } / 60
-                views.setTextViewText(R.id.widget_next, "$pomodoros pomodoros · ${minutesText(workMinutes)}")
+                views.setTextViewText(R.id.widget_next, pomodorosText(pomodoros, workMinutes))
                 views.setImageViewBitmap(R.id.widget_vessel, vessel(VesselShape.BEAKER, 0.8f, RestingColor))
                 startButton(views)
             }
@@ -181,9 +182,9 @@ class TimerWidgetSync @Inject constructor(
         views.setTextViewText(
             R.id.widget_label,
             buildString {
-                append(type.label())
-                element?.let { append(" · ${it.name}") }
-                if (state.isPaused) append(" · En pausa")
+                append(context.getString(type.labelRes()))
+                element?.let { append(" · ${it.localizedName(context)}") }
+                if (state.isPaused) append(" · ${context.getString(R.string.main_paused)}")
             },
         )
         if (state.isPaused) {
@@ -199,7 +200,8 @@ class TimerWidgetSync @Inject constructor(
         views.setTextViewText(
             R.id.widget_next,
             // Corto para que quepa en widgets angostos
-            state.next?.let { "Luego: ${it.type.label().lowercase()} ${it.durationSeconds / 60}′" } ?: "Última sesión",
+            state.next?.let { context.getString(R.string.main_widget_next, context.getString(it.type.labelRes()).lowercase(), it.durationSeconds / 60) }
+                ?: context.getString(R.string.main_last_session),
         )
         val progress = (1f - remaining / (state.current.durationSeconds * 1000f)).coerceIn(0f, 1f)
         val color = element?.look()?.color ?: LiquidPalette.liquid(type, state.planSeed, state.index)
@@ -208,9 +210,9 @@ class TimerWidgetSync @Inject constructor(
             vessel(LiquidPalette.vessel(state.planSeed, state.index), if (type == SessionType.WORK) 1f - progress else progress, color),
         )
         val (icon, action, description) = if (state.isPaused) {
-            Triple(R.drawable.ic_play, TimerService.ACTION_RESUME, "Continuar")
+            Triple(R.drawable.ic_play, TimerService.ACTION_RESUME, context.getString(R.string.main_action_resume))
         } else {
-            Triple(R.drawable.ic_pause, TimerService.ACTION_PAUSE, "Pausar")
+            Triple(R.drawable.ic_pause, TimerService.ACTION_PAUSE, context.getString(R.string.main_action_pause))
         }
         views.setImageViewResource(R.id.widget_primary, icon)
         views.setContentDescription(R.id.widget_primary, description)
@@ -220,6 +222,10 @@ class TimerWidgetSync @Inject constructor(
         views.setOnClickPendingIntent(R.id.widget_skip, TimerService.actionIntent(context, TimerService.ACTION_SKIP))
         views.setOnClickPendingIntent(R.id.widget_stop, TimerService.actionIntent(context, TimerService.ACTION_STOP))
     }
+
+    /** "3 pomodoros · 1 h 15 min". */
+    private fun pomodorosText(pomodoros: Int, minutes: Int): String =
+        context.resources.getQuantityString(R.plurals.main_pomodoros_with_time, pomodoros, pomodoros, minutesText(minutes))
 
     /** "25 min", "2 h", "1 h 30 min". */
     private fun minutesText(minutes: Int): String = when {
@@ -236,7 +242,7 @@ class TimerWidgetSync @Inject constructor(
 
     private fun startButton(views: RemoteViews) {
         views.setImageViewResource(R.id.widget_primary, R.drawable.ic_play)
-        views.setContentDescription(R.id.widget_primary, "Iniciar")
+        views.setContentDescription(R.id.widget_primary, context.getString(R.string.main_action_start))
         val start = PendingIntent.getBroadcast(
             context,
             0,

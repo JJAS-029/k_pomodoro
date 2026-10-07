@@ -73,8 +73,8 @@ class StreakReminderScheduler @Inject constructor(
     private fun notify(message: StreakReminder.Message) {
         val manager = context.getSystemService(NotificationManager::class.java)
         manager.createNotificationChannel(
-            NotificationChannel(CHANNEL_ID, "Recordatorio de racha", NotificationManager.IMPORTANCE_DEFAULT).apply {
-                description = "Un aviso al día si aún no has hecho ningún pomodoro"
+            NotificationChannel(CHANNEL_ID, context.getString(R.string.main_streak_channel_name), NotificationManager.IMPORTANCE_DEFAULT).apply {
+                description = context.getString(R.string.main_streak_channel_description)
             }
         )
         val open = PendingIntent.getActivity(
@@ -83,10 +83,17 @@ class StreakReminderScheduler @Inject constructor(
             Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
+        val (title, text) = when (message) {
+            is StreakReminder.Message.StreakAtRisk -> context.resources.getQuantityString(
+                R.plurals.main_streak_reminder_title, message.streak, message.streak,
+            ) to context.getString(R.string.main_streak_reminder_text)
+            StreakReminder.Message.StartNew ->
+                context.getString(R.string.main_streak_new_title) to context.getString(R.string.main_streak_new_text)
+        }
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_stat_timer)
-            .setContentTitle(message.title)
-            .setContentText(message.text)
+            .setContentTitle(title)
+            .setContentText(text)
             .setContentIntent(open)
             .setAutoCancel(true)
             .build()

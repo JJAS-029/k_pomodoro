@@ -1,0 +1,844 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Datos de los 118 elementos; índice = número atómico − 1 -->
+<resources>
+    <string-array name="element_names">
+        <item>Hydrogen</item>
+        <item>Helium</item>
+        <item>Lithium</item>
+        <item>Beryllium</item>
+        <item>Boron</item>
+        <item>Carbon</item>
+        <item>Nitrogen</item>
+        <item>Oxygen</item>
+        <item>Fluorine</item>
+        <item>Neon</item>
+        <item>Sodium</item>
+        <item>Magnesium</item>
+        <item>Aluminum</item>
+        <item>Silicon</item>
+        <item>Phosphorus</item>
+        <item>Sulfur</item>
+        <item>Chlorine</item>
+        <item>Argon</item>
+        <item>Potassium</item>
+        <item>Calcium</item>
+        <item>Scandium</item>
+        <item>Titanium</item>
+        <item>Vanadium</item>
+        <item>Chromium</item>
+        <item>Manganese</item>
+        <item>Iron</item>
+        <item>Cobalt</item>
+        <item>Nickel</item>
+        <item>Copper</item>
+        <item>Zinc</item>
+        <item>Gallium</item>
+        <item>Germanium</item>
+        <item>Arsenic</item>
+        <item>Selenium</item>
+        <item>Bromine</item>
+        <item>Krypton</item>
+        <item>Rubidium</item>
+        <item>Strontium</item>
+        <item>Yttrium</item>
+        <item>Zirconium</item>
+        <item>Niobium</item>
+        <item>Molybdenum</item>
+        <item>Technetium</item>
+        <item>Ruthenium</item>
+        <item>Rhodium</item>
+        <item>Palladium</item>
+        <item>Silver</item>
+        <item>Cadmium</item>
+        <item>Indium</item>
+        <item>Tin</item>
+        <item>Antimony</item>
+        <item>Tellurium</item>
+        <item>Iodine</item>
+        <item>Xenon</item>
+        <item>Cesium</item>
+        <item>Barium</item>
+        <item>Lanthanum</item>
+        <item>Cerium</item>
+        <item>Praseodymium</item>
+        <item>Neodymium</item>
+        <item>Promethium</item>
+        <item>Samarium</item>
+        <item>Europium</item>
+        <item>Gadolinium</item>
+        <item>Terbium</item>
+        <item>Dysprosium</item>
+        <item>Holmium</item>
+        <item>Erbium</item>
+        <item>Thulium</item>
+        <item>Ytterbium</item>
+        <item>Lutetium</item>
+        <item>Hafnium</item>
+        <item>Tantalum</item>
+        <item>Tungsten</item>
+        <item>Rhenium</item>
+        <item>Osmium</item>
+        <item>Iridium</item>
+        <item>Platinum</item>
+        <item>Gold</item>
+        <item>Mercury</item>
+        <item>Thallium</item>
+        <item>Lead</item>
+        <item>Bismuth</item>
+        <item>Polonium</item>
+        <item>Astatine</item>
+        <item>Radon</item>
+        <item>Francium</item>
+        <item>Radium</item>
+        <item>Actinium</item>
+        <item>Thorium</item>
+        <item>Protactinium</item>
+        <item>Uranium</item>
+        <item>Neptunium</item>
+        <item>Plutonium</item>
+        <item>Americium</item>
+        <item>Curium</item>
+        <item>Berkelium</item>
+        <item>Californium</item>
+        <item>Einsteinium</item>
+        <item>Fermium</item>
+        <item>Mendelevium</item>
+        <item>Nobelium</item>
+        <item>Lawrencium</item>
+        <item>Rutherfordium</item>
+        <item>Dubnium</item>
+        <item>Seaborgium</item>
+        <item>Bohrium</item>
+        <item>Hassium</item>
+        <item>Meitnerium</item>
+        <item>Darmstadtium</item>
+        <item>Roentgenium</item>
+        <item>Copernicium</item>
+        <item>Nihonium</item>
+        <item>Flerovium</item>
+        <item>Moscovium</item>
+        <item>Livermorium</item>
+        <item>Tennessine</item>
+        <item>Oganesson</item>
+    </string-array>
+    <string-array name="element_fact_descriptions">
+        <item>The most abundant element in the universe: it makes up about 75% of normal matter and powers the stars.</item>
+        <item>A noble gas lighter than air; it was first discovered in sunlight and years later on Earth.</item>
+        <item>The lightest metal of all: it is so low in density that it floats on water, even though it reacts with it.</item>
+        <item>A gray metal, very light and stiff; its dust is toxic if inhaled.</item>
+        <item>A dark, very hard metalloid; its most famous compound, borax, has been used for centuries.</item>
+        <item>The basis of all known life; depending on how its atoms are arranged, it can be soft graphite or diamond.</item>
+        <item>A colorless, odorless gas that makes up about 78% of the air you breathe.</item>
+        <item>A gas that makes up 21% of the air and is the most abundant element in the Earth\'s crust.</item>
+        <item>A pale yellow gas and the most reactive element of all: it reacts with almost any substance.</item>
+        <item>A noble gas that glows with an intense orange-red color when electricity passes through it.</item>
+        <item>A metal so soft it can be cut with a knife, and it reacts violently with water.</item>
+        <item>A light metal that burns with a very bright white light; it sits at the center of plants\' chlorophyll.</item>
+        <item>The most abundant metal in the Earth\'s crust; in the 19th century it was once worth more than gold.</item>
+        <item>A shiny gray metalloid; after oxygen, it is the most abundant element in the Earth\'s crust.</item>
+        <item>Its white form glows in the dark and ignites on its own in air; it is also part of your DNA and your bones.</item>
+        <item>A yellow solid found near volcanoes; some of its compounds smell like rotten eggs.</item>
+        <item>A toxic, yellowish-green gas; combined with sodium it becomes harmless table salt.</item>
+        <item>A noble gas that makes up almost 1% of the air; its name comes from the Greek for \'lazy\' because it hardly reacts.</item>
+        <item>A soft metal that burns in water with a lilac flame; your nerves and muscles need it to work.</item>
+        <item>A silvery, reactive metal; it is the most abundant mineral in your body, especially in bones and teeth.</item>
+        <item>A light, scarce metal whose existence Mendeleev predicted before it was discovered.</item>
+        <item>A metal as strong as many steels but much lighter, and very resistant to corrosion.</item>
+        <item>A hard, gray metal; its name comes from Vanadis, the Norse goddess of beauty, because of its colorful compounds.</item>
+        <item>A shiny, hard metal; small amounts give emerald its green and ruby its red.</item>
+        <item>A hard, brittle metal; plants and animals need it in small amounts.</item>
+        <item>The metal most used by humankind; it makes up a large part of the Earth\'s core.</item>
+        <item>A hard, magnetic metal; its compounds give glass and ceramics their intense cobalt blue.</item>
+        <item>A silvery, magnetic metal, very resistant to corrosion; it is plentiful in iron meteorites.</item>
+        <item>A reddish metal used for more than 10,000 years; over time it turns green, like the Statue of Liberty.</item>
+        <item>A bluish-gray metal; your body needs it for the immune system and for healing wounds.</item>
+        <item>A metal that melts in the palm of your hand: its melting point is only about 30 °C.</item>
+        <item>A shiny gray metalloid predicted by Mendeleev; it was key in the first transistors.</item>
+        <item>A gray metalloid famous as a poison in history and in mystery novels.</item>
+        <item>A nonmetal that conducts electricity better when light shines on it; its name comes from Selene, the Moon.</item>
+        <item>One of only two elements that are liquid at room temperature: dark red with a pungent smell.</item>
+        <item>A rare noble gas; its name means \'hidden\' in Greek, and no, it doesn\'t come from Superman\'s planet.</item>
+        <item>A very soft, reactive metal that ignites on its own on contact with air.</item>
+        <item>A soft, silvery metal that tints flames an intense red.</item>
+        <item>A silvery metal named after Ytterby, a Swedish village that gave its name to four elements.</item>
+        <item>A metal very resistant to corrosion; its oxide, cubic zirconia, imitates diamonds.</item>
+        <item>A soft gray metal that becomes a superconductor when cooled to extremely low temperatures.</item>
+        <item>A metal with one of the highest melting points (about 2600 °C); many enzymes need it.</item>
+        <item>The lightest element with no stable form; it was the first one created artificially, in 1937.</item>
+        <item>A hard, rare metal from the platinum family that barely corrodes.</item>
+        <item>One of the rarest and most expensive metals in the world; it is very shiny and reflective.</item>
+        <item>A silvery metal that can absorb hundreds of times its own volume of hydrogen.</item>
+        <item>The best conductor of electricity and heat of all the elements.</item>
+        <item>A soft, bluish and very toxic metal that builds up in the body.</item>
+        <item>A metal so soft that a fingernail can scratch it, and it creaks, like a tiny cry, when bent.</item>
+        <item>A silvery, malleable metal known since the Bronze Age; it also creaks when bent.</item>
+        <item>A shiny gray metalloid; in ancient Egypt its ore was used to line the eyes.</item>
+        <item>A rare, brittle metalloid; anyone who handles it can end up with garlic-smelling breath.</item>
+        <item>A shiny black solid that, when heated, turns directly into a violet vapor.</item>
+        <item>A heavy, rare noble gas that glows with a bluish-white light in discharge lamps.</item>
+        <item>A golden metal so soft that it melts at 28 °C and explodes on contact with water.</item>
+        <item>A silvery, reactive metal that turns flames green.</item>
+        <item>A soft, silvery metal that starts the lanthanide series, part of the so-called rare earths.</item>
+        <item>The most abundant rare earth; it gives off sparks when scraped.</item>
+        <item>A silvery rare-earth metal; its compounds have a lovely green color.</item>
+        <item>A rare-earth metal that forms the most powerful permanent magnets that exist.</item>
+        <item>A radioactive lanthanide almost nonexistent in nature; what is used is made in nuclear reactors.</item>
+        <item>A rare-earth metal named after samarskite, the mineral where it was found.</item>
+        <item>The most reactive rare earth; its name comes from Europe.</item>
+        <item>A rare-earth metal that is magnetic only below about 20 °C, nearly room temperature.</item>
+        <item>A silvery rare-earth metal, another of the elements named after the Swedish village of Ytterby.</item>
+        <item>Its name comes from the Greek for \'hard to get\', because isolating it took a lot of work.</item>
+        <item>It has one of the strongest atomic magnetisms; its name comes from Holmia, Latin for Stockholm.</item>
+        <item>A rare earth with pinkish compounds; it also owes its name to the Swedish village of Ytterby.</item>
+        <item>One of the least abundant rare earths; its name comes from Thule, an ancient name for northern Europe.</item>
+        <item>A soft, silvery rare-earth metal, the fourth element named after Ytterby.</item>
+        <item>The last of the lanthanides; its name comes from Lutetia, the ancient name of Paris.</item>
+        <item>A shiny metal that always appears alongside zirconium and is very hard to separate from it.</item>
+        <item>A bluish-gray metal highly resistant to corrosion; its name comes from Tantalus, a character in Greek mythology.</item>
+        <item>The metal with the highest melting point of all: about 3400 °C. It is also called wolfram.</item>
+        <item>One of the rarest elements in the Earth\'s crust and the last stable element to be discovered (1925).</item>
+        <item>The densest natural element: one liter of osmium would weigh more than 22 kg.</item>
+        <item>A metal highly resistant to corrosion; an iridium-rich layer marks the impact that wiped out the dinosaurs.</item>
+        <item>A precious metal, very dense and almost unalterable; it is rarer than gold.</item>
+        <item>A yellow metal that never tarnishes; it is formed in stellar explosions and collisions.</item>
+        <item>The only metal that is liquid at room temperature; it is silvery and its vapors are toxic.</item>
+        <item>A soft, highly toxic metal nicknamed \'the poisoner\'s poison\' because it has no taste or color.</item>
+        <item>A heavy, soft metal that the Romans used for pipes; it is toxic, especially for children.</item>
+        <item>A brittle metal that forms stair-stepped crystals with rainbow colors; it is barely toxic despite being so heavy.</item>
+        <item>A highly radioactive element discovered by Marie and Pierre Curie, named in honor of Poland, Marie\'s homeland.</item>
+        <item>One of the rarest naturally occurring elements: there is less than a gram of it in the whole Earth\'s crust at any one time.</item>
+        <item>A radioactive noble gas, invisible and odorless, that seeps out of some soils and can build up in basements.</item>
+        <item>Discovered in France in 1939; it is so unstable that there are only a few grams of it in the Earth\'s crust at any one time.</item>
+        <item>It glows faintly in the dark; the Curies discovered it, and it made ill the workers known as the \'Radium Girls\'.</item>
+        <item>A radioactive metal that glows with a pale blue light in the dark; it gives its name to the actinide series.</item>
+        <item>A radioactive metal about three times more abundant than uranium; its name comes from Thor, the Norse god of thunder.</item>
+        <item>A very rare and toxic radioactive metal; its name means \'before actinium\' because it turns into it.</item>
+        <item>A radioactive and very dense metal, named after the planet Uranus, which had been discovered only a few years earlier.</item>
+        <item>The first element heavier than uranium to be created (1940); it is named after Neptune, the planet after Uranus.</item>
+        <item>A radioactive metal named after Pluto; it changes shape and density with temperature like few other metals.</item>
+        <item>A synthetic element made in reactors; it is named after the Americas, just as europium is named after Europe.</item>
+        <item>A synthetic element named in honor of Marie and Pierre Curie; it glows in the dark because of its radioactivity.</item>
+        <item>A synthetic element created in 1949 in Berkeley, California, the city it is named after.</item>
+        <item>Created in 1950 at the University of California; a single microgram emits millions of neutrons per second.</item>
+        <item>It was discovered in 1952 in the debris of the first hydrogen bomb; its name honors Albert Einstein.</item>
+        <item>It also appeared in the debris of the first hydrogen bomb; its name honors Enrico Fermi.</item>
+        <item>It honors Mendeleev, creator of the periodic table; in 1955 only 17 atoms were made.</item>
+        <item>Named after Alfred Nobel; teams from Sweden, the United States and the Soviet Union disputed its discovery.</item>
+        <item>The last of the actinides, named after Ernest Lawrence, inventor of the cyclotron.</item>
+        <item>The first superheavy element after the actinides; it honors Ernest Rutherford, discoverer of the atomic nucleus.</item>
+        <item>Named after Dubna, the Russian city home to a famous nuclear physics laboratory.</item>
+        <item>It honors Glenn Seaborg, the first person to have an element named after him while still alive.</item>
+        <item>Created in Germany in 1981 and named after Niels Bohr, a pioneer of atomic physics.</item>
+        <item>Named after Hesse, the German state where it was first created in 1984.</item>
+        <item>It honors Lise Meitner, a physicist who helped explain nuclear fission; it was created in Germany in 1982.</item>
+        <item>Named after Darmstadt, the German city where it was created in 1994.</item>
+        <item>Named after Wilhelm Röntgen, discoverer of X-rays; it was created in Germany in 1994.</item>
+        <item>It honors Nicolaus Copernicus; calculations suggest it could be liquid at room temperature, like mercury.</item>
+        <item>The first element discovered in Asia: a Japanese team created it, and its name comes from Nihon, \'Japan\'.</item>
+        <item>Named after the Flerov Laboratory in Russia; it was expected to be more stable, but its atoms last seconds.</item>
+        <item>Created by Russian and American scientists; its name honors the Moscow region.</item>
+        <item>Named after the Lawrence Livermore Laboratory in California, which collaborated in its creation in Russia.</item>
+        <item>Its name comes from Tennessee: creating it required berkelium produced in that U.S. state.</item>
+        <item>The heaviest known element; it honors Yuri Oganessian, and only about five atoms have been detected.</item>
+    </string-array>
+    <string-array name="element_fact_uses">
+        <item>Used to make ammonia for fertilizers, refine oil, and as a clean fuel in hydrogen fuel cells.</item>
+        <item>Inflates balloons, cools the magnets in MRI machines, and shields metal during welding.</item>
+        <item>It is the heart of batteries in phones, laptops, and electric cars; it is also used in psychiatric medicines.</item>
+        <item>Makes up the mirrors of the James Webb Space Telescope and is used in springs, non-sparking tools, and aerospace parts.</item>
+        <item>Found in heat-resistant glass (borosilicate), fiberglass, detergents, and neodymium magnets.</item>
+        <item>Found in pencil lead, diamonds, steel, fuels, and carbon fiber.</item>
+        <item>Used in fertilizers, to preserve packaged food, and, as a liquid at -196 °C, to freeze samples.</item>
+        <item>Almost all living things breathe it; it is used in hospitals, in steelmaking, and in rockets.</item>
+        <item>The fluoride in toothpaste protects your teeth; it also forms the Teflon of nonstick pans.</item>
+        <item>It gives its name and color to classic neon signs; it is also used in some lasers.</item>
+        <item>Together with chlorine it forms table salt; its lamps give the yellow light of some street lighting.</item>
+        <item>Used in lightweight alloys for cars and laptops, in flares and fireworks, and as a supplement.</item>
+        <item>Found in soda cans, aluminum foil, windows, airplanes, and electrical cables; it also recycles very well.</item>
+        <item>It is the basis of computer and phone chips and of solar panels; as silica, it forms glass.</item>
+        <item>Used in fertilizers, in the striker strip for lighting matches, and in some detergents and colas.</item>
+        <item>Used to make sulfuric acid, to vulcanize the rubber in tires, in gunpowder, and in fungicides.</item>
+        <item>Disinfects drinking water and swimming pools, is found in bleaches, and is used to make PVC.</item>
+        <item>Fills incandescent bulbs, shields welds, and insulates the space between the panes of double-glazed windows.</item>
+        <item>Key in fertilizers (potash); you get it by eating bananas, potatoes, and beans.</item>
+        <item>Found in cement, lime, plaster, and chalk; also in milk and in bone supplements.</item>
+        <item>Small amounts strengthen the aluminum in bicycle frames, baseball bats, and airplane parts.</item>
+        <item>Used in airplanes, dental implants, and prostheses; its oxide is the white pigment in paints and sunscreens.</item>
+        <item>Hardens the steel of tools and springs; it is also used in flow batteries to store energy.</item>
+        <item>Gives chrome plating its shiny finish and keeps stainless steel from rusting.</item>
+        <item>Added to steel to make it stronger and found in ordinary alkaline batteries.</item>
+        <item>It is the basis of the steel in buildings, cars, and bridges; in your blood, hemoglobin uses it to carry oxygen.</item>
+        <item>Found in lithium batteries and in superalloys for jet turbines, and it is part of vitamin B12.</item>
+        <item>Used in stainless steel, in rechargeable batteries, and in many coins.</item>
+        <item>Found in almost all electrical wires, in pipes, and in alloys such as bronze and brass.</item>
+        <item>Protects steel from rusting (galvanizing) and is found in batteries, in brass, and in sunscreens.</item>
+        <item>With arsenic or nitrogen it forms LEDs, lasers, and high-frequency chips for phones.</item>
+        <item>Used in fiber optics, in lenses for infrared and night-vision cameras, and in satellite solar cells.</item>
+        <item>Forms the gallium arsenide in some chips and LEDs; it once protected wood, but today it is restricted because it is toxic.</item>
+        <item>Removes the greenish tint from glass, is found in anti-dandruff shampoos, and is an essential nutrient in small doses.</item>
+        <item>Used in fire retardants, in pool disinfectants, and in some medicines.</item>
+        <item>Used in some high-performance lamps, camera flashes, and insulating windows.</item>
+        <item>Used in compact atomic clocks, like those in some GPS satellites, and in research.</item>
+        <item>Gives fireworks and emergency flares their red; it is also used in ferrite magnets.</item>
+        <item>Used in white LEDs, medical lasers (YAG), and superconductors; it once supplied the red in tube TVs.</item>
+        <item>Coats the fuel in nuclear reactors and is used in dental crowns and ceramic knives.</item>
+        <item>It forms the superconducting magnets of MRI machines and the Large Hadron Collider, and it strengthens steel.</item>
+        <item>It hardens the steel used in tools, pipelines and engines; as a disulfide, it works as a lubricant.</item>
+        <item>One of its isotopes is used in millions of medical scans each year to look at bones, the heart and other organs.</item>
+        <item>It is used in electrical contacts, hard drives, as a catalyst, and to harden platinum.</item>
+        <item>It is in car catalytic converters to cut toxic gases, and it coats jewelry.</item>
+        <item>It is used in car catalytic converters, electronics, dentistry and white gold jewelry.</item>
+        <item>It is used in jewelry, coins, mirrors, electronic contacts and solar panels; also in antibacterial dressings.</item>
+        <item>It was used in nickel-cadmium batteries and yellow pigments; today it is in some thin-film solar panels.</item>
+        <item>Combined with tin (ITO), it lets touchscreens conduct electricity while staying transparent.</item>
+        <item>It is used in electronics solder, to coat steel cans (tinplate) and in bronze.</item>
+        <item>It is used as a fire retardant in plastics and fabrics, and to harden the lead in car batteries.</item>
+        <item>It is used in thin-film solar panels (cadmium telluride) and in thermoelectric devices.</item>
+        <item>It is added to table salt to protect the thyroid and is used as an antiseptic for wounds.</item>
+        <item>It is in car headlights, camera flashes and movie projectors; it is also an anesthetic and powers satellites with ion engines.</item>
+        <item>Its atomic clocks define the official second; it is also used in fluids for drilling oil wells.</item>
+        <item>It gives fireworks their green color; barium sulfate is swallowed to show the digestive system on X-rays.</item>
+        <item>It is used in high-quality camera lenses, in hybrid car batteries and in lighter flints.</item>
+        <item>It makes up lighter flints, polishes glass and lenses, and helps in catalytic converters.</item>
+        <item>It is used with neodymium in powerful magnets, in glassblowers\' goggles, and to give glass a yellow color.</item>
+        <item>Its magnets are in headphones, speakers, hard drives, electric car motors and wind turbines.</item>
+        <item>It has been used in glow-in-the-dark paint and in small nuclear batteries for pacemakers and spacecraft.</item>
+        <item>Its samarium-cobalt magnets withstand high temperatures; it is also used to relieve bone cancer pain.</item>
+        <item>It gives red and blue glow to screens and energy-saving bulbs, and its fluorescent ink protects euro banknotes.</item>
+        <item>It is injected as a contrast agent in MRI scans and absorbs neutrons in nuclear reactors.</item>
+        <item>It gives green color to screens and fluorescent bulbs, and is used in materials that change shape with a magnet.</item>
+        <item>It is added to neodymium magnets so they withstand heat in electric car motors and wind turbines.</item>
+        <item>It is used in medical lasers to break up kidney stones and in very powerful laboratory magnets.</item>
+        <item>It amplifies the signal in internet fiber optics, gives glass a pink color, and is used in dermatological lasers.</item>
+        <item>It is used in portable X-ray equipment and in medical and surgical lasers.</item>
+        <item>It is used in some of the most precise atomic clocks in the world and in industrial lasers.</item>
+        <item>It is used in PET scan detectors and, in radioactive form, in therapies against some cancers.</item>
+        <item>It absorbs neutrons in nuclear control rods and is part of modern processor chips.</item>
+        <item>Its tiny capacitors are in cell phones and computers; it is also used in surgical implants.</item>
+        <item>It forms the filament of classic light bulbs, the tiny balls in ballpoint pens, drill bits and cutting tools.</item>
+        <item>It is used in superalloys for jet engine turbines and as a catalyst to make high-octane gasoline.</item>
+        <item>It is used in fountain pen tips and electrical contacts, and its compounds stain samples for microscopes.</item>
+        <item>It is used in high-performance spark plugs, fountain pen tips and crucibles for growing crystals.</item>
+        <item>It is in catalytic converters, jewelry, electrodes, pacemakers and cancer drugs (cisplatin).</item>
+        <item>It is used in jewelry, coins and bank reserves, and in the contacts of cell phones and computers.</item>
+        <item>It was used in thermometers and barometers; it is still in some energy-saving bulbs, but its use is limited because it is toxic.</item>
+        <item>It is used in some heart imaging studies and in electronics; it was once used as rat poison.</item>
+        <item>It is found in car batteries and in the aprons that protect against X-rays; it is no longer used in gasoline.</item>
+        <item>It is the active ingredient in some stomach medicines and replaces lead in solders.</item>
+        <item>It is used in devices that remove static electricity in factories and was a heat source in some spacecraft.</item>
+        <item>It is used only in research, mainly to study cancer therapies with alpha particles.</item>
+        <item>It is measured in homes because of its health risk; it has been used in radiotherapy and to study groundwater.</item>
+        <item>It is used only in research, to study the structure of atoms with lasers.</item>
+        <item>It was once used in glow-in-the-dark watch paints; today one isotope is used to treat prostate cancer.</item>
+        <item>Actinium-225 is being studied in cancer therapies; it also serves as a neutron source in research.</item>
+        <item>It was used in gas lantern mantles and camera lenses; today it is being studied as a nuclear fuel.</item>
+        <item>It is used only in research, for example to date ocean sediments thousands of years old.</item>
+        <item>It is the fuel of nuclear power plants, which generate about 9% of the world\'s electricity.</item>
+        <item>It is used to produce plutonium-238 for spacecraft and in neutron detectors.</item>
+        <item>It is used in nuclear reactors and weapons; plutonium-238 powers probes such as the Voyagers and the Curiosity rover.</item>
+        <item>A tiny amount of americium-241 is in many household smoke detectors and helps save lives.</item>
+        <item>It is the alpha particle source in instruments on Mars rovers that analyze rocks.</item>
+        <item>It is used only in research, mainly as a target to make heavier elements, such as tennessine.</item>
+        <item>Its neutrons help start up nuclear reactors, search for oil and gold, and detect explosives.</item>
+        <item>It is used only in research: it has been produced in amounts so tiny that they can barely be seen.</item>
+        <item>It has no practical uses: it is the heaviest element that can be formed in a reactor and it is only studied.</item>
+        <item>It is used only in research, to understand how very heavy atoms behave.</item>
+        <item>It has no uses outside the lab; its atoms last from seconds to a little under an hour.</item>
+        <item>It exists only in laboratories, where it is made atom by atom to study its chemistry.</item>
+        <item>It is used only in research; its most stable form lasts just a few hours before decaying.</item>
+        <item>It is made a few atoms at a time and serves only to explore the limits of the periodic table.</item>
+        <item>It is used only in research; chemists have studied its compounds with just a handful of atoms.</item>
+        <item>Its atoms last seconds or, at most, about a minute; they serve only for basic science.</item>
+        <item>It is used only in research; with just a few atoms, scientists managed to study one of its oxides.</item>
+        <item>It has no practical uses: only a handful of atoms have been produced for research.</item>
+        <item>It exists for only a few seconds in the lab and is used to explore the physics of superheavy nuclei.</item>
+        <item>It is used only in research; chemically it is thought to resemble gold, but this has not yet been confirmed.</item>
+        <item>It is used only in research; with just a few atoms, it was shown to be very volatile.</item>
+        <item>It is used only in research; it took the Japanese team nine years to obtain three atoms.</item>
+        <item>It exists only in the lab, where scientists study whether it behaves like a metal or almost like a noble gas.</item>
+        <item>Its atoms last fractions of a second, so it is only useful for researching superheavy nuclei.</item>
+        <item>It has no practical use: a few dozen atoms that live for milliseconds have been observed.</item>
+        <item>It is used only in research: it is one of the newest elements and very few atoms are known.</item>
+        <item>It serves only science: each atom lasts less than a millisecond before decaying.</item>
+    </string-array>
+    <string-array name="element_discoverers">
+        <item>Henry Cavendish</item>
+        <item>Pierre Janssen and Norman Lockyer</item>
+        <item>Johan August Arfwedson</item>
+        <item>Louis-Nicolas Vauquelin</item>
+        <item>Gay-Lussac, Thénard and Humphry Davy</item>
+        <item>Unknown</item>
+        <item>Daniel Rutherford</item>
+        <item>Joseph Priestley and Carl Wilhelm Scheele</item>
+        <item>Henri Moissan</item>
+        <item>William Ramsay and Morris Travers</item>
+        <item>Humphry Davy</item>
+        <item>Joseph Black</item>
+        <item>Hans Christian Ørsted</item>
+        <item>Jöns Jacob Berzelius</item>
+        <item>Hennig Brand</item>
+        <item>Unknown</item>
+        <item>Carl Wilhelm Scheele</item>
+        <item>Lord Rayleigh and William Ramsay</item>
+        <item>Humphry Davy</item>
+        <item>Humphry Davy</item>
+        <item>Lars Fredrik Nilson</item>
+        <item>William Gregor</item>
+        <item>Andrés Manuel del Río</item>
+        <item>Louis-Nicolas Vauquelin</item>
+        <item>Johan Gottlieb Gahn</item>
+        <item>Unknown</item>
+        <item>Georg Brandt</item>
+        <item>Axel Fredrik Cronstedt</item>
+        <item>Unknown</item>
+        <item>Andreas Sigismund Marggraf</item>
+        <item>Paul-Émile Lecoq de Boisbaudran</item>
+        <item>Clemens Winkler</item>
+        <item>Albertus Magnus</item>
+        <item>Jöns Jacob Berzelius and Johan Gottlieb Gahn</item>
+        <item>Antoine-Jérôme Balard</item>
+        <item>William Ramsay and Morris Travers</item>
+        <item>Robert Bunsen and Gustav Kirchhoff</item>
+        <item>Adair Crawford</item>
+        <item>Johan Gadolin</item>
+        <item>Martin Heinrich Klaproth</item>
+        <item>Charles Hatchett</item>
+        <item>Carl Wilhelm Scheele</item>
+        <item>Carlo Perrier and Emilio Segrè</item>
+        <item>Karl Ernst Claus</item>
+        <item>William Hyde Wollaston</item>
+        <item>William Hyde Wollaston</item>
+        <item>Unknown</item>
+        <item>Friedrich Stromeyer</item>
+        <item>Ferdinand Reich and Theodor Richter</item>
+        <item>Unknown</item>
+        <item>Unknown</item>
+        <item>Franz-Joseph Müller von Reichenstein</item>
+        <item>Bernard Courtois</item>
+        <item>William Ramsay and Morris Travers</item>
+        <item>Robert Bunsen and Gustav Kirchhoff</item>
+        <item>Carl Wilhelm Scheele</item>
+        <item>Carl Gustaf Mosander</item>
+        <item>Berzelius, Hisinger and Klaproth</item>
+        <item>Carl Auer von Welsbach</item>
+        <item>Carl Auer von Welsbach</item>
+        <item>Marinsky, Glendenin and Coryell</item>
+        <item>Paul-Émile Lecoq de Boisbaudran</item>
+        <item>Eugène-Anatole Demarçay</item>
+        <item>Jean Charles Galissard de Marignac</item>
+        <item>Carl Gustaf Mosander</item>
+        <item>Paul-Émile Lecoq de Boisbaudran</item>
+        <item>Marc Delafontaine and Jacques-Louis Soret</item>
+        <item>Carl Gustaf Mosander</item>
+        <item>Per Teodor Cleve</item>
+        <item>Jean Charles Galissard de Marignac</item>
+        <item>Georges Urbain</item>
+        <item>Dirk Coster and George de Hevesy</item>
+        <item>Anders Gustaf Ekeberg</item>
+        <item>Juan José and Fausto Elhuyar</item>
+        <item>Walter Noddack, Ida Tacke and Otto Berg</item>
+        <item>Smithson Tennant</item>
+        <item>Smithson Tennant</item>
+        <item>Antonio de Ulloa</item>
+        <item>Unknown</item>
+        <item>Unknown</item>
+        <item>William Crookes</item>
+        <item>Unknown</item>
+        <item>Claude François Geoffroy</item>
+        <item>Marie and Pierre Curie</item>
+        <item>Corson, MacKenzie and Segrè</item>
+        <item>Friedrich Ernst Dorn</item>
+        <item>Marguerite Perey</item>
+        <item>Marie and Pierre Curie</item>
+        <item>André-Louis Debierne</item>
+        <item>Jöns Jacob Berzelius</item>
+        <item>Kasimir Fajans and Oswald Göhring</item>
+        <item>Martin Heinrich Klaproth</item>
+        <item>Edwin McMillan and Philip Abelson</item>
+        <item>Seaborg, McMillan, Kennedy and Wahl</item>
+        <item>Seaborg, James, Morgan and Ghiorso</item>
+        <item>Seaborg, James and Ghiorso</item>
+        <item>Thompson, Ghiorso and Seaborg</item>
+        <item>Thompson, Street, Ghiorso and Seaborg</item>
+        <item>Albert Ghiorso\'s team (Ivy Mike test)</item>
+        <item>Albert Ghiorso\'s team (Ivy Mike test)</item>
+        <item>Ghiorso, Harvey, Choppin, Thompson and Seaborg</item>
+        <item>JINR (Dubna) team</item>
+        <item>Albert Ghiorso\'s team (Berkeley)</item>
+        <item>JINR (Dubna) and LBL (Berkeley) teams</item>
+        <item>JINR (Dubna) and LBL (Berkeley) teams</item>
+        <item>Albert Ghiorso\'s team (LBL, Berkeley)</item>
+        <item>GSI team (Peter Armbruster)</item>
+        <item>GSI team (Peter Armbruster)</item>
+        <item>GSI team (Peter Armbruster)</item>
+        <item>GSI team (Sigurd Hofmann)</item>
+        <item>GSI team (Sigurd Hofmann)</item>
+        <item>GSI team (Sigurd Hofmann)</item>
+        <item>RIKEN team (Kosuke Morita)</item>
+        <item>JINR (Dubna) and LLNL teams</item>
+        <item>JINR (Dubna) and LLNL teams</item>
+        <item>JINR (Dubna) and LLNL teams</item>
+        <item>JINR, ORNL, Vanderbilt and LLNL</item>
+        <item>JINR (Dubna) and LLNL teams</item>
+    </string-array>
+    <string-array name="element_discovery_eras">
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item>Prehistory</item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item>Antiquity</item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item>Prehistory</item>
+        <item></item>
+        <item></item>
+        <item>Prehistory</item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item>Prehistory</item>
+        <item></item>
+        <item></item>
+        <item>Antiquity</item>
+        <item>Antiquity</item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item>Prehistory</item>
+        <item>Antiquity</item>
+        <item></item>
+        <item>Prehistory</item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+    </string-array>
+    <string-array name="element_discovery_countries">
+        <item>United Kingdom</item>
+        <item>India and United Kingdom</item>
+        <item>Sweden</item>
+        <item>France</item>
+        <item>France and United Kingdom</item>
+        <item></item>
+        <item>United Kingdom</item>
+        <item>United Kingdom and Sweden</item>
+        <item>France</item>
+        <item>United Kingdom</item>
+        <item>United Kingdom</item>
+        <item>United Kingdom</item>
+        <item>Denmark</item>
+        <item>Sweden</item>
+        <item>Germany</item>
+        <item></item>
+        <item>Sweden</item>
+        <item>United Kingdom</item>
+        <item>United Kingdom</item>
+        <item>United Kingdom</item>
+        <item>Sweden</item>
+        <item>United Kingdom</item>
+        <item>Mexico</item>
+        <item>France</item>
+        <item>Sweden</item>
+        <item></item>
+        <item>Sweden</item>
+        <item>Sweden</item>
+        <item></item>
+        <item>Germany</item>
+        <item>France</item>
+        <item>Germany</item>
+        <item>Germany</item>
+        <item>Sweden</item>
+        <item>France</item>
+        <item>United Kingdom</item>
+        <item>Germany</item>
+        <item>United Kingdom</item>
+        <item>Finland</item>
+        <item>Germany</item>
+        <item>United Kingdom</item>
+        <item>Sweden</item>
+        <item>Italy</item>
+        <item>Russia</item>
+        <item>United Kingdom</item>
+        <item>United Kingdom</item>
+        <item></item>
+        <item>Germany</item>
+        <item>Germany</item>
+        <item></item>
+        <item></item>
+        <item>Romania</item>
+        <item>France</item>
+        <item>United Kingdom</item>
+        <item>Germany</item>
+        <item>Sweden</item>
+        <item>Sweden</item>
+        <item>Sweden and Germany</item>
+        <item>Austria</item>
+        <item>Austria</item>
+        <item>United States</item>
+        <item>France</item>
+        <item>France</item>
+        <item>Switzerland</item>
+        <item>Sweden</item>
+        <item>France</item>
+        <item>Switzerland</item>
+        <item>Sweden</item>
+        <item>Sweden</item>
+        <item>Switzerland</item>
+        <item>France</item>
+        <item>Denmark</item>
+        <item>Sweden</item>
+        <item>Spain</item>
+        <item>Germany</item>
+        <item>United Kingdom</item>
+        <item>United Kingdom</item>
+        <item>Colombia</item>
+        <item></item>
+        <item></item>
+        <item>United Kingdom</item>
+        <item></item>
+        <item>France</item>
+        <item>France</item>
+        <item>United States</item>
+        <item>Germany</item>
+        <item>France</item>
+        <item>France</item>
+        <item>France</item>
+        <item>Sweden</item>
+        <item>Germany</item>
+        <item>Germany</item>
+        <item>United States</item>
+        <item>United States</item>
+        <item>United States</item>
+        <item>United States</item>
+        <item>United States</item>
+        <item>United States</item>
+        <item>United States</item>
+        <item>United States</item>
+        <item>United States</item>
+        <item>Russia</item>
+        <item>United States</item>
+        <item>Russia and United States</item>
+        <item>Russia and United States</item>
+        <item>United States</item>
+        <item>Germany</item>
+        <item>Germany</item>
+        <item>Germany</item>
+        <item>Germany</item>
+        <item>Germany</item>
+        <item>Germany</item>
+        <item>Japan</item>
+        <item>Russia and United States</item>
+        <item>Russia and United States</item>
+        <item>Russia and United States</item>
+        <item>Russia and United States</item>
+        <item>Russia and United States</item>
+    </string-array>
+    <string-array name="element_look_origins">
+        <item>Hydrogen discharge: violet pink</item>
+        <item>Helium discharge: peach pink</item>
+        <item>Crimson flame</item>
+        <item>Emerald: beryl is its gemstone</item>
+        <item>Lime green flame</item>
+        <item>Graphite</item>
+        <item>Liquid nitrogen, almost colorless</item>
+        <item>Liquid oxygen, pale blue</item>
+        <item>Pale yellow gas</item>
+        <item>Neon sign</item>
+        <item>Yellow sodium flame</item>
+        <item>Burns with a blinding white light</item>
+        <item>Matte aluminum</item>
+        <item>Bluish-gray crystal</item>
+        <item>White phosphorus glows green in air</item>
+        <item>Lemon yellow crystals</item>
+        <item>Yellowish-green gas</item>
+        <item>Violet discharge</item>
+        <item>Lilac flame</item>
+        <item>Brick red flame</item>
+        <item>Stadium lamps</item>
+        <item>Violet anodized titanium</item>
+        <item>Violet V2+ ion</item>
+        <item>Orange dichromate</item>
+        <item>Purple permanganate</item>
+        <item>Rust, reddish brown</item>
+        <item>Pink Co2+ ion</item>
+        <item>Green Ni2+ ion</item>
+        <item>Blue copper sulfate</item>
+        <item>Bluish-white galvanized finish</item>
+        <item>Melts in your hand: warm silver</item>
+        <item>Shiny gray crystal</item>
+        <item>Gray arsenic</item>
+        <item>Red selenium</item>
+        <item>Reddish-brown vapor</item>
+        <item>Lavender white discharge</item>
+        <item>Red-violet flame</item>
+        <item>Scarlet flame (fireworks)</item>
+        <item>Green Nd:YAG laser</item>
+        <item>Zirconia crystals</item>
+        <item>Violet-blue anodized finish</item>
+        <item>Dark greenish silver</item>
+        <item>Mint (medical tracer)</item>
+        <item>Ruthenium red</item>
+        <item>Pink rhodium salts</item>
+        <item>Warm gray</item>
+        <item>Bright silver</item>
+        <item>Cadmium yellow pigment</item>
+        <item>The indigo line that gave it its name</item>
+        <item>Light tin</item>
+        <item>Warm gray antimony</item>
+        <item>Brown tellurium</item>
+        <item>Violet vapor</item>
+        <item>Blue xenon headlights</item>
+        <item>Blue-violet flame</item>
+        <item>Yellowish-green flame</item>
+        <item>Movie arc lamps</item>
+        <item>Yellow phosphor of white LEDs</item>
+        <item>Green Pr3+ ion</item>
+        <item>Lilac Nd3+ ion</item>
+        <item>Blue-green glow</item>
+        <item>Orange luminescence</item>
+        <item>Red phosphor of screens</item>
+        <item>Magnetic greenish gray</item>
+        <item>Yellow-green phosphor</item>
+        <item>Bronzed silver</item>
+        <item>Peach Ho3+ ion</item>
+        <item>Pale pink Er3+ ion</item>
+        <item>Blue thulium emission</item>
+        <item>Yellow-green Yb2+ ion</item>
+        <item>Lutetium-177 for radiotherapy</item>
+        <item>Control rod steel</item>
+        <item>Dark blue-gray</item>
+        <item>Glowing filament</item>
+        <item>Brownish gray</item>
+        <item>Bluish gray, the densest</item>
+        <item>Yellowish silver, salts of a thousand colors</item>
+        <item>Cool white platinum</item>
+        <item>Gold</item>
+        <item>Liquid mirror</item>
+        <item>Emerald-green line</item>
+        <item>Dull lead gray</item>
+        <item>Iridescent bismuth crystals</item>
+        <item>Blue glow</item>
+        <item>Dark violet vapor</item>
+        <item>Radioactive gas with a reddish glow</item>
+        <item>Coral</item>
+        <item>Green glow-in-the-dark paint from old watches</item>
+        <item>Glows pale blue in the dark</item>
+        <item>Silver (gas lantern mantles)</item>
+        <item>Olive</item>
+        <item>Yellow-green uranium glass</item>
+        <item>Blue-green Np5+ ion</item>
+        <item>It heats itself: bright red</item>
+        <item>Pink Am3+ ion</item>
+        <item>Glows purple in the dark</item>
+        <item>Yellow-green Bk3+ ion</item>
+        <item>Green Cf3+ ion</item>
+        <item>Glows blue from its own radiation</item>
+        <item>No one has seen it in a visible amount: its color is imaginary</item>
+        <item>No one has seen it in a visible amount: its color is imaginary</item>
+        <item>No one has seen it in a visible amount: its color is imaginary</item>
+        <item>No one has seen it in a visible amount: its color is imaginary</item>
+        <item>No one has seen it in a visible amount: its color is imaginary</item>
+        <item>No one has seen it in a visible amount: its color is imaginary</item>
+        <item>No one has seen it in a visible amount: its color is imaginary</item>
+        <item>No one has seen it in a visible amount: its color is imaginary</item>
+        <item>No one has seen it in a visible amount: its color is imaginary</item>
+        <item>No one has seen it in a visible amount: its color is imaginary</item>
+        <item>No one has seen it in a visible amount: its color is imaginary</item>
+        <item>Imaginary: golden like gold, which is in its group</item>
+        <item>Imaginary: silvery like mercury, which is in its group</item>
+        <item>No one has seen it in a visible amount: its color is imaginary</item>
+        <item>No one has seen it in a visible amount: its color is imaginary</item>
+        <item>No one has seen it in a visible amount: its color is imaginary</item>
+        <item>No one has seen it in a visible amount: its color is imaginary</item>
+        <item>Imaginary: violet like the halogens in its group</item>
+        <item>Imaginary: pale like the noble gases in its group</item>
+    </string-array>
+</resources>

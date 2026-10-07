@@ -1,9 +1,13 @@
 package com.jjas.labpomodoro.domain.model
 
-enum class MedalTier(val label: String) {
-    BRONZE("Bronce"),
-    SILVER("Plata"),
-    GOLD("Oro"),
+import androidx.annotation.PluralsRes
+import androidx.annotation.StringRes
+import com.jjas.labpomodoro.R
+
+enum class MedalTier(@StringRes val labelRes: Int) {
+    BRONZE(R.string.prog_tier_bronze),
+    SILVER(R.string.prog_tier_silver),
+    GOLD(R.string.prog_tier_gold),
 }
 
 /**
@@ -11,31 +15,31 @@ enum class MedalTier(val label: String) {
  * restaurado las trae de vuelta solo. Solo se guarda cuáles ya se celebraron.
  */
 enum class Medal(
-    val title: String,
-    val description: String,
+    @StringRes val titleRes: Int,
+    @StringRes val descriptionRes: Int,
     val symbol: String,
     val tier: MedalTier,
     val target: Long,
-    /** Unidad del progreso, para "4/7 días". */
-    val unit: String,
+    /** Texto del progreso con su unidad, para "4/7 días"; el plural va por la meta. */
+    @PluralsRes val progressRes: Int,
 ) {
-    FIRST_POMODORO("Primer experimento", "Completa tu primer pomodoro", "🧪", MedalTier.BRONZE, 1, "pomodoro"),
-    STREAK_3("Constancia", "Racha de 3 días seguidos", "🔥", MedalTier.BRONZE, 3, "días"),
-    STREAK_7("Semana perfecta", "Racha de 7 días seguidos", "🔥", MedalTier.SILVER, 7, "días"),
-    STREAK_30("Mes de laboratorio", "Racha de 30 días seguidos", "🔥", MedalTier.GOLD, 30, "días"),
-    STREAK_100("Cien días", "Racha de 100 días seguidos", "☄️", MedalTier.GOLD, 100, "días"),
-    HOURS_10("Becario", "10 horas de enfoque en total", "⏳", MedalTier.BRONZE, 10, "h"),
-    HOURS_50("Investigador", "50 horas de enfoque en total", "⏳", MedalTier.SILVER, 50, "h"),
-    HOURS_100("Doctorado", "100 horas de enfoque en total", "🎓", MedalTier.GOLD, 100, "h"),
-    MARATHON("Maratón", "8 pomodoros en un mismo día", "🏃", MedalTier.SILVER, 8, "pomodoros"),
-    EARLY_BIRD("Madrugador", "5 pomodoros empezados antes de las 7 de la mañana", "🌅", MedalTier.SILVER, 5, "pomodoros"),
-    NIGHT_OWL("Búho nocturno", "5 pomodoros empezados después de las 10 de la noche", "🦉", MedalTier.SILVER, 5, "pomodoros"),
-    FIRST_FUSION("Primera síntesis", "Fusiona dos elementos en el sintetizador", "⚗️", MedalTier.BRONZE, 1, "fusión"),
-    FUSION_MASTER("Maestro de la fusión", "25 fusiones en el sintetizador", "💥", MedalTier.GOLD, 25, "fusiones"),
-    COLLECTOR("Coleccionista", "Descubre 10 elementos", "🔬", MedalTier.BRONZE, 10, "elementos"),
-    HALF_TABLE("Media tabla", "Descubre 59 elementos", "🧫", MedalTier.SILVER, 59, "elementos"),
-    FULL_TABLE("Tabla completa", "Descubre los 118 elementos", "🏆", MedalTier.GOLD, PeriodicTable.SIZE.toLong(), "elementos"),
-    FIRST_GOLD("Maestría de oro", "Lleva un elemento a la maestría de oro", "🥇", MedalTier.SILVER, 1, "elemento"),
+    FIRST_POMODORO(R.string.prog_medal_first_pomodoro_title, R.string.prog_medal_first_pomodoro_desc, "🧪", MedalTier.BRONZE, 1, R.plurals.prog_medal_progress_pomodoros),
+    STREAK_3(R.string.prog_medal_streak_3_title, R.string.prog_medal_streak_3_desc, "🔥", MedalTier.BRONZE, 3, R.plurals.prog_medal_progress_days),
+    STREAK_7(R.string.prog_medal_streak_7_title, R.string.prog_medal_streak_7_desc, "🔥", MedalTier.SILVER, 7, R.plurals.prog_medal_progress_days),
+    STREAK_30(R.string.prog_medal_streak_30_title, R.string.prog_medal_streak_30_desc, "🔥", MedalTier.GOLD, 30, R.plurals.prog_medal_progress_days),
+    STREAK_100(R.string.prog_medal_streak_100_title, R.string.prog_medal_streak_100_desc, "☄️", MedalTier.GOLD, 100, R.plurals.prog_medal_progress_days),
+    HOURS_10(R.string.prog_medal_hours_10_title, R.string.prog_medal_hours_10_desc, "⏳", MedalTier.BRONZE, 10, R.plurals.prog_medal_progress_hours),
+    HOURS_50(R.string.prog_medal_hours_50_title, R.string.prog_medal_hours_50_desc, "⏳", MedalTier.SILVER, 50, R.plurals.prog_medal_progress_hours),
+    HOURS_100(R.string.prog_medal_hours_100_title, R.string.prog_medal_hours_100_desc, "🎓", MedalTier.GOLD, 100, R.plurals.prog_medal_progress_hours),
+    MARATHON(R.string.prog_medal_marathon_title, R.string.prog_medal_marathon_desc, "🏃", MedalTier.SILVER, 8, R.plurals.prog_medal_progress_pomodoros),
+    EARLY_BIRD(R.string.prog_medal_early_bird_title, R.string.prog_medal_early_bird_desc, "🌅", MedalTier.SILVER, 5, R.plurals.prog_medal_progress_pomodoros),
+    NIGHT_OWL(R.string.prog_medal_night_owl_title, R.string.prog_medal_night_owl_desc, "🦉", MedalTier.SILVER, 5, R.plurals.prog_medal_progress_pomodoros),
+    FIRST_FUSION(R.string.prog_medal_first_fusion_title, R.string.prog_medal_first_fusion_desc, "⚗️", MedalTier.BRONZE, 1, R.plurals.prog_medal_progress_fusions),
+    FUSION_MASTER(R.string.prog_medal_fusion_master_title, R.string.prog_medal_fusion_master_desc, "💥", MedalTier.GOLD, 25, R.plurals.prog_medal_progress_fusions),
+    COLLECTOR(R.string.prog_medal_collector_title, R.string.prog_medal_collector_desc, "🔬", MedalTier.BRONZE, 10, R.plurals.prog_medal_progress_elements),
+    HALF_TABLE(R.string.prog_medal_half_table_title, R.string.prog_medal_half_table_desc, "🧫", MedalTier.SILVER, 59, R.plurals.prog_medal_progress_elements),
+    FULL_TABLE(R.string.prog_medal_full_table_title, R.string.prog_medal_full_table_desc, "🏆", MedalTier.GOLD, PeriodicTable.SIZE.toLong(), R.plurals.prog_medal_progress_elements),
+    FIRST_GOLD(R.string.prog_medal_first_gold_title, R.string.prog_medal_first_gold_desc, "🥇", MedalTier.SILVER, 1, R.plurals.prog_medal_progress_elements),
 }
 
 /** Lo que se necesita del historial para calcular las medallas. */
@@ -54,8 +58,8 @@ data class MedalFacts(
 data class MedalProgress(val medal: Medal, val current: Long) {
     val earned: Boolean get() = current >= medal.target
     val fraction: Float get() = (current.toFloat() / medal.target).coerceIn(0f, 1f)
-    /** "4/7 días"; sin pasarse de la meta. */
-    val label: String get() = "${current.coerceAtMost(medal.target)}/${medal.target} ${medal.unit}"
+    /** Lo que se muestra del progreso ("4" de "4/7 días"), sin pasarse de la meta. */
+    val shown: Long get() = current.coerceAtMost(medal.target)
 }
 
 object Medals {

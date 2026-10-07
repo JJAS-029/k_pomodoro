@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -29,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
@@ -37,22 +39,22 @@ import com.jjas.labpomodoro.R
 /** Podcasts del creador de la app: se promocionan en los espacios de anuncios de la versión gratis. */
 enum class Podcast(
     val title: String,
-    val tagline: String,
-    val description: String,
+    @param:StringRes val taglineRes: Int,
+    @param:StringRes val descriptionRes: Int,
     @param:DrawableRes val cover: Int,
     val spotifyUrl: String,
 ) {
     CIENCIAFICCION(
         title = "CiencIAficción",
-        tagline = "Relatos de ciencia ficción narrados con IA",
-        description = "Aventuras intergalácticas, futuros distópicos y tecnologías inimaginables de diversos autores, narrados con inteligencia artificial.",
+        taglineRes = R.string.main_podcast_cienciaficcion_tagline,
+        descriptionRes = R.string.main_podcast_cienciaficcion_description,
         cover = R.drawable.podcast_cienciaficcion,
         spotifyUrl = "https://open.spotify.com/show/4fYtxwJXvYiXTBmjdwMyNY",
     ),
     CIENCIA(
         title = "CiencIA",
-        tagline = "Ciencia y tesis narradas con IA",
-        description = "Artículos científicos y tesis narrados con inteligencia artificial, para que el conocimiento llegue a todos.",
+        taglineRes = R.string.main_podcast_ciencia_tagline,
+        descriptionRes = R.string.main_podcast_ciencia_description,
         cover = R.drawable.podcast_ciencia,
         spotifyUrl = "https://open.spotify.com/show/3Ez2gZpy8e9orhMqNRwXLl",
     ),
@@ -66,7 +68,7 @@ const val SUGGESTIONS_EMAIL = "ciencia.koala@gmail.com"
 /** Abre el correo con el asunto y la versión ya escritos, para que solo haya que contar la idea. */
 fun Context.sendSuggestion(appVersion: String) {
     val body = "\n\n—\nLab Pomodoro $appVersion · Android ${Build.VERSION.RELEASE} · ${Build.MANUFACTURER} ${Build.MODEL}"
-    val uri = "mailto:$SUGGESTIONS_EMAIL?subject=${Uri.encode("Sugerencia para Lab Pomodoro")}&body=${Uri.encode(body)}".toUri()
+    val uri = "mailto:$SUGGESTIONS_EMAIL?subject=${Uri.encode(getString(R.string.main_suggestion_subject))}&body=${Uri.encode(body)}".toUri()
     runCatching { startActivity(Intent(Intent.ACTION_SENDTO, uri).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
 }
 
@@ -95,16 +97,16 @@ fun PodcastBanner(podcast: Podcast, modifier: Modifier = Modifier) {
             )
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
-                Text("Podcast · ${podcast.title}", style = MaterialTheme.typography.titleSmall, maxLines = 1)
+                Text(stringResource(R.string.main_podcast_banner_title, podcast.title), style = MaterialTheme.typography.titleSmall, maxLines = 1)
                 Text(
-                    podcast.tagline,
+                    stringResource(podcast.taglineRes),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
             }
-            TextButton(onClick = { context.openUrl(podcast.spotifyUrl) }) { Text("Escuchar") }
+            TextButton(onClick = { context.openUrl(podcast.spotifyUrl) }) { Text(stringResource(R.string.main_podcast_listen)) }
         }
     }
 }
@@ -119,22 +121,22 @@ fun PodcastPromoDialog(podcast: Podcast, onDismiss: () -> Unit) {
             Button(onClick = {
                 context.openUrl(podcast.spotifyUrl)
                 onDismiss()
-            }) { Text("Escuchar en Spotify") }
+            }) { Text(stringResource(R.string.main_podcast_listen_spotify)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Ahora no") } },
-        title = { Text("Para tu descanso") },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.main_podcast_not_now)) } },
+        title = { Text(stringResource(R.string.main_podcast_promo_title)) },
         text = {
             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Image(
                     painterResource(podcast.cover),
-                    contentDescription = "Portada de ${podcast.title}",
+                    contentDescription = stringResource(R.string.main_podcast_cover, podcast.title),
                     modifier = Modifier
                         .size(180.dp)
                         .clip(RoundedCornerShape(16.dp)),
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(podcast.title, style = MaterialTheme.typography.titleLarge)
-                Text(podcast.description, style = MaterialTheme.typography.bodyMedium)
+                Text(stringResource(podcast.descriptionRes), style = MaterialTheme.typography.bodyMedium)
             }
         },
     )

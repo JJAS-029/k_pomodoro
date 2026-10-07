@@ -490,6 +490,16 @@ Se revisaron las tres; ninguna se agregó como dependencia porque nuestro sistem
 | Aviso | `MedalBanner` en la pantalla principal | "¡Nueva medalla!" con confeti de su metal; "Ver" lleva a Progreso |
 | Guía | `GuideScreen.ProgressPage` | Última página: maestría (Au en sus 4 niveles), medallas y ligas; el menú explica Logros y Progreso |
 
+### Versión en inglés
+
+| Pieza | Archivo | Notas |
+|---|---|---|
+| Idiomas | `res/values/` (inglés, el de base) y `res/values-es/` | Un archivo de textos por área: `strings_main`, `strings_elements`, `strings_settings`, `strings_progress`. Cualquier idioma que no sea español ve inglés |
+| Elegir idioma | `androidResources.generateLocaleConfig`, `res/resources.properties` | Android 13+ lista la app en "Idioma de la app"; Config › General › Idioma abre esa pantalla. Antes de Android 13 sigue el idioma del teléfono |
+| Elementos | `res/values*/element_data.xml`, `ui/components/ElementTexts.kt` | Nombres, fichas, descubridores, épocas, países y origen del color de los 118 como `string-array` (índice = número atómico − 1); `localizedName()`, `elementFact()`, `elementDiscovery()` |
+| Modelos | `labelRes`, `titleRes`, `descriptionRes` | Los enums guardan el id del texto, no el texto; notificaciones, widget y ajustes rápidos usan `context.getString` |
+| Fechas y plurales | `pluralStringResource`, formatos del idioma actual | "4/7 days" / "4/7 días"; días y meses en el idioma de la app |
+
 ### Ideas Pro para más adelante
 - **Más sonidos**: ✅ los generados ya están. Faltan ambientes grabados con licencia CC0 (cafetería, bosque) en loop con `ExoPlayer`/Media3 y mezclar varios a la vez.
 - **Efectos del líquido**: hervor en el último minuto, condensación en el vidrio vacío, chapoteo al cambiar de sesión, brillo tenue en modo ambiente, inclinación con el acelerómetro.

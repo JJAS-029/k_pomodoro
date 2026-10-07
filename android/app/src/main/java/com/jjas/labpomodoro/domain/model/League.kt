@@ -1,5 +1,7 @@
 package com.jjas.labpomodoro.domain.model
 
+import androidx.annotation.StringRes
+import com.jjas.labpomodoro.R
 import java.time.DayOfWeek
 import java.time.Instant
 import java.time.ZoneOffset
@@ -8,17 +10,17 @@ import java.time.temporal.TemporalAdjusters
 import kotlin.random.Random
 
 /** Ligas semanales, de la más baja a la más alta. Todos empiezan en Hidrógeno. */
-enum class League(val label: String, val symbol: String, val color: Long) {
-    HYDROGEN("Hidrógeno", "H", 0xFFB3E5FC),
-    HELIUM("Helio", "He", 0xFFFFB3C1),
-    CARBON("Carbono", "C", 0xFF9E9E9E),
-    NITROGEN("Nitrógeno", "N", 0xFF90CAF9),
-    OXYGEN("Oxígeno", "O", 0xFF4FC3F7),
-    NEON("Neón", "Ne", 0xFFFF5722),
-    IRON("Hierro", "Fe", 0xFFD87C2A),
-    SILVER("Plata", "Ag", 0xFFE0E0E0),
-    GOLD("Oro", "Au", 0xFFFFC94A),
-    PLATINUM("Platino", "Pt", 0xFFB9F2FF),
+enum class League(@StringRes val labelRes: Int, val symbol: String, val color: Long) {
+    HYDROGEN(R.string.set_league_hydrogen, "H", 0xFFB3E5FC),
+    HELIUM(R.string.set_league_helium, "He", 0xFFFFB3C1),
+    CARBON(R.string.set_league_carbon, "C", 0xFF9E9E9E),
+    NITROGEN(R.string.set_league_nitrogen, "N", 0xFF90CAF9),
+    OXYGEN(R.string.set_league_oxygen, "O", 0xFF4FC3F7),
+    NEON(R.string.set_league_neon, "Ne", 0xFFFF5722),
+    IRON(R.string.set_league_iron, "Fe", 0xFFD87C2A),
+    SILVER(R.string.set_league_silver, "Ag", 0xFFE0E0E0),
+    GOLD(R.string.set_league_gold, "Au", 0xFFFFC94A),
+    PLATINUM(R.string.set_league_platinum, "Pt", 0xFFB9F2FF),
     ;
 
     val next: League? get() = entries.getOrNull(ordinal + 1)

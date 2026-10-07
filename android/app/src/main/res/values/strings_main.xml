@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Tipos de sesión -->
+    <string name="main_session_work">Focus</string>
+    <string name="main_session_short_break">Short break</string>
+    <string name="main_session_long_break">Long break</string>
+
+    <!-- Controles del timer (app, notificación, widget, PiP) -->
+    <string name="main_action_start">Start</string>
+    <string name="main_action_resume">Resume</string>
+    <string name="main_action_pause">Pause</string>
+    <string name="main_action_skip">Skip</string>
+    <string name="main_action_stop">Stop</string>
+    <string name="main_paused">Paused</string>
+    <string name="main_experiment_complete">Experiment complete!</string>
+    <string name="main_experiment_complete_short">Experiment complete</string>
+    <string name="main_next">Next: %1$s</string>
+    <string name="main_last_session">Last session</string>
+    <string name="main_session_of">Session %1$d of %2$d</string>
+    <string name="main_session_description_next">Session %1$d of %2$d. Next: %3$s</string>
+    <string name="main_session_description_last">Session %1$d of %2$d. Last session</string>
+    <string name="main_label_with_element">%1$s · %2$s</string>
+    <string name="main_pip_done">Done!</string>
+
+    <!-- Pantalla principal -->
+    <string name="main_focus_sound_title">Focus sound</string>
+    <string name="main_dock_settings">Settings</string>
+    <string name="main_dock_achievements">Achievements</string>
+    <string name="main_dock_progress">Progress</string>
+    <string name="main_dock_pro">Pro</string>
+    <string name="main_dock_guide">Guide</string>
+    <string name="main_dock_ambient">Ambient</string>
+    <string name="main_dock_sound">Sound</string>
+    <string name="main_dock_sign_out">Sign out</string>
+    <string name="main_dock_sign_in">Sign in</string>
+    <string name="main_new_experiment">New experiment</string>
+    <string name="main_start_button">Start</string>
+    <string name="main_hide_options">Hide options</string>
+    <string name="main_more_options">More options</string>
+    <plurals name="main_plan_summary">
+        <item quantity="one">%1$d pomodoro · %2$s of focus</item>
+        <item quantity="other">%1$d pomodoros · %2$s of focus</item>
+    </plurals>
+    <string name="main_with_breaks">With breaks: %1$s</string>
+    <string name="main_share">Share</string>
+    <string name="main_koala_description">Koala, the Lab Pomodoro mascot</string>
+
+    <!-- Respaldo en la nube -->
+    <string name="main_restore_title">We found your lab</string>
+    <string name="main_restore_confirm">Restore</string>
+    <string name="main_restore_dismiss">Start fresh</string>
+    <string name="main_restore_text">You have a backup from %1$s with %2$d elements and %3$d sessions. Want to restore it on this phone?</string>
+    <string name="main_restore_text_device">You have a backup from %1$s (%2$s) with %3$d elements and %4$d sessions. Want to restore it on this phone?</string>
+
+    <!-- Notificaciones -->
+    <string name="main_timer_channel_name">Timer</string>
+    <string name="main_timer_channel_description">Countdown for the current session</string>
+    <string name="main_notification_paused">Paused · %1$s left</string>
+    <string name="main_notification_paused_chip">Paused</string>
+    <string name="main_streak_channel_name">Streak reminder</string>
+    <string name="main_streak_channel_description">A daily nudge if you haven\'t done a pomodoro yet</string>
+    <plurals name="main_streak_reminder_title">
+        <item quantity="one">Your %1$d-day streak is waiting</item>
+        <item quantity="other">Your %1$d-day streak is waiting</item>
+    </plurals>
+    <string name="main_streak_reminder_text">One pomodoro before bed keeps it alive.</string>
+    <string name="main_streak_new_title">An experiment today?</string>
+    <string name="main_streak_new_text">A single pomodoro starts a brand-new streak.</string>
+
+    <!-- Widget y ajustes rápidos -->
+    <string name="main_widget_next">Next: %1$s %2$d′</string>
+    <plurals name="main_pomodoros_with_time">
+        <item quantity="one">%1$d pomodoro · %2$s</item>
+        <item quantity="other">%1$d pomodoros · %2$s</item>
+    </plurals>
+    <string name="main_tile_paused">Paused · %1$d min</string>
+    <string name="main_tile_active">%1$s · %2$d min</string>
+
+    <!-- Podcasts -->
+    <string name="main_podcast_cienciaficcion_tagline">Sci-fi stories narrated with AI</string>
+    <string name="main_podcast_cienciaficcion_description">Intergalactic adventures, dystopian futures and unimaginable technologies from a range of authors, narrated with artificial intelligence.</string>
+    <string name="main_podcast_ciencia_tagline">Science and theses narrated with AI</string>
+    <string name="main_podcast_ciencia_description">Scientific papers and theses narrated with artificial intelligence, so knowledge can reach everyone.</string>
+    <string name="main_podcast_banner_title">Podcast · %1$s</string>
+    <string name="main_podcast_listen">Listen</string>
+    <string name="main_podcast_listen_spotify">Listen on Spotify</string>
+    <string name="main_podcast_not_now">Not now</string>
+    <string name="main_podcast_promo_title">For your break</string>
+    <string name="main_podcast_cover">%1$s cover</string>
+    <string name="main_suggestion_subject">Suggestion for Lab Pomodoro</string>
+
+    <!-- Compartir -->
+    <string name="main_share_invite">I\'m using Lab Pomodoro 🧪: a pomodoro timer that turns your focus time into periodic table elements. Try it: %1$s</string>
+    <plurals name="main_share_finished">
+        <item quantity="one">Experiment complete! 🧪 Today I did %1$d pomodoro (%2$s of focus) in Lab Pomodoro. Up for it? %3$s</item>
+        <item quantity="other">Experiment complete! 🧪 Today I did %1$d pomodoros (%2$s of focus) in Lab Pomodoro. Up for it? %3$s</item>
+    </plurals>
+    <string name="main_share_medal">I earned the “%1$s” medal in Lab Pomodoro! 🏅 (%2$s). Up for it? %3$s</string>
+    <!-- %3$s: maestría " (🥉1 🥈2)" o vacío; %5$s: racha (main_share_progress_streak) o vacío -->
+    <string name="main_share_progress">I\'ve collected %1$d/%2$d elements of the periodic table%3$s, %4$s of focus%5$s in Lab Pomodoro 🧪. Can you catch up? %6$s</string>
+    <plurals name="main_share_progress_streak">
+        <item quantity="one">" and a %1$d-day streak"</item>
+        <item quantity="other">" and a %1$d-day streak"</item>
+    </plurals>
+
+    <!-- Saludos según la hora -->
+    <string-array name="main_greetings_morning">
+        <item>Good morning. Shall we start the experiment?</item>
+        <item>Good morning. The lab is already up and running.</item>
+        <item>Coffee ready, flasks clean. Shall we begin?</item>
+        <item>Good morning. Mornings are great for tough ideas.</item>
+        <item>New day, new experiments.</item>
+    </string-array>
+    <string-array name="main_greetings_afternoon">
+        <item>Good afternoon. The lab is ready.</item>
+        <item>Good afternoon. One more experiment?</item>
+        <item>The afternoon is long: give it a good pomodoro.</item>
+        <item>Good afternoon. The flasks are waiting for you.</item>
+        <item>Time to turn this afternoon into something worthwhile.</item>
+    </string-array>
+    <string-array name="main_greetings_night">
+        <item>Good evening. One last experiment, then rest.</item>
+        <item>Good evening. The night lab is open.</item>
+        <item>The night is quiet: a great time to focus.</item>
+        <item>Good evening. Even the stars work the night shift.</item>
+    </string-array>
+    <string-array name="main_greetings_late">
+        <item>Working in the small hours. Don\'t forget to sleep.</item>
+        <item>Late night at the lab. One pomodoro, then bed.</item>
+        <item>At this hour, only scientists and owls are still up.</item>
+    </string-array>
+
+    <!-- Mensajes al terminar el plan -->
+    <string-array name="main_finished_done">
+        <item>Reaction complete! Your focus was the best catalyst.</item>
+        <item>Activation energy overcome: starting was the hard part, and you did it.</item>
+        <item>Every pomodoro is an atom; today you built a whole molecule.</item>
+        <item>Like gold, your consistency doesn\'t rust.</item>
+        <item>Successful experiment. Marie Curie also started with a single sample.</item>
+        <item>Your brain just synthesized something valuable: time well spent.</item>
+        <item>Even noble gases need stability. Rest, you\'ve earned it.</item>
+        <item>Science moves step by step, and today you took several.</item>
+        <item>Positive result: focus really works. Repeatable and proven.</item>
+        <item>Carbon becomes diamond with pressure and time. You\'re on the right track.</item>
+        <item>Hypothesis confirmed: you\'ve got this.</item>
+        <item>Your lab smells like success. Well, and a little like coffee.</item>
+        <item>Newton had his apple; you had your pomodoro streak.</item>
+        <item>A chain reaction starts with a single step. You\'ve already taken many.</item>
+        <item>Not even helium gets past you: today you contained all your attention.</item>
+        <item>Great discoveries are consistency disguised as genius.</item>
+        <item>Today\'s data: more focus, fewer distractions. Excellent sample.</item>
+        <item>Your neurons formed some great bonds today.</item>
+        <item>Just as water carves stone, consistency carves results.</item>
+        <item>Experiment finished. Now hang up the lab coat and rest.</item>
+    </string-array>
+    <string-array name="main_finished_big">
+        <item>Full lab shift complete! That was a high-yield experiment.</item>
+        <item>This many pomodoros deserve to be published in a scientific journal.</item>
+        <item>Today you were a focus reactor. Recharge well.</item>
+    </string-array>
+    <string-array name="main_finished_none">
+        <item>The experiment didn\'t work out today, and that\'s okay: it\'s data too. We\'ll pick it up tomorrow.</item>
+        <item>Not every reaction happens on the first try. Come back whenever you like.</item>
+        <item>Edison tried thousands of filaments before finding the right one. Tomorrow is another trial.</item>
+    </string-array>
+</resources>

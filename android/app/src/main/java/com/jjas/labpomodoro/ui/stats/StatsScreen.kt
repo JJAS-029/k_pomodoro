@@ -1,6 +1,8 @@
 package com.jjas.labpomodoro.ui.stats
 
 import android.Manifest
+import android.content.res.Resources
+import android.text.format.DateFormat
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -39,10 +41,15 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.jjas.labpomodoro.R
 import com.jjas.labpomodoro.ads.AdBanner
 import com.jjas.labpomodoro.ui.medals.MedalDialog
 import com.jjas.labpomodoro.ui.medals.MedalGrid
@@ -55,18 +62,24 @@ import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
 
-private val SPANISH: Locale = Locale.forLanguageTag("es")
-
 /** Tiempo legible: "25 min", "1 h 15 min", "3 h". */
-fun formatFocus(seconds: Long): String {
+fun formatFocus(seconds: Long, resources: Resources): String {
     val minutes = seconds / 60
     val h = minutes / 60
     val m = minutes % 60
     return when {
-        h == 0L -> "$m min"
-        m == 0L -> "$h h"
-        else -> "$h h $m min"
+        h == 0L -> resources.getString(R.string.prog_focus_minutes, m)
+        m == 0L -> resources.getString(R.string.prog_focus_hours, h)
+        else -> resources.getString(R.string.prog_focus_hours_minutes, h, m)
     }
+}
+
+/** [formatFocus] con los recursos de la pantalla actual. */
+@Composable
+fun formatFocus(seconds: Long): String {
+    // Se lee la configuración para que cambie con el idioma
+    LocalConfiguration.current
+    return formatFocus(seconds, LocalResources.current)
 }
 
 @Composable
@@ -85,12 +98,12 @@ fun StatsScreen(onBack: () -> Unit, onOpenPro: () -> Unit, viewModel: StatsViewM
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        "Progreso",
+                        stringResource(R.string.prog_title),
                         style = MaterialTheme.typography.headlineMedium,
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.weight(1f),
                     )
-                    TextButton(onClick = onBack) { Text("Listo") }
+                    TextButton(onClick = onBack) { Text(stringResource(R.string.prog_done)) }
                 }
                 Spacer(Modifier.height(12.dp))
                 RangeSelector(range, viewModel::setRange)
@@ -106,14 +119,14 @@ fun StatsScreen(onBack: () -> Unit, onOpenPro: () -> Unit, viewModel: StatsViewM
                     if (current.stats.isEmpty) {
                         Spacer(Modifier.height(24.dp))
                         Text(
-                            "Aún no hay sesiones en este periodo. Completa un pomodoro y aquí verás tus patrones.",
+                            stringResource(R.string.prog_empty_period),
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     } else {
                         Charts(current.stats)
                     }
-                    Section("Dónde te concentras")
+                    Section(stringResource(R.string.prog_places_section))
                     Places(
                         ui = current.places,
                         onOpenPro = onOpenPro,
@@ -137,7 +150,7 @@ private fun RangeSelector(range: StatsRange, onChange: (StatsRange) -> Unit) {
                 selected = r == range,
                 onClick = { onChange(r) },
                 shape = SegmentedButtonDefaults.itemShape(i, StatsRange.entries.size),
-            ) { Text(r.label) }
+            ) { Text(stringResource(r.labelRes)) }
         }
     }
 }
@@ -145,18 +158,22 @@ private fun RangeSelector(range: StatsRange, onChange: (StatsRange) -> Unit) {
 @Composable
 private fun Summary(stats: FocusStats, streak: Int) {
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        Tile(formatFocus(stats.workSeconds), "de enfoque", Modifier.weight(1f))
-        Tile(stats.completed.toString(), "pomodoros", Modifier.weight(1f))
+        Tile(formatFocus(stats.workSeconds), stringResource(R.string.prog_tile_focus), Modifier.weight(1f))
+        Tile(stats.completed.toString(), stringResource(R.string.prog_tile_pomodoros), Modifier.weight(1f))
     }
     Spacer(Modifier.height(8.dp))
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        Tile(stats.completionRate?.let { "$it %" } ?: "—", "completados sin saltar", Modifier.weight(1f))
-        Tile("$streak ${if (streak == 1) "día" else "días"}", "de racha", Modifier.weight(1f))
+        Tile(
+            stats.completionRate?.let { stringResource(R.string.prog_percent, it) } ?: "—",
+            stringResource(R.string.prog_tile_completion),
+            Modifier.weight(1f),
+        )
+        Tile(pluralStringResource(R.plurals.prog_streak_days, streak, streak), stringResource(R.string.prog_tile_streak), Modifier.weight(1f))
     }
     if (stats.activeDays > 0) {
         Spacer(Modifier.height(8.dp))
         Text(
-            "En promedio, ${formatFocus(stats.averagePerActiveDaySeconds)} los días que te concentras.",
+            stringResource(R.string.prog_average, formatFocus(stats.averagePerActiveDaySeconds)),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -166,7 +183,10 @@ private fun Summary(stats: FocusStats, streak: Int) {
 @Composable
 private fun Medals(medals: List<MedalProgress>) {
     var selected by remember { mutableStateOf<MedalProgress?>(null) }
-    Section("Medallas", "${medals.count { it.earned }} de ${medals.size} · Toca una para ver cómo ganarla")
+    Section(
+        stringResource(R.string.prog_medals),
+        stringResource(R.string.prog_medals_subtitle, medals.count { it.earned }, medals.size),
+    )
     MedalGrid(medals, onSelect = { selected = it })
     selected?.let { chosen ->
         // Se busca de nuevo para que el progreso se actualice si la ventana sigue abierta
@@ -194,20 +214,29 @@ private fun Section(title: String, subtitle: String? = null) {
     Spacer(Modifier.height(8.dp))
 }
 
-private val DAY = DateTimeFormatter.ofPattern("EEE d 'de' MMM", SPANISH)
-private val MONTH = DateTimeFormatter.ofPattern("MMMM yyyy", SPANISH)
-
 @Composable
 private fun Charts(stats: FocusStats) {
+    val resources = LocalResources.current
+    val locale: Locale = LocalConfiguration.current.locales[0]
+    // Patrones según el idioma: "mar, 5 oct" en español, "Tue, Oct 5" en inglés
+    val day = remember(locale) { DateTimeFormatter.ofPattern(DateFormat.getBestDateTimePattern(locale, "EEEdMMM"), locale) }
+    val month = remember(locale) { DateTimeFormatter.ofPattern(DateFormat.getBestDateTimePattern(locale, "MMMMyyyy"), locale) }
+    fun value(label: String, seconds: Long) =
+        resources.getString(R.string.prog_bar_value, label.replaceFirstChar { it.uppercase(locale) }, formatFocus(seconds, resources))
+    fun hourRange(hour: Int) = resources.getString(R.string.prog_hour_range, hour, (hour + 1) % 24)
+
     val timeline = stats.timeline
     val monthly = stats.range == StatsRange.ALL
-    Section(if (monthly) "Por mes" else "Por día", "Toca una barra para ver su valor")
+    Section(
+        stringResource(if (monthly) R.string.prog_by_month else R.string.prog_by_day),
+        stringResource(R.string.prog_tap_bar),
+    )
     BarChart(
         values = timeline.map { it.seconds },
         labels = timeline.mapIndexed { i, b ->
             when {
-                monthly -> b.start.month.getDisplayName(TextStyle.NARROW, SPANISH).uppercase()
-                timeline.size <= 7 -> b.start.dayOfWeek.getDisplayName(TextStyle.NARROW, SPANISH).uppercase()
+                monthly -> b.start.month.getDisplayName(TextStyle.NARROW, locale).uppercase(locale)
+                timeline.size <= 7 -> b.start.dayOfWeek.getDisplayName(TextStyle.NARROW, locale).uppercase(locale)
                 // En 30 días, una etiqueta por semana
                 (timeline.size - 1 - i) % 7 == 0 -> b.start.dayOfMonth.toString()
                 else -> ""
@@ -215,29 +244,28 @@ private fun Charts(stats: FocusStats) {
         },
         describe = { i ->
             val b = timeline[i]
-            val date = if (monthly) MONTH.format(b.start) else DAY.format(b.start)
-            "${date.replaceFirstChar { it.uppercase() }}: ${formatFocus(b.seconds)}"
+            value(if (monthly) month.format(b.start) else day.format(b.start), b.seconds)
         },
     )
 
     Section(
-        "Qué días te concentras más",
-        stats.bestWeekday?.let { "Tu mejor día: ${it.getDisplayName(TextStyle.FULL, SPANISH)}" },
+        stringResource(R.string.prog_weekdays_title),
+        stats.bestWeekday?.let { stringResource(R.string.prog_best_day, it.getDisplayName(TextStyle.FULL, locale)) },
     )
     BarChart(
         values = stats.byWeekday,
-        labels = DayOfWeek.entries.map { it.getDisplayName(TextStyle.NARROW, SPANISH).uppercase() },
-        describe = { i -> "${DayOfWeek.of(i + 1).getDisplayName(TextStyle.FULL, SPANISH).replaceFirstChar { it.uppercase() }}: ${formatFocus(stats.byWeekday[i])}" },
+        labels = DayOfWeek.entries.map { it.getDisplayName(TextStyle.NARROW, locale).uppercase(locale) },
+        describe = { i -> value(DayOfWeek.of(i + 1).getDisplayName(TextStyle.FULL, locale), stats.byWeekday[i]) },
     )
 
     Section(
-        "A qué hora rindes más",
-        stats.bestHour?.let { "Tu mejor hora: de $it:00 a ${(it + 1) % 24}:00" },
+        stringResource(R.string.prog_hours_title),
+        stats.bestHour?.let { stringResource(R.string.prog_best_hour, it, (it + 1) % 24) },
     )
     BarChart(
         values = stats.byHour,
-        labels = (0..23).map { if (it % 6 == 0) "$it h" else "" },
-        describe = { i -> "De $i:00 a ${(i + 1) % 24}:00: ${formatFocus(stats.byHour[i])}" },
+        labels = (0..23).map { if (it % 6 == 0) resources.getString(R.string.prog_hour_axis, it) else "" },
+        describe = { i -> value(hourRange(i), stats.byHour[i]) },
     )
 }
 
@@ -252,38 +280,37 @@ private fun Places(
     val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         if (granted) onEnable()
     }
-    val explain = "Al iniciar un plan se guarda tu ubicación aproximada, solo en el teléfono, para ver en qué " +
-        "lugares rindes más. Nunca se sube a internet."
+    val explain = stringResource(R.string.prog_places_explain)
     when (ui) {
         PlacesUi.NotPro -> {
             Text(explain, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(Modifier.height(8.dp))
-            FilledTonalButton(onClick = onOpenPro) { Text("Disponible en Pro") }
+            FilledTonalButton(onClick = onOpenPro) { Text(stringResource(R.string.prog_places_pro)) }
         }
         PlacesUi.Disabled -> {
             Text(explain, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(Modifier.height(8.dp))
             FilledTonalButton(onClick = { permission.launch(Manifest.permission.ACCESS_COARSE_LOCATION) }) {
-                Text("Activar lugares")
+                Text(stringResource(R.string.prog_places_enable))
             }
         }
         is PlacesUi.Enabled -> {
             if (ui.places.isEmpty()) {
                 Text(
-                    "Inicia un plan y aquí aparecerá tu primer lugar.",
+                    stringResource(R.string.prog_places_empty),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             } else {
                 Text(
-                    "Toca un lugar para ponerle nombre.",
+                    stringResource(R.string.prog_places_tap),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 val max = ui.places.maxOf { it.workSeconds }.coerceAtLeast(1)
                 ui.places.forEach { PlaceRow(it, max, onRename) }
             }
-            TextButton(onClick = onDisable) { Text("Dejar de guardar lugares") }
+            TextButton(onClick = onDisable) { Text(stringResource(R.string.prog_places_disable)) }
         }
     }
 }
@@ -309,7 +336,7 @@ private fun PlaceRow(place: PlaceTotal, maxSeconds: Long, onRename: (Long, Strin
         )
         if (total > 0) {
             Text(
-                "${place.completed * 100 / total} % de tus pomodoros completados aquí · $total en total",
+                stringResource(R.string.prog_place_stats, place.completed * 100 / total, total),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -323,16 +350,16 @@ private fun PlaceRow(place: PlaceTotal, maxSeconds: Long, onRename: (Long, Strin
                 TextButton(onClick = {
                     onRename(place.placeId, name)
                     editing = false
-                }) { Text("Guardar") }
+                }) { Text(stringResource(R.string.prog_save)) }
             },
-            dismissButton = { TextButton(onClick = { editing = false }) { Text("Cancelar") } },
-            title = { Text("Nombre del lugar") },
+            dismissButton = { TextButton(onClick = { editing = false }) { Text(stringResource(R.string.prog_cancel)) } },
+            title = { Text(stringResource(R.string.prog_place_name)) },
             text = {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it.take(30) },
                     singleLine = true,
-                    placeholder = { Text("Casa, Oficina, Biblioteca…", textAlign = TextAlign.Start) },
+                    placeholder = { Text(stringResource(R.string.prog_place_hint), textAlign = TextAlign.Start) },
                 )
             },
         )

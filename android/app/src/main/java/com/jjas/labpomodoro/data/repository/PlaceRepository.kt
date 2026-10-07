@@ -1,9 +1,12 @@
 package com.jjas.labpomodoro.data.repository
 
+import android.content.Context
 import android.location.Location
+import com.jjas.labpomodoro.R
 import com.jjas.labpomodoro.data.local.dao.PlaceDao
 import com.jjas.labpomodoro.data.local.entity.PlaceEntity
 import com.jjas.labpomodoro.data.local.entity.PlaceTotal
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import java.time.Clock
 import java.time.LocalDate
@@ -15,6 +18,7 @@ import javax.inject.Singleton
 class PlaceRepository @Inject constructor(
     private val placeDao: PlaceDao,
     private val clock: Clock,
+    @ApplicationContext private val context: Context,
 ) {
 
     /** Enfoque por lugar en los últimos [days] días (todo el historial si es null). */
@@ -23,7 +27,7 @@ class PlaceRepository @Inject constructor(
         return placeDao.observeTotals(from)
     }
 
-    suspend fun rename(id: Long, name: String) = placeDao.rename(id, name.trim().ifEmpty { "Sin nombre" })
+    suspend fun rename(id: Long, name: String) = placeDao.rename(id, name.trim().ifEmpty { context.getString(R.string.prog_place_unnamed) })
 
     suspend fun tagSession(startedAtMillis: Long, placeId: Long) = placeDao.tagSession(startedAtMillis, placeId)
 
@@ -39,7 +43,7 @@ class PlaceRepository @Inject constructor(
         }
         return placeDao.insert(
             PlaceEntity(
-                name = suggestedName?.takeIf { it.isNotBlank() } ?: "Lugar ${places.size + 1}",
+                name = suggestedName?.takeIf { it.isNotBlank() } ?: context.getString(R.string.prog_place_default, places.size + 1),
                 latitude = latitude,
                 longitude = longitude,
                 createdAtMillis = clock.millis(),

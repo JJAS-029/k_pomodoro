@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -108,12 +109,12 @@ fun GuideScreen(onDone: () -> Unit, viewModel: GuideViewModel = hiltViewModel())
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    "Cómo funciona",
+                    stringResource(R.string.prog_guide_title),
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.weight(1f),
                 )
-                TextButton(onClick = finish) { Text("Saltar") }
+                TextButton(onClick = finish) { Text(stringResource(R.string.prog_guide_skip)) }
             }
 
             HorizontalPager(state = pager, modifier = Modifier.weight(1f)) { page ->
@@ -142,7 +143,7 @@ fun GuideScreen(onDone: () -> Unit, viewModel: GuideViewModel = hiltViewModel())
                 }
                 val last = pager.currentPage == pages.lastIndex
                 Button(onClick = { if (last) finish() else scope.launch { pager.animateScrollToPage(pager.currentPage + 1) } }) {
-                    Text(if (last) "Empezar" else "Siguiente")
+                    Text(stringResource(if (last) R.string.prog_guide_start else R.string.prog_guide_next))
                 }
             }
         }
@@ -186,7 +187,7 @@ private fun LegendIcon(icon: Int, tint: Color) {
 
 @Composable
 private fun LabPage() {
-    PageTitle("Tu laboratorio de enfoque")
+    PageTitle(stringResource(R.string.prog_guide_lab_title))
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -195,7 +196,7 @@ private fun LabPage() {
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             VesselView(VesselShape.ERLENMEYER, 0.6f, WorkColor, Color.Transparent, LiquidEffect.VAPOR, animate = true, modifier = Modifier.weight(1f).width(130.dp))
-            Text("Trabajo", color = WorkColor, style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.prog_guide_work), color = WorkColor, style = MaterialTheme.typography.titleMedium)
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             VesselView(
@@ -203,19 +204,16 @@ private fun LabPage() {
                 LiquidPalette.bubble(SessionType.SHORT_BREAK, SEED, 1), LiquidEffect.BUBBLES, animate = true,
                 modifier = Modifier.weight(1f).width(130.dp),
             )
-            Text("Descanso", color = ShortColor, style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.prog_guide_break), color = ShortColor, style = MaterialTheme.typography.titleMedium)
         }
     }
     Spacer(Modifier.height(20.dp))
-    Body(
-        "Mientras trabajas, el líquido se evapora poco a poco. En el descanso, el recipiente se vuelve a llenar.\n\n" +
-            "Cada sesión del plan usa un recipiente y un color distintos."
-    )
+    Body(stringResource(R.string.prog_guide_lab_body))
 }
 
 @Composable
 private fun SymbolsPage() {
-    PageTitle("Qué estás haciendo y qué sigue")
+    PageTitle(stringResource(R.string.prog_guide_symbols_title))
     SessionIndicator(
         current = SessionType.WORK,
         currentColor = WorkColor,
@@ -227,20 +225,20 @@ private fun SymbolsPage() {
             PlanDot(DotState.PENDING, WorkColor, cycleEnd = true),
             PlanDot(DotState.PENDING, WorkColor, cycleEnd = false),
         ),
-        description = "Ejemplo del indicador de sesión",
+        description = stringResource(R.string.prog_guide_indicator_desc),
     )
     Spacer(Modifier.height(20.dp))
-    LegendRow({ LegendIcon(SessionType.WORK.icon(), WorkColor) }, "Trabajo (pomodoro)")
-    LegendRow({ LegendIcon(SessionType.SHORT_BREAK.icon(), ShortColor) }, "Descanso corto")
-    LegendRow({ LegendIcon(SessionType.LONG_BREAK.icon(), LongColor) }, "Descanso largo")
-    LegendRow({ LegendIcon(R.drawable.ic_check, MaterialTheme.colorScheme.primary) }, "Fin del plan")
-    LegendRow({ Text("5′", style = MaterialTheme.typography.titleMedium) }, "Minutos de lo que sigue")
+    LegendRow({ LegendIcon(SessionType.WORK.icon(), WorkColor) }, stringResource(R.string.prog_guide_legend_work))
+    LegendRow({ LegendIcon(SessionType.SHORT_BREAK.icon(), ShortColor) }, stringResource(R.string.prog_guide_legend_short_break))
+    LegendRow({ LegendIcon(SessionType.LONG_BREAK.icon(), LongColor) }, stringResource(R.string.prog_guide_legend_long_break))
+    LegendRow({ LegendIcon(R.drawable.ic_check, MaterialTheme.colorScheme.primary) }, stringResource(R.string.prog_guide_legend_plan_end))
+    LegendRow({ Text("5′", style = MaterialTheme.typography.titleMedium) }, stringResource(R.string.prog_guide_legend_minutes))
     Spacer(Modifier.height(8.dp))
-    LegendRow({ PlanDotView(PlanDot(DotState.DONE, WorkColor, false), 12.dp) }, "Pomodoro terminado")
-    LegendRow({ PlanDotView(PlanDot(DotState.CURRENT, WorkColor, false), 12.dp) }, "Pomodoro en curso")
-    LegendRow({ PlanDotView(PlanDot(DotState.PENDING, WorkColor, false), 12.dp) }, "Pomodoro pendiente")
-    LegendRow({ PlanDotView(PlanDot(DotState.SKIPPED, WorkColor, false), 12.dp) }, "Pomodoro saltado")
-    Body("Un espacio entre puntos marca un descanso largo.")
+    LegendRow({ PlanDotView(PlanDot(DotState.DONE, WorkColor, false), 12.dp) }, stringResource(R.string.prog_guide_legend_done))
+    LegendRow({ PlanDotView(PlanDot(DotState.CURRENT, WorkColor, false), 12.dp) }, stringResource(R.string.prog_guide_legend_current))
+    LegendRow({ PlanDotView(PlanDot(DotState.PENDING, WorkColor, false), 12.dp) }, stringResource(R.string.prog_guide_legend_pending))
+    LegendRow({ PlanDotView(PlanDot(DotState.SKIPPED, WorkColor, false), 12.dp) }, stringResource(R.string.prog_guide_legend_skipped))
+    Body(stringResource(R.string.prog_guide_symbols_gap))
 }
 
 @Composable
@@ -264,25 +262,25 @@ private fun ControlButton(icon: Int, highlighted: Boolean = false) {
 
 @Composable
 private fun ControlsPage() {
-    PageTitle("Controles")
-    LegendRow({ ControlButton(R.drawable.ic_pause, highlighted = true) }, "Pausar o continuar")
-    LegendRow({ ControlButton(R.drawable.ic_skip) }, "Saltar a la siguiente sesión (no cuenta como completada)")
-    LegendRow({ ControlButton(R.drawable.ic_stop) }, "Detener el plan")
-    LegendRow({ ControlButton(R.drawable.ic_chevron_up) }, "Abrir el menú")
+    PageTitle(stringResource(R.string.prog_guide_controls_title))
+    LegendRow({ ControlButton(R.drawable.ic_pause, highlighted = true) }, stringResource(R.string.prog_guide_pause))
+    LegendRow({ ControlButton(R.drawable.ic_skip) }, stringResource(R.string.prog_guide_skip_session))
+    LegendRow({ ControlButton(R.drawable.ic_stop) }, stringResource(R.string.prog_guide_stop))
+    LegendRow({ ControlButton(R.drawable.ic_chevron_up) }, stringResource(R.string.prog_guide_open_menu))
     Spacer(Modifier.height(12.dp))
-    Text("En el menú", style = MaterialTheme.typography.titleMedium)
+    Text(stringResource(R.string.prog_guide_in_menu), style = MaterialTheme.typography.titleMedium)
     Spacer(Modifier.height(4.dp))
-    LegendRow({ LegendIcon(R.drawable.ic_tune, MaterialTheme.colorScheme.onSurface) }, "Config: horas, duraciones y avisos")
-    LegendRow({ LegendIcon(R.drawable.ic_star, MaterialTheme.colorScheme.onSurface) }, "Logros: tabla periódica, sintetizador y liga")
-    LegendRow({ LegendIcon(R.drawable.ic_chart, MaterialTheme.colorScheme.onSurface) }, "Progreso: estadísticas y medallas")
-    LegendRow({ LegendIcon(R.drawable.ic_moon, MaterialTheme.colorScheme.onSurface) }, "Modo ambiente al instante (Pro)")
-    LegendRow({ LegendIcon(R.drawable.ic_help, MaterialTheme.colorScheme.onSurface) }, "Volver a ver esta guía")
-    Body("Los mismos controles aparecen en la notificación.")
+    LegendRow({ LegendIcon(R.drawable.ic_tune, MaterialTheme.colorScheme.onSurface) }, stringResource(R.string.prog_guide_menu_settings))
+    LegendRow({ LegendIcon(R.drawable.ic_star, MaterialTheme.colorScheme.onSurface) }, stringResource(R.string.prog_guide_menu_achievements))
+    LegendRow({ LegendIcon(R.drawable.ic_chart, MaterialTheme.colorScheme.onSurface) }, stringResource(R.string.prog_guide_menu_progress))
+    LegendRow({ LegendIcon(R.drawable.ic_moon, MaterialTheme.colorScheme.onSurface) }, stringResource(R.string.prog_guide_menu_ambient))
+    LegendRow({ LegendIcon(R.drawable.ic_help, MaterialTheme.colorScheme.onSurface) }, stringResource(R.string.prog_guide_menu_help))
+    Body(stringResource(R.string.prog_guide_controls_notification))
 }
 
 @Composable
 private fun ShelfAndAmbientPage() {
-    PageTitle("Repisa, modo ambiente y ventana flotante")
+    PageTitle(stringResource(R.string.prog_guide_shelf_title))
     Row(
         modifier = Modifier.height(64.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -309,15 +307,15 @@ private fun ShelfAndAmbientPage() {
         }
     }
     Spacer(Modifier.height(12.dp))
-    Body("La repisa guarda la cristalería de todo tu plan: cada recipiente se llena al completar su sesión. Los punteados son sesiones saltadas.")
+    Body(stringResource(R.string.prog_guide_shelf_body))
     Spacer(Modifier.height(24.dp))
-    LegendRow({ LegendIcon(R.drawable.ic_moon, MaterialTheme.colorScheme.secondary) }, "Modo ambiente (Pro): si no tocas la pantalla (o con 🌙 en el menú), quedan solo el recipiente, el tiempo y lo que sigue, atenuados. Tócala para volver.")
-    LegendRow({ LegendIcon(R.drawable.ic_stat_timer, MaterialTheme.colorScheme.tertiary) }, "Si sales de la app, el timer sigue en una ventana flotante y en la notificación.")
+    LegendRow({ LegendIcon(R.drawable.ic_moon, MaterialTheme.colorScheme.secondary) }, stringResource(R.string.prog_guide_ambient))
+    LegendRow({ LegendIcon(R.drawable.ic_stat_timer, MaterialTheme.colorScheme.tertiary) }, stringResource(R.string.prog_guide_floating))
 }
 
 @Composable
 private fun ElementsPage() {
-    PageTitle("Colecciona la tabla periódica")
+    PageTitle(stringResource(R.string.prog_guide_elements_title))
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
         ElementTile(PeriodicTable[1], discovered = true, size = 48.dp)
         Text("+", style = MaterialTheme.typography.titleLarge)
@@ -326,18 +324,18 @@ private fun ElementsPage() {
         ElementTile(PeriodicTable[93], discovered = true, size = 48.dp)
     }
     Spacer(Modifier.height(16.dp))
-    Body("Tu tiempo de enfoque se convierte en elementos: cada 25 min completados ganas uno básico y cada 60 min uno raro. Saltar una sesión no cuenta.")
+    Body(stringResource(R.string.prog_guide_elements_body1))
     Spacer(Modifier.height(12.dp))
-    Body("En ★ Logros › Sintetizador fusiona dos elementos: sus números atómicos se suman (H 1 + U 92 → Np 93). Es la única forma de conseguir los sintéticos.")
+    Body(stringResource(R.string.prog_guide_elements_body2))
     Spacer(Modifier.height(12.dp))
-    Body("Tus elementos llenan los recipientes de trabajo y se comportan como en la realidad: el sodio burbujea, el neón brilla, el mercurio refleja como metal. Toca uno en la tabla para saber qué es y para qué sirve.")
+    Body(stringResource(R.string.prog_guide_elements_body3))
     Spacer(Modifier.height(12.dp))
-    LegendRow({ LegendIcon(R.drawable.ic_headphones, MaterialTheme.colorScheme.secondary) }, "Sonido (Pro): ruido blanco, rosa o café, lluvia u olas mientras trabajas.")
+    LegendRow({ LegendIcon(R.drawable.ic_headphones, MaterialTheme.colorScheme.secondary) }, stringResource(R.string.prog_guide_sound))
 }
 
 @Composable
 private fun ProgressPage() {
-    PageTitle("Maestría, medallas y ligas")
+    PageTitle(stringResource(R.string.prog_guide_progress_title))
     // La misma pieza con cada nivel de maestría
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         listOf(Mastery.DISCOVERED, Mastery.BRONZE, Mastery.SILVER, Mastery.GOLD).forEach {
@@ -345,29 +343,20 @@ private fun ProgressPage() {
         }
     }
     Spacer(Modifier.height(12.dp))
-    Body(
-        "Los repetidos no se desperdician: cada vez que obtienes un elemento sube su maestría, de bronce a plata " +
-            "y a oro (5, 10 y 15 veces; los sintéticos, 2, 4 y 6). Si toda la tabla llega a un nivel, lo celebramos."
-    )
+    Body(stringResource(R.string.prog_guide_mastery_body))
     Spacer(Modifier.height(20.dp))
     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         listOf(Medal.STREAK_3, Medal.MARATHON, Medal.HOURS_100).forEach { MedalBadge(MedalProgress(it, it.target), 48.dp) }
         MedalBadge(MedalProgress(Medal.STREAK_30, 12), 48.dp)
     }
     Spacer(Modifier.height(12.dp))
-    Body(
-        "En Progreso están tus medallas: rachas, horas de enfoque, madrugadas, fusiones y más. Las que te faltan " +
-            "se ven apagadas, con un anillo que muestra cuánto llevas."
-    )
+    Body(stringResource(R.string.prog_guide_medals_body))
     Spacer(Modifier.height(20.dp))
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         listOf(League.HYDROGEN, League.NEON, League.GOLD, League.PLATINUM).forEach { LeagueChip(it) }
     }
     Spacer(Modifier.height(12.dp))
-    Body(
-        "En ★ Logros › Liga compites cada semana con hasta 30 personas: tus puntos son tus minutos de enfoque. " +
-            "Los primeros suben de liga y los últimos bajan, del Hidrógeno al Platino. Necesitas entrar con tu cuenta."
-    )
+    Body(stringResource(R.string.prog_guide_league_body))
 }
 
 @Composable
@@ -387,17 +376,11 @@ private fun LeagueChip(league: League) {
 private fun WelcomePage() {
     KoalaAvatar()
     Spacer(Modifier.height(20.dp))
-    PageTitle("¡Hola! Te damos la bienvenida a tu laboratorio")
-    Body(
-        "Aquí cada sesión de enfoque es un experimento. Mientras trabajas, el líquido se evapora; " +
-            "al descansar, el recipiente se vuelve a llenar."
-    )
+    PageTitle(stringResource(R.string.prog_guide_welcome_title))
+    Body(stringResource(R.string.prog_guide_welcome_body1))
     Spacer(Modifier.height(12.dp))
-    Body(
-        "Con tu tiempo de enfoque ganas elementos de la tabla periódica, y con el tiempo descubrirás " +
-            "a qué hora y qué días rindes más."
-    )
+    Body(stringResource(R.string.prog_guide_welcome_body2))
     Spacer(Modifier.height(12.dp))
-    Body("Te explico cómo funciona en unos pasos. Si ya lo conoces, toca Saltar.")
+    Body(stringResource(R.string.prog_guide_welcome_body3))
 }
 

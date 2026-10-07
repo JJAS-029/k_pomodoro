@@ -1,14 +1,17 @@
 package com.jjas.labpomodoro.domain.model
 
+import androidx.annotation.StringRes
+import com.jjas.labpomodoro.R
+
 /**
  * Sonidos de fondo para concentrarse. Todos se generan en el teléfono (sin archivos de audio):
  * ruido con distintos "colores" y dos ambientes hechos a partir de ruido filtrado.
  */
-enum class FocusSound(val label: String, val description: String) {
-    OFF("Sin sonido", ""),
-    WHITE("Ruido blanco", "Parejo en todas las frecuencias, como estática: tapa bien las voces."),
-    PINK("Ruido rosa", "Más suave en los agudos, como lluvia constante."),
-    BROWN("Ruido café", "Grave y profundo, como una cascada lejana o el motor de un avión."),
-    RAIN("Lluvia", "Lluvia sobre una ventana, con gotas que caen al azar."),
-    WAVES("Olas", "Oleaje que sube y baja lento, para respirar al ritmo."),
+enum class FocusSound(@StringRes val labelRes: Int, @StringRes val descriptionRes: Int?) {
+    OFF(R.string.set_sound_off, null),
+    WHITE(R.string.set_sound_white, R.string.set_sound_white_desc),
+    PINK(R.string.set_sound_pink, R.string.set_sound_pink_desc),
+    BROWN(R.string.set_sound_brown, R.string.set_sound_brown_desc),
+    RAIN(R.string.set_sound_rain, R.string.set_sound_rain_desc),
+    WAVES(R.string.set_sound_waves, R.string.set_sound_waves_desc),
 }

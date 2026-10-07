@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Elementos, laboratorio (tabla periódica y sintetizador) y diálogos de colección -->
+<resources>
+    <!-- Rareza -->
+    <string name="el_rarity_basic">Basic</string>
+    <string name="el_rarity_rare">Rare</string>
+    <string name="el_rarity_synthetic">Synthetic</string>
+
+    <!-- Familias de la tabla -->
+    <string name="el_category_alkali_metal">Alkali metal</string>
+    <string name="el_category_alkaline_earth_metal">Alkaline earth metal</string>
+    <string name="el_category_transition_metal">Transition metal</string>
+    <string name="el_category_post_transition_metal">Other metal</string>
+    <string name="el_category_metalloid">Metalloid</string>
+    <string name="el_category_nonmetal">Nonmetal</string>
+    <string name="el_category_halogen">Halogen</string>
+    <string name="el_category_noble_gas">Noble gas</string>
+    <string name="el_category_lanthanide">Lanthanide</string>
+    <string name="el_category_actinide">Actinide</string>
+    <string name="el_category_unknown">Unknown properties</string>
+
+    <!-- Comportamiento en el recipiente -->
+    <string name="el_behavior_solution">Tints the liquid with the color of its dissolved salts.</string>
+    <string name="el_behavior_reactive">Reacts with water: bubbles hard and throws sparks the color of its flame.</string>
+    <string name="el_behavior_flame">Throws sparks the color it burns in the flame test.</string>
+    <string name="el_behavior_glow">Glows with its own light, like a neon sign, phosphorus or a lit filament.</string>
+    <string name="el_behavior_metallic">Looks like molten metal, with reflections gliding across the surface.</string>
+    <string name="el_behavior_colored_vapor">Evaporates into a vapor of its own color, like the halogens.</string>
+    <string name="el_behavior_precipitate">Doesn\'t dissolve: forms crystals or gems that sink and settle at the bottom.</string>
+    <string name="el_behavior_cryo">Liquefied at ultra-low temperatures: it boils and spills over with cold mist.</string>
+    <string name="el_behavior_radioactive">It\'s radioactive: pulses with its own glow and gives off flashes.</string>
+
+    <!-- Casilla de la tabla (accesibilidad) -->
+    <string name="el_tile_undiscovered">%1$s, not discovered</string>
+    <string name="el_tile_quantity">%1$s, %2$d</string>
+
+    <!-- Pantalla de logros -->
+    <string name="el_lab_title">Achievements</string>
+    <string name="el_lab_share_progress">Share my progress</string>
+    <string name="el_lab_done">Done</string>
+    <string name="el_lab_tab_table">Periodic table</string>
+    <string name="el_lab_tab_synthesizer">Synthesizer</string>
+    <string name="el_lab_tab_league">League</string>
+    <string name="el_lab_fusion_failed">Not enough ingredients anymore</string>
+    <string name="el_stat_elements">elements</string>
+    <plurals name="el_stat_streak_days">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
+    <string name="el_stat_streak_label">streak · best %1$d</string>
+    <string name="el_stat_focus_label">of focus</string>
+    <string name="el_reward_next_basic">Next basic</string>
+    <string name="el_reward_next_rare">Next rare</string>
+    <string name="el_reward_minutes">%1$d / %2$d min</string>
+
+    <!-- Ficha del elemento -->
+    <string name="el_detail_subtitle">Atomic number %1$d · %2$s</string>
+    <string name="el_detail_uses_title">What it\'s used for</string>
+    <string name="el_detail_in_vessels">In your vessels</string>
+    <string name="el_detail_color_origin">Its color: %1$s.</string>
+    <string name="el_detail_remove_vessels">Remove from my vessels (back to mixed)</string>
+    <string name="el_detail_use_vessels">Use in all my vessels</string>
+    <string name="el_detail_not_discovered">You haven\'t discovered it yet.</string>
+    <string name="el_detail_used_up">You discovered it, but used it all up in the synthesizer.</string>
+    <plurals name="el_detail_owned">
+        <item quantity="one">You have %d.</item>
+        <item quantity="other">You have %d.</item>
+    </plurals>
+    <string name="el_detail_first_found">First found: %1$s</string>
+    <string name="el_detail_source_basic">Earned as a reward every 25 min of focus, or in the synthesizer.</string>
+    <string name="el_detail_source_rare">Earned as a reward every 60 min of focus, or in the synthesizer.</string>
+    <string name="el_detail_source_synthetic">It doesn\'t exist in nature: it can only be made in the synthesizer.</string>
+    <string name="el_detail_synthesize">Make it in the synthesizer</string>
+
+    <!-- Maestría -->
+    <string name="el_mastery_title">Mastery</string>
+    <string name="el_mastery_level_prefix">"Mastery: "</string>
+    <plurals name="el_mastery_obtained">
+        <item quantity="one">Obtained %d time</item>
+        <item quantity="other">Obtained %d times</item>
+    </plurals>
+    <plurals name="el_mastery_left">
+        <item quantity="one">%1$d more to reach %2$s.</item>
+        <item quantity="other">%1$d more to reach %2$s.</item>
+    </plurals>
+    <string name="el_mastery_maxed">Mastered! You reached the highest level.</string>
+
+    <!-- Ficha técnica del descubrimiento -->
+    <string name="el_fact_discovered_in">Discovered in</string>
+    <string name="el_fact_by">By</string>
+    <string name="el_fact_where">Where</string>
+    <string name="el_fact_discovered">Discovered</string>
+    <string name="el_fact_known_since">Known since %1$s</string>
+    <string name="el_era_antiquity">Antiquity</string>
+    <string name="el_fact_in_table">In the table</string>
+    <string name="el_fact_group">Group %1$d</string>
+    <string name="el_fact_lanthanides">Lanthanides</string>
+    <string name="el_fact_actinides">Actinides</string>
+    <string name="el_fact_position">%1$s · Period %2$d</string>
+
+    <!-- Sintetizador -->
+    <string name="el_synth_intro">Fuse two nuclei and their atomic numbers add up: H (1) + He (2) → Li (3). It uses one unit of each, so your duplicates become raw material.</string>
+    <string name="el_synth_empty">You don\'t have anything to fuse yet. Keep focusing: every 25 min you get a new element.</string>
+    <string name="el_synth_new">New for your table</string>
+    <string name="el_synth_more">To collect more</string>
+    <string name="el_recipes_title">Make %1$s</string>
+    <string name="el_recipes_none">Not enough ingredients anymore.</string>
+    <string name="el_fuse">Fuse</string>
+    <string name="el_fused">You synthesized %1$s!</string>
+
+    <!-- Aviso de descubrimientos -->
+    <string name="el_banner_discovered">You discovered %1$s!</string>
+    <plurals name="el_banner_new_elements">
+        <item quantity="one">%d new element!</item>
+        <item quantity="other">%d new elements!</item>
+    </plurals>
+    <string name="el_banner_close">Close</string>
+    <string name="el_banner_view">View</string>
+
+    <!-- Tabla completa en bronce, plata u oro -->
+    <string name="el_mastery_table_bronze_title">Bronze table!</string>
+    <string name="el_mastery_table_bronze_body1">All 118 elements, five times each. It\'s not luck anymore: it\'s method.</string>
+    <string name="el_mastery_table_bronze_body2">Silver awaits. Every Pomodoro keeps adding up.</string>
+    <string name="el_mastery_table_silver_title">Silver table!</string>
+    <string name="el_mastery_table_silver_body1">Ten times every element. By now your lab has more experience than most.</string>
+    <string name="el_mastery_table_silver_body2">Only gold is left: the level of those who turn consistency into habit.</string>
+    <string name="el_mastery_table_gold_title">Gold table!</string>
+    <string name="el_mastery_table_gold_body1">Fifteen times each of the 118 elements. What alchemists chased for centuries, turning things into gold, you achieved with time and focus.</string>
+    <string name="el_mastery_table_gold_body2">You reached the top of this lab. What you built here, the habit of focusing, is yours now and goes with you into everything you do.</string>
+    <string name="el_mastery_table_gold_body3">Thank you for every Pomodoro.</string>
+    <string name="el_mastery_table_confirm">Let\'s keep going!</string>
+    <string name="el_signature">— JJAS and the koala</string>
+
+    <!-- Tabla periódica completa -->
+    <string name="el_table_complete_title">You completed the periodic table!</string>
+    <string name="el_table_complete_body1">All %1$d elements. Each one came from your focus time: from hours when you chose to concentrate while it was easier to get distracted.</string>
+    <string name="el_table_complete_body2">Mendeleev spent years ordering this table, and generations of scientists devoted their lives to finding every square. You filled it one Pomodoro at a time, and even made the ones that don\'t exist in nature in your synthesizer.</string>
+    <string name="el_table_complete_body3">This isn\'t just a collection: it\'s proof that consistency transforms. Just as these elements make up everything that exists, your hours of focus are shaping the person you want to be.</string>
+    <string name="el_table_complete_body4">Thank you for letting this little lab keep you company. We\'re still here for whatever comes next.</string>
+    <string name="el_table_complete_confirm">Thanks, koala</string>
+</resources>

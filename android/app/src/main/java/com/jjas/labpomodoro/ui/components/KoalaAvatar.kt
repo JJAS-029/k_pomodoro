@@ -9,6 +9,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.jjas.labpomodoro.R
@@ -21,7 +22,7 @@ import com.jjas.labpomodoro.R
 fun KoalaAvatar(modifier: Modifier = Modifier, size: Dp = 120.dp) {
     Image(
         painterResource(R.drawable.koala_mascot),
-        contentDescription = "Koala, la mascota de Lab Pomodoro",
+        contentDescription = stringResource(R.string.main_koala_description),
         contentScale = ContentScale.Crop,
         modifier = modifier
             .size(size)
