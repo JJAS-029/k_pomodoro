@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Fondo del widget con Material You: tonos del fondo de pantalla (Android 12+) -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="@android:color/system_neutral1_900" />
+    <stroke android:width="1dp" android:color="@android:color/system_accent1_600" />
+    <corners android:radius="28dp" />
+</shape>

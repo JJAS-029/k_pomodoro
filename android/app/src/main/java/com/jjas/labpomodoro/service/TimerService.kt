@@ -42,6 +42,8 @@ class TimerService : Service() {
                 if (state is TimerState.Active) {
                     // El cronómetro avanza solo; la barra del plan se refresca cada 30 s mientras corre
                     do {
+                        // Al cruzar el segundo, para que el cronómetro de la notificación vaya parejo con la app
+                        if (!state.isPaused) delay(state.millisToNextSecond(SystemClock.elapsedRealtime()))
                         notifications.notify(
                             notifications.build(state, SystemClock.elapsedRealtime(), System.currentTimeMillis())
                         )

@@ -472,6 +472,8 @@ Se revisaron las tres; ninguna se agregó como dependencia porque nuestro sistem
 |---|---|---|
 | Widget | `widget/TimerWidget.kt`, `res/layout/widget_timer.xml` | `RemoteViews` clásico (no Glance) para usar el **cronómetro del sistema en cuenta regresiva**: el tiempo avanza sin despertar a la app. Recipiente dibujado como imagen con el color de su elemento y el nivel del líquido; "Trabajo · Neón", tiempo, lo que sigue y botones (iniciar/pausar/continuar, saltar, detener) debajo del texto para que quepa en cualquier ancho |
 | Al día | `TimerWidgetSync` | Cambia con el estado del timer y redibuja el recipiente cada 30 s mientras corre; no hace nada si no hay widgets |
+| Material You | `res/drawable-v31/widget_*_dynamic.xml` | Con "Color dinámico" activo (Android 12+), fondo, borde, botones y textos toman los colores del fondo de pantalla (`system_accent1/2`, `system_neutral2`) |
+| Mismo segundo | `TimerState.millisToNextSecond` | El `Chronometer` y el reloj de la notificación truncan los segundos y la app redondea hacia arriba: la base lleva +1 s y se actualizan justo después del cambio de segundo, así widget, notificación y ventana flotante marcan lo mismo |
 | Iniciar | `WidgetActionReceiver` | Arranca el plan sin abrir la app (tocar un widget permite iniciar el servicio en primer plano) |
 | Agregar | Config › Widget | "Agregar a la pantalla de inicio" con `requestPinAppWidget` |
 | Ajustes rápidos | `service/TimerTileService.kt` | Botón de la cortina: sin plan lo inicia (si Android no deja iniciar el servicio desde ahí, abre la app); con plan pausa o continúa. Encendido mientras hay plan, con "Trabajo · 23 min" o "En pausa". Config › Atajos lo agrega con un toque (Android 13+) |

@@ -12,9 +12,11 @@ import android.graphics.Canvas
 import android.graphics.LinearGradient
 import android.graphics.Paint
 import android.graphics.Shader
+import android.os.Build
 import android.os.SystemClock
 import android.view.View
 import android.widget.RemoteViews
+import androidx.annotation.RequiresApi
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asAndroidPath
 import androidx.compose.ui.graphics.lerp
@@ -108,6 +110,8 @@ class TimerWidgetSync @Inject constructor(
         scope.launch {
             combine(engine.state, settings.settings, inventory.items, ::Triple).collectLatest { (state, prefs, items) ->
                 while (true) {
+                    // Al cruzar el segundo, para que el cronómetro del widget vaya parejo con la app
+                    if (state is TimerState.Active && !state.isPaused) delay(state.millisToNextSecond(SystemClock.elapsedRealtime()))
                     push(state, prefs, items)
                     if (state !is TimerState.Active || state.isPaused) break
                     delay(REFRESH_MILLIS)
@@ -149,7 +153,23 @@ class TimerWidgetSync @Inject constructor(
                 startButton(views)
             }
         }
+        // Pro: colores de Material You, igual que la app
+        if (prefs.dynamicColorActive && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) dynamicColors(views)
         return views
+    }
+
+    /** Fondo, borde, botones y textos con los tonos del fondo de pantalla (Android 12+). */
+    @RequiresApi(Build.VERSION_CODES.S)
+    private fun dynamicColors(views: RemoteViews) {
+        views.setInt(R.id.widget_root, "setBackgroundResource", R.drawable.widget_background_dynamic)
+        listOf(R.id.widget_primary, R.id.widget_skip, R.id.widget_stop).forEach {
+            views.setInt(it, "setBackgroundResource", R.drawable.widget_button_dynamic)
+        }
+        val clock = context.getColor(android.R.color.system_accent1_100)
+        views.setTextColor(R.id.widget_chrono, clock)
+        views.setTextColor(R.id.widget_time, clock)
+        views.setTextColor(R.id.widget_label, context.getColor(android.R.color.system_accent2_200))
+        views.setTextColor(R.id.widget_next, context.getColor(android.R.color.system_neutral2_300))
     }
 
     private fun active(views: RemoteViews, state: TimerState.Active, prefs: AppSettings, items: List<InventoryItem>) {
@@ -171,7 +191,9 @@ class TimerWidgetSync @Inject constructor(
         } else {
             views.setViewVisibility(R.id.widget_chrono, View.VISIBLE)
             views.setViewVisibility(R.id.widget_time, View.GONE)
-            views.setChronometer(R.id.widget_chrono, SystemClock.elapsedRealtime() + remaining, null, true)
+            // El cronómetro del sistema redondea hacia abajo y la app hacia arriba: con 1 s de más y
+            // actualizando justo al cruzar el segundo (TimerWidgetSync), marcan exactamente lo mismo
+            views.setChronometer(R.id.widget_chrono, SystemClock.elapsedRealtime() + remaining + ROUND_UP_MILLIS, null, true)
             views.setChronometerCountDown(R.id.widget_chrono, true)
         }
         views.setTextViewText(
@@ -267,6 +289,7 @@ class TimerWidgetSync @Inject constructor(
 
     private companion object {
         const val REFRESH_MILLIS = 30_000L
+        const val ROUND_UP_MILLIS = 1_000L
         const val VESSEL_WIDTH_DP = 64
         const val VESSEL_HEIGHT_DP = 88
         val RestingColor = Color(0xFF39FF14).copy(alpha = 0.8f)

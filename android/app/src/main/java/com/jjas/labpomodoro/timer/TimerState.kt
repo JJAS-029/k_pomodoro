@@ -3,6 +3,9 @@ package com.jjas.labpomodoro.timer
 import com.jjas.labpomodoro.domain.model.PlannedSession
 import java.time.Instant
 
+/** Un poco después del cruce, para no caer justo antes por imprecisión del reloj. */
+private const val SECOND_ALIGN_MARGIN_MILLIS = 20L
+
 sealed interface TimerState {
 
     data object Idle : TimerState
@@ -31,6 +34,13 @@ sealed interface TimerState {
 
         fun remainingMillis(nowElapsed: Long): Long =
             if (isPaused) remainingWhenPausedMillis else (endsAtElapsed - nowElapsed).coerceAtLeast(0)
+
+        /**
+         * Cuánto falta para que el tiempo restante cruce el siguiente segundo entero. Los
+         * cronómetros del sistema (widget, notificación) avanzan cada segundo desde que se dibujan:
+         * si se actualizan justo después del cruce, marcan exactamente lo mismo que la app.
+         */
+        fun millisToNextSecond(nowElapsed: Long): Long = remainingMillis(nowElapsed) % 1000 + SECOND_ALIGN_MARGIN_MILLIS
     }
 
     data class Finished(

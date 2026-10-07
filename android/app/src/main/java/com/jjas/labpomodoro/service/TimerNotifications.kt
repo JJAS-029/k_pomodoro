@@ -70,7 +70,9 @@ class TimerNotifications @Inject constructor(
         } else {
             builder
                 .setContentText(state.next?.let { "Después: ${it.type.label().lowercase()}" } ?: "Última sesión")
-                .setWhen(nowWallMillis + remaining)
+                // Igual que el widget: 1 s de más porque el cronómetro redondea hacia abajo (la
+                // notificación se actualiza justo al cruzar el segundo, en TimerService)
+                .setWhen(nowWallMillis + remaining + 1_000)
                 .setShowWhen(true)
                 .setUsesChronometer(true)
                 .setChronometerCountDown(true)
