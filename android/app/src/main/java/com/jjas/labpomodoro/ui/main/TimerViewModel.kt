@@ -93,6 +93,8 @@ data class TimerScreenState(
     val dynamicColor: Boolean = false,
     /** null mientras carga; false = hay que mostrar la guía la primera vez. */
     val guideSeen: Boolean? = null,
+    /** null mientras carga; false = aún no se pide permitir las alarmas exactas. */
+    val exactAlarmAsked: Boolean? = null,
     /** Pro con el sonido de lluvia elegido: en modo ambiente se ve llover detrás del recipiente. */
     val rainAmbience: Boolean = false,
     /** Si no es null, tras este tiempo sin tocar la pantalla se entra al modo ambiente. */
@@ -206,10 +208,15 @@ class TimerViewModel @Inject constructor(
             isPro = settings.isPro,
             dynamicColor = settings.dynamicColorActive,
             guideSeen = settings.guideSeen,
+            exactAlarmAsked = settings.exactAlarmAsked,
             rainAmbience = settings.isPro && settings.focusSound == FocusSound.RAIN,
             ambientDelayMillis = if (running && settings.ambientActive) settings.ambientDelayMinutes * 60_000L else null,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), TimerScreenState())
+
+    fun markExactAlarmAsked() {
+        viewModelScope.launch { settingsRepository.setExactAlarmAsked() }
+    }
 
     fun start() {
         viewModelScope.launch { engine.start(settingsRepository.settings.first().session) }

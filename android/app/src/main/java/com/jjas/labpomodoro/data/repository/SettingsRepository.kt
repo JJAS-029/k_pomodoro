@@ -60,6 +60,8 @@ class SettingsRepository @Inject constructor(
 
     suspend fun setGuideSeen() = dataStore.edit { it[Keys.GUIDE_SEEN] = true }
 
+    suspend fun setExactAlarmAsked() = dataStore.edit { it[Keys.EXACT_ALARM_ASKED] = true }
+
     suspend fun setVesselElement(atomicNumber: Int) = dataStore.edit { it[Keys.VESSEL_ELEMENT] = atomicNumber }
 
     suspend fun setFocusSound(sound: FocusSound) = dataStore.edit { it[Keys.FOCUS_SOUND] = sound.name }
@@ -87,6 +89,9 @@ class SettingsRepository @Inject constructor(
 
     /** Lo llama la tienda al confirmar o revocar la compra. */
     suspend fun setProPurchased(purchased: Boolean) = dataStore.edit { it[Keys.PRO_PURCHASED] = purchased }
+
+    /** Pro para los revisores de Google Play (con el código de revisión). */
+    suspend fun setProReview() = dataStore.edit { it[Keys.PRO_REVIEW] = true }
 
     /** Ajustes para el respaldo en la nube, por nombre de clave. */
     suspend fun exportForBackup(): Map<String, Any> =
@@ -132,7 +137,9 @@ class SettingsRepository @Inject constructor(
             dynamicColor = this[Keys.DYNAMIC_COLOR] ?: defaults.dynamicColor,
             proPurchased = this[Keys.PRO_PURCHASED] ?: defaults.proPurchased,
             proTesting = BuildConfig.DEBUG && (this[Keys.PRO] ?: defaults.proTesting),
+            proReview = this[Keys.PRO_REVIEW] ?: defaults.proReview,
             guideSeen = this[Keys.GUIDE_SEEN] ?: defaults.guideSeen,
+            exactAlarmAsked = this[Keys.EXACT_ALARM_ASKED] ?: defaults.exactAlarmAsked,
             vesselElement = this[Keys.VESSEL_ELEMENT] ?: defaults.vesselElement,
             focusSound = this[Keys.FOCUS_SOUND]?.let { name -> FocusSound.entries.firstOrNull { it.name == name } } ?: defaults.focusSound,
             focusVolume = this[Keys.FOCUS_VOLUME] ?: defaults.focusVolume,
@@ -149,7 +156,7 @@ class SettingsRepository @Inject constructor(
 
     private companion object {
         /** De cada teléfono: la compra la restaura Google Play y el permiso de ubicación se pide de nuevo. */
-        val NOT_BACKED_UP = setOf("pro_unlocked", "pro_purchased", "places_enabled")
+        val NOT_BACKED_UP = setOf("pro_unlocked", "pro_purchased", "pro_review", "places_enabled")
     }
 
     private object Keys {
@@ -166,7 +173,9 @@ class SettingsRepository @Inject constructor(
         val AMBIENT_DELAY = intPreferencesKey("ambient_delay_minutes")
         val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
         val PRO = booleanPreferencesKey("pro_unlocked")
+        val PRO_REVIEW = booleanPreferencesKey("pro_review")
         val GUIDE_SEEN = booleanPreferencesKey("guide_seen")
+        val EXACT_ALARM_ASKED = booleanPreferencesKey("exact_alarm_asked")
         val PRO_PURCHASED = booleanPreferencesKey("pro_purchased")
         val VESSEL_ELEMENT = intPreferencesKey("vessel_element")
         val FOCUS_SOUND = stringPreferencesKey("focus_sound")

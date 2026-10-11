@@ -393,6 +393,9 @@ Decisiones: Pro con **suscripción (mensual y anual) y pago único**; anuncios *
 | Pieza | Archivo | Notas |
 |---|---|---|
 | Versión de publicación | `app/build.gradle.kts` | R8 (`isMinifyEnabled`, `isShrinkResources`) y firma con la llave de subida de `android/keystore.properties` (fuera de git); sin ella usa la de debug para probar |
+| Alarmas exactas sin `USE_EXACT_ALARM` | `AndroidManifest.xml`, `AlarmDeadlineScheduler` (`canScheduleExactAlarms`, `requestExactAlarms`) | Play reserva `USE_EXACT_ALARM` a despertadores y calendarios. Con `SCHEDULE_EXACT_ALARM`, Android 14+ lo niega al instalar: se pide una vez al primer plan (`exact_alarm_asked`) y Config › General muestra "Alarmas y recordatorios" mientras falte; sin él la alarma es inexacta y el `delay` del motor sigue de respaldo |
+| Código de revisión | `data/billing/ReviewAccess.kt`, Config › Acerca de (mantener presionada la versión) | Activa Pro para los revisores de Google Play, que no pueden comprar. En el código solo está el SHA-256; el código vive en Play Console › Acceso a la app (`pro_review`, fuera del respaldo) |
+| Vínculo de privacidad | `PRIVACY_URL`, Config › Acerca de | Play exige el enlace también dentro de la app |
 | Recurso que R8 debe conservar | `res/raw/keep.xml` | `default_web_client_id` se busca por nombre al iniciar sesión con Google |
 | Borrar la cuenta | `data/remote/AccountRepository.kt`, Config › Respaldo en la nube | Lo exige Play: sale de la liga, borra el respaldo, el perfil y la cuenta de Firebase (si el login es viejo, pide elegir la cuenta otra vez). Lo del teléfono se queda |
 | Lugares sin coordenadas en la nube | `BackupCodec`, `PlaceRepository.resolve` | El respaldo sube solo el nombre del lugar; al restaurar, el lugar recupera sus coordenadas la primera vez que se está en un sitio con ese nombre |
@@ -510,6 +513,15 @@ Se revisaron las tres; ninguna se agregó como dependencia porque nuestro sistem
 | Recuperar | `TimerEngine.ensureRestored` | Una vez por proceso, antes de cualquier acción; lo llaman la app al arrancar, el servicio (ahora `START_STICKY`), la alarma, los botones, el widget y los ajustes rápidos |
 | Reinicio del teléfono | `TimerRestoreReceiver` (BOOT_COMPLETED, MY_PACKAGE_REPLACED) | Si cambió el arranque (`hora de pared − elapsedRealtime` se movió más de 1 min), el fin de sesión se traduce con la hora de pared; vuelve a programar la alarma y la notificación |
 | Lo que pasó mientras | `finishCurrent(atElapsed, late)` | Las sesiones que acabaron con la app cerrada se registran como completadas a la hora en que terminaron, sin sonido (`SessionEnded.late`). Un plan guardado hace más de 24 h se descarta |
+
+### Modo claro
+
+| Pieza | Archivo | Notas |
+|---|---|---|
+| Tema | `ui/theme/Theme.kt`, `Color.kt` | Sigue el tema del teléfono. Claro: "papel de laboratorio" (`LabPaper`) con los acentos de la app más oscuros para que se lean (`LabGreenDeep`, `LabAmberDeep`, `LabCyanDeep`) y verde claro en lo elegido. Con Material You usa `dynamicLightColorScheme`; el oscuro conserva el negro puro |
+| Siempre oscuros | `MainScreen` (modo ambiente), `MainActivity` (PiP) | Se envuelven en `LabPomodoroTheme(darkTheme = true)` |
+| Vidrio y vapor | `VesselView.GlassStyle`, `glassOutlineColor()` | Blancos sobre negro, grises sobre claro (contorno, marcas, reflejo y vapor); la repisa y la guía usan el mismo contorno |
+| Ajustes finos | `MainScreen` | La etiqueta "Trabajo · elemento" se oscurece en claro (el amarillo no se leía) y el dock desplegado usa `surfaceContainerHigh` en vez de casi negro |
 
 ### Ideas Pro para más adelante
 - **Más sonidos**: ✅ los generados ya están. Faltan ambientes grabados con licencia CC0 (cafetería, bosque) en loop con `ExoPlayer`/Media3 y mezclar varios a la vez.

@@ -12,11 +12,9 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <!-- Lugares (Pro, opcional): solo ubicación aproximada y solo con la app abierta -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <!-- Alarma exacta al terminar cada sesión, aunque el teléfono esté en reposo -->
-    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
-    <uses-permission
-        android:name="android.permission.SCHEDULE_EXACT_ALARM"
-        android:maxSdkVersion="32" />
+    <!-- Alarma exacta al terminar cada sesión, aunque el teléfono esté en reposo. USE_EXACT_ALARM es
+         solo para despertadores y calendarios: en Android 14+ el usuario concede este en los ajustes -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 
     <application
         android:name=".LabPomodoroApp"

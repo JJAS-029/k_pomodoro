@@ -62,6 +62,9 @@ enum class Podcast(
 
 const val GITHUB_URL = "https://github.com/JJAS-029"
 
+/** Política de privacidad (GitHub Pages del repositorio); la misma URL va en la ficha de Play. */
+const val PRIVACY_URL = "https://jjas-029.github.io/k_pomodoro/privacy/"
+
 /** Correo para sugerencias y reportes. */
 const val SUGGESTIONS_EMAIL = "ciencia.koala@gmail.com"
 

@@ -45,6 +45,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -83,8 +84,10 @@ import com.jjas.labpomodoro.data.repository.Discovery
 import com.jjas.labpomodoro.domain.model.DiscoverySource
 import com.jjas.labpomodoro.domain.model.Medal
 import com.jjas.labpomodoro.domain.model.SessionType
+import com.jjas.labpomodoro.service.canScheduleExactAlarms
 import com.jjas.labpomodoro.service.formatMinutesSeconds
 import com.jjas.labpomodoro.service.labelRes
+import com.jjas.labpomodoro.service.requestExactAlarms
 import com.jjas.labpomodoro.ui.components.Celebration
 import com.jjas.labpomodoro.ui.components.ConfettiBurst
 import com.jjas.labpomodoro.ui.components.DotState
@@ -107,6 +110,7 @@ import com.jjas.labpomodoro.ui.promo.ShareText
 import com.jjas.labpomodoro.ui.promo.shareText
 import com.jjas.labpomodoro.ui.sound.FocusSoundPanel
 import com.jjas.labpomodoro.ui.theme.LabPomodoroTheme
+import com.jjas.labpomodoro.ui.theme.isLight
 import kotlinx.coroutines.delay
 import java.time.LocalTime
 
@@ -140,15 +144,40 @@ fun MainScreen(
 
     // En Android 13+ hay que pedir permiso para mostrar la cuenta regresiva en la notificación.
     // El timer arranca igual si el usuario lo niega.
+    // Android 14+ niega las alarmas exactas al instalar: se pide una vez, al primer plan. Sin ellas
+    // el timer funciona igual, pero con la pantalla apagada el fin de sesión puede llegar tarde
+    var askExactAlarm by rememberSaveable { mutableStateOf(false) }
+    val startPlan = {
+        timerViewModel.start()
+        if (timer.exactAlarmAsked == false && !context.canScheduleExactAlarms()) askExactAlarm = true
+    }
     val notificationPermission = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
-    ) { timerViewModel.start() }
+    ) { startPlan() }
     val onStart = {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
         } else {
-            timerViewModel.start()
+            startPlan()
         }
+    }
+    if (askExactAlarm) {
+        val close = {
+            askExactAlarm = false
+            timerViewModel.markExactAlarmAsked()
+        }
+        AlertDialog(
+            onDismissRequest = close,
+            confirmButton = {
+                TextButton(onClick = {
+                    close()
+                    context.requestExactAlarms()
+                }) { Text(stringResource(R.string.main_exact_alarm_allow)) }
+            },
+            dismissButton = { TextButton(onClick = close) { Text(stringResource(R.string.main_exact_alarm_later)) } },
+            title = { Text(stringResource(R.string.main_exact_alarm_title)) },
+            text = { Text(stringResource(R.string.main_exact_alarm_text)) },
+        )
     }
 
     // Modo ambiente (Pro): tras N minutos sin tocar la pantalla con el timer corriendo
@@ -217,15 +246,18 @@ fun MainScreen(
         label = "ambient",
     ) { inAmbient ->
         if (inAmbient && active != null) {
-            AmbientScreen(
-                active,
-                dynamicColor = timer.dynamicColor,
-                rain = timer.rainAmbience,
-                onWake = {
-                    ambient = false
-                    lastTouch = SystemClock.uptimeMillis()
-                },
-            )
+            // El modo ambiente es siempre oscuro, aunque el teléfono use el tema claro
+            LabPomodoroTheme(darkTheme = true, dynamicColor = timer.dynamicColor) {
+                AmbientScreen(
+                    active,
+                    dynamicColor = timer.dynamicColor,
+                    rain = timer.rainAmbience,
+                    onWake = {
+                        ambient = false
+                        lastTouch = SystemClock.uptimeMillis()
+                    },
+                )
+            }
         } else if (inAmbient) {
             // El plan terminó mientras se desvanecía el modo ambiente
             Box(Modifier.fillMaxSize())
@@ -478,7 +510,8 @@ private fun LabDock(timer: TimerUi?, account: MainUiState, actions: MainActions,
     }
 
     // La burbuja contenedora solo aparece al desplegar; contraído, los botones flotan solos
-    val bubbleColor by animateColorAsState(if (expanded) Color(0xFA141414) else Color.Transparent, label = "bubble")
+    val bubble = if (MaterialTheme.colorScheme.isLight) MaterialTheme.colorScheme.surfaceContainerHigh else Color(0xFA141414)
+    val bubbleColor by animateColorAsState(if (expanded) bubble else Color.Transparent, label = "bubble")
     val borderColor by animateColorAsState(
         if (expanded) MaterialTheme.colorScheme.outline else Color.Transparent,
         label = "bubbleBorder",
@@ -650,7 +683,8 @@ private fun ActivePanel(active: TimerUi.Active, clockColor: Color) {
             Text(
                 text = if (element != null) stringResource(R.string.main_label_with_element, typeLabel, element.localizedName()) else typeLabel,
                 style = MaterialTheme.typography.titleLarge,
-                color = active.vessel.liquid,
+                // Sobre el tema claro, el color del líquido se oscurece para que se lea (el amarillo casi no se ve)
+                color = if (MaterialTheme.colorScheme.isLight) lerp(active.vessel.liquid, Color.Black, 0.4f) else active.vessel.liquid,
             )
             // El elemento que hay en el recipiente
             if (element != null) {

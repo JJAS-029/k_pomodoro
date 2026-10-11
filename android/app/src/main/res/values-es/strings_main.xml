@@ -168,4 +168,8 @@
         <item>No todas las reacciones ocurren al primer intento. Vuelve cuando quieras.</item>
         <item>Edison probó miles de filamentos antes del bueno. Mañana es otra prueba.</item>
     </string-array>
+    <string name="main_exact_alarm_title">Que cada sesión termine a tiempo</string>
+    <string name="main_exact_alarm_text">Para terminar cada pomodoro y descanso en el segundo exacto, aun con la pantalla apagada, permite que Lab Pomodoro programe alarmas. Sin esto el timer funciona igual, pero el fin de una sesión puede llegar un poco tarde.</string>
+    <string name="main_exact_alarm_allow">Permitir</string>
+    <string name="main_exact_alarm_later">Ahora no</string>
 </resources>

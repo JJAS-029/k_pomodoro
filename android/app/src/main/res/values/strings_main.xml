@@ -163,4 +163,8 @@
         <item>Not every reaction happens on the first try. Come back whenever you like.</item>
         <item>Edison tried thousands of filaments before finding the right one. Tomorrow is another trial.</item>
     </string-array>
+    <string name="main_exact_alarm_title">Finish every session on time</string>
+    <string name="main_exact_alarm_text">To end each pomodoro and break at the exact second, even with the screen off, allow Lab Pomodoro to set alarms. Without it the timer still works, but the end of a session may arrive a little late.</string>
+    <string name="main_exact_alarm_allow">Allow</string>
+    <string name="main_exact_alarm_later">Not now</string>
 </resources>

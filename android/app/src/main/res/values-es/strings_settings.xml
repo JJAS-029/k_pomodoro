@@ -47,7 +47,7 @@
     <string name="set_section_appearance">Apariencia</string>
     <string name="set_dynamic_color">Colores del sistema (Material You)</string>
     <string name="set_requires_android_12">Requiere Android 12 o superior.</string>
-    <string name="set_dynamic_color_desc">Los botones y acentos toman los colores de tu fondo de pantalla. El fondo sigue negro.</string>
+    <string name="set_dynamic_color_desc">Los botones y acentos toman los colores de tu fondo de pantalla. En modo oscuro, el fondo sigue negro.</string>
 
     <string name="set_section_focus_sound">Sonido de concentración</string>
     <string name="set_section_backup">Respaldo en la nube</string>
@@ -74,6 +74,7 @@
     <string name="set_send_suggestions">Enviar sugerencias</string>
     <string name="set_recommend">Recomendar a un amigo</string>
     <string name="set_github">Mi GitHub: JJAS-029</string>
+    <string name="set_privacy_policy">Política de privacidad</string>
 
     <!-- Respaldo en la nube -->
     <string name="set_backup_signed_out_desc">Inicia sesión con Google y tu tabla, tu historial y tu racha quedan guardados en la nube. Si cambias de teléfono, los recuperas.</string>
@@ -222,4 +223,10 @@
     <string name="set_delete_account_confirm">Borrar</string>
     <string name="set_delete_account_done">Se borraron tu cuenta y tus datos en la nube.</string>
     <string name="set_delete_account_failed">No se pudo borrar tu cuenta. Revisa tu conexión e inténtalo de nuevo.</string>
+    <string name="set_review_title">Código de revisión</string>
+    <string name="set_review_apply">Activar</string>
+    <string name="set_review_ok">Pro quedó activado para la revisión. ¡Gracias!</string>
+    <string name="set_review_wrong">Ese código no es válido</string>
+    <string name="set_exact_alarms">Alarmas y recordatorios</string>
+    <string name="set_exact_alarms_off">Desactivado: con la pantalla apagada, una sesión puede terminar un poco tarde. Toca para permitir.</string>
 </resources>

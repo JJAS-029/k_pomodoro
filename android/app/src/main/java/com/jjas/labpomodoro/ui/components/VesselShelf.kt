@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.material3.MaterialTheme
 
 /** Un recipiente de la repisa: una sesión del plan. */
 data class ShelfItemUi(
@@ -79,8 +80,8 @@ private fun ShelfVessel(item: ShelfItemUi) {
         liquidColor = item.color,
         outlineColor = when {
             item.isCurrent -> item.color
-            item.skipped -> Color.White.copy(alpha = 0.25f)
-            else -> Color(0xFFCCCCCC).copy(alpha = 0.7f)
+            item.skipped -> MaterialTheme.colorScheme.onBackground.copy(alpha = 0.25f)
+            else -> glassOutlineColor().copy(alpha = 0.7f)
         },
         // Recipiente punteado = sesión saltada
         dashed = item.skipped,

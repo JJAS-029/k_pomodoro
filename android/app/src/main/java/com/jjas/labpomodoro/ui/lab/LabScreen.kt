@@ -109,6 +109,7 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
+import com.jjas.labpomodoro.ui.theme.isLight
 
 /** Logros: tabla periódica con lo descubierto, avance de recompensas y sintetizador. */
 @Composable
@@ -317,8 +318,10 @@ private fun StatCard(value: String, label: String, modifier: Modifier = Modifier
 @Composable
 private fun RewardProgress(totalWorkSeconds: Long, modifier: Modifier = Modifier) {
     Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        RewardBar(stringResource(R.string.el_reward_next_basic), totalWorkSeconds, RewardSchedule.BASIC_EVERY_SECONDS, Color(0xFF80CBC4))
-        RewardBar(stringResource(R.string.el_reward_next_rare), totalWorkSeconds, RewardSchedule.RARE_EVERY_SECONDS, Color(0xFFCE93D8))
+        // Pastel sobre negro; más intensos sobre el tema claro para que se vean
+        val light = MaterialTheme.colorScheme.isLight
+        RewardBar(stringResource(R.string.el_reward_next_basic), totalWorkSeconds, RewardSchedule.BASIC_EVERY_SECONDS, if (light) Color(0xFF00897B) else Color(0xFF80CBC4))
+        RewardBar(stringResource(R.string.el_reward_next_rare), totalWorkSeconds, RewardSchedule.RARE_EVERY_SECONDS, if (light) Color(0xFF8E24AA) else Color(0xFFCE93D8))
     }
 }
 

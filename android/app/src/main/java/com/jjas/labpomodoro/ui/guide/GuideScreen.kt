@@ -64,6 +64,7 @@ import com.jjas.labpomodoro.ui.medals.MedalBadge
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.jjas.labpomodoro.ui.components.glassOutlineColor
 
 @HiltViewModel
 class GuideViewModel @Inject constructor(
@@ -297,8 +298,8 @@ private fun ShelfAndAmbientPage() {
                 shape, fill, color,
                 outlineColor = when (i) {
                     2 -> color
-                    3 -> Color.White.copy(alpha = 0.25f)
-                    else -> Color(0xFFCCCCCC).copy(alpha = 0.7f)
+                    3 -> MaterialTheme.colorScheme.onBackground.copy(alpha = 0.25f)
+                    else -> glassOutlineColor().copy(alpha = 0.7f)
                 },
                 // El último ejemplo es una sesión saltada
                 dashed = i == 3,

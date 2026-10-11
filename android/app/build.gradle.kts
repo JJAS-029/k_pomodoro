@@ -16,19 +16,16 @@ android {
         applicationId = "com.jjas.labpomodoro"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
+        versionCode = 2
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // AdMob: mientras no haya cuenta se usan los IDs de prueba oficiales de Google. Los reales
-        // van en gradle.properties (admobAppId, admobBannerId, admobInterstitialId)
-        val admobAppId = providers.gradleProperty("admobAppId").getOrElse("ca-app-pub-3940256099942544~3347511713")
-        val admobBanner = providers.gradleProperty("admobBannerId").getOrElse("ca-app-pub-3940256099942544/9214589741")
-        val admobInterstitial = providers.gradleProperty("admobInterstitialId").getOrElse("ca-app-pub-3940256099942544/1033173712")
-        manifestPlaceholders["admobAppId"] = admobAppId
-        buildConfigField("String", "AD_BANNER_ID", "\"$admobBanner\"")
-        buildConfigField("String", "AD_INTERSTITIAL_ID", "\"$admobInterstitial\"")
+        // AdMob: en debug, siempre los IDs de prueba oficiales de Google (hacer clic en anuncios
+        // reales propios puede suspender la cuenta); los reales solo en release
+        manifestPlaceholders["admobAppId"] = "ca-app-pub-3940256099942544~3347511713"
+        buildConfigField("String", "AD_BANNER_ID", "\"ca-app-pub-3940256099942544/9214589741\"")
+        buildConfigField("String", "AD_INTERSTITIAL_ID", "\"ca-app-pub-3940256099942544/1033173712\"")
     }
 
     // Llave de subida a Play: android/keystore.properties (no se sube a git) con storeFile,
@@ -57,6 +54,10 @@ android {
                 "proguard-rules.pro"
             )
             signingConfig = signingConfigs.findByName("upload") ?: signingConfigs.getByName("debug")
+            // AdMob de Lab Pomodoro (no son secretos: van dentro de la app publicada)
+            manifestPlaceholders["admobAppId"] = "ca-app-pub-9843969378937419~7427910282"
+            buildConfigField("String", "AD_BANNER_ID", "\"ca-app-pub-9843969378937419/8985543694\"")
+            buildConfigField("String", "AD_INTERSTITIAL_ID", "\"ca-app-pub-9843969378937419/4586124520\"")
         }
     }
     // AGP 9 compila Kotlin de forma nativa y toma el jvmTarget de aquí

@@ -53,8 +53,12 @@ data class AppSettings(
     val proPurchased: Boolean = false,
     /** Interruptor de pruebas: solo tiene efecto en compilaciones debug. */
     val proTesting: Boolean = false,
+    /** Pro activado con el código para los revisores de Google Play. */
+    val proReview: Boolean = false,
     /** La guía de uso se muestra sola la primera vez. */
     val guideSeen: Boolean = false,
+    /** Ya se pidió una vez permitir las alarmas exactas (Android 14+ las niega al instalar). */
+    val exactAlarmAsked: Boolean = false,
     /**
      * Elemento que tiñe los recipientes de trabajo. 0 = automático: uno distinto de tu
      * colección en cada sesión.
@@ -78,7 +82,7 @@ data class AppSettings(
     val reminderHour: Int = 20,
 ) {
     /** El modo ambiente solo aplica si el usuario es Pro. */
-    val isPro: Boolean get() = proPurchased || proTesting
+    val isPro: Boolean get() = proPurchased || proTesting || proReview
 
     val ambientActive: Boolean get() = isPro && ambientMode
 

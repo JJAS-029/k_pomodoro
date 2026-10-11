@@ -37,3 +37,9 @@ android/keystore.properties
 *.jks
 # Config de Firebase: se copia a mano en cada máquina
 android/app/google-services.json
+
+#carpeta key
+key/*
+# Paquetes que genera el asistente de Android Studio (Build > Generate Signed…)
+android/app/debug/
+android/app/release/

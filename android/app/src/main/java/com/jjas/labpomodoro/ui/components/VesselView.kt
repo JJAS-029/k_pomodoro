@@ -33,6 +33,8 @@ import kotlin.math.cos
 import kotlin.math.exp
 import kotlin.math.sin
 import kotlin.random.Random
+import com.jjas.labpomodoro.ui.theme.isLight
+import androidx.compose.material3.MaterialTheme
 
 enum class LiquidEffect {
     NONE,
@@ -44,7 +46,18 @@ enum class LiquidEffect {
     BUBBLES,
 }
 
-private val GlassColor = Color(0xFFCCCCCC)
+/** Vidrio y vapor según el fondo: blancos sobre negro, grises sobre el tema claro. */
+private class GlassStyle(val outline: Color, val marks: Color, val highlight: Color, val vapor: Color)
+
+private val GlassOnDark = GlassStyle(Color(0xFFCCCCCC), Color.White.copy(alpha = 0.35f), Color.White.copy(alpha = 0.14f), Color.White)
+private val GlassOnLight = GlassStyle(Color(0xFF8C9199), Color(0xFF5F6368).copy(alpha = 0.45f), Color(0xFF5F6368).copy(alpha = 0.12f), Color(0xFF9AA0A6))
+
+@Composable
+private fun glassStyle(): GlassStyle = if (MaterialTheme.colorScheme.isLight) GlassOnLight else GlassOnDark
+
+/** Contorno de los recipientes de la repisa y la guía, con el mismo vidrio del recipiente grande. */
+@Composable
+fun glassOutlineColor(): Color = glassStyle().outline
 
 /** Lo que dura el chapoteo al cambiar de sesión. */
 private const val SLOSH_SECONDS = 3f
@@ -70,6 +83,7 @@ fun VesselView(
     refraction: Boolean = false,
 ) {
     val glassShader = remember { createGlassShader() }
+    val glass = glassStyle()
     val animatedFill by animateFloatAsState(fill.coerceIn(0f, 1f), tween(300, easing = LinearEasing), label = "fill")
     val animatedColor by animateColorAsState(liquidColor, tween(600), label = "liquid")
     val currentFill by rememberUpdatedState(animatedFill)
@@ -127,11 +141,11 @@ fun VesselView(
         Canvas(Modifier.matchParentSize()) {
             val g = VesselGeometry.fit(shape, size.width, size.height, headroom = 0.18f)
             clipRect {
-                drawGlass(g)
+                drawGlass(g, glass)
                 particles.drawVapor(
                     this,
                     g,
-                    vaporColor = if (behavior == ElementBehavior.COLORED_VAPOR) animatedColor else Color.White,
+                    vaporColor = if (behavior == ElementBehavior.COLORED_VAPOR) animatedColor else glass.vapor,
                     sparkColor = animatedColor,
                 )
             }
@@ -277,8 +291,8 @@ private fun DrawScope.drawLiquid(
     }
 }
 
-private fun DrawScope.drawGlass(g: VesselGeometry) {
-    val highlight = Color.White.copy(alpha = 0.14f)
+private fun DrawScope.drawGlass(g: VesselGeometry, glass: GlassStyle) {
+    val highlight = glass.highlight
     when (g.shape) {
         VesselShape.BEAKER, VesselShape.TEST_TUBE -> {
             // Marcas de medición y reflejo vertical
@@ -287,7 +301,7 @@ private fun DrawScope.drawGlass(g: VesselGeometry) {
                 val v = i / 5f * g.maxFill
                 val length = if (i % 2 == 0) hw * 0.35f else hw * 0.2f
                 drawLine(
-                    Color.White.copy(alpha = 0.35f),
+                    glass.marks,
                     Offset(g.px(0.5f + hw - length), g.py(v)),
                     Offset(g.px(0.5f + hw - 0.02f), g.py(v)),
                     g.stroke * 0.5f,
@@ -313,7 +327,7 @@ private fun DrawScope.drawGlass(g: VesselGeometry) {
             )
         }
     }
-    drawPath(g.outline, GlassColor, style = Stroke(width = g.stroke, cap = StrokeCap.Round))
+    drawPath(g.outline, glass.outline, style = Stroke(width = g.stroke, cap = StrokeCap.Round))
 }
 
 private enum class Kind {

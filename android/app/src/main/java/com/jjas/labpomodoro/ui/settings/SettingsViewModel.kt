@@ -1,6 +1,7 @@
 package com.jjas.labpomodoro.ui.settings
 
 import android.app.Activity
+import com.jjas.labpomodoro.data.billing.ReviewAccess
 import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
@@ -42,6 +43,13 @@ class SettingsViewModel @Inject constructor(
     val privacyOptionsRequired: Boolean get() = ads.privacyOptionsRequired
 
     fun showPrivacyOptions(activity: Activity) = ads.showPrivacyOptions(activity)
+
+    /** Código para los revisores de Google Play; true si era correcto (activa Pro). */
+    fun redeemReviewCode(code: String): Boolean {
+        if (!ReviewAccess.matches(code)) return false
+        viewModelScope.launch { repository.setProReview() }
+        return true
+    }
 
     /** Escribe el historial en el archivo que eligió el usuario. */
     fun exportCsv(uri: Uri) {

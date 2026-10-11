@@ -17,7 +17,7 @@ Con GitHub Pages activo en el repositorio, las páginas quedan en:
 
 ## 1. Llave de subida (una sola vez) ✅ hecha el 6 de octubre de 2026
 
-La llave está en `android/upload-key.jks` y sus contraseñas en `android/keystore.properties` (git ignora los dos). SHA-1: `E4:0D:E7:18:19:13:D8:AF:EE:D4:79:98:81:4E:63:3E:F4:E2:A4:67`.
+La llave que Play tiene registrada es la del asistente de Android Studio: `key/key` (alias `key`), SHA-1 `69:F6:74:6A:BB:E3:79:24:56:31:4C:47:49:93:7B:96:3F:1C:FC:D9`. `android/keystore.properties` apunta a ella con `storeFile=../key/key` (en `.properties` usa `/`, no `\`). Git ignora los dos archivos. `android/upload-key.jks` (SHA-1 `E4:0D:…`) se creó antes y **no** sirve para Play.
 
 Si algún día hay que crearla de nuevo, en la terminal de Android Studio (PowerShell), dentro de `android/`:
 
@@ -38,13 +38,7 @@ Guarda una copia de `upload-key.jks` y la contraseña fuera de la computadora. C
 
 ## 2. Antes de compilar la versión para Play
 
-1. **AdMob**: crea la app y dos bloques (banner adaptable e intersticial) y pon sus IDs en `android/gradle.properties`:
-   ```properties
-   admobAppId=ca-app-pub-XXXXXXXX~XXXXXXXX
-   admobBannerId=ca-app-pub-XXXXXXXX/XXXXXXXX
-   admobInterstitialId=ca-app-pub-XXXXXXXX/XXXXXXXX
-   ```
-   Sin ellos se usan los de prueba de Google. Configura también el mensaje de consentimiento (GDPR) en *Privacidad y mensajería*.
+1. **AdMob** ✅: app `ca-app-pub-9843969378937419~7427910282`, banner `…/8985543694` e intersticial `…/4586124520`, en el bloque `release` de `app/build.gradle.kts`. La versión debug usa siempre los IDs de prueba de Google (hacer clic en anuncios reales propios puede suspender la cuenta). Los mensajes de RGPD y de estados de EE. UU. ya están publicados en *Privacidad y mensajería*. Pendiente al publicar: `app-ads.txt` en la raíz del sitio web de desarrollador.
 2. **Compilar**: en `android/`, `./gradlew bundleRelease` → `app/build/outputs/bundle/release/app-release.aab`.
 3. Sube `versionCode` en `app/build.gradle.kts` en cada versión nueva.
 
@@ -83,23 +77,10 @@ Copia los textos y sube las imágenes de `listing/`. Categoría: **Productividad
 | ID de publicidad | Sí: anuncios y estadísticas |
 | Borrar la cuenta | En la app: Configuración › Respaldo en la nube › Borrar mi cuenta. Web: la URL de `delete-account.html` |
 | Servicio en primer plano (`specialUse`) | "Temporizador Pomodoro iniciado por el usuario: mantiene la cuenta regresiva y sus controles en la notificación mientras el plan está en curso, y se detiene al terminar o al detenerlo." Puede pedir un video corto: inicia un plan y muestra la notificación |
-| Alarmas exactas (`USE_EXACT_ALARM`) | Es una app de temporizador: la alarma marca el fin exacto de cada pomodoro y descanso |
+| Alarmas exactas | La app ya **no** usa `USE_EXACT_ALARM` (es solo para despertadores y calendarios). Usa `SCHEDULE_EXACT_ALARM`, que en Android 14+ el usuario concede: la app lo pide una vez al primer plan y deja la opción en Configuración › General. Si Play pregunta por alarmas exactas, la respuesta es que no se usa `USE_EXACT_ALARM` |
 
 ### Seguridad de los datos
-¿Recopila o comparte datos? **Sí**. ¿Cifrados en tránsito? **Sí**. ¿Se pueden pedir que se borren? **Sí**.
-
-| Tipo de dato | Recopilado | Compartido | Opcional | Para qué |
-|---|---|---|---|---|
-| Nombre | Sí | No | Sí (iniciar sesión) | Funcionalidad de la app, administración de la cuenta |
-| Correo electrónico | Sí | No | Sí | Administración de la cuenta |
-| ID de usuario | Sí | No | Sí | Funcionalidad de la app, administración de la cuenta |
-| Ubicación aproximada | Sí | Sí | No | Publicidad (AdMob usa la IP). Lugares (Pro) no cuenta: las coordenadas no salen del teléfono |
-| Interacciones con la app | Sí | Sí | No | Estadísticas (Firebase Analytics), publicidad (AdMob) |
-| Otro contenido generado por el usuario | Sí | No | Sí | Funcionalidad de la app: respaldo del historial y apodo en las ligas |
-| Diagnóstico | Sí | Sí | No | Publicidad (AdMob) |
-| ID del dispositivo u otros | Sí | Sí | No | Publicidad, estadísticas |
-
-"Compartido" se refiere a AdMob; si cambian los SDK, revisa de nuevo las [declaraciones de Google para AdMob](https://developers.google.com/admob/android/privacy/play-data-disclosure) y [Firebase](https://firebase.google.com/docs/android/play-data-disclosure).
+Pantalla por pantalla, con cada opción a marcar: [seguridad-de-los-datos.md](seguridad-de-los-datos.md).
 
 ## 5. Lanzamiento
 

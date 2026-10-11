@@ -10,6 +10,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,9 +40,16 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.LifecycleResumeEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -56,6 +64,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jjas.labpomodoro.BuildConfig
 import com.jjas.labpomodoro.R
+import com.jjas.labpomodoro.service.requestExactAlarms
+import com.jjas.labpomodoro.service.canScheduleExactAlarms
 import com.jjas.labpomodoro.ads.AdBanner
 import com.jjas.labpomodoro.domain.model.AppSettings
 import com.jjas.labpomodoro.domain.model.PeriodicTable
@@ -64,6 +74,7 @@ import com.jjas.labpomodoro.domain.model.SessionConfig
 import com.jjas.labpomodoro.service.requestAddTimerTile
 import com.jjas.labpomodoro.ui.components.localizedName
 import com.jjas.labpomodoro.ui.promo.GITHUB_URL
+import com.jjas.labpomodoro.ui.promo.PRIVACY_URL
 import com.jjas.labpomodoro.ui.promo.Podcast
 import com.jjas.labpomodoro.ui.promo.SUGGESTIONS_EMAIL
 import com.jjas.labpomodoro.ui.promo.ShareText
@@ -111,6 +122,7 @@ fun SettingsScreen(
                     onReminderHourChange = viewModel::setReminderHour,
                     soundSection = { FocusSoundPanel(onOpenPro = onOpenPro) },
                     backupSection = { CloudBackupSection() },
+                    onRedeemReviewCode = viewModel::redeemReviewCode,
                     dataSection = {
                         DataSection(
                             isPro = current.isPro,
@@ -175,6 +187,7 @@ private fun SettingsContent(
     soundSection: @Composable () -> Unit = {},
     dataSection: @Composable () -> Unit = {},
     backupSection: @Composable () -> Unit = {},
+    onRedeemReviewCode: (String) -> Boolean = { false },
 ) {
     val session = settings.session
     Column(
@@ -353,7 +366,7 @@ private fun SettingsContent(
         dataSection()
 
         SectionTitle(stringResource(R.string.set_section_about))
-        AboutSection()
+        AboutSection(onRedeemReviewCode = onRedeemReviewCode)
         Spacer(Modifier.height(24.dp))
     }
 }
@@ -369,10 +382,33 @@ private fun proTitle(@StringRes title: Int, isPro: Boolean): String =
  */
 @Composable
 private fun LanguageSection() {
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
     val context = LocalContext.current
-    val locale = LocalConfiguration.current.locales[0]
+    // Se revisa al volver de los ajustes del sistema
+    var exactAlarms by remember { mutableStateOf(context.canScheduleExactAlarms()) }
+    LifecycleResumeEffect(Unit) {
+        exactAlarms = context.canScheduleExactAlarms()
+        onPauseOrDispose { }
+    }
+    val showLanguage = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+    if (!showLanguage && exactAlarms) return
     SectionTitle(stringResource(R.string.set_section_general))
+    if (!exactAlarms) {
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .clickable { context.requestExactAlarms() }
+                .padding(vertical = 6.dp),
+        ) {
+            Text(stringResource(R.string.set_exact_alarms), style = MaterialTheme.typography.bodyLarge)
+            Text(
+                stringResource(R.string.set_exact_alarms_off),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+            )
+        }
+    }
+    if (!showLanguage) return
+    val locale = LocalConfiguration.current.locales[0]
     Column(
         Modifier
             .fillMaxWidth()
@@ -456,13 +492,17 @@ private fun SettingsContentPreview() {
 
 /** Créditos: el creador, sus podcasts y su GitHub. Se ve también en Pro. */
 @Composable
-private fun AboutSection() {
+private fun AboutSection(onRedeemReviewCode: (String) -> Boolean) {
     val context = LocalContext.current
+    var askReviewCode by rememberSaveable { mutableStateOf(false) }
+    // Mantener presionada la versión: código para los revisores de Google Play
     Text(
         stringResource(R.string.set_about_credits, BuildConfig.VERSION_NAME),
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.combinedClickable(onClick = {}, onLongClick = { askReviewCode = true }),
     )
+    if (askReviewCode) ReviewCodeDialog(onRedeem = onRedeemReviewCode, onDismiss = { askReviewCode = false })
     Spacer(Modifier.height(8.dp))
     Podcast.entries.forEach { podcast ->
         Row(
@@ -497,4 +537,46 @@ private fun AboutSection() {
     Text(SUGGESTIONS_EMAIL, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     FilledTonalButton(onClick = { context.shareText(ShareText.invite(context)) }) { Text(stringResource(R.string.set_recommend)) }
     TextButton(onClick = { context.openUrl(GITHUB_URL) }) { Text(stringResource(R.string.set_github)) }
+    TextButton(onClick = { context.openUrl(PRIVACY_URL) }) { Text(stringResource(R.string.set_privacy_policy)) }
+}
+
+@Composable
+private fun ReviewCodeDialog(onRedeem: (String) -> Boolean, onDismiss: () -> Unit) {
+    var code by rememberSaveable { mutableStateOf("") }
+    var wrong by rememberSaveable { mutableStateOf(false) }
+    var done by rememberSaveable { mutableStateOf(false) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            if (done) {
+                TextButton(onClick = onDismiss) { Text(stringResource(R.string.set_done)) }
+            } else {
+                TextButton(onClick = { if (onRedeem(code)) done = true else wrong = true }) { Text(stringResource(R.string.set_review_apply)) }
+            }
+        },
+        dismissButton = if (done) null else {
+            { TextButton(onClick = onDismiss) { Text(stringResource(R.string.set_cancel)) } }
+        },
+        title = { Text(stringResource(R.string.set_review_title)) },
+        text = {
+            if (done) {
+                Text(stringResource(R.string.set_review_ok))
+            } else {
+                OutlinedTextField(
+                    value = code,
+                    onValueChange = {
+                        code = it.take(32)
+                        wrong = false
+                    },
+                    singleLine = true,
+                    isError = wrong,
+                    supportingText = if (wrong) {
+                        { Text(stringResource(R.string.set_review_wrong)) }
+                    } else {
+                        null
+                    },
+                )
+            }
+        },
+    )
 }

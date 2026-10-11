@@ -105,7 +105,8 @@ class MainActivity : ComponentActivity() {
             LabPomodoroTheme(dynamicColor = settings?.dynamicColorActive == true) {
                 // Fuera del if para conservar la pantalla en la que estaba al volver de PiP
                 val navController = rememberNavController()
-                if (isInPip) PipScreen() else LabNavHost(navController)
+                // La ventana flotante es siempre oscura: se lee mejor encima de cualquier app
+                if (isInPip) LabPomodoroTheme(darkTheme = true, dynamicColor = settings?.dynamicColorActive == true) { PipScreen() } else LabNavHost(navController)
                 // Anuncio propio de fin de plan (podcast)
                 val promo by ads.housePromo.collectAsStateWithLifecycle()
                 promo?.let { PodcastPromoDialog(it, onDismiss = ads::dismissHousePromo) }

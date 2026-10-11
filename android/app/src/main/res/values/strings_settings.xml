@@ -47,7 +47,7 @@
     <string name="set_section_appearance">Appearance</string>
     <string name="set_dynamic_color">System colors (Material You)</string>
     <string name="set_requires_android_12">Requires Android 12 or later.</string>
-    <string name="set_dynamic_color_desc">Buttons and accents take on your wallpaper\'s colors. The background stays black.</string>
+    <string name="set_dynamic_color_desc">Buttons and accents take on your wallpaper\'s colors. In dark mode, the background stays black.</string>
 
     <string name="set_section_focus_sound">Focus sound</string>
     <string name="set_section_backup">Cloud backup</string>
@@ -73,6 +73,7 @@
     <string name="set_send_suggestions">Send suggestions</string>
     <string name="set_recommend">Recommend to a friend</string>
     <string name="set_github">My GitHub: JJAS-029</string>
+    <string name="set_privacy_policy">Privacy policy</string>
 
     <!-- Respaldo en la nube -->
     <string name="set_backup_signed_out_desc">Sign in with Google and your table, history and streak are saved in the cloud. If you switch phones, you get them back.</string>
@@ -215,4 +216,10 @@
     <string name="set_delete_account_confirm">Delete</string>
     <string name="set_delete_account_done">Your account and your cloud data were deleted.</string>
     <string name="set_delete_account_failed">Couldn\'t delete your account. Check your connection and try again.</string>
+    <string name="set_review_title">Review code</string>
+    <string name="set_review_apply">Activate</string>
+    <string name="set_review_ok">Pro is on for this review. Thanks!</string>
+    <string name="set_review_wrong">That code isn\'t valid</string>
+    <string name="set_exact_alarms">Alarms and reminders</string>
+    <string name="set_exact_alarms_off">Off: with the screen off, a session may end a little late. Tap to allow.</string>
 </resources>
