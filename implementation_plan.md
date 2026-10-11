@@ -522,6 +522,9 @@ Se revisaron las tres; ninguna se agregó como dependencia porque nuestro sistem
 | Siempre oscuros | `MainScreen` (modo ambiente), `MainActivity` (PiP) | Se envuelven en `LabPomodoroTheme(darkTheme = true)` |
 | Vidrio y vapor | `VesselView.GlassStyle`, `glassOutlineColor()` | Blancos sobre negro, grises sobre claro (contorno, marcas, reflejo y vapor); la repisa y la guía usan el mismo contorno |
 | Ajustes finos | `MainScreen` | La etiqueta "Trabajo · elemento" se oscurece en claro (el amarillo no se leía) y el dock desplegado usa `surfaceContainerHigh` en vez de casi negro |
+| Widget claro (Pro) | `TimerWidgetLightProvider`, `layout/widget_timer_light.xml`, `xml/timer_widget_light_info.xml` | Segundo widget en el selector ("Lab Pomodoro claro"); con Material You usa los tonos claros (`system_neutral1_50`, `system_accent1_700`). Sin Pro se ve claro pero muestra "Widget claro · Pro" y abre la app. Config › Atajos tiene un botón para cada widget |
+| Widgets que reaplican | `TimerWidgetSync` | El lanzador reaplica los cambios sobre la vista anterior: lo que un estado oculta (botón principal) se vuelve a mostrar explícitamente |
+| Avisos fuera de PiP | `MainActivity` | Celebraciones y la promoción de podcasts solo con la app completa, no en la ventana flotante |
 
 ### Ideas Pro para más adelante
 - **Más sonidos**: ✅ los generados ya están. Faltan ambientes grabados con licencia CC0 (cafetería, bosque) en loop con `ExoPlayer`/Media3 y mezclar varios a la vez.

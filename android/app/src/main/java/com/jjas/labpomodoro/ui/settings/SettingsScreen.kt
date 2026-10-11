@@ -311,6 +311,10 @@ private fun SettingsContent(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         OutlinedButton(onClick = { context.requestPinTimerWidget() }) { Text(stringResource(R.string.set_add_home_screen)) }
+        // Widget claro: Pro (sin Pro, el widget invita a conocerlo)
+        OutlinedButton(onClick = { context.requestPinTimerWidget(light = true) }) {
+            Text(proTitle(R.string.set_add_home_screen_light, settings.isPro))
+        }
         // Android 13+ permite agregar el botón de los ajustes rápidos desde la app
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             OutlinedButton(onClick = { context.requestAddTimerTile() }) { Text(stringResource(R.string.set_add_quick_settings)) }

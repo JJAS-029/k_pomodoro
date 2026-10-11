@@ -229,4 +229,5 @@
     <string name="set_review_wrong">Ese código no es válido</string>
     <string name="set_exact_alarms">Alarmas y recordatorios</string>
     <string name="set_exact_alarms_off">Desactivado: con la pantalla apagada, una sesión puede terminar un poco tarde. Toca para permitir.</string>
+    <string name="set_add_home_screen_light">Agregar el widget claro</string>
 </resources>

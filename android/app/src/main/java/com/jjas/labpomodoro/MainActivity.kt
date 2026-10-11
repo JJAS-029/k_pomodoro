@@ -107,22 +107,25 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 // La ventana flotante es siempre oscura: se lee mejor encima de cualquier app
                 if (isInPip) LabPomodoroTheme(darkTheme = true, dynamicColor = settings?.dynamicColorActive == true) { PipScreen() } else LabNavHost(navController)
-                // Anuncio propio de fin de plan (podcast)
-                val promo by ads.housePromo.collectAsStateWithLifecycle()
-                promo?.let { PodcastPromoDialog(it, onDismiss = ads::dismissHousePromo) }
-                // Una sola vez en la vida: al descubrir los 118 elementos
-                val discovered by inventory.discoveredCount.collectAsStateWithLifecycle(initialValue = 0)
-                if (discovered >= PeriodicTable.SIZE && settings?.tableCelebrated == false) {
-                    TableCompleteDialog(onDismiss = { lifecycleScope.launch { settingsRepository.setTableCelebrated() } })
-                } else {
-                    // Tabla de bronce, plata y oro: una vez cada una
-                    val counts by lab.obtainedCounts.collectAsStateWithLifecycle(initialValue = emptyMap())
-                    val tableLevel = MasteryRules.tableLevel(counts)
-                    val celebrated = settings?.masteryCelebrated
-                    if (celebrated != null && tableLevel >= Mastery.BRONZE && tableLevel.ordinal > celebrated) {
-                        MasteryTableDialog(tableLevel, onDismiss = {
-                            lifecycleScope.launch { settingsRepository.setMasteryCelebrated(tableLevel.ordinal) }
-                        })
+                // Los avisos y celebraciones esperan a la app completa: no caben en la ventana flotante
+                if (!isInPip) {
+                    // Anuncio propio de fin de plan (podcast)
+                    val promo by ads.housePromo.collectAsStateWithLifecycle()
+                    promo?.let { PodcastPromoDialog(it, onDismiss = ads::dismissHousePromo) }
+                    // Una sola vez en la vida: al descubrir los 118 elementos
+                    val discovered by inventory.discoveredCount.collectAsStateWithLifecycle(initialValue = 0)
+                    if (discovered >= PeriodicTable.SIZE && settings?.tableCelebrated == false) {
+                        TableCompleteDialog(onDismiss = { lifecycleScope.launch { settingsRepository.setTableCelebrated() } })
+                    } else {
+                        // Tabla de bronce, plata y oro: una vez cada una
+                        val counts by lab.obtainedCounts.collectAsStateWithLifecycle(initialValue = emptyMap())
+                        val tableLevel = MasteryRules.tableLevel(counts)
+                        val celebrated = settings?.masteryCelebrated
+                        if (celebrated != null && tableLevel >= Mastery.BRONZE && tableLevel.ordinal > celebrated) {
+                            MasteryTableDialog(tableLevel, onDismiss = {
+                                lifecycleScope.launch { settingsRepository.setMasteryCelebrated(tableLevel.ordinal) }
+                            })
+                        }
                     }
                 }
             }

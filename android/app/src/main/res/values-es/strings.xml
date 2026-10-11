@@ -2,4 +2,8 @@
     <string name="widget_skip">Saltar</string>
     <string name="widget_stop">Detener</string>
     <string name="widget_description">Tu experimento en la pantalla de inicio: el recipiente, el tiempo y los controles.</string>
+    <string name="widget_light_label">Lab Pomodoro claro</string>
+    <string name="widget_light_description">La versión clara del widget (Pro).</string>
+    <string name="widget_light_locked_label">Widget claro · Pro</string>
+    <string name="widget_light_locked_text">Toca para conocer Lab Pomodoro Pro</string>
 </resources>

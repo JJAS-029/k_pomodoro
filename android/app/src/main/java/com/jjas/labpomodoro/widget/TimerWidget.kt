@@ -63,6 +63,15 @@ class TimerWidgetProvider : AppWidgetProvider() {
     override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) = sync.refreshNow()
 }
 
+/** El widget claro (Pro): mismo contenido, fondo claro. Sin Pro muestra cómo conseguirlo. */
+@AndroidEntryPoint
+class TimerWidgetLightProvider : AppWidgetProvider() {
+
+    @Inject lateinit var sync: TimerWidgetSync
+
+    override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) = sync.refreshNow()
+}
+
 /** "Iniciar" desde el widget: arranca el plan sin abrir la app. */
 @AndroidEntryPoint
 class WidgetActionReceiver : BroadcastReceiver() {
@@ -106,6 +115,7 @@ class TimerWidgetSync @Inject constructor(
 ) {
     private val manager = AppWidgetManager.getInstance(context)
     private val component = ComponentName(context, TimerWidgetProvider::class.java)
+    private val lightComponent = ComponentName(context, TimerWidgetLightProvider::class.java)
 
     fun start() {
         scope.launch {
@@ -126,21 +136,34 @@ class TimerWidgetSync @Inject constructor(
     }
 
     private fun push(state: TimerState, prefs: AppSettings, items: List<InventoryItem>) {
-        val ids = manager.getAppWidgetIds(component)
-        if (ids.isEmpty()) return
-        manager.updateAppWidget(ids, render(state, prefs, items))
+        val dark = manager.getAppWidgetIds(component)
+        if (dark.isNotEmpty()) manager.updateAppWidget(dark, render(state, prefs, items, light = false))
+        val light = manager.getAppWidgetIds(lightComponent)
+        if (light.isNotEmpty()) manager.updateAppWidget(light, if (prefs.isPro) render(state, prefs, items, light = true) else lockedLight())
     }
 
-    private fun render(state: TimerState, prefs: AppSettings, items: List<InventoryItem>): RemoteViews {
-        val views = RemoteViews(context.packageName, R.layout.widget_timer)
+    /** El widget claro sin Pro: se ve claro, pero invita a conocer Pro en vez de mostrar el timer. */
+    private fun lockedLight(): RemoteViews {
+        val views = RemoteViews(context.packageName, R.layout.widget_timer_light)
+        views.setOnClickPendingIntent(R.id.widget_root, openApp())
+        views.setTextViewText(R.id.widget_label, context.getString(R.string.widget_light_locked_label))
+        staticTime(views, "Pro")
+        views.setTextViewText(R.id.widget_next, context.getString(R.string.widget_light_locked_text))
+        views.setImageViewBitmap(R.id.widget_vessel, vessel(VesselShape.BEAKER, 0.8f, RestingColor, light = true))
+        listOf(R.id.widget_primary, R.id.widget_skip, R.id.widget_stop).forEach { views.setViewVisibility(it, View.GONE) }
+        return views
+    }
+
+    private fun render(state: TimerState, prefs: AppSettings, items: List<InventoryItem>, light: Boolean): RemoteViews {
+        val views = RemoteViews(context.packageName, if (light) R.layout.widget_timer_light else R.layout.widget_timer)
         views.setOnClickPendingIntent(R.id.widget_root, openApp())
         when (state) {
-            is TimerState.Active -> active(views, state, prefs, items)
+            is TimerState.Active -> active(views, state, prefs, items, light)
             is TimerState.Finished -> {
                 views.setTextViewText(R.id.widget_label, context.getString(R.string.main_experiment_complete))
                 staticTime(views, "✓")
                 views.setTextViewText(R.id.widget_next, pomodorosText(state.completedWorkSessions, (state.completedWorkSeconds / 60).toInt()))
-                views.setImageViewBitmap(R.id.widget_vessel, vessel(VesselShape.BEAKER, 0.8f, RestingColor))
+                views.setImageViewBitmap(R.id.widget_vessel, vessel(VesselShape.BEAKER, 0.8f, RestingColor, light))
                 startButton(views)
             }
             TimerState.Idle -> {
@@ -150,13 +173,31 @@ class TimerWidgetSync @Inject constructor(
                 val pomodoros = plan.count { it.type == SessionType.WORK }
                 val workMinutes = plan.filter { it.type == SessionType.WORK }.sumOf { it.durationSeconds } / 60
                 views.setTextViewText(R.id.widget_next, pomodorosText(pomodoros, workMinutes))
-                views.setImageViewBitmap(R.id.widget_vessel, vessel(VesselShape.BEAKER, 0.8f, RestingColor))
+                views.setImageViewBitmap(R.id.widget_vessel, vessel(VesselShape.BEAKER, 0.8f, RestingColor, light))
                 startButton(views)
             }
         }
         // Pro: colores de Material You, igual que la app
-        if (prefs.dynamicColorActive && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) dynamicColors(views)
+        if (prefs.dynamicColorActive && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (light) dynamicLightColors(views) else dynamicColors(views)
+        }
         return views
+    }
+
+    /** Lo mismo que [dynamicColors] con los tonos claros del fondo de pantalla. */
+    @RequiresApi(Build.VERSION_CODES.S)
+    private fun dynamicLightColors(views: RemoteViews) {
+        views.setInt(R.id.widget_root, "setBackgroundResource", R.drawable.widget_background_light_dynamic)
+        val icon = context.getColor(android.R.color.system_accent1_800)
+        listOf(R.id.widget_primary, R.id.widget_skip, R.id.widget_stop).forEach {
+            views.setInt(it, "setBackgroundResource", R.drawable.widget_button_light_dynamic)
+            views.setInt(it, "setColorFilter", icon)
+        }
+        val clock = context.getColor(android.R.color.system_accent1_700)
+        views.setTextColor(R.id.widget_chrono, clock)
+        views.setTextColor(R.id.widget_time, clock)
+        views.setTextColor(R.id.widget_label, context.getColor(android.R.color.system_accent2_600))
+        views.setTextColor(R.id.widget_next, context.getColor(android.R.color.system_neutral2_600))
     }
 
     /** Fondo, borde, botones y textos con los tonos del fondo de pantalla (Android 12+). */
@@ -173,7 +214,7 @@ class TimerWidgetSync @Inject constructor(
         views.setTextColor(R.id.widget_next, context.getColor(android.R.color.system_neutral2_300))
     }
 
-    private fun active(views: RemoteViews, state: TimerState.Active, prefs: AppSettings, items: List<InventoryItem>) {
+    private fun active(views: RemoteViews, state: TimerState.Active, prefs: AppSettings, items: List<InventoryItem>, light: Boolean) {
         val remaining = state.remainingMillis(SystemClock.elapsedRealtime())
         val type = state.current.type
         val element = VesselReagents.reagent(
@@ -207,7 +248,7 @@ class TimerWidgetSync @Inject constructor(
         val color = element?.look()?.color ?: LiquidPalette.liquid(type, state.planSeed, state.index)
         views.setImageViewBitmap(
             R.id.widget_vessel,
-            vessel(LiquidPalette.vessel(state.planSeed, state.index), if (type == SessionType.WORK) 1f - progress else progress, color),
+            vessel(LiquidPalette.vessel(state.planSeed, state.index), if (type == SessionType.WORK) 1f - progress else progress, color, light),
         )
         val (icon, action, description) = if (state.isPaused) {
             Triple(R.drawable.ic_play, TimerService.ACTION_RESUME, context.getString(R.string.main_action_resume))
@@ -217,6 +258,8 @@ class TimerWidgetSync @Inject constructor(
         views.setImageViewResource(R.id.widget_primary, icon)
         views.setContentDescription(R.id.widget_primary, description)
         views.setOnClickPendingIntent(R.id.widget_primary, TimerService.actionIntent(context, action))
+        // El lanzador reaplica sobre la vista anterior: lo que otro estado ocultó hay que mostrarlo
+        views.setViewVisibility(R.id.widget_primary, View.VISIBLE)
         views.setViewVisibility(R.id.widget_skip, View.VISIBLE)
         views.setViewVisibility(R.id.widget_stop, View.VISIBLE)
         views.setOnClickPendingIntent(R.id.widget_skip, TimerService.actionIntent(context, TimerService.ACTION_SKIP))
@@ -241,6 +284,7 @@ class TimerWidgetSync @Inject constructor(
     }
 
     private fun startButton(views: RemoteViews) {
+        views.setViewVisibility(R.id.widget_primary, View.VISIBLE)
         views.setImageViewResource(R.id.widget_primary, R.drawable.ic_play)
         views.setContentDescription(R.id.widget_primary, context.getString(R.string.main_action_start))
         val start = PendingIntent.getBroadcast(
@@ -262,7 +306,7 @@ class TimerWidgetSync @Inject constructor(
     )
 
     /** El recipiente dibujado como imagen: el widget no puede usar Compose. */
-    private fun vessel(shape: VesselShape, fill: Float, liquid: Color): Bitmap {
+    private fun vessel(shape: VesselShape, fill: Float, liquid: Color, light: Boolean): Bitmap {
         val density = context.resources.displayMetrics.density
         val width = (VESSEL_WIDTH_DP * density).toInt()
         val height = (VESSEL_HEIGHT_DP * density).toInt()
@@ -287,7 +331,8 @@ class TimerWidgetSync @Inject constructor(
             style = Paint.Style.STROKE
             strokeWidth = g.stroke
             strokeCap = Paint.Cap.ROUND
-            color = GlassColor
+            // Sobre el widget claro, el vidrio gris de la app en tema claro
+            color = if (light) GlassColorLight else GlassColor
         }
         canvas.drawPath(g.outline.asAndroidPath(), glass)
         return bitmap
@@ -300,12 +345,14 @@ class TimerWidgetSync @Inject constructor(
         const val VESSEL_HEIGHT_DP = 88
         val RestingColor = Color(0xFF39FF14).copy(alpha = 0.8f)
         const val GlassColor = 0xFFCCCCCC.toInt()
+        const val GlassColorLight = 0xFF8C9199.toInt()
     }
 }
 
 /** Pide a la pantalla de inicio fijar el widget (Android 8+, si el lanzador lo permite). */
-fun Context.requestPinTimerWidget(): Boolean {
+fun Context.requestPinTimerWidget(light: Boolean = false): Boolean {
     val manager = AppWidgetManager.getInstance(this)
     if (!manager.isRequestPinAppWidgetSupported) return false
-    return manager.requestPinAppWidget(ComponentName(this, TimerWidgetProvider::class.java), null, null)
+    val provider = if (light) TimerWidgetLightProvider::class.java else TimerWidgetProvider::class.java
+    return manager.requestPinAppWidget(ComponentName(this, provider), null, null)
 }

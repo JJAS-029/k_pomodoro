@@ -3,4 +3,8 @@
     <string name="widget_skip">Skip</string>
     <string name="widget_stop">Stop</string>
     <string name="widget_description">Your experiment on the home screen: the vessel, the time and the controls.</string>
+    <string name="widget_light_label">Lab Pomodoro light</string>
+    <string name="widget_light_description">The light version of the widget (Pro).</string>
+    <string name="widget_light_locked_label">Light widget · Pro</string>
+    <string name="widget_light_locked_text">Tap to see Lab Pomodoro Pro</string>
 </resources>

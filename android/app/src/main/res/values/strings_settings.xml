@@ -222,4 +222,5 @@
     <string name="set_review_wrong">That code isn\'t valid</string>
     <string name="set_exact_alarms">Alarms and reminders</string>
     <string name="set_exact_alarms_off">Off: with the screen off, a session may end a little late. Tap to allow.</string>
+    <string name="set_add_home_screen_light">Add the light widget</string>
 </resources>
