@@ -50,8 +50,8 @@
     <string name="main_restore_title">Encontramos tu laboratorio</string>
     <string name="main_restore_confirm">Recuperar</string>
     <string name="main_restore_dismiss">Empezar de cero</string>
-    <string name="main_restore_text">Tienes un respaldo del %1$s con %2$d elementos y %3$d sesiones. ¿Quieres recuperarlo en este teléfono?</string>
-    <string name="main_restore_text_device">Tienes un respaldo del %1$s (%2$s) con %3$d elementos y %4$d sesiones. ¿Quieres recuperarlo en este teléfono?</string>
+    <string name="main_restore_text">Tienes un respaldo del %1$s con %2$s y %3$s. ¿Quieres recuperarlo en este teléfono?</string>
+    <string name="main_restore_text_device">Tienes un respaldo del %1$s (%2$s) con %3$s y %4$s. ¿Quieres recuperarlo en este teléfono?</string>
 
     <!-- Notificaciones -->
     <string name="main_timer_channel_name">Temporizador</string>
@@ -172,4 +172,16 @@
     <string name="main_exact_alarm_text">Para terminar cada pomodoro y descanso en el segundo exacto, aun con la pantalla apagada, permite que Lab Pomodoro programe alarmas. Sin esto el timer funciona igual, pero el fin de una sesión puede llegar un poco tarde.</string>
     <string name="main_exact_alarm_allow">Permitir</string>
     <string name="main_exact_alarm_later">Ahora no</string>
+    <string name="main_dock_plan">Plan</string>
+    <string name="main_plan_title">Ajustar el plan</string>
+    <string name="main_plan_summary">%1$s · faltan %2$s · termina como a las %3$s</string>
+    <plurals name="main_plan_pomodoros_left">
+        <item quantity="one">%1$d pomodoro más</item>
+        <item quantity="many">%1$d pomodoros más</item>
+        <item quantity="other">%1$d pomodoros más</item>
+    </plurals>
+    <string name="main_plan_extend">+5 min a esta sesión</string>
+    <string name="main_plan_add">+1 pomodoro al final</string>
+    <string name="main_plan_remove">Quitar el último pomodoro</string>
+    <string name="main_plan_finish_after">Terminar después de esta sesión</string>
 </resources>

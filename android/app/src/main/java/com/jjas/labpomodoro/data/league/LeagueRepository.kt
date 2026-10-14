@@ -91,7 +91,8 @@ class LeagueRepository @Inject constructor(
         val current = profile()
         val profile = LeagueProfile(
             league = current?.league ?: League.HYDROGEN,
-            nickname = nickname.trim().take(MAX_NICKNAME).ifEmpty { "Científico anónimo" },
+            // Lo ven personas de cualquier idioma: un apodo neutro, como el que sugiere el formulario
+            nickname = nickname.trim().take(MAX_NICKNAME).ifEmpty { "Koala ${kotlin.random.Random.nextInt(100, 1000)}" },
             avatar = avatar,
             week = null,
             groupId = null,

@@ -205,6 +205,26 @@ fun MainScreen(
     }
 
     // Hoja para elegir el sonido de concentración sin salir del timer
+    // Hoja para ajustar el plan en curso (alargar, sumar o quitar pomodoros, terminar antes)
+    var planSheet by rememberSaveable { mutableStateOf(false) }
+    val adjustable = timer.timer as? TimerUi.Active
+    if (planSheet && adjustable != null) {
+        ModalBottomSheet(onDismissRequest = { planSheet = false }) {
+            AdjustPlanSheet(
+                active = adjustable,
+                onExtend = timerViewModel::extend,
+                onAdd = timerViewModel::addPomodoro,
+                onRemove = timerViewModel::removeLastPomodoro,
+                onFinishAfter = {
+                    timerViewModel.finishAfterCurrent()
+                    planSheet = false
+                },
+            )
+        }
+    } else if (planSheet) {
+        planSheet = false
+    }
+
     var soundSheet by rememberSaveable { mutableStateOf(false) }
     if (soundSheet) {
         ModalBottomSheet(onDismissRequest = { soundSheet = false }) {
@@ -298,6 +318,7 @@ fun MainScreen(
                     onDismissDiscoveries = discoveryViewModel::dismiss,
                     onDismissMedals = medalViewModel::dismiss,
                     onOpenSound = { soundSheet = true },
+                    onOpenPlan = { planSheet = true },
                     onSignIn = { viewModel.signIn(context) },
                     onSignOut = viewModel::signOut,
                     // Modo ambiente al instante (Pro); si no es Pro, lleva a la pantalla Pro
@@ -321,6 +342,7 @@ data class MainActions(
     val onOpenGuide: () -> Unit = {},
     val onOpenStats: () -> Unit = {},
     val onOpenSound: () -> Unit = {},
+    val onOpenPlan: () -> Unit = {},
     val onDismissDiscoveries: () -> Unit = {},
     val onDismissMedals: () -> Unit = {},
     val onSignIn: () -> Unit = {},
@@ -552,6 +574,7 @@ private fun LabDock(timer: TimerUi?, account: MainUiState, actions: MainActions,
                     }
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                         DockItem(R.drawable.ic_help, stringResource(R.string.main_dock_guide), run(actions.onOpenGuide))
+                        if (timer is TimerUi.Active) DockItem(R.drawable.ic_more_time, stringResource(R.string.main_dock_plan), run(actions.onOpenPlan))
                         if (timer is TimerUi.Active) DockItem(R.drawable.ic_moon, stringResource(R.string.main_dock_ambient), run(actions.onEnterAmbient))
                         DockItem(R.drawable.ic_headphones, stringResource(R.string.main_dock_sound), run(actions.onOpenSound))
                         when {

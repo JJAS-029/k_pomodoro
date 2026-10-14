@@ -563,11 +563,13 @@ Hecho: `LiquidTilt.kt` (sensor de gravedad + resorte amortiguado; sin movimiento
 
 #### Funcionalidades (no estéticas, por decidir)
 
+Hecho: **Ajustar el plan en curso** — `TimerEngine.extendCurrent` (+5 min, tope 90 min por sesión, corra o esté en pausa), `addPomodoro` (con su descanso antes, tope 24), `removeLastPomodoro` y `finishAfterCurrent`; todo se guarda para recuperar el plan. Botón "Plan" en el dock mientras hay plan, con hoja `AdjustPlanSheet` y resumen (pomodoros que faltan, tiempo y hora aproximada de fin). Detalles: el aviso de restaurar usa plurales, el apodo por defecto de la liga es "Koala NNN" (neutro) y `PlaceTracker` guarda el lugar con la semilla del plan para recuperarlo si Android cierra la app.
+
 | Idea | Qué hace | Esfuerzo | Pro |
 |---|---|---|---|
 | Etiquetas por plan | Al iniciar: "¿En qué vas a trabajar?" (Matemáticas, Tesis…); estadísticas y exportación por etiqueta | 🟡 | Gratis 3 etiquetas, Pro ilimitadas |
 | Plantillas de plan | Planes guardados ("Estudio 2 h", "Trabajo profundo 4 h") para iniciar con un toque; también desde el widget y el ícono | 🟢 | No |
-| Ajustar el plan en curso | +1 pomodoro, extender 5 min, saltar el descanso o terminar después de este pomodoro | 🟢 | No |
+| ✅ Ajustar el plan en curso | +1 pomodoro, extender 5 min, saltar el descanso o terminar después de este pomodoro | 🟢 | No |
 | No molestar automático | Activa "No molestar" durante el trabajo y lo quita en los descansos (permiso de acceso a No molestar) | 🟢 | Pro |
 | Metas diarias y semanales | "4 pomodoros al día": anillo de progreso en la pantalla principal, racha de metas y aviso al cumplirla | 🟡 | No |
 | Notas de logro | Al terminar un pomodoro, una línea opcional "¿Qué lograste?"; historial tipo diario | 🟢 | Pro |

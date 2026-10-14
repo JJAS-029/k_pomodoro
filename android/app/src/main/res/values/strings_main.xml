@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Tipos de sesión -->
     <string name="main_session_work">Focus</string>
     <string name="main_session_short_break">Short break</string>
@@ -49,8 +49,8 @@
     <string name="main_restore_title">We found your lab</string>
     <string name="main_restore_confirm">Restore</string>
     <string name="main_restore_dismiss">Start fresh</string>
-    <string name="main_restore_text">You have a backup from %1$s with %2$d elements and %3$d sessions. Want to restore it on this phone?</string>
-    <string name="main_restore_text_device">You have a backup from %1$s (%2$s) with %3$d elements and %4$d sessions. Want to restore it on this phone?</string>
+    <string name="main_restore_text">You have a backup from %1$s with %2$s and %3$s. Want to restore it on this phone?</string>
+    <string name="main_restore_text_device">You have a backup from %1$s (%2$s) with %3$s and %4$s. Want to restore it on this phone?</string>
 
     <!-- Notificaciones -->
     <string name="main_timer_channel_name">Timer</string>
@@ -97,7 +97,7 @@
     </plurals>
     <string name="main_share_medal">I earned the “%1$s” medal in Lab Pomodoro! 🏅 (%2$s). Up for it? %3$s</string>
     <!-- %3$s: maestría " (🥉1 🥈2)" o vacío; %5$s: racha (main_share_progress_streak) o vacío -->
-    <string name="main_share_progress">I\'ve collected %1$d/%2$d elements of the periodic table%3$s, %4$s of focus%5$s in Lab Pomodoro 🧪. Can you catch up? %6$s</string>
+    <string name="main_share_progress" tools:ignore="PluralsCandidate">I\'ve collected %1$d/%2$d elements of the periodic table%3$s, %4$s of focus%5$s in Lab Pomodoro 🧪. Can you catch up? %6$s</string>
     <plurals name="main_share_progress_streak">
         <item quantity="one">" and a %1$d-day streak"</item>
         <item quantity="other">" and a %1$d-day streak"</item>
@@ -167,4 +167,15 @@
     <string name="main_exact_alarm_text">To end each pomodoro and break at the exact second, even with the screen off, allow Lab Pomodoro to set alarms. Without it the timer still works, but the end of a session may arrive a little late.</string>
     <string name="main_exact_alarm_allow">Allow</string>
     <string name="main_exact_alarm_later">Not now</string>
+    <string name="main_dock_plan">Plan</string>
+    <string name="main_plan_title">Adjust the plan</string>
+    <string name="main_plan_summary">%1$s left · %2$s to go · ends around %3$s</string>
+    <plurals name="main_plan_pomodoros_left">
+        <item quantity="one">%1$d more pomodoro</item>
+        <item quantity="other">%1$d more pomodoros</item>
+    </plurals>
+    <string name="main_plan_extend">+5 min to this session</string>
+    <string name="main_plan_add">+1 pomodoro at the end</string>
+    <string name="main_plan_remove">Remove the last pomodoro</string>
+    <string name="main_plan_finish_after">Finish after this session</string>
 </resources>

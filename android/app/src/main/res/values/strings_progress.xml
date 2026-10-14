@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Tiempo de enfoque -->
     <string name="prog_focus_minutes">%1$d min</string>
     <string name="prog_focus_hours">%1$d h</string>
@@ -47,7 +47,7 @@
     <string name="prog_places_empty">Start a plan and your first place will show up here.</string>
     <string name="prog_places_tap">Tap a place to name it.</string>
     <string name="prog_places_disable">Stop saving places</string>
-    <string name="prog_place_stats">%1$d%% of your pomodoros completed here · %2$d total</string>
+    <string name="prog_place_stats" tools:ignore="PluralsCandidate">%1$d%% of your pomodoros completed here · %2$d total</string>
     <string name="prog_place_name">Place name</string>
     <string name="prog_place_hint">Home, Office, Library…</string>
     <string name="prog_place_unnamed">Unnamed</string>

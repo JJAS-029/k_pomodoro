@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Elementos, laboratorio (tabla periódica y sintetizador) y diálogos de colección -->
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Rareza -->
     <string name="el_rarity_basic">Basic</string>
     <string name="el_rarity_rare">Rare</string>
@@ -133,7 +133,7 @@
 
     <!-- Tabla periódica completa -->
     <string name="el_table_complete_title">You completed the periodic table!</string>
-    <string name="el_table_complete_body1">All %1$d elements. Each one came from your focus time: from hours when you chose to concentrate while it was easier to get distracted.</string>
+    <string name="el_table_complete_body1" tools:ignore="PluralsCandidate">All %1$d elements. Each one came from your focus time: from hours when you chose to concentrate while it was easier to get distracted.</string>
     <string name="el_table_complete_body2">Mendeleev spent years ordering this table, and generations of scientists devoted their lives to finding every square. You filled it one Pomodoro at a time, and even made the ones that don\'t exist in nature in your synthesizer.</string>
     <string name="el_table_complete_body3">This isn\'t just a collection: it\'s proof that consistency transforms. Just as these elements make up everything that exists, your hours of focus are shaping the person you want to be.</string>
     <string name="el_table_complete_body4">Thank you for letting this little lab keep you company. We\'re still here for whatever comes next.</string>

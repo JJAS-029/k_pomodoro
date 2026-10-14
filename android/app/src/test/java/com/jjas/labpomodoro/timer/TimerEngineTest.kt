@@ -298,4 +298,85 @@ class TimerEngineTest {
         f.engine.reset()
         assertEquals(null, f.store.saved)
     }
+
+    @Test
+    fun `alargar suma minutos a la sesion actual y a la alarma`() = runTest {
+        val f = Fixture(this)
+        f.engine.start(config)
+        advanceTimeBy(10 * minute)
+
+        f.engine.extendCurrent(5)
+
+        assertEquals(20 * minute, f.active.remainingMillis(f.time.elapsedRealtime()))
+        assertEquals(30 * 60, f.active.current.durationSeconds)
+        assertEquals(f.active.endsAtElapsed, f.scheduler.scheduledAt)
+        // Al terminar se guarda con su duración nueva
+        advanceTimeBy(20 * minute + 1)
+        runCurrent()
+        assertEquals(30 * 60, f.dao.inserted.single().actualSeconds)
+    }
+
+    @Test
+    fun `alargar en pausa suma al tiempo congelado`() = runTest {
+        val f = Fixture(this)
+        f.engine.start(config)
+        advanceTimeBy(10 * minute)
+        f.engine.pause()
+
+        f.engine.extendCurrent(5)
+
+        assertEquals(20 * minute, f.active.remainingMillis(f.time.elapsedRealtime()))
+        assertEquals(null, f.scheduler.scheduledAt)
+    }
+
+    @Test
+    fun `agregar un pomodoro lo pone al final con su descanso`() = runTest {
+        val f = Fixture(this)
+        f.engine.start(config)
+        val before = f.active.plan.size
+
+        f.engine.addPomodoro()
+
+        val plan = f.active.plan
+        assertEquals(before + 2, plan.size)
+        assertEquals(SessionType.SHORT_BREAK, plan[plan.size - 2].type)
+        assertEquals(SessionType.WORK, plan.last().type)
+    }
+
+    @Test
+    fun `quitar el ultimo pomodoro no toca la sesion actual`() = runTest {
+        val f = Fixture(this)
+        f.engine.start(config)
+        // 25 · 5 · 25 · 5 · 10: se quita el pomodoro de 10 y el descanso de antes
+        f.engine.removeLastPomodoro()
+        assertEquals(3, f.active.plan.size)
+        assertEquals(SessionType.WORK, f.active.plan.last().type)
+
+        f.engine.removeLastPomodoro()
+        f.engine.removeLastPomodoro() // Solo queda la actual: ya no se quita
+        assertEquals(1, f.active.plan.size)
+        assertEquals(0, f.active.index)
+    }
+
+    @Test
+    fun `terminar despues de esta sesion corta el plan`() = runTest {
+        val f = Fixture(this)
+        f.engine.start(config)
+
+        f.engine.finishAfterCurrent()
+        assertEquals(1, f.active.plan.size)
+
+        advanceTimeBy(25 * minute + 1)
+        runCurrent()
+        assertTrue(f.engine.state.value is TimerState.Finished)
+    }
+
+    @Test
+    fun `los ajustes se guardan para recuperar el plan`() = runTest {
+        val f = Fixture(this)
+        f.engine.start(config)
+        f.engine.addPomodoro()
+
+        assertEquals(f.active.plan, f.store.saved?.state?.plan)
+    }
 }

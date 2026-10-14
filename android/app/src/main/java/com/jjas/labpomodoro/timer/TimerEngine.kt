@@ -2,6 +2,7 @@ package com.jjas.labpomodoro.timer
 
 import com.jjas.labpomodoro.core.di.ApplicationScope
 import com.jjas.labpomodoro.data.repository.SessionRepository
+import com.jjas.labpomodoro.domain.model.PlannedSession
 import com.jjas.labpomodoro.domain.model.SessionConfig
 import com.jjas.labpomodoro.domain.model.SessionType
 import com.jjas.labpomodoro.domain.usecase.SessionPlanGenerator
@@ -119,6 +120,58 @@ class TimerEngine @Inject constructor(
         }
     }
 
+    /** Suma [minutes] a la sesión actual (hasta [MAX_SESSION_SECONDS]), corra o esté en pausa. */
+    suspend fun extendCurrent(minutes: Int = 5) = mutex.withLock {
+        restoreLocked()
+        val s = _state.value as? TimerState.Active ?: return@withLock
+        val extra = minutes * 60
+        if (s.current.durationSeconds + extra > MAX_SESSION_SECONDS) return@withLock
+        val plan = s.plan.toMutableList().also { it[s.index] = s.current.copy(durationSeconds = s.current.durationSeconds + extra) }
+        val extended = if (s.isPaused) {
+            s.copy(plan = plan, remainingWhenPausedMillis = s.remainingWhenPausedMillis + extra * 1000L)
+        } else {
+            s.copy(plan = plan, endsAtElapsed = s.endsAtElapsed + extra * 1000L)
+        }
+        publish(extended)
+        if (!extended.isPaused) armDeadline()
+    }
+
+    /** Agrega un pomodoro al final del plan, con un descanso corto antes (como los demás). */
+    suspend fun addPomodoro() = mutex.withLock {
+        restoreLocked()
+        val s = _state.value as? TimerState.Active ?: return@withLock
+        if (s.plan.count { it.type == SessionType.WORK } >= MAX_POMODOROS) return@withLock
+        val work = s.plan.lastOrNull { it.type == SessionType.WORK }?.durationSeconds ?: return@withLock
+        val rest = s.plan.firstOrNull { it.type == SessionType.SHORT_BREAK }?.durationSeconds ?: DEFAULT_BREAK_SECONDS
+        val added = if (s.plan.last().type == SessionType.WORK) {
+            listOf(PlannedSession(SessionType.SHORT_BREAK, rest), PlannedSession(SessionType.WORK, work))
+        } else {
+            listOf(PlannedSession(SessionType.WORK, work))
+        }
+        publish(s.copy(plan = s.plan + added))
+    }
+
+    /** Quita el último pomodoro que falta (y el descanso que lo precedía). */
+    suspend fun removeLastPomodoro() = mutex.withLock {
+        restoreLocked()
+        val s = _state.value as? TimerState.Active ?: return@withLock
+        val last = s.plan.indexOfLast { it.type == SessionType.WORK }
+        if (last <= s.index) return@withLock
+        val plan = s.plan.toMutableList()
+        plan.removeAt(last)
+        // Sin pomodoro después, los descansos del final ya no tienen sentido
+        while (plan.size - 1 > s.index && plan.last().type != SessionType.WORK) plan.removeAt(plan.lastIndex)
+        publish(s.copy(plan = plan, skippedIndices = s.skippedIndices.filter { it < plan.size }.toSet()))
+    }
+
+    /** El plan termina al acabar la sesión actual. */
+    suspend fun finishAfterCurrent() = mutex.withLock {
+        restoreLocked()
+        val s = _state.value as? TimerState.Active ?: return@withLock
+        if (s.next == null) return@withLock
+        publish(s.copy(plan = s.plan.take(s.index + 1), skippedIndices = s.skippedIndices.filter { it <= s.index }.toSet()))
+    }
+
     /** Vuelve a Idle desde la pantalla de resumen. */
     suspend fun dismissFinished() = mutex.withLock {
         if (_state.value is TimerState.Finished) publish(TimerState.Idle)
@@ -228,11 +281,17 @@ class TimerEngine @Inject constructor(
         scheduler.cancel()
     }
 
-    private companion object {
+    companion object {
         /** Un plan guardado hace más de un día ya no se recupera. */
-        const val MAX_RESTORE_AGE_MILLIS = 24 * 60 * 60 * 1000L
+        private const val MAX_RESTORE_AGE_MILLIS = 24 * 60 * 60 * 1000L
 
         /** Diferencia entre relojes que todavía cuenta como el mismo arranque (ajustes de hora). */
-        const val SAME_BOOT_TOLERANCE_MILLIS = 60_000L
+        private const val SAME_BOOT_TOLERANCE_MILLIS = 60_000L
+
+        /** Una sesión no se alarga más de hora y media. */
+        const val MAX_SESSION_SECONDS = 90 * 60
+
+        private const val MAX_POMODOROS = 24
+        private const val DEFAULT_BREAK_SECONDS = 5 * 60
     }
 }

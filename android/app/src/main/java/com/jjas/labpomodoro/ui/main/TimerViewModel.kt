@@ -61,6 +61,12 @@ sealed interface TimerUi {
         val dots: List<PlanDot>,
         /** Pomodoros completados en este plan; cuando sube, hay confeti. */
         val completedWork: Int = 0,
+        /** Para ajustar el plan: pomodoros que faltan después de la sesión actual. */
+        val pomodorosLeft: Int = 0,
+        /** Lo que falta de todo el plan (esta sesión y las siguientes). */
+        val planRemainingMillis: Long = 0,
+        /** Se le pueden sumar 5 min a esta sesión (no pasa del tope). */
+        val canExtend: Boolean = true,
     ) : TimerUi
 
     data class Finished(val workSessions: Int, val workMinutes: Long) : TimerUi
@@ -183,6 +189,9 @@ class TimerViewModel @Inject constructor(
                             )
                         },
                     completedWork = timer.completedWorkSessions,
+                    pomodorosLeft = timer.plan.drop(timer.index + 1).count { it.type == SessionType.WORK },
+                    planRemainingMillis = remaining + timer.plan.drop(timer.index + 1).sumOf { it.durationSeconds } * 1000L,
+                    canExtend = timer.current.durationSeconds + 5 * 60 <= TimerEngine.MAX_SESSION_SECONDS,
                     shelf = timer.plan.mapIndexed { i, session ->
                         ShelfItemUi(
                             shape = LiquidPalette.vessel(timer.planSeed, i),
@@ -220,6 +229,22 @@ class TimerViewModel @Inject constructor(
 
     fun start() {
         viewModelScope.launch { engine.start(settingsRepository.settings.first().session) }
+    }
+
+    fun extend() {
+        viewModelScope.launch { engine.extendCurrent(5) }
+    }
+
+    fun addPomodoro() {
+        viewModelScope.launch { engine.addPomodoro() }
+    }
+
+    fun removeLastPomodoro() {
+        viewModelScope.launch { engine.removeLastPomodoro() }
+    }
+
+    fun finishAfterCurrent() {
+        viewModelScope.launch { engine.finishAfterCurrent() }
     }
 
     fun pause() {

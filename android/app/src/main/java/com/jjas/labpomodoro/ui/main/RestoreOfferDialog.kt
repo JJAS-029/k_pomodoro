@@ -5,6 +5,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import com.jjas.labpomodoro.R
 import com.jjas.labpomodoro.data.backup.BackupInfo
@@ -28,11 +29,13 @@ fun RestoreOfferDialog(info: BackupInfo, onRestore: () -> Unit, onDismiss: () ->
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.main_restore_dismiss)) } },
         title = { Text(stringResource(R.string.main_restore_title)) },
         text = {
+            val elements = pluralStringResource(R.plurals.set_backup_elements, info.elements, info.elements)
+            val sessions = pluralStringResource(R.plurals.set_backup_sessions, info.sessions, info.sessions)
             Text(
                 if (info.device.isNotBlank()) {
-                    stringResource(R.string.main_restore_text_device, info.formattedDate(), info.device, info.elements, info.sessions)
+                    stringResource(R.string.main_restore_text_device, info.formattedDate(), info.device, elements, sessions)
                 } else {
-                    stringResource(R.string.main_restore_text, info.formattedDate(), info.elements, info.sessions)
+                    stringResource(R.string.main_restore_text, info.formattedDate(), elements, sessions)
                 }
             )
         },

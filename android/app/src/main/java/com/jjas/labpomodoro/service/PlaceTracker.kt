@@ -17,6 +17,7 @@ import com.jjas.labpomodoro.data.repository.PlaceRepository
 import com.jjas.labpomodoro.data.repository.SettingsRepository
 import com.jjas.labpomodoro.timer.TimerEngine
 import com.jjas.labpomodoro.timer.TimerEvent
+import com.jjas.labpomodoro.timer.TimerState
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -52,7 +53,22 @@ class PlaceTracker @Inject constructor(
     private val pending = mutableListOf<Long>()
     private val lock = Mutex()
 
+    /**
+     * El lugar del plan en curso, guardado con la semilla del plan: si Android cierra la app y el
+     * motor recupera ese mismo plan, las sesiones siguientes siguen ligadas al lugar.
+     */
+    private val saved = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+
     fun start() {
+        // Plan recuperado tras cerrar la app: vuelve su lugar (y se asigna a lo que quedó pendiente)
+        scope.launch {
+            engine.state.collect { state ->
+                val active = state as? TimerState.Active ?: return@collect
+                if (currentPlaceId != null || saved.getLong(KEY_SEED, 0L) != active.planSeed) return@collect
+                val id = saved.getLong(KEY_PLACE, 0L).takeIf { it > 0 } ?: return@collect
+                lock.withLock { setPlace(id) }
+            }
+        }
         scope.launch {
             engine.events.collect { event ->
                 when (event) {
@@ -61,16 +77,15 @@ class PlaceTracker @Inject constructor(
                             currentPlaceId = null
                             pending.clear()
                         }
+                        saved.edit().clear().apply()
+                        val seed = (engine.state.value as? TimerState.Active)?.planSeed
                         val prefs = settings.settings.first()
                         if (prefs.isPro && prefs.placesEnabled && hasPermission()) {
                             // En paralelo: obtener la ubicación puede tardar unos segundos
                             launch {
                                 val id = locate() ?: return@launch
-                                lock.withLock {
-                                    currentPlaceId = id
-                                    pending.forEach { places.tagSession(it, id) }
-                                    pending.clear()
-                                }
+                                lock.withLock { setPlace(id) }
+                                if (seed != null) saved.edit().putLong(KEY_SEED, seed).putLong(KEY_PLACE, id).apply()
                             }
                         }
                     }
@@ -81,6 +96,13 @@ class PlaceTracker @Inject constructor(
                 }
             }
         }
+    }
+
+    /** Usa [id] para lo que sigue y para lo que esperaba la ubicación. Llamar con [lock]. */
+    private suspend fun setPlace(id: Long) {
+        currentPlaceId = id
+        pending.forEach { places.tagSession(it, id) }
+        pending.clear()
     }
 
     private fun hasPermission() =
@@ -125,6 +147,9 @@ class PlaceTracker @Inject constructor(
 
     private companion object {
         const val TAG = "PlaceTracker"
+        const val PREFS = "place_tracker"
+        const val KEY_SEED = "plan_seed"
+        const val KEY_PLACE = "place_id"
         const val LOCATION_TIMEOUT_MILLIS = 15_000L
         const val GEOCODER_TIMEOUT_MILLIS = 5_000L
     }
