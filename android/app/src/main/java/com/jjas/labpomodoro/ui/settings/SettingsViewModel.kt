@@ -2,6 +2,7 @@ package com.jjas.labpomodoro.ui.settings
 
 import android.app.Activity
 import com.jjas.labpomodoro.data.billing.ReviewAccess
+import com.jjas.labpomodoro.domain.model.LabPalette
 import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
@@ -88,6 +89,10 @@ class SettingsViewModel @Inject constructor(
 
     fun setAmbientMode(enabled: Boolean) {
         viewModelScope.launch { repository.setAmbientMode(enabled) }
+    }
+
+    fun setLabPalette(palette: LabPalette) {
+        viewModelScope.launch { repository.setLabPalette(palette) }
     }
 
     fun setDynamicColor(enabled: Boolean) {

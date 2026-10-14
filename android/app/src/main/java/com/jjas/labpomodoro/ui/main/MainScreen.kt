@@ -816,6 +816,7 @@ fun Vessel(vessel: VesselUi, modifier: Modifier = Modifier, refraction: Boolean 
         behavior = vessel.behavior,
         refraction = refraction,
         interactive = interactive,
+        tones = vessel.tones,
     )
 }
 

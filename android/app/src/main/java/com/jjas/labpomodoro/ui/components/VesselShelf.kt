@@ -39,6 +39,8 @@ data class ShelfItemUi(
     val fill: Float,
     val isCurrent: Boolean,
     val skipped: Boolean,
+    /** Firma del elemento, si tiene; si no, los tonos salen del color. */
+    val tones: LiquidTones? = null,
 )
 
 private val ItemHeight = 56.dp
@@ -121,6 +123,7 @@ private fun ShelfVessel(item: ShelfItemUi) {
             dashed = item.skipped,
             modifier = Modifier.size(width = ItemHeight * item.shape.aspect + 4.dp, height = ItemHeight),
             bubbles = bubbles,
+            tones = item.tones,
         )
     }
 }

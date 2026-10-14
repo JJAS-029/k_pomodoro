@@ -9,6 +9,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -47,6 +48,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -56,7 +58,17 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
@@ -87,8 +99,15 @@ import com.jjas.labpomodoro.domain.usecase.RewardSchedule
 import com.jjas.labpomodoro.ui.components.BronzeColor
 import com.jjas.labpomodoro.ui.components.Celebration
 import com.jjas.labpomodoro.ui.components.ConfettiBurst
+import com.jjas.labpomodoro.ui.components.ElementSignatures
 import com.jjas.labpomodoro.ui.components.ElementTile
+import com.jjas.labpomodoro.ui.components.GlassPalette
 import com.jjas.labpomodoro.ui.components.GoldColor
+import com.jjas.labpomodoro.ui.components.LocalGlassShimmer
+import com.jjas.labpomodoro.ui.components.glass
+import com.jjas.labpomodoro.ui.components.masteryProgress
+import com.jjas.labpomodoro.ui.components.rememberGlassShimmer
+import com.jjas.labpomodoro.ui.components.rememberLiquidTilt
 import com.jjas.labpomodoro.ui.components.LiquidEffect
 import com.jjas.labpomodoro.ui.components.SilverColor
 import com.jjas.labpomodoro.ui.components.VesselShape
@@ -105,6 +124,7 @@ import com.jjas.labpomodoro.ui.promo.ShareText
 import com.jjas.labpomodoro.ui.promo.shareText
 import com.jjas.labpomodoro.ui.stats.formatFocus
 import kotlinx.coroutines.delay
+import kotlin.math.abs
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -175,92 +195,103 @@ private fun LabContent(
     var tab by rememberSaveable { mutableIntStateOf(0) }
     var selected by rememberSaveable { mutableStateOf<Int?>(null) }
     var target by rememberSaveable { mutableStateOf<Int?>(null) }
-
-    Column(
-        Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(vertical = 16.dp),
-    ) {
-        Row(Modifier.padding(horizontal = 24.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = stringResource(R.string.el_lab_title),
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.weight(1f),
-            )
-            val context = LocalContext.current
-            val resources = LocalResources.current
-            IconButton(onClick = {
-                val counts = state.masteryCounts
-                context.shareText(
-                    ShareText.progress(
-                        context = context,
-                        discovered = state.discoveredCount,
-                        total = PeriodicTable.SIZE,
-                        bronze = counts[Mastery.BRONZE] ?: 0,
-                        silver = counts[Mastery.SILVER] ?: 0,
-                        gold = counts[Mastery.GOLD] ?: 0,
-                        streak = state.streak.current,
-                        focus = formatFocus(state.totalWorkSeconds, resources),
-                    )
-                )
-            }) {
-                Icon(painterResource(R.drawable.ic_share), contentDescription = stringResource(R.string.el_lab_share_progress))
-            }
-            TextButton(onClick = onBack) { Text(stringResource(R.string.el_lab_done)) }
-        }
-        Stats(state, Modifier.padding(horizontal = 24.dp, vertical = 12.dp))
-        MasterySummary(state, Modifier.padding(horizontal = 24.dp).padding(bottom = 12.dp))
-        RewardProgress(state.totalWorkSeconds, Modifier.padding(horizontal = 24.dp))
-        Spacer(Modifier.height(16.dp))
-
-        PrimaryTabRow(selectedTabIndex = tab) {
-            Tab(selected = tab == 0, onClick = { tab = 0 }, text = { Text(stringResource(R.string.el_lab_tab_table)) })
-            Tab(selected = tab == 1, onClick = { tab = 1 }, text = { Text(stringResource(R.string.el_lab_tab_synthesizer)) })
-            Tab(selected = tab == 2, onClick = { tab = 2 }, text = { Text(stringResource(R.string.el_lab_tab_league)) })
-        }
-        Spacer(Modifier.height(16.dp))
-        when (tab) {
-            0 -> {
-                PeriodicTableGrid(
-                    state.items,
-                    newOnes,
-                    onSelect = { selected = it },
-                    modifier = Modifier.padding(horizontal = 12.dp),
-                    mastery = state::mastery,
-                )
-                Spacer(Modifier.height(12.dp))
-                Legend(Modifier.padding(horizontal = 24.dp))
-            }
-            1 -> Synthesizer(
-                state = state,
-                onTarget = { target = it },
-                modifier = Modifier.padding(horizontal = 24.dp),
-            )
-            else -> LeaguePanel(Modifier.padding(horizontal = 24.dp))
-        }
-    }
-
-    selected?.let { z ->
-        // La ficha es larga: se abre completa para no tener que arrastrarla
-        ModalBottomSheet(
-            onDismissRequest = { selected = null },
-            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+    // Familia resaltada desde la leyenda; null = todas
+    var focus by rememberSaveable { mutableStateOf<ElementCategory?>(null) }
+    // Un solo reloj para el destello de plata y oro; sin piezas brillantes no hace falta animar nada
+    val anyShiny = state.items.any { it.discovered && state.mastery(it.element) >= Mastery.SILVER }
+    CompositionLocalProvider(LocalGlassShimmer provides if (anyShiny) rememberGlassShimmer() else null) {
+        Column(
+            Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(vertical = 16.dp),
         ) {
-            val item = state.items[z - 1]
-            ElementDetail(
-                item = item,
-                canCraft = Fusion.recipesFor(z, state.quantities).isNotEmpty(),
-                inVessels = state.vesselElement == z,
-                obtained = state.obtained(z),
-                onToggleVessel = { onVesselElement(if (state.vesselElement == z) 0 else z) },
-                onSynthesize = {
-                    target = z
-                    tab = 1
-                    selected = null
-                },
-            )
+            Row(Modifier.padding(horizontal = 24.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = stringResource(R.string.el_lab_title),
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.weight(1f),
+                )
+                val context = LocalContext.current
+                val resources = LocalResources.current
+                IconButton(onClick = {
+                    val counts = state.masteryCounts
+                    context.shareText(
+                        ShareText.progress(
+                            context = context,
+                            discovered = state.discoveredCount,
+                            total = PeriodicTable.SIZE,
+                            bronze = counts[Mastery.BRONZE] ?: 0,
+                            silver = counts[Mastery.SILVER] ?: 0,
+                            gold = counts[Mastery.GOLD] ?: 0,
+                            streak = state.streak.current,
+                            focus = formatFocus(state.totalWorkSeconds, resources),
+                        )
+                    )
+                }) {
+                    Icon(painterResource(R.drawable.ic_share), contentDescription = stringResource(R.string.el_lab_share_progress))
+                }
+                TextButton(onClick = onBack) { Text(stringResource(R.string.el_lab_done)) }
+            }
+            Stats(state, Modifier.padding(horizontal = 24.dp, vertical = 12.dp))
+            MasterySummary(state, Modifier.padding(horizontal = 24.dp).padding(bottom = 12.dp))
+            RewardProgress(state.totalWorkSeconds, Modifier.padding(horizontal = 24.dp))
+            Spacer(Modifier.height(16.dp))
+
+            PrimaryTabRow(selectedTabIndex = tab) {
+                Tab(selected = tab == 0, onClick = { tab = 0 }, text = { Text(stringResource(R.string.el_lab_tab_table)) })
+                Tab(selected = tab == 1, onClick = { tab = 1 }, text = { Text(stringResource(R.string.el_lab_tab_synthesizer)) })
+                Tab(selected = tab == 2, onClick = { tab = 2 }, text = { Text(stringResource(R.string.el_lab_tab_league)) })
+            }
+            Spacer(Modifier.height(16.dp))
+            when (tab) {
+                0 -> {
+                    PeriodicTableGrid(
+                        state.items,
+                        newOnes,
+                        onSelect = { selected = it },
+                        modifier = Modifier.padding(horizontal = 12.dp),
+                        mastery = state::mastery,
+                        focus = focus,
+                    )
+                    Spacer(Modifier.height(16.dp))
+                    Legend(
+                        focus = focus,
+                        onFocus = { focus = if (focus == it) null else it },
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                    )
+                }
+                1 -> Synthesizer(
+                    state = state,
+                    onTarget = { target = it },
+                    modifier = Modifier.padding(horizontal = 24.dp),
+                )
+                else -> LeaguePanel(Modifier.padding(horizontal = 24.dp))
+            }
+        }
+
+        selected?.let { z ->
+            // La ficha es larga: se abre completa para no tener que arrastrarla
+            ModalBottomSheet(
+                onDismissRequest = { selected = null },
+                sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+            ) {
+                val item = state.items[z - 1]
+                ElementDetail(
+                    item = item,
+                    canCraft = Fusion.recipesFor(z, state.quantities).isNotEmpty(),
+                    inVessels = state.vesselElement == z,
+                    obtained = state.obtained(z),
+                    mastery = state.mastery(item.element),
+                    onToggleVessel = { onVesselElement(if (state.vesselElement == z) 0 else z) },
+                    onSynthesize = {
+                        target = z
+                        tab = 1
+                        selected = null
+                    },
+                )
+            }
         }
     }
 
@@ -365,7 +396,18 @@ private fun PeriodicTableGrid(
     onSelect: (Int) -> Unit,
     modifier: Modifier = Modifier,
     mastery: (Element) -> Mastery = { Mastery.NONE },
+    focus: ElementCategory? = null,
 ) {
+    // Una sola animación para atenuar las demás familias; se lee al dibujar (graphicsLayer), así
+    // las 118 casillas no se recomponen en cada cuadro. Se recuerda la última familia para que
+    // al quitar el resaltado se desvanezca en lugar de saltar.
+    val shown = remember { mutableStateOf(focus) }
+    if (focus != null) shown.value = focus
+    val dim = animateFloatAsState(if (focus != null) 1f else 0f, label = "atenuar")
+    fun Modifier.dimmed(category: ElementCategory) = graphicsLayer {
+        val active = shown.value
+        alpha = if (active == null || category == active) 1f else 1f - (1f - DIMMED_ALPHA) * dim.value
+    }
     BoxWithConstraints(modifier.fillMaxWidth()) {
         val gap = 2.dp
         // Siempre cabe completa: en vertical las casillas quedan compactas (solo el símbolo)
@@ -381,7 +423,7 @@ private fun PeriodicTableGrid(
                     for (col in 1..TABLE_COLUMNS) {
                         val element = TABLE_POSITIONS[row to col]
                         if (element == null) {
-                            FBlockMarker(row, col, cell)
+                            FBlockMarker(row, col, cell, Modifier.dimmed(if (row == 6) ElementCategory.LANTHANIDE else ElementCategory.ACTINIDE))
                         } else {
                             val item = items[element.atomicNumber - 1]
                             ElementTile(
@@ -391,7 +433,9 @@ private fun PeriodicTableGrid(
                                 size = cell,
                                 highlighted = element.atomicNumber in newOnes,
                                 mastery = mastery(element),
-                                modifier = Modifier.clickable { onSelect(element.atomicNumber) },
+                                modifier = Modifier
+                                    .dimmed(element.category)
+                                    .clickable { onSelect(element.atomicNumber) },
                             )
                         }
                     }
@@ -403,8 +447,8 @@ private fun PeriodicTableGrid(
 
 /** Hueco del grupo 3 en los periodos 6 y 7: ahí van los lantánidos y actínidos de abajo. */
 @Composable
-private fun FBlockMarker(row: Int, col: Int, cell: Dp) {
-    Box(Modifier.size(cell), contentAlignment = Alignment.Center) {
+private fun FBlockMarker(row: Int, col: Int, cell: Dp, modifier: Modifier = Modifier) {
+    Box(modifier.size(cell), contentAlignment = Alignment.Center) {
         if (col == 3 && (row == 6 || row == 7)) {
             val color = if (row == 6) ElementCategory.LANTHANIDE.color() else ElementCategory.ACTINIDE.color()
             Box(
@@ -416,26 +460,80 @@ private fun FBlockMarker(row: Int, col: Int, cell: Dp) {
     }
 }
 
+/** Opacidad de las casillas de otras familias mientras una está resaltada. */
+private const val DIMMED_ALPHA = 0.15f
+
+/** Leyenda en fichas: tocar una resalta su familia en la tabla; tocarla otra vez lo quita. */
 @Composable
-private fun Legend(modifier: Modifier = Modifier) {
-    FlowRow(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalArrangement = Arrangement.spacedBy(6.dp),
-    ) {
-        ElementCategory.entries.forEach { category ->
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    Modifier
-                        .size(10.dp)
-                        .background(category.color(), RoundedCornerShape(2.dp))
-                )
-                Spacer(Modifier.width(6.dp))
-                Text(stringResource(category.labelRes()), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+private fun Legend(
+    focus: ElementCategory?,
+    onFocus: (ElementCategory) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val light = MaterialTheme.colorScheme.isLight
+    Column(modifier) {
+        Text(
+            stringResource(R.string.el_legend_hint),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(start = 4.dp, bottom = 8.dp),
+        )
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            ElementCategory.entries.forEach { category ->
+                val glass = category.glass(light)
+                val selected = focus == category
+                val shape = RoundedCornerShape(50)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .clip(shape)
+                        .background(
+                            if (selected) glass.orb.copy(alpha = if (light) 0.22f else 0.20f)
+                            else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f)
+                        )
+                        .border(if (selected) 1.5.dp else 1.dp, glass.orb.copy(alpha = if (selected) 0.9f else 0.3f), shape)
+                        .toggleable(value = selected, role = Role.Checkbox, onValueChange = { onFocus(category) })
+                        .padding(horizontal = 10.dp, vertical = 7.dp),
+                ) {
+                    GlassOrb(glass, Modifier.size(12.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text(
+                        stringResource(category.labelRes()),
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+                        color = if (selected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
         }
     }
 }
+
+/** Esfera de cristal del color de la familia, con su brillo arriba a la izquierda. */
+@Composable
+private fun GlassOrb(glass: GlassPalette, modifier: Modifier = Modifier) {
+    Box(
+        modifier.drawWithCache {
+            val brush = Brush.radialGradient(
+                0f to Color.White.copy(alpha = 0.9f),
+                0.35f to glass.orb,
+                1f to glass.deep.copy(alpha = 1f),
+                center = Offset(size.width * 0.35f, size.height * 0.3f),
+                radius = size.minDimension * 0.75f,
+            )
+            onDrawBehind { drawCircle(brush) }
+        }
+    )
+}
+
+/** Inclinación del teléfono (radianes) que lleva la tarjeta del detalle a su giro máximo. */
+private const val DETAIL_TILT_RANGE = 0.3f
+
+/** Giro máximo de la tarjeta del detalle, en grados: lo justo para que se sienta de cristal. */
+private const val DETAIL_MAX_ROTATION = 10f
 
 private val DATE_FORMAT: DateTimeFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG)
 
@@ -447,6 +545,7 @@ private fun ElementDetail(
     onToggleVessel: () -> Unit,
     onSynthesize: () -> Unit,
     obtained: Int = 0,
+    mastery: Mastery = Mastery.NONE,
 ) {
     val element = item.element
     val fact = elementFact(element.atomicNumber)
@@ -460,7 +559,24 @@ private fun ElementDetail(
             .padding(bottom = 24.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            ElementTile(element, discovered = item.discovered, quantity = item.quantity, size = 72.dp)
+            // Tarjeta de cristal que se ladea con el teléfono; el reflejo se corre al mismo lado
+            val tilt = rememberLiquidTilt(enabled = true)
+            val lean = remember(tilt) { { (tilt.value / DETAIL_TILT_RANGE).coerceIn(-1f, 1f) } }
+            ElementTile(
+                element,
+                discovered = item.discovered,
+                quantity = item.quantity,
+                size = 120.dp,
+                mastery = mastery,
+                progress = if (item.discovered) masteryProgress(element, obtained) else null,
+                specular = lean,
+                modifier = Modifier.graphicsLayer {
+                    val t = lean()
+                    rotationY = t * DETAIL_MAX_ROTATION
+                    rotationX = -abs(t) * DETAIL_MAX_ROTATION * 0.35f
+                    cameraDistance = 14f * density
+                },
+            )
             Spacer(Modifier.width(16.dp))
             Column {
                 Text(element.localizedName(), style = MaterialTheme.typography.headlineSmall)
@@ -469,11 +585,7 @@ private fun ElementDetail(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                Text(
-                    stringResource(element.rarity.labelRes),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = element.category.color(),
-                )
+                OutlinedLabel(stringResource(element.rarity.labelRes), element.category.color())
             }
         }
         if (item.discovered) {
@@ -504,6 +616,7 @@ private fun ElementDetail(
                     effect = LiquidEffect.VAPOR,
                     animate = item.discovered,
                     behavior = look.behavior,
+                    tones = ElementSignatures.tones(element.atomicNumber),
                     modifier = Modifier.size(width = 56.dp, height = 72.dp),
                 )
                 Spacer(Modifier.width(12.dp))
@@ -705,16 +818,28 @@ private fun CraftableGroup(title: String, elements: List<Element>, state: LabUi,
     if (elements.isEmpty()) return
     Text(title, style = MaterialTheme.typography.titleMedium)
     Spacer(Modifier.height(8.dp))
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        elements.forEach { element ->
-            val item = state.items[element.atomicNumber - 1]
-            ElementTile(
-                element = element,
-                discovered = item.discovered,
-                quantity = item.quantity,
-                size = 44.dp,
-                modifier = Modifier.clickable { onTarget(element.atomicNumber) },
-            )
+    // Tarjetas grandes de cristal: símbolo, nombre, cuántas hay y cuánto falta para la siguiente maestría
+    BoxWithConstraints(Modifier.fillMaxWidth()) {
+        val gap = 8.dp
+        val columns = if (maxWidth < 360.dp) 4 else 5
+        val cell = ((maxWidth - gap * (columns - 1)) / columns).coerceAtMost(96.dp)
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(gap),
+            verticalArrangement = Arrangement.spacedBy(gap),
+            maxItemsInEachRow = columns,
+        ) {
+            elements.forEach { element ->
+                val item = state.items[element.atomicNumber - 1]
+                ElementTile(
+                    element = element,
+                    discovered = item.discovered,
+                    quantity = item.quantity,
+                    size = cell,
+                    mastery = state.mastery(element),
+                    progress = if (item.discovered) masteryProgress(element, state.obtained(element.atomicNumber)) else null,
+                    modifier = Modifier.clickable { onTarget(element.atomicNumber) },
+                )
+            }
         }
     }
     Spacer(Modifier.height(20.dp))
@@ -789,5 +914,25 @@ private fun FusionFlash(element: Element?, modifier: Modifier = Modifier) {
                 Text(stringResource(R.string.el_fused, e.localizedName().lowercase(locale)), fontSize = 18.sp, fontWeight = FontWeight.Medium)
             }
         }
+    }
+}
+
+/**
+ * Etiqueta del color de la familia. En el tema claro los tonos claros (el amarillo de los halógenos)
+ * no se leen sobre blanco: lleva un contorno oscuro sutil por debajo.
+ */
+@Composable
+private fun OutlinedLabel(text: String, color: Color) {
+    val style = MaterialTheme.typography.labelLarge
+    val light = MaterialTheme.colorScheme.background.luminance() > 0.5f
+    Box {
+        if (light) {
+            Text(
+                text,
+                style = style.copy(drawStyle = Stroke(width = 2.5f, join = StrokeJoin.Round)),
+                color = Color.Black.copy(alpha = 0.55f),
+            )
+        }
+        Text(text, style = style, color = color)
     }
 }

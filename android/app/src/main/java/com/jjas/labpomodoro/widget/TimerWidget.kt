@@ -37,7 +37,9 @@ import com.jjas.labpomodoro.service.formatMinutesSeconds
 import com.jjas.labpomodoro.service.labelRes
 import com.jjas.labpomodoro.timer.TimerEngine
 import com.jjas.labpomodoro.timer.TimerState
+import com.jjas.labpomodoro.ui.components.ElementSignatures
 import com.jjas.labpomodoro.ui.components.LiquidPalette
+import com.jjas.labpomodoro.ui.components.LiquidTones
 import com.jjas.labpomodoro.ui.components.VesselGeometry
 import com.jjas.labpomodoro.ui.components.VesselReagents
 import com.jjas.labpomodoro.ui.components.VesselShape
@@ -245,10 +247,10 @@ class TimerWidgetSync @Inject constructor(
                 ?: context.getString(R.string.main_last_session),
         )
         val progress = (1f - remaining / (state.current.durationSeconds * 1000f)).coerceIn(0f, 1f)
-        val color = element?.look()?.color ?: LiquidPalette.liquid(type, state.planSeed, state.index)
+        val color = element?.look()?.color ?: LiquidPalette.liquid(type, state.planSeed, state.index, prefs.activePalette)
         views.setImageViewBitmap(
             R.id.widget_vessel,
-            vessel(LiquidPalette.vessel(state.planSeed, state.index), if (type == SessionType.WORK) 1f - progress else progress, color, light),
+            vessel(LiquidPalette.vessel(state.planSeed, state.index), if (type == SessionType.WORK) 1f - progress else progress, color, light, element?.let { ElementSignatures.tones(it.atomicNumber) }),
         )
         val (icon, action, description) = if (state.isPaused) {
             Triple(R.drawable.ic_play, TimerService.ACTION_RESUME, context.getString(R.string.main_action_resume))
@@ -306,7 +308,7 @@ class TimerWidgetSync @Inject constructor(
     )
 
     /** El recipiente dibujado como imagen: el widget no puede usar Compose. */
-    private fun vessel(shape: VesselShape, fill: Float, liquid: Color, light: Boolean): Bitmap {
+    private fun vessel(shape: VesselShape, fill: Float, liquid: Color, light: Boolean, tones: LiquidTones? = null): Bitmap {
         val density = context.resources.displayMetrics.density
         val width = (VESSEL_WIDTH_DP * density).toInt()
         val height = (VESSEL_HEIGHT_DP * density).toInt()
@@ -316,11 +318,13 @@ class TimerWidgetSync @Inject constructor(
         if (fill > 0.01f) {
             canvas.withClip(g.interior.asAndroidPath()) {
                 val surface = g.surfaceY(fill)
+                // Liquid Glass, como en la app: brillo arriba a la izquierda y sombra saturada (sin negro)
+                val t = tones ?: LiquidTones.from(liquid)
                 val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
                     shader = LinearGradient(
-                        0f, surface, 0f, g.bottom,
-                        lerp(liquid, Color.White, 0.18f).toArgb(),
-                        lerp(liquid, Color.Black, 0.35f).toArgb(),
+                        g.left, surface, g.right, g.bottom,
+                        intArrayOf(t.highlight.toArgb(), liquid.toArgb(), t.deep.toArgb()),
+                        floatArrayOf(0f, 0.45f, 1f),
                         Shader.TileMode.CLAMP,
                     )
                 }

@@ -17,6 +17,8 @@ import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -66,26 +68,28 @@ private val GlassOnLight = GlassStyle(Color(0xFF8C9199), Color(0xFF5F6368).copy(
 @Composable
 private fun glassStyle(): GlassStyle = if (MaterialTheme.colorScheme.isLight) GlassOnLight else GlassOnDark
 
-/** Cómo se dibuja el vidrio. CLASSIC es el de siempre; los otros son prototipos para elegir. */
-enum class GlassLook { CLASSIC, CRYSTAL, MINIMAL, FLAT, LIQUID_GLASS }
+/** Cómo se dibuja el vidrio. LIQUID_GLASS es el de la app; CLASSIC queda para comparar en debug. */
+enum class GlassLook { CLASSIC, LIQUID_GLASS }
 
 /**
- * Colores del líquido "Liquid Glass", calculados del color base: brillo (más claro), sombra (más
- * oscura y más saturada, nunca gris) y resplandor (el tono más vivo, para el rebote de luz).
+ * Colores del líquido "Liquid Glass": brillo (más claro), sombra (más oscura y más saturada, nunca
+ * gris) y resplandor (el tono más vivo, para el rebote de luz). Se calculan del color base con
+ * tonos vecinos, o vienen de la firma de un elemento especial ([ElementSignatures]).
  */
-private class LiquidTones(base: Color) {
-    val highlight: Color
-    val deep: Color
-    val glow: Color
-
-    init {
-        val hsv = FloatArray(3)
-        android.graphics.Color.colorToHSV(base.toArgb(), hsv)
-        fun tone(s: Float, v: Float, alpha: Float = base.alpha) =
-            Color.hsv(hsv[0], s.coerceIn(0f, 1f), v.coerceIn(0f, 1f), alpha)
-        highlight = tone(hsv[1] * 0.75f, hsv[2] * 0.4f + 0.6f)
-        deep = tone(hsv[1] * 1.25f + 0.1f, hsv[2] * 0.5f)
-        glow = tone(hsv[1] * 0.95f + 0.05f, 1f)
+class LiquidTones(val highlight: Color, val deep: Color, val glow: Color) {
+    companion object {
+        fun from(base: Color): LiquidTones {
+            val hsv = FloatArray(3)
+            android.graphics.Color.colorToHSV(base.toArgb(), hsv)
+            // Tonos vecinos (no solo más claro u oscuro): el líquido pasa por varios matices, como la luz real
+            fun tone(hueShift: Float, s: Float, v: Float) =
+                Color.hsv((hsv[0] + hueShift + 360f) % 360f, s.coerceIn(0f, 1f), v.coerceIn(0f, 1f), base.alpha)
+            return LiquidTones(
+                highlight = tone(14f, hsv[1] * 0.75f, hsv[2] * 0.4f + 0.6f),
+                deep = tone(-16f, hsv[1] * 1.25f + 0.1f, hsv[2] * 0.5f),
+                glow = tone(6f, hsv[1] * 0.95f + 0.05f, 1f),
+            )
+        }
     }
 }
 
@@ -117,7 +121,9 @@ fun VesselView(
     refraction: Boolean = false,
     /** Pantalla principal: el líquido se inclina con el teléfono y hace ondas al tocarlo. */
     interactive: Boolean = false,
-    look: GlassLook = GlassLook.CLASSIC,
+    look: GlassLook = GlassLook.LIQUID_GLASS,
+    /** Tonos propios (firma de un elemento); si no, se calculan del color del líquido. */
+    tones: LiquidTones? = null,
 ) {
     val glassShader = remember { createGlassShader() }
     val glass = glassStyle()
@@ -184,11 +190,11 @@ fun VesselView(
                 val surfaceOffset: (Float) -> Float = { xn -> slope * (xn - 0.5f) * g.width + ripples.offset(xn, now, g) }
                 clipRect {
                     // Estilo plano: el vidrio tiene un tinte propio detrás del líquido
-                    if (look == GlassLook.FLAT) drawPath(g.interior, glass.outline.copy(alpha = 0.12f))
-                    if (look == GlassLook.LIQUID_GLASS) drawFrostedBody(g, animatedColor, glass)
+                    val liquidTones = tones ?: LiquidTones.from(animatedColor)
+                    if (look == GlassLook.LIQUID_GLASS) drawFrostedBody(g, liquidTones, glass)
                     drawLiquid(
                         g, animatedFill, animatedColor, t, waving = animate || interactive, behavior = behavior,
-                        sloshAge = sloshAge, surfaceOffset = surfaceOffset, look = look,
+                        sloshAge = sloshAge, surfaceOffset = surfaceOffset, look = look, tones = liquidTones,
                     )
                     particles.drawInLiquid(this, g, animatedFill, bubbleColor, animatedColor)
                 }
@@ -218,10 +224,7 @@ fun VesselView(
                 }
                 when (look) {
                     GlassLook.CLASSIC -> drawGlass(g, glass)
-                    GlassLook.CRYSTAL -> drawGlassCrystal(g, glass)
-                    GlassLook.MINIMAL -> drawGlassMinimal(g, glass)
-                    GlassLook.FLAT -> drawGlassFlat(g, glass)
-                    GlassLook.LIQUID_GLASS -> drawGlassLiquid(g, glass, animatedColor)
+                    GlassLook.LIQUID_GLASS -> drawGlassLiquid(g, glass, tones ?: LiquidTones.from(animatedColor))
                 }
                 particles.drawVapor(
                     this,
@@ -246,10 +249,11 @@ fun MiniVessel(
     modifier: Modifier = Modifier,
     /** Fase 0..1 del burbujeo suave (recipiente actual de la repisa); null = quieto. */
     bubbles: Float? = null,
+    tones: LiquidTones? = null,
 ) {
     Canvas(modifier) {
         val g = VesselGeometry.fit(shape, size.width, size.height, strokeWidth = 1.5f * density)
-        drawLiquid(g, fill, liquidColor, t = 0f, waving = false)
+        drawLiquid(g, fill, liquidColor, t = 0f, waving = false, look = GlassLook.LIQUID_GLASS, tones = tones)
         if (bubbles != null && fill > 0.08f) {
             clipPath(g.interior) {
                 clipRect(top = g.surfaceY(fill)) {
@@ -321,6 +325,7 @@ private fun DrawScope.drawLiquid(
     /** Desplazamiento extra de la superficie (px) en cada punto 0..1 a lo ancho: inclinación y ondas. */
     surfaceOffset: (Float) -> Float = { 0f },
     look: GlassLook = GlassLook.CLASSIC,
+    tones: LiquidTones? = null,
 ) {
     if (fill <= 0.001f) return
     clipPath(g.interior) {
@@ -361,7 +366,7 @@ private fun DrawScope.drawLiquid(
             }
         }
 
-        val tones = if (look == GlassLook.LIQUID_GLASS) LiquidTones(liquid) else null
+        val tones = if (look == GlassLook.LIQUID_GLASS) tones ?: LiquidTones.from(liquid) else null
         // Capa de atrás, un poco más alta y oscura: da profundidad a la superficie
         if (waving) {
             val backColor = tones?.highlight?.copy(alpha = 0.6f) ?: lerp(liquid, Color.Black, 0.25f).copy(alpha = 0.55f)
@@ -494,81 +499,41 @@ private fun DrawScope.drawMarks(g: VesselGeometry, color: Color) {
 /** Dónde poner el reflejo: a la izquierda del cuerpo, a media altura del líquido posible. */
 private fun reflexX(g: VesselGeometry): Float = g.px(0.5f - g.halfWidth(g.maxFill * 0.45f) * 0.62f)
 
-/**
- * Prototipo A, cristal realista: pared con degradado (bordes más brillantes), filo interior
- * claro, velo translúcido, reflejo vertical y destello, labio en elipse (en 3D) y sombra suave.
- */
-private fun DrawScope.drawGlassCrystal(g: VesselGeometry, glass: GlassStyle) {
-    val base = glass.outline
-    // Sombra bajo el recipiente
-    val shadowW = g.width * 0.9f
-    drawOval(
-        Brush.radialGradient(listOf(Color.Black.copy(alpha = 0.45f), Color.Transparent), Offset(g.px(0.5f), g.bottom + g.stroke * 0.5f), shadowW / 2),
-        topLeft = Offset(g.px(0.5f) - shadowW / 2, g.bottom - g.stroke),
-        size = Size(shadowW, g.stroke * 4f),
-    )
-    // Velo del vidrio sobre el líquido: más claro en los bordes
-    drawPath(
-        g.interior,
-        Brush.horizontalGradient(
-            listOf(Color.White.copy(alpha = 0.12f), Color.White.copy(alpha = 0.02f), Color.Transparent, Color.White.copy(alpha = 0.08f)),
-            startX = g.left,
-            endX = g.right,
-        ),
-    )
-    // Pared: degradado a lo ancho y filo interior brillante
-    val wall = Brush.horizontalGradient(
-        listOf(Color.White.copy(alpha = 0.95f), base.copy(alpha = 0.55f), base.copy(alpha = 0.3f), base.copy(alpha = 0.55f), Color.White.copy(alpha = 0.9f)),
-        startX = g.left,
-        endX = g.right,
-    )
-    drawPath(g.bodyOutline, wall, style = Stroke(width = g.stroke * 1.1f, cap = StrokeCap.Round, join = StrokeJoin.Round))
-    drawPath(g.bodyOutline, Color.White.copy(alpha = 0.5f), style = Stroke(width = g.stroke * 0.22f, cap = StrokeCap.Round, join = StrokeJoin.Round))
-    // Reflejo vertical suave y un destello
-    clipPath(g.interior) {
-        val x = reflexX(g)
-        val bandW = g.width * 0.08f
-        drawRect(
-            Brush.horizontalGradient(listOf(Color.Transparent, Color.White.copy(alpha = 0.28f), Color.Transparent), startX = x - bandW, endX = x + bandW),
-            topLeft = Offset(x - bandW, g.mouthY),
-            size = Size(bandW * 2, g.bottom - g.mouthY),
-        )
-        drawCircle(Color.White.copy(alpha = 0.8f), g.stroke * 0.7f, Offset(x + bandW * 0.6f, g.py(g.maxFill * 0.25f)))
-    }
-    drawMarks(g, Color.White.copy(alpha = 0.4f))
-    // Boca: labio en elipse, como si se viera un poco desde arriba
-    val (u0, u1, _) = g.lip ?: Triple(0f, 1f, 0f)
-    val mouthW = g.px(u1) - g.px(u0)
-    val ellipseH = mouthW * 0.24f
-    drawOval(Color.White.copy(alpha = 0.06f), topLeft = Offset(g.px(u0), g.top), size = Size(mouthW, ellipseH))
-    drawOval(wall, topLeft = Offset(g.px(u0), g.top), size = Size(mouthW, ellipseH), style = Stroke(width = g.stroke * 0.9f))
-}
-
 /** Liquid Glass: cuerpo de vidrio esmerilado (detrás del líquido) con un tinte del líquido. */
-private fun DrawScope.drawFrostedBody(g: VesselGeometry, liquid: Color, glass: GlassStyle) {
+private fun DrawScope.drawFrostedBody(g: VesselGeometry, tones: LiquidTones, glass: GlassStyle) {
     val light = glass === GlassOnLight
-    val tones = LiquidTones(liquid)
-    drawPath(
-        g.interior,
-        Brush.linearGradient(
-            listOf(
-                Color.White.copy(alpha = if (light) 0.7f else 0.13f),
-                Color.White.copy(alpha = if (light) 0.35f else 0.04f),
-                tones.glow.copy(alpha = if (light) 0.12f else 0.08f),
-            ),
-            start = Offset(g.left, g.top),
-            end = Offset(g.right, g.bottom),
+    val frost = Brush.linearGradient(
+        listOf(
+            Color.White.copy(alpha = if (light) 0.7f else 0.13f),
+            Color.White.copy(alpha = if (light) 0.35f else 0.04f),
+            tones.glow.copy(alpha = if (light) 0.12f else 0.08f),
         ),
+        start = Offset(g.left, g.top),
+        end = Offset(g.right, g.bottom),
     )
+    if (g.lip != null) {
+        // Empieza bajo el aro del labio, sin encimarse en él
+        clipRect(top = g.wallTop) { drawPath(g.interior, frost) }
+        return
+    }
+    // El vaso no tiene labio: el esmerilado llena el pico y se desvanece hacia la boca, sin un corte recto
+    drawContext.canvas.saveLayer(Rect(g.left - g.width, g.top - g.stroke, g.right + g.width, g.bottom + g.stroke), Paint())
+    drawPath(g.glassArea, frost)
+    drawRect(
+        Brush.verticalGradient(listOf(Color.Transparent, Color.Black), startY = g.top, endY = g.top + g.height * 0.14f),
+        topLeft = Offset(g.left - g.width, g.top - g.stroke),
+        size = Size(g.width * 3f, g.height + g.stroke * 2f),
+        blendMode = BlendMode.DstIn,
+    )
+    drawContext.canvas.restore()
 }
 
 /**
- * Prototipo D, Liquid Glass: resplandor del líquido bajo el recipiente, reflejo cilíndrico y
+ * Liquid Glass: resplandor del líquido bajo el recipiente, reflejo cilíndrico y
  * borde especular en diagonal (blanco arriba a la izquierda, teñido del líquido abajo a la derecha).
  */
-private fun DrawScope.drawGlassLiquid(g: VesselGeometry, glass: GlassStyle, liquid: Color) {
+private fun DrawScope.drawGlassLiquid(g: VesselGeometry, glass: GlassStyle, tones: LiquidTones) {
     val light = glass === GlassOnLight
-    val tones = LiquidTones(liquid)
     // Resplandor cáustico: la luz que atraviesa el líquido pinta la mesa
     val glowW = g.width * 1.1f
     val glowCenter = Offset(g.px(0.5f), g.bottom)
@@ -577,19 +542,25 @@ private fun DrawScope.drawGlassLiquid(g: VesselGeometry, glass: GlassStyle, liqu
         topLeft = Offset(glowCenter.x - glowW / 2, g.bottom - g.stroke * 2f),
         size = Size(glowW, g.stroke * 6f),
     )
-    // Reflejo cilíndrico a la izquierda
+    // Reflejo que sigue la curva del vidrio (cono, bola, cuello), con un núcleo más nítido
     clipPath(g.interior) {
-        val x = reflexX(g)
-        val bandW = g.width * 0.1f
-        drawRect(
-            Brush.horizontalGradient(
-                listOf(Color.Transparent, Color.White.copy(alpha = if (light) 0.55f else 0.3f), Color.White.copy(alpha = 0.04f), Color.Transparent),
-                startX = x - bandW,
-                endX = x + bandW,
-            ),
-            topLeft = Offset(x - bandW, g.mouthY),
-            size = Size(bandW * 2, g.bottom - g.mouthY),
-        )
+        clipRect(top = g.wallTop) {
+        val ribbon = Path()
+        val topV = (g.bottom - g.mouthY) / g.height
+        val steps = 48
+        val vs = List(steps + 1) { 0.08f + (topV - 0.1f) * it / steps }
+        val xs = vs.map { g.halfWidth(it) }
+        // Promedio móvil: el reflejo dobla en curva donde el cuello se une al cuerpo, sin quiebre
+        val window = 4
+        vs.forEachIndexed { i, v ->
+            val near = xs.subList(maxOf(0, i - window), minOf(steps, i + window) + 1)
+            val x = g.px(0.5f - near.average().toFloat() * 0.68f)
+            if (i == 0) ribbon.moveTo(x, g.py(v)) else ribbon.lineTo(x, g.py(v))
+        }
+        val ribbonW = g.width * 0.075f
+        drawPath(ribbon, Color.White.copy(alpha = if (light) 0.6f else 0.26f), style = Stroke(width = ribbonW, cap = StrokeCap.Round, join = StrokeJoin.Round))
+        drawPath(ribbon, Color.White.copy(alpha = if (light) 0.85f else 0.42f), style = Stroke(width = ribbonW * 0.28f, cap = StrokeCap.Round, join = StrokeJoin.Round))
+    }
     }
     drawMarks(g, if (light) Color.Black.copy(alpha = 0.25f) else Color.White.copy(alpha = 0.38f))
     // Borde especular: en el tema claro el blanco no se vería, así que arranca en gris azulado
@@ -601,39 +572,19 @@ private fun DrawScope.drawGlassLiquid(g: VesselGeometry, glass: GlassStyle, liqu
         start = Offset(g.left, g.top),
         end = Offset(g.right, g.bottom),
     )
-    drawPath(g.bodyOutline, rim, style = Stroke(width = g.stroke * 0.85f, cap = StrokeCap.Round, join = StrokeJoin.Round))
+    val rimStroke = Stroke(width = g.stroke * 0.85f, cap = StrokeCap.Round, join = StrokeJoin.Round)
+    if (g.shape == VesselShape.GRADUATED_CYLINDER) {
+        // El pie de la probeta es vidrio macizo: sin el rebote de color del líquido
+        val footTop = g.py(g.cylinderFloor)
+        clipRect(top = g.wallTop, bottom = footTop) { drawPath(g.bodyOutline, rim, style = rimStroke) }
+        clipRect(top = footTop) {
+            drawPath(g.bodyOutline, (if (light) Color(0xFF8A96A8) else Color.White).copy(alpha = 0.55f), style = rimStroke)
+        }
+    } else {
+        clipRect(top = g.wallTop) { drawPath(g.bodyOutline, rim, style = rimStroke) }
+    }
     g.lip?.let { (u0, u1, h) ->
         drawRoundRect(rim, topLeft = Offset(g.px(u0), g.top), size = Size(g.px(u1) - g.px(u0), h), cornerRadius = CornerRadius(h / 2), style = Stroke(width = g.stroke * 0.7f))
-    }
-}
-
-/** Prototipo B, minimal moderno: trazo fino que se desvanece hacia la boca y un solo reflejo. */
-private fun DrawScope.drawGlassMinimal(g: VesselGeometry, glass: GlassStyle) {
-    val base = glass.outline
-    val fade = Brush.verticalGradient(listOf(base.copy(alpha = 0.15f), base.copy(alpha = 0.95f)), startY = g.top, endY = g.bottom)
-    drawPath(g.bodyOutline, fade, style = Stroke(width = g.stroke * 0.55f, cap = StrokeCap.Round, join = StrokeJoin.Round))
-    g.lip?.let { (u0, u1, _) ->
-        drawLine(base.copy(alpha = 0.3f), Offset(g.px(u0), g.top + g.stroke), Offset(g.px(u1), g.top + g.stroke), g.stroke * 0.5f, StrokeCap.Round)
-    }
-    clipPath(g.interior) {
-        val x = reflexX(g)
-        drawLine(Color.White.copy(alpha = 0.22f), Offset(x, g.py(g.maxFill * 0.85f)), Offset(x, g.py(g.maxFill * 0.2f)), g.stroke * 0.6f, StrokeCap.Round)
-    }
-}
-
-/** Prototipo C, ilustración plana: contorno de dos tonos, labio sólido y reflejo como franja. */
-private fun DrawScope.drawGlassFlat(g: VesselGeometry, glass: GlassStyle) {
-    val base = glass.outline
-    drawPath(g.bodyOutline, lerp(base, Color.Black, 0.3f), style = Stroke(width = g.stroke * 1.35f, cap = StrokeCap.Round, join = StrokeJoin.Round))
-    drawPath(g.bodyOutline, lerp(base, Color.White, 0.35f), style = Stroke(width = g.stroke * 0.45f, cap = StrokeCap.Round, join = StrokeJoin.Round))
-    clipPath(g.interior) {
-        val x = reflexX(g)
-        val bandW = g.width * 0.05f
-        drawRect(Color.White.copy(alpha = 0.22f), topLeft = Offset(x - bandW, g.mouthY), size = Size(bandW, g.bottom - g.mouthY))
-    }
-    drawMarks(g, lerp(base, Color.White, 0.35f).copy(alpha = 0.7f))
-    g.lip?.let { (u0, u1, h) ->
-        drawRoundRect(lerp(base, Color.White, 0.2f), topLeft = Offset(g.px(u0), g.top), size = Size(g.px(u1) - g.px(u0), h), cornerRadius = CornerRadius(h / 2))
     }
 }
 

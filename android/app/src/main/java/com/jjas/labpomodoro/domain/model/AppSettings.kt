@@ -59,6 +59,8 @@ data class AppSettings(
     val guideSeen: Boolean = false,
     /** Ya se pidió una vez permitir las alarmas exactas (Android 14+ las niega al instalar). */
     val exactAlarmAsked: Boolean = false,
+    /** Paleta de laboratorio para los colores de los recipientes (Pro). */
+    val labPalette: LabPalette = LabPalette.CLASSIC,
     /**
      * Elemento que tiñe los recipientes de trabajo. 0 = automático: uno distinto de tu
      * colección en cada sesión.
@@ -87,6 +89,9 @@ data class AppSettings(
     val ambientActive: Boolean get() = isPro && ambientMode
 
     val dynamicColorActive: Boolean get() = isPro && dynamicColor
+
+    /** La paleta elegida solo cuenta con Pro; si no, la clásica. */
+    val activePalette: LabPalette get() = if (isPro) labPalette else LabPalette.CLASSIC
 
     companion object {
         val AMBIENT_DELAYS = listOf(3, 5)

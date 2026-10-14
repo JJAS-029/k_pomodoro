@@ -15,7 +15,9 @@ import com.jjas.labpomodoro.timer.TimerState
 import com.jjas.labpomodoro.ui.components.DotState
 import com.jjas.labpomodoro.ui.components.ElementBehavior
 import com.jjas.labpomodoro.ui.components.LiquidEffect
+import com.jjas.labpomodoro.ui.components.ElementSignatures
 import com.jjas.labpomodoro.ui.components.LiquidPalette
+import com.jjas.labpomodoro.ui.components.LiquidTones
 import com.jjas.labpomodoro.ui.components.PlanDot
 import com.jjas.labpomodoro.ui.components.ShelfItemUi
 import com.jjas.labpomodoro.ui.components.UpNext
@@ -85,6 +87,9 @@ data class VesselUi(
 ) {
     val behavior: ElementBehavior? get() = element?.look()?.behavior
 
+    /** Tonos de firma si el elemento tiene una (oro, mercurio…); si no, se calculan del color. */
+    val tones: LiquidTones? get() = element?.let { ElementSignatures.tones(it.atomicNumber) }
+
     companion object {
         /** Vaso con líquido y quieto, antes de empezar o al terminar. */
         val Resting = VesselUi(VesselShape.BEAKER, 0.8f, NeonGreen.copy(alpha = 0.8f), Color.Transparent, LiquidEffect.NONE, animate = false)
@@ -153,7 +158,7 @@ class TimerViewModel @Inject constructor(
                 fun reagent(i: Int): Element? =
                     VesselReagents.reagent(timer.plan, i, timer.planSeed, pool, settings.vesselElement)
                 fun liquid(i: Int): Color =
-                    reagent(i)?.look()?.color ?: LiquidPalette.liquid(timer.plan[i].type, timer.planSeed, i)
+                    reagent(i)?.look()?.color ?: LiquidPalette.liquid(timer.plan[i].type, timer.planSeed, i, settings.activePalette)
                 TimerUi.Active(
                     type = timer.current.type,
                     remainingMillis = remaining,
@@ -166,7 +171,7 @@ class TimerViewModel @Inject constructor(
                         shape = LiquidPalette.vessel(timer.planSeed, timer.index),
                         fill = if (type == SessionType.WORK) 1f - progress else progress,
                         liquid = liquid(timer.index),
-                        bubbles = LiquidPalette.bubble(type, timer.planSeed, timer.index),
+                        bubbles = LiquidPalette.bubble(type, timer.planSeed, timer.index, settings.activePalette),
                         effect = if (type == SessionType.WORK) LiquidEffect.VAPOR else LiquidEffect.BUBBLES,
                         animate = !timer.isPaused,
                         element = reagent(timer.index),
@@ -203,6 +208,7 @@ class TimerViewModel @Inject constructor(
                             },
                             isCurrent = i == timer.index,
                             skipped = i in timer.skippedIndices,
+                            tones = reagent(i)?.let { ElementSignatures.tones(it.atomicNumber) },
                         )
                     },
                 )

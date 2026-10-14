@@ -223,4 +223,12 @@
     <string name="set_exact_alarms">Alarms and reminders</string>
     <string name="set_exact_alarms_off">Off: with the screen off, a session may end a little late. Tap to allow.</string>
     <string name="set_add_home_screen_light">Add the light widget</string>
+    <string name="set_palette">Lab palette</string>
+    <string name="set_palette_desc">The colors of your vessels. Vessels with an element from your collection keep its color.</string>
+    <string name="set_palette_classic">Classic</string>
+    <string name="set_palette_neon">Neon</string>
+    <string name="set_palette_sunset">Sunset</string>
+    <string name="set_palette_ocean">Ocean</string>
+    <string name="set_palette_aurora">Aurora</string>
+    <string name="set_palette_pastel">Pastel</string>
 </resources>

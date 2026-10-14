@@ -24,19 +24,27 @@ import com.jjas.labpomodoro.ui.components.VesselShape
 import com.jjas.labpomodoro.ui.components.VesselView
 import com.jjas.labpomodoro.ui.theme.LabPomodoroTheme
 
-/** Compara los estilos de vidrio con las seis formas. Extra "light" = true: tema claro. */
+/**
+ * Compara los estilos de vidrio con las seis formas. Extra "light" = true: tema claro;
+ * "big" = true: solo Liquid Glass, tres por fila y más altos, para revisar bocas y bordes.
+ */
 class GlassPreviewActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val light = intent.getBooleanExtra("light", false)
+        val big = intent.getBooleanExtra("big", false)
+        val looks = if (big) listOf(GlassLook.LIQUID_GLASS) else GlassLook.entries
+        val perRow = if (big) 3 else VesselShape.entries.size
         setContent {
             LabPomodoroTheme(darkTheme = !light) {
                 Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
                     Column(Modifier.safeDrawingPadding().padding(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        GlassLook.entries.forEach { look ->
+                        looks.forEach { look ->
                             Text(look.name, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onBackground)
-                            Row(Modifier.fillMaxWidth().height(128.dp)) {
-                                VesselShape.entries.forEachIndexed { i, shape ->
+                            VesselShape.entries.chunked(perRow).forEachIndexed { row, shapes ->
+                            Row(Modifier.fillMaxWidth().height(if (big) 330.dp else 170.dp)) {
+                                shapes.forEachIndexed { j, shape ->
+                                    val i = row * perRow + j
                                     VesselView(
                                         shape = shape,
                                         fill = 0.6f,
@@ -48,6 +56,7 @@ class GlassPreviewActivity : ComponentActivity() {
                                         modifier = Modifier.weight(1f).fillMaxSize(),
                                     )
                                 }
+                            }
                             }
                         }
                     }

@@ -41,6 +41,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.AlertDialog
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -64,6 +69,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jjas.labpomodoro.BuildConfig
 import com.jjas.labpomodoro.R
+import com.jjas.labpomodoro.domain.model.LabPalette
 import com.jjas.labpomodoro.service.requestExactAlarms
 import com.jjas.labpomodoro.service.canScheduleExactAlarms
 import com.jjas.labpomodoro.ads.AdBanner
@@ -117,6 +123,8 @@ fun SettingsScreen(
                     onAmbientChange = viewModel::setAmbientMode,
                     onAmbientDelayChange = viewModel::setAmbientDelayMinutes,
                     onDynamicColorChange = viewModel::setDynamicColor,
+                    onPaletteChange = viewModel::setLabPalette,
+                    onOpenPro = onOpenPro,
                     onResetVesselElement = viewModel::resetVesselElement,
                     onReminderChange = viewModel::setReminder,
                     onReminderHourChange = viewModel::setReminderHour,
@@ -180,6 +188,8 @@ private fun SettingsContent(
     onAmbientChange: (Boolean) -> Unit,
     onAmbientDelayChange: (Int) -> Unit,
     onDynamicColorChange: (Boolean) -> Unit,
+    onPaletteChange: (LabPalette) -> Unit = {},
+    onOpenPro: () -> Unit = {},
     modifier: Modifier = Modifier,
     onResetVesselElement: () -> Unit = {},
     onReminderChange: (Boolean) -> Unit = {},
@@ -358,6 +368,13 @@ private fun SettingsContent(
             },
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.height(12.dp))
+        PaletteChooser(
+            selected = settings.activePalette,
+            isPro = settings.isPro,
+            onSelect = onPaletteChange,
+            onOpenPro = onOpenPro,
         )
 
         SectionTitle(proTitle(R.string.set_section_focus_sound, settings.isPro))
@@ -583,4 +600,33 @@ private fun ReviewCodeDialog(onRedeem: (String) -> Boolean, onDismiss: () -> Uni
             }
         },
     )
+}
+
+/** Paletas de laboratorio (Pro): cada opción muestra tres pomodoros y los dos descansos. */
+@Composable
+private fun PaletteChooser(selected: LabPalette, isPro: Boolean, onSelect: (LabPalette) -> Unit, onOpenPro: () -> Unit) {
+    Text(stringResource(R.string.set_palette), style = MaterialTheme.typography.bodyLarge)
+    Text(
+        stringResource(if (isPro) R.string.set_palette_desc else R.string.set_available_in_pro),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    Spacer(Modifier.height(8.dp))
+    Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        LabPalette.entries.forEach { palette ->
+            FilterChip(
+                selected = palette == selected,
+                onClick = { if (isPro) onSelect(palette) else onOpenPro() },
+                label = { Text(stringResource(palette.labelRes)) },
+                leadingIcon = {
+                    // Muestra: tres pomodoros de la gama y los dos descansos
+                    Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                        val swatches = listOf(0.1f, 0.5f, 0.9f).map { Color.hsl(palette.hueAt(it), palette.saturation, palette.lightness) } +
+                            listOf(Color(palette.shortBreak), Color(palette.longBreak))
+                        swatches.forEach { Box(Modifier.size(8.dp).background(it, CircleShape)) }
+                    }
+                },
+            )
+        }
+    }
 }

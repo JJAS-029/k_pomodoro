@@ -12,6 +12,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import com.jjas.labpomodoro.BuildConfig
 import com.jjas.labpomodoro.domain.model.AppSettings
 import com.jjas.labpomodoro.domain.model.FocusSound
+import com.jjas.labpomodoro.domain.model.LabPalette
 import com.jjas.labpomodoro.domain.model.PlanRounding
 import com.jjas.labpomodoro.domain.model.SessionConfig
 import kotlinx.coroutines.flow.Flow
@@ -61,6 +62,8 @@ class SettingsRepository @Inject constructor(
     suspend fun setGuideSeen() = dataStore.edit { it[Keys.GUIDE_SEEN] = true }
 
     suspend fun setExactAlarmAsked() = dataStore.edit { it[Keys.EXACT_ALARM_ASKED] = true }
+
+    suspend fun setLabPalette(palette: LabPalette) = dataStore.edit { it[Keys.LAB_PALETTE] = palette.name }
 
     suspend fun setVesselElement(atomicNumber: Int) = dataStore.edit { it[Keys.VESSEL_ELEMENT] = atomicNumber }
 
@@ -140,6 +143,7 @@ class SettingsRepository @Inject constructor(
             proReview = this[Keys.PRO_REVIEW] ?: defaults.proReview,
             guideSeen = this[Keys.GUIDE_SEEN] ?: defaults.guideSeen,
             exactAlarmAsked = this[Keys.EXACT_ALARM_ASKED] ?: defaults.exactAlarmAsked,
+            labPalette = this[Keys.LAB_PALETTE]?.let { name -> LabPalette.entries.firstOrNull { it.name == name } } ?: defaults.labPalette,
             vesselElement = this[Keys.VESSEL_ELEMENT] ?: defaults.vesselElement,
             focusSound = this[Keys.FOCUS_SOUND]?.let { name -> FocusSound.entries.firstOrNull { it.name == name } } ?: defaults.focusSound,
             focusVolume = this[Keys.FOCUS_VOLUME] ?: defaults.focusVolume,
@@ -176,6 +180,7 @@ class SettingsRepository @Inject constructor(
         val PRO_REVIEW = booleanPreferencesKey("pro_review")
         val GUIDE_SEEN = booleanPreferencesKey("guide_seen")
         val EXACT_ALARM_ASKED = booleanPreferencesKey("exact_alarm_asked")
+        val LAB_PALETTE = stringPreferencesKey("lab_palette")
         val PRO_PURCHASED = booleanPreferencesKey("pro_purchased")
         val VESSEL_ELEMENT = intPreferencesKey("vessel_element")
         val FOCUS_SOUND = stringPreferencesKey("focus_sound")

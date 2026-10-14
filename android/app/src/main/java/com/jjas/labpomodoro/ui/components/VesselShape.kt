@@ -81,9 +81,13 @@ class VesselGeometry private constructor(
         return when (shape) {
             VesselShape.BEAKER -> 0.46f
             VesselShape.TEST_TUBE -> 0.3f
+            // Cono que se curva al llegar al cuello (hombros suaves)
             VesselShape.ERLENMEYER -> when {
-                v >= 0.6f -> 0.12f
-                v >= 0.13f -> 0.44f + (0.12f - 0.44f) * (v - 0.13f) / 0.47f
+                v >= 0.66f -> 0.12f
+                v >= 0.13f -> {
+                    val k = (v - 0.13f) / 0.53f
+                    0.44f + (0.12f - 0.44f) * (k * (2f - k))
+                }
                 else -> 0.4f
             }
             VesselShape.ROUND_FLASK, VesselShape.VOLUMETRIC_FLASK -> {
@@ -102,6 +106,9 @@ class VesselGeometry private constructor(
         else -> py(0.94f)
     }
 
+    /** Área del vidrio para el esmerilado: en el vaso incluye el pico, que el interior no lleva. */
+    val glassArea: Path = Path().apply { body(closed = false); close() }
+
     /** Silueta cerrada del interior, para recortar el líquido y las burbujas. */
     val interior: Path = Path().apply { body(closed = true) }
 
@@ -113,7 +120,8 @@ class VesselGeometry private constructor(
         VesselShape.ROUND_FLASK -> Triple(0.33f, 0.67f, height * 0.06f)
         VesselShape.VOLUMETRIC_FLASK -> Triple(0.36f, 0.64f, height * 0.06f)
         // La probeta es muy alta: el labio va por ancho para no quedar grueso
-        VesselShape.GRADUATED_CYLINDER -> Triple(0.17f, 0.83f, width * 0.12f)
+        // Alto igual al tramo sobre las paredes (py(0.96)), para que el labio y las paredes se toquen
+        VesselShape.GRADUATED_CYLINDER -> Triple(0.12f, 0.88f, height * 0.04f)
     }
 
     /** El vidrio sin el labio (con el pie de la probeta): cada estilo dibuja la boca a su manera. */
@@ -124,6 +132,12 @@ class VesselGeometry private constructor(
             addRoundRect(RoundRect(left, bottom - foot, right, bottom, CornerRadius(foot / 2)))
         }
     }
+
+    /**
+     * Dónde empiezan las paredes bajo el labio: el borde exterior de su trazo, para que las puntas
+     * de las paredes no se encimen en el aro. En el vaso, que no lleva labio, la boca.
+     */
+    val wallTop: Float get() = lip?.let { (_, _, h) -> maxOf(mouthY, top + h) + stroke * 0.35f } ?: (top - stroke)
 
     /** Contorno del vidrio (abierto arriba) más el borde/labio. */
     val outline: Path = Path().apply {
@@ -146,14 +160,15 @@ class VesselGeometry private constructor(
                     )
                     return
                 }
+                // Pico vertedor curvo
                 moveTo(left - lip, top)
-                lineTo(left, top + lip)
+                quadraticTo(left - lip * 0.05f, top + lip * 0.2f, left, top + lip * 1.4f)
                 lineTo(left, bottom - r)
                 arcTo(Rect(left, bottom - 2 * r, left + 2 * r, bottom), 180f, -90f, false)
                 lineTo(right - r, bottom)
                 arcTo(Rect(right - 2 * r, bottom - 2 * r, right, bottom), 90f, -90f, false)
-                lineTo(right, top + lip)
-                lineTo(right + lip, top)
+                lineTo(right, top + lip * 1.4f)
+                quadraticTo(right + lip * 0.05f, top + lip * 0.2f, right + lip, top)
             }
 
             VesselShape.TEST_TUBE -> {
@@ -170,13 +185,14 @@ class VesselGeometry private constructor(
 
             VesselShape.ERLENMEYER -> {
                 val neckTop = py(0.94f)
+                // Hombros curvos del cuello al cono y base redondeada
                 moveTo(px(0.37f), neckTop)
-                lineTo(px(0.37f), py(0.6f))
-                lineTo(px(0.04f), py(0.13f))
+                lineTo(px(0.37f), py(0.66f))
+                cubicTo(px(0.37f), py(0.56f), px(0.12f), py(0.3f), px(0.04f), py(0.13f))
                 quadraticTo(px(0f), py(0f), px(0.14f), py(0f))
                 lineTo(px(0.86f), py(0f))
                 quadraticTo(px(1f), py(0f), px(0.96f), py(0.13f))
-                lineTo(px(0.63f), py(0.6f))
+                cubicTo(px(0.88f), py(0.3f), px(0.63f), py(0.56f), px(0.63f), py(0.66f))
                 lineTo(px(0.63f), neckTop)
                 if (closed) close()
             }
