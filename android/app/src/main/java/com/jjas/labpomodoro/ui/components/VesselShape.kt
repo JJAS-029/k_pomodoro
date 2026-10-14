@@ -15,6 +15,12 @@ enum class VesselShape(val aspect: Float) {
     ERLENMEYER(0.72f),
     TEST_TUBE(0.3f),
     ROUND_FLASK(0.69f),
+
+    /** Probeta graduada: alta y angosta, con pie ancho y marcas finas. */
+    GRADUATED_CYLINDER(0.3f),
+
+    /** Matraz aforado: bola con cuello largo y la marca de aforo, hasta donde llega el líquido. */
+    VOLUMETRIC_FLASK(0.55f),
 }
 
 /**
@@ -38,10 +44,10 @@ class VesselGeometry private constructor(
     fun px(u: Float) = left + u * width
     fun py(v: Float) = bottom - v * height
 
-    // Matraz de fondo redondo: esfera de diámetro = ancho y cuello centrado
+    // Matraces de bola (fondo redondo y aforado): esfera de diámetro = ancho y cuello centrado
     private val sphereR = width / 2f
     private val sphereCy = bottom - sphereR
-    private val neckHalf = width * 0.13f
+    private val neckHalf = width * if (shape == VesselShape.VOLUMETRIC_FLASK) 0.1f else 0.13f
     private val neckJunctionY = sphereCy - sqrt(sphereR * sphereR - neckHalf * neckHalf)
 
     /** Nivel máximo del líquido (en v) cuando fill = 1: en los matraces llega al inicio del cuello. */
@@ -50,9 +56,24 @@ class VesselGeometry private constructor(
         VesselShape.TEST_TUBE -> 0.9f
         VesselShape.ERLENMEYER -> 0.7f
         VesselShape.ROUND_FLASK -> (bottom - neckJunctionY) / height * 0.97f
+        VesselShape.GRADUATED_CYLINDER -> 0.88f
+        // Lleno hasta la marca de aforo, en el cuello
+        VesselShape.VOLUMETRIC_FLASK -> VOLUMETRIC_MARK
     }
 
-    fun surfaceY(fill: Float) = py(fill.coerceIn(0f, 1f) * maxFill)
+    /** Arriba del pie de la probeta (v); el líquido y las partículas empiezan ahí. */
+    val cylinderFloor = 0.045f
+
+    /** Donde empieza el líquido (v): el fondo, o arriba del pie en la probeta. */
+    private val floorV = if (shape == VesselShape.GRADUATED_CYLINDER) cylinderFloor else 0f
+
+    /**
+     * Altura (v) para un nivel de llenado 0..1. En la probeta el cero está arriba del pie, para
+     * que el líquido se vea desde el primer instante y se acabe justo al terminar la sesión.
+     */
+    fun levelV(fill: Float): Float = floorV + fill * (maxFill - floorV)
+
+    fun surfaceY(fill: Float) = py(levelV(fill.coerceIn(0f, 1f)))
 
     /** Medio ancho interior (en u) a la altura v; las partículas se mantienen dentro. */
     fun halfWidth(v: Float): Float {
@@ -65,11 +86,12 @@ class VesselGeometry private constructor(
                 v >= 0.13f -> 0.44f + (0.12f - 0.44f) * (v - 0.13f) / 0.47f
                 else -> 0.4f
             }
-            VesselShape.ROUND_FLASK -> {
+            VesselShape.ROUND_FLASK, VesselShape.VOLUMETRIC_FLASK -> {
                 val y = py(v)
-                if (y < neckJunctionY) 0.12f
+                if (y < neckJunctionY) neckHalf / width * 0.9f
                 else sqrt(max(0f, sphereR * sphereR - (y - sphereCy) * (y - sphereCy))) / width * 0.9f
             }
+            VesselShape.GRADUATED_CYLINDER -> 0.24f
         }
     }
 
@@ -84,6 +106,14 @@ class VesselGeometry private constructor(
             VesselShape.TEST_TUBE -> lipRing(0f, 1f)
             VesselShape.ERLENMEYER -> lipRing(0.3f, 0.7f)
             VesselShape.ROUND_FLASK -> lipRing(0.33f, 0.67f)
+            VesselShape.VOLUMETRIC_FLASK -> lipRing(0.36f, 0.64f)
+            VesselShape.GRADUATED_CYLINDER -> {
+                // Pie ancho y labio delgado (la probeta es muy alta: el aro normal quedaría grueso)
+                val foot = height * cylinderFloor
+                addRoundRect(RoundRect(left, bottom - foot, right, bottom, CornerRadius(foot / 2)))
+                val h = width * 0.12f
+                addRoundRect(RoundRect(px(0.17f), top, px(0.83f), top + h, CornerRadius(h / 2)))
+            }
         }
     }
 
@@ -142,7 +172,16 @@ class VesselGeometry private constructor(
                 if (closed) close()
             }
 
-            VesselShape.ROUND_FLASK -> {
+            VesselShape.GRADUATED_CYLINDER -> {
+                val neckTop = py(0.96f)
+                moveTo(px(0.22f), neckTop)
+                lineTo(px(0.22f), py(cylinderFloor))
+                lineTo(px(0.78f), py(cylinderFloor))
+                lineTo(px(0.78f), neckTop)
+                if (closed) close()
+            }
+
+            VesselShape.ROUND_FLASK, VesselShape.VOLUMETRIC_FLASK -> {
                 val cx = px(0.5f)
                 val neckTop = py(0.94f)
                 val alpha = Math.toDegrees(asin((neckHalf / sphereR).toDouble())).toFloat()
@@ -161,6 +200,9 @@ class VesselGeometry private constructor(
     }
 
     companion object {
+        /** Altura (v) de la marca de aforo del matraz aforado. */
+        const val VOLUMETRIC_MARK = 0.8f
+
         /**
          * Acomoda el recipiente centrado en un Canvas de [canvasWidth] × [canvasHeight], dejando
          * [headroom] (fracción del alto) libre arriba para el vapor.

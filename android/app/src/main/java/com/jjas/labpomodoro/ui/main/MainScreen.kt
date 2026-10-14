@@ -364,6 +364,8 @@ private fun MainContent(
                         .padding(vertical = 8.dp),
                     // Pro: vidrio con refracción (Android 13+)
                     refraction = !showTitle,
+                    // Se inclina con el teléfono y hace ondas al tocarlo
+                    interactive = true,
                 )
                 when (timer) {
                     null -> CircularProgressIndicator()
@@ -765,7 +767,7 @@ fun ActiveIndicator(active: TimerUi.Active, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun Vessel(vessel: VesselUi, modifier: Modifier = Modifier, refraction: Boolean = false) {
+fun Vessel(vessel: VesselUi, modifier: Modifier = Modifier, refraction: Boolean = false, interactive: Boolean = false) {
     VesselView(
         shape = vessel.shape,
         fill = vessel.fill,
@@ -776,6 +778,7 @@ fun Vessel(vessel: VesselUi, modifier: Modifier = Modifier, refraction: Boolean 
         modifier = modifier,
         behavior = vessel.behavior,
         refraction = refraction,
+        interactive = interactive,
     )
 }
 

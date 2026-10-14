@@ -528,7 +528,61 @@ Se revisaron las tres; ninguna se agregó como dependencia porque nuestro sistem
 
 ### Ideas Pro para más adelante
 - **Más sonidos**: ✅ los generados ya están. Faltan ambientes grabados con licencia CC0 (cafetería, bosque) en loop con `ExoPlayer`/Media3 y mezclar varios a la vez.
-- **Efectos del líquido**: hervor en el último minuto, condensación en el vidrio vacío, chapoteo al cambiar de sesión, brillo tenue en modo ambiente, inclinación con el acelerómetro.
+- **Efectos del líquido**: ✅ chapoteo al cambiar de sesión. Los demás (hervor, condensación, inclinación) pasaron a *Próximas ideas*.
+
+### Próximas ideas
+
+Esfuerzo: 🟢 poco · 🟡 medio · 🔴 mucho. "Pro" es una sugerencia, se decide al hacerlo.
+
+#### Animaciones y estética (aprobadas, en este orden)
+
+| # | Idea | Qué hace | Esfuerzo | Pro |
+|---|---|---|---|---|
+| 1 | ✅ Líquido que se inclina | Con el acelerómetro, la superficie se inclina y chapotea al ladear el teléfono (se apaga en modo ambiente y PiP) | 🟡 | No |
+| 2 | ✅ Ondas al tocar | Tocar el líquido hace ondas en la superficie y salpica gotitas | 🟡 | No |
+| 3 | ✅ Probeta y matraz aforado | Dos recipientes nuevos en la rotación del plan: probeta graduada (alta, base y pico) y matraz aforado (bola, cuello largo, marca de aforo) | 🟡 | No |
+| 4 | Condensación | Durante el trabajo, gotitas en la pared del vidrio que resbalan despacio | 🟢 | No |
+| 5 | Mechero Bunsen | Llama azul bajo el recipiente en el trabajo (explica la evaporación); se apaga en los descansos | 🟢 | No |
+| 6 | Llenado en los descansos | Un chorrito cae desde arriba (bureta) mientras el recipiente se llena | 🟢 | No |
+| 7 | Burbujas que revientan | Al llegar a la superficie, cada burbuja revienta con un anillo de onda | 🟢 | No |
+| 8 | Repisa viva | El recipiente de la sesión actual burbujea suave en la repisa y los completados brillan al llenarse | 🟢 | No |
+
+Hecho: `LiquidTilt.kt` (sensor de gravedad + resorte amortiguado; sin movimiento no pide cuadros), `Ripples` y `Kind.DROP` en `VesselView` (solo con `interactive`, en la pantalla principal; vibración suave al tocar), `VesselShape.GRADUATED_CYLINDER` (pie y graduación fina) y `VOLUMETRIC_FLASK` (cuello largo, líquido hasta la marca de aforo).
+
+#### Más ideas de estética (por decidir)
+
+| Idea | Qué hace | Esfuerzo | Pro |
+|---|---|---|---|
+| Indicador al terminar | Al completar un pomodoro el líquido cambia de color como un indicador (fenolftaleína: transparente → rosa) antes del descanso | 🟢 | No |
+| Descubrimiento con tarjeta | El elemento nuevo aparece como una tarjeta que gira y brilla según su rareza, en vez de solo el aviso | 🟡 | No |
+| Hervor al final | En el último minuto de trabajo el líquido hierve (burbujas grandes y vapor más denso) para avisar sin sonido | 🟢 | No |
+| Sonidos de laboratorio | Opcionales: tintineo de vidrio al terminar y burbujeo suave (además de los avisos actuales) | 🟢 | Pro |
+| Fondos de laboratorio | Mesa de trabajo, azulejos o pizarrón detrás del recipiente (opcional, el negro sigue por defecto) | 🟡 | Pro |
+| Temas de temporada | Líquidos fluorescentes en Halloween, nieve en diciembre, etc., por unos días | 🟡 | No |
+| Vibración al tocar | Pulso háptico suave al tocar el líquido y al llenarse un recipiente | 🟢 | No |
+
+#### Funcionalidades (no estéticas, por decidir)
+
+| Idea | Qué hace | Esfuerzo | Pro |
+|---|---|---|---|
+| Etiquetas por plan | Al iniciar: "¿En qué vas a trabajar?" (Matemáticas, Tesis…); estadísticas y exportación por etiqueta | 🟡 | Gratis 3 etiquetas, Pro ilimitadas |
+| Plantillas de plan | Planes guardados ("Estudio 2 h", "Trabajo profundo 4 h") para iniciar con un toque; también desde el widget y el ícono | 🟢 | No |
+| Ajustar el plan en curso | +1 pomodoro, extender 5 min, saltar el descanso o terminar después de este pomodoro | 🟢 | No |
+| No molestar automático | Activa "No molestar" durante el trabajo y lo quita en los descansos (permiso de acceso a No molestar) | 🟢 | Pro |
+| Metas diarias y semanales | "4 pomodoros al día": anillo de progreso en la pantalla principal, racha de metas y aviso al cumplirla | 🟡 | No |
+| Notas de logro | Al terminar un pomodoro, una línea opcional "¿Qué lograste?"; historial tipo diario | 🟢 | Pro |
+| Mapa de calor anual | Cuadrícula de días del año (estilo GitHub) en Progreso | 🟢 | No |
+| Accesos directos del ícono | Mantener presionado el ícono: "Iniciar plan", "Plan corto", "Ver progreso"; y "Ok Google, inicia un pomodoro" (App Actions) | 🟢 | No |
+| Pausas activas | En los descansos, sugerencias breves: estirarse, respirar 4-7-8, tomar agua, mirar lejos 20 s | 🟢 | No |
+| Retos semanales | Retos que cambian cada semana ("3 pomodoros antes de las 9") con un elemento raro de premio | 🟡 | No |
+| Cuenta regresiva a una fecha | "Faltan 12 días para el examen" en la pantalla principal y el widget | 🟢 | No |
+| Respaldo a archivo | Exportar e importar todo el progreso a un archivo, sin cuenta de Google | 🟢 | No |
+| Estudiar con amigos | Sala compartida: varios hacen el mismo plan sincronizado y ven quién sigue concentrado | 🔴 | Pro |
+| Tienda de cristalería | Gastar elementos repetidos en recipientes y fondos cosméticos (le da otro uso a los repetidos) | 🟡 | No |
+| Tableta y horizontal | Diseño a dos columnas en tabletas y plegables, y pantalla principal en horizontal | 🟡 | No |
+| Wear OS | Tile y complicación con el tiempo restante en el reloj | 🔴 | Pro |
+| Accesibilidad | Revisión completa con TalkBack y tamaños de letra grandes | 🟢 | No |
+
 
 ---
 

@@ -89,7 +89,7 @@ fun LiquidBlobs(
             if (fill <= 0.05f) return@Canvas
             blobs.forEach { b ->
                 // Sube y baja dentro del líquido, sin pasar de la superficie
-                val v = fill * g.maxFill * (0.12f + 0.7f * (0.5f + 0.5f * sin(time * b.riseSpeed * 6.28f + b.phase)))
+                val v = g.levelV(fill * (0.12f + 0.7f * (0.5f + 0.5f * sin(time * b.riseSpeed * 6.28f + b.phase))))
                 val lane = (b.lane + b.sway * sin(time * b.swaySpeed * 6.28f + b.phase * 1.3f)).coerceIn(-0.85f, 0.85f)
                 val center = Offset(g.px(0.5f + lane * g.halfWidth(v)), g.py(v))
                 val r = g.width * b.radius

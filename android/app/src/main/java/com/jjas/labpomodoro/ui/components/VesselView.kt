@@ -33,6 +33,13 @@ import kotlin.math.cos
 import kotlin.math.exp
 import kotlin.math.sin
 import kotlin.random.Random
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalHapticFeedback
+import kotlin.math.abs
+import kotlin.math.tan
 import com.jjas.labpomodoro.ui.theme.isLight
 import androidx.compose.material3.MaterialTheme
 
@@ -81,9 +88,16 @@ fun VesselView(
     behavior: ElementBehavior? = null,
     /** Pro, Android 13+: el vidrio deforma el líquido como una lente. */
     refraction: Boolean = false,
+    /** Pantalla principal: el líquido se inclina con el teléfono y hace ondas al tocarlo. */
+    interactive: Boolean = false,
 ) {
     val glassShader = remember { createGlassShader() }
     val glass = glassStyle()
+    val tilt by rememberLiquidTilt(interactive)
+    val ripples = remember { Ripples() }
+    val haptics = LocalHapticFeedback.current
+    // Cada toque vuelve a arrancar el ciclo de cuadros si estaba detenido
+    var touches by remember { mutableIntStateOf(0) }
     val animatedFill by animateFloatAsState(fill.coerceIn(0f, 1f), tween(300, easing = LinearEasing), label = "fill")
     val animatedColor by animateColorAsState(liquidColor, tween(600), label = "liquid")
     val currentFill by rememberUpdatedState(animatedFill)
@@ -97,9 +111,9 @@ fun VesselView(
     // Cambio de sesión: el líquido nuevo llega chapoteando y se calma solo
     val sloshStart = remember(shape, effect) { System.nanoTime() }
 
-    LaunchedEffect(animate, effect, shape, behavior) {
+    LaunchedEffect(animate, effect, shape, behavior, touches) {
         var last = 0L
-        while (currentAnimate || particles.isNotEmpty()) {
+        while (currentAnimate || particles.isNotEmpty() || ripples.isActive(System.nanoTime())) {
             withFrameNanos { now ->
                 val dt = if (last == 0L) 0f else ((now - last) / 1_000_000_000f).coerceAtMost(0.1f)
                 last = now
@@ -109,8 +123,22 @@ fun VesselView(
         }
     }
 
+    val touchModifier = if (!interactive) Modifier else Modifier.pointerInput(shape) {
+        detectTapGestures { position ->
+            val g = VesselGeometry.fit(shape, size.width.toFloat(), size.height.toFloat(), headroom = 0.18f)
+            val fill = currentFill
+            if (fill <= 0.02f || position.x !in g.left..g.right || position.y !in g.top..g.bottom) return@detectTapGestures
+            val u = (position.x - g.left) / g.width
+            ripples.add(u, System.nanoTime())
+            val surfaceV = g.levelV(fill)
+            particles.splash(lane = ((u - 0.5f) / g.halfWidth(surfaceV)).coerceIn(-1f, 1f), fill = fill)
+            haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+            touches++
+        }
+    }
+
     // Capas: halo o aurora, líquido y gotas (a través de la lente del vidrio) y el vidrio con el vapor
-    Box(modifier) {
+    Box(modifier.then(touchModifier)) {
         // Fuera de la lente: los efectos de render recortan a su borde y el halo debe salirse
         Canvas(Modifier.matchParentSize()) {
             val g = VesselGeometry.fit(shape, size.width, size.height, headroom = 0.18f)
@@ -122,8 +150,15 @@ fun VesselView(
                 val g = VesselGeometry.fit(shape, size.width, size.height, headroom = 0.18f)
                 val t = frameNanos / 1_000_000_000f
                 val sloshAge = ((frameNanos - sloshStart) / 1_000_000_000f).takeIf { frameNanos > sloshStart && it < SLOSH_SECONDS }
+                // Inclinación (la superficie se mantiene horizontal) y ondas de los toques
+                val slope = -tan(tilt)
+                val now = frameNanos
+                val surfaceOffset: (Float) -> Float = { xn -> slope * (xn - 0.5f) * g.width + ripples.offset(xn, now, g) }
                 clipRect {
-                    drawLiquid(g, animatedFill, animatedColor, t, waving = animate, behavior = behavior, sloshAge = sloshAge)
+                    drawLiquid(
+                        g, animatedFill, animatedColor, t, waving = animate || interactive, behavior = behavior,
+                        sloshAge = sloshAge, surfaceOffset = surfaceOffset,
+                    )
                     particles.drawInLiquid(this, g, animatedFill, bubbleColor, animatedColor)
                 }
             }
@@ -186,7 +221,7 @@ private fun DrawScope.drawAurora(g: VesselGeometry, fill: Float, color: Color, t
     if (fill <= 0.02f) return
     val hsv = FloatArray(3)
     android.graphics.Color.colorToHSV(color.toArgb(), hsv)
-    val center = Offset(g.px(0.5f), g.py(fill * g.maxFill / 2f))
+    val center = Offset(g.px(0.5f), g.py(g.levelV(fill / 2f)))
     val orbit = g.width * 0.28f
     val radius = g.width * 0.85f
     listOf(0f, 35f, -35f).forEachIndexed { i, shift ->
@@ -208,7 +243,7 @@ private fun DrawScope.drawHalo(g: VesselGeometry, fill: Float, color: Color, beh
         else -> return
     }
     if (fill <= 0.02f) return
-    val center = Offset(g.px(0.5f), g.py(fill * g.maxFill / 2f))
+    val center = Offset(g.px(0.5f), g.py(g.levelV(fill / 2f)))
     val radius = g.width * 0.95f
     drawCircle(Brush.radialGradient(listOf(color.copy(alpha = alpha), Color.Transparent), center, radius), radius, center)
 }
@@ -221,6 +256,8 @@ private fun DrawScope.drawLiquid(
     waving: Boolean,
     behavior: ElementBehavior? = null,
     sloshAge: Float? = null,
+    /** Desplazamiento extra de la superficie (px) en cada punto 0..1 a lo ancho: inclinación y ondas. */
+    surfaceOffset: (Float) -> Float = { 0f },
 ) {
     if (fill <= 0.001f) return
     clipPath(g.interior) {
@@ -234,7 +271,7 @@ private fun DrawScope.drawLiquid(
             val a = amplitude * scale
             val x = xn * 2f * PI.toFloat()
             return surface + a * sin(x * 1.5f + t * 2.2f + phase) + a * 0.55f * sin(x * 2.7f - t * 1.5f + phase * 1.7f) +
-                slosh * (xn - 0.5f) * 2f
+                slosh * (xn - 0.5f) * 2f + surfaceOffset(xn)
         }
 
         fun surfacePath(phase: Float, scale: Float, lift: Float, closed: Boolean) = Path().apply {
@@ -313,7 +350,27 @@ private fun DrawScope.drawGlass(g: VesselGeometry, glass: GlassStyle) {
         VesselShape.ERLENMEYER -> {
             drawLine(highlight, Offset(g.px(0.13f), g.py(0.2f)), Offset(g.px(0.34f), g.py(0.52f)), g.stroke * 1.4f, StrokeCap.Round)
         }
-        VesselShape.ROUND_FLASK -> {
+        VesselShape.GRADUATED_CYLINDER -> {
+            // Graduación fina: una marca por décimo, más larga cada cinco
+            val hw = g.halfWidth(0.5f)
+            for (i in 1..9) {
+                val v = g.cylinderFloor + i / 10f * (g.maxFill - g.cylinderFloor)
+                val length = when {
+                    i % 5 == 0 -> hw * 0.55f
+                    i % 2 == 0 -> hw * 0.35f
+                    else -> hw * 0.2f
+                }
+                drawLine(glass.marks, Offset(g.px(0.5f + hw - length), g.py(v)), Offset(g.px(0.5f + hw - 0.02f), g.py(v)), g.stroke * 0.45f, StrokeCap.Round)
+            }
+            drawLine(highlight, Offset(g.px(0.5f - hw * 0.7f), g.py(0.85f)), Offset(g.px(0.5f - hw * 0.7f), g.py(0.15f)), g.stroke * 1.2f, StrokeCap.Round)
+        }
+        VesselShape.ROUND_FLASK, VesselShape.VOLUMETRIC_FLASK -> {
+            if (g.shape == VesselShape.VOLUMETRIC_FLASK) {
+                // Marca de aforo: una línea que rodea el cuello
+                val y = g.py(VesselGeometry.VOLUMETRIC_MARK)
+                val hw = g.halfWidth(VesselGeometry.VOLUMETRIC_MARK) * 1.3f
+                drawLine(glass.outline, Offset(g.px(0.5f - hw), y), Offset(g.px(0.5f + hw), y), g.stroke * 0.6f, StrokeCap.Round)
+            }
             val r = g.width / 2f * 0.78f
             val cy = g.bottom - g.width / 2f
             drawArc(
@@ -343,6 +400,9 @@ private enum class Kind {
 
     /** Destello breve dentro del líquido (radiactivos). */
     SPARKLE,
+
+    /** Gotita que salta al tocar el líquido y vuelve a caer. */
+    DROP,
 }
 
 private class Particle(
@@ -406,7 +466,7 @@ private class ParticleSystem {
             // Si el líquido baja de su altura, el destello ya no tiene dónde estar
             val stranded = (p.kind == Kind.SPARKLE || p.kind == Kind.FLAKE) && p.v > fill
             // La chispa vuelve a caer al líquido y se apaga
-            val landed = p.kind == Kind.SPARK && p.speed < 0f && p.v < fill
+            val landed = (p.kind == Kind.SPARK || p.kind == Kind.DROP) && p.speed < 0f && p.v < fill
             if (p.age >= p.life || popped || stranded || landed) iterator.remove()
         }
 
@@ -481,6 +541,24 @@ private class ParticleSystem {
         if (mainBudget > 1f) mainBudget = 0f
     }
 
+    /** Salpicadura al tocar el líquido: unas gotitas saltan desde la superficie en [lane]. */
+    fun splash(lane: Float, fill: Float) {
+        repeat(10) {
+            if (particles.size >= MAX_PARTICLES) return
+            particles += Particle(
+                lane = (lane + random.nextFloat() * 0.3f - 0.15f).coerceIn(-1f, 1f),
+                v = fill + 0.01f,
+                speed = 0.4f + random.nextFloat() * 0.4f,
+                gravity = -1.8f,
+                drift = random.nextFloat() * 0.8f - 0.4f,
+                life = 1.2f,
+                size = 0.018f + random.nextFloat() * 0.018f,
+                phase = random.nextFloat() * 6.28f,
+                kind = Kind.DROP,
+            )
+        }
+    }
+
     private fun spawnSpecial(dt: Float, fill: Float, behavior: ElementBehavior?) {
         val rate = when (behavior) {
             ElementBehavior.REACTIVE -> 3f
@@ -530,7 +608,7 @@ private class ParticleSystem {
     }
 
     private fun position(g: VesselGeometry, p: Particle, wobbleAmount: Float): Offset {
-        val v = p.v * g.maxFill
+        val v = g.levelV(p.v)
         val wobble = sin(p.phase + p.age * 3f) * wobbleAmount
         val u = 0.5f + (p.lane + wobble).coerceIn(-1f, 1f) * g.halfWidth(v)
         return Offset(g.px(u), g.py(v))
@@ -569,7 +647,7 @@ private class ParticleSystem {
                             drawCircle(liquidColor.copy(alpha = 0.5f * flash), g.unit * p.size * 3f, c)
                             drawCircle(Color.White.copy(alpha = 0.9f * flash), g.unit * p.size, c)
                         }
-                        Kind.VAPOR, Kind.SPARK -> Unit
+                        Kind.VAPOR, Kind.SPARK, Kind.DROP -> Unit
                     }
                 }
             }
@@ -585,6 +663,14 @@ private class ParticleSystem {
                 val r = g.unit * p.size
                 drawCircle(sparkColor.copy(alpha = 0.8f * fade), r * 2.2f, c)
                 drawCircle(Color.White.copy(alpha = fade), r, c)
+                continue
+            }
+            if (p.kind == Kind.DROP) {
+                // Gotita del color del líquido con un brillo
+                val c = position(g, p, 0f)
+                val r = g.unit * p.size
+                drawCircle(sparkColor, r, c)
+                drawCircle(Color.White.copy(alpha = 0.6f), r * 0.35f, Offset(c.x - r * 0.3f, c.y - r * 0.3f))
                 continue
             }
             if (p.kind != Kind.VAPOR) continue
@@ -605,5 +691,40 @@ private class ParticleSystem {
 
         /** Altura del fondo, para que nada atraviese el vidrio. */
         const val FLOOR = 0.015f
+    }
+}
+
+/** Ondas que se abren desde donde se tocó el líquido y se apagan en un par de segundos. */
+private class Ripples {
+    private class Ripple(val u: Float, val start: Long)
+
+    private val list = ArrayList<Ripple>()
+
+    fun add(u: Float, now: Long) {
+        list.removeAll { (now - it.start) / 1_000_000_000f > LIFE }
+        if (list.size >= MAX) list.removeAt(0)
+        list += Ripple(u, now)
+    }
+
+    fun isActive(now: Long) = list.any { (now - it.start) / 1_000_000_000f < LIFE }
+
+    /** Altura de las ondas (px) en el punto [xn] (0..1 a lo ancho). */
+    fun offset(xn: Float, now: Long, g: VesselGeometry): Float {
+        var sum = 0f
+        for (r in list) {
+            val age = (now - r.start) / 1_000_000_000f
+            if (age !in 0f..LIFE) continue
+            // Distancia en "unidades" del recipiente: el frente avanza y deja ondas detrás
+            val d = abs(xn - r.u) * g.width / g.unit
+            val front = age * 2.4f
+            if (d > front) continue
+            sum += g.unit * 0.065f * exp(-age * 1.5f) * exp(-d * 1.1f) * sin(d * 9f - age * 13f)
+        }
+        return sum
+    }
+
+    private companion object {
+        const val LIFE = 2.5f
+        const val MAX = 6
     }
 }
