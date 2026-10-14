@@ -604,6 +604,9 @@ Hecho: **Ajustar el plan en curso** — `TimerEngine.extendCurrent` (+5 min, top
 | Negro puro (AMOLED) | En el tema oscuro, tarjetas, hojas, diálogos y menús en negro profundo en vez del gris de Material (Android no avisa si la pantalla es AMOLED: interruptor "Negro puro" en Apariencia, encendido por defecto) | 🟢 | No |
 | Ficha del elemento ampliada | Más datos: masa atómica, configuración electrónica, estado a temperatura ambiente, densidad, puntos de fusión y ebullición, quién lo descubrió y dato curioso | 🟡 | No |
 | Medallas con Koala | Recalcular las medallas alrededor del koala del laboratorio (nombres, historia, niveles) e ilustraciones propias en vez de emojis | 🟡/🔴 | No |
+| Elemento que nace del recipiente | En vez de solo el aviso: la app ya sabe qué elemento dará de premio, así que en el último tramo del pomodoro que lo gana el líquido empieza a mutar hacia el color (y comportamiento) de ese elemento; si gana varios, va pasando por cada uno. Al terminar, el elemento sale del recipiente en una burbuja, como las burbujas de notificación de Android, que se puede tocar para ver su ficha (o descartar) | 🟡 | No |
+| Mechero Bunsen de cristal | Rehacer el mechero con el estilo Liquid Glass: cuerpo metálico con reflejos y borde especular, llama con núcleo y halo, parpadeo y chispas, y resplandor que tiñe la base del recipiente | 🟢 | No |
+| Temas de laboratorio | Personalización combinada: tinte del cristal (transparente, verdoso, ámbar, azulado), color de la llama (azul, verde, violeta…) y paleta de líquidos; por ejemplo "cristal verdoso + llama azul + paleta verde". Se suma a las paletas de laboratorio que ya hay | 🟡 | Pro |
 
 #### Pendientes de publicación y técnicos
 
