@@ -43,3 +43,6 @@ key/*
 # Paquetes que genera el asistente de Android Studio (Build > Generate Signed…)
 android/app/debug/
 android/app/release/
+
+# Capturas de prototipos para revisar (no van al repo)
+prototipos/

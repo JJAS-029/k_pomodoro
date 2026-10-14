@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Solo en debug: pantallas de prueba que nunca llegan a la versión de Play -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <!-- Prototipos de cristalería: adb shell am start -n com.jjas.labpomodoro/.debug.GlassPreviewActivity -->
+        <activity
+            android:name=".debug.GlassPreviewActivity"
+            android:exported="true" />
+    </application>
+</manifest>

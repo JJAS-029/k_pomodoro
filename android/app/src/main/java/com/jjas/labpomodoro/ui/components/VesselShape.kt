@@ -105,28 +105,30 @@ class VesselGeometry private constructor(
     /** Silueta cerrada del interior, para recortar el líquido y las burbujas. */
     val interior: Path = Path().apply { body(closed = true) }
 
-    /** Contorno del vidrio (abierto arriba) más el borde/labio. */
-    val outline: Path = Path().apply {
+    /** Labio de la boca: de dónde a dónde va (u) y su alto (px); null en el vaso, que lleva pico. */
+    val lip: Triple<Float, Float, Float>? = when (shape) {
+        VesselShape.BEAKER -> null
+        VesselShape.TEST_TUBE -> Triple(0f, 1f, height * 0.06f)
+        VesselShape.ERLENMEYER -> Triple(0.3f, 0.7f, height * 0.06f)
+        VesselShape.ROUND_FLASK -> Triple(0.33f, 0.67f, height * 0.06f)
+        VesselShape.VOLUMETRIC_FLASK -> Triple(0.36f, 0.64f, height * 0.06f)
+        // La probeta es muy alta: el labio va por ancho para no quedar grueso
+        VesselShape.GRADUATED_CYLINDER -> Triple(0.17f, 0.83f, width * 0.12f)
+    }
+
+    /** El vidrio sin el labio (con el pie de la probeta): cada estilo dibuja la boca a su manera. */
+    val bodyOutline: Path = Path().apply {
         body(closed = false)
-        when (shape) {
-            VesselShape.BEAKER -> Unit // El vaso lleva su pico dentro de body()
-            VesselShape.TEST_TUBE -> lipRing(0f, 1f)
-            VesselShape.ERLENMEYER -> lipRing(0.3f, 0.7f)
-            VesselShape.ROUND_FLASK -> lipRing(0.33f, 0.67f)
-            VesselShape.VOLUMETRIC_FLASK -> lipRing(0.36f, 0.64f)
-            VesselShape.GRADUATED_CYLINDER -> {
-                // Pie ancho y labio delgado (la probeta es muy alta: el aro normal quedaría grueso)
-                val foot = height * cylinderFloor
-                addRoundRect(RoundRect(left, bottom - foot, right, bottom, CornerRadius(foot / 2)))
-                val h = width * 0.12f
-                addRoundRect(RoundRect(px(0.17f), top, px(0.83f), top + h, CornerRadius(h / 2)))
-            }
+        if (shape == VesselShape.GRADUATED_CYLINDER) {
+            val foot = height * cylinderFloor
+            addRoundRect(RoundRect(left, bottom - foot, right, bottom, CornerRadius(foot / 2)))
         }
     }
 
-    private fun Path.lipRing(u0: Float, u1: Float) {
-        val h = height * 0.06f
-        addRoundRect(RoundRect(px(u0), top, px(u1), top + h, CornerRadius(h / 2)))
+    /** Contorno del vidrio (abierto arriba) más el borde/labio. */
+    val outline: Path = Path().apply {
+        addPath(bodyOutline)
+        lip?.let { (u0, u1, h) -> addRoundRect(RoundRect(px(u0), top, px(u1), top + h, CornerRadius(h / 2))) }
     }
 
     private fun Path.body(closed: Boolean) {
