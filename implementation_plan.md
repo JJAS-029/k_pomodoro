@@ -541,13 +541,13 @@ Esfuerzo: 🟢 poco · 🟡 medio · 🔴 mucho. "Pro" es una sugerencia, se dec
 | 1 | ✅ Líquido que se inclina | Con el acelerómetro, la superficie se inclina y chapotea al ladear el teléfono (se apaga en modo ambiente y PiP) | 🟡 | No |
 | 2 | ✅ Ondas al tocar | Tocar el líquido hace ondas en la superficie y salpica gotitas | 🟡 | No |
 | 3 | ✅ Probeta y matraz aforado | Dos recipientes nuevos en la rotación del plan: probeta graduada (alta, base y pico) y matraz aforado (bola, cuello largo, marca de aforo) | 🟡 | No |
-| 4 | Condensación | Durante el trabajo, gotitas en la pared del vidrio que resbalan despacio | 🟢 | No |
-| 5 | Mechero Bunsen | Llama azul bajo el recipiente en el trabajo (explica la evaporación); se apaga en los descansos | 🟢 | No |
-| 6 | Llenado en los descansos | Un chorrito cae desde arriba (bureta) mientras el recipiente se llena | 🟢 | No |
-| 7 | Burbujas que revientan | Al llegar a la superficie, cada burbuja revienta con un anillo de onda | 🟢 | No |
-| 8 | Repisa viva | El recipiente de la sesión actual burbujea suave en la repisa y los completados brillan al llenarse | 🟢 | No |
+| 4 | ✅ Condensación | Durante el trabajo, gotitas en la pared del vidrio que resbalan despacio | 🟢 | No |
+| 5 | ✅ Mechero Bunsen | Llama azul bajo el recipiente en el trabajo (explica la evaporación); se apaga en los descansos | 🟢 | No |
+| 6 | ✅ Llenado en los descansos | Un chorrito cae desde arriba (bureta) mientras el recipiente se llena | 🟢 | No |
+| 7 | ✅ Burbujas que revientan | Al llegar a la superficie, cada burbuja revienta con un anillo de onda | 🟢 | No |
+| 8 | ✅ Repisa viva | El recipiente de la sesión actual burbujea suave en la repisa y los completados brillan al llenarse | 🟢 | No |
 
-Hecho: `LiquidTilt.kt` (sensor de gravedad + resorte amortiguado; sin movimiento no pide cuadros), `Ripples` y `Kind.DROP` en `VesselView` (solo con `interactive`, en la pantalla principal; vibración suave al tocar), `VesselShape.GRADUATED_CYLINDER` (pie y graduación fina) y `VOLUMETRIC_FLASK` (cuello largo, líquido hasta la marca de aforo).
+Hecho: `LiquidTilt.kt` (sensor de gravedad + resorte amortiguado; sin movimiento no pide cuadros), `Ripples` y `Kind.DROP` en `VesselView` (solo con `interactive`, en la pantalla principal; vibración suave al tocar), `VesselShape.GRADUATED_CYLINDER` (pie y graduación fina) y `VOLUMETRIC_FLASK` (cuello largo, líquido hasta la marca de aforo). Después: `Kind.CONDENSE` (gotas en el vidrio sobre el líquido que resbalan), `drawPour` y salpicaduras en los descansos, `Kind.RING` al reventar cada burbuja, `BunsenBurner.kt` bajo el recipiente de la pantalla principal (llama solo en el trabajo) y en la repisa burbujeo del recipiente actual y destello al llenarse. `VesselGeometry.levelV` hace que en la probeta el nivel empiece arriba del pie.
 
 #### Más ideas de estética (por decidir)
 

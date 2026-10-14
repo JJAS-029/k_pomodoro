@@ -177,11 +177,16 @@ fun VesselView(
             val g = VesselGeometry.fit(shape, size.width, size.height, headroom = 0.18f)
             clipRect {
                 drawGlass(g, glass)
+                // Descanso: un chorrito cae al centro mientras el recipiente se llena
+                if (animate && effect == LiquidEffect.BUBBLES && animatedFill < 0.97f) {
+                    drawPour(g, animatedFill, animatedColor, frameNanos / 1_000_000_000f)
+                }
                 particles.drawVapor(
                     this,
                     g,
                     vaporColor = if (behavior == ElementBehavior.COLORED_VAPOR) animatedColor else glass.vapor,
                     sparkColor = animatedColor,
+                    condenseColor = glass.vapor,
                 )
             }
         }
@@ -197,10 +202,25 @@ fun MiniVessel(
     outlineColor: Color,
     dashed: Boolean,
     modifier: Modifier = Modifier,
+    /** Fase 0..1 del burbujeo suave (recipiente actual de la repisa); null = quieto. */
+    bubbles: Float? = null,
 ) {
     Canvas(modifier) {
         val g = VesselGeometry.fit(shape, size.width, size.height, strokeWidth = 1.5f * density)
         drawLiquid(g, fill, liquidColor, t = 0f, waving = false)
+        if (bubbles != null && fill > 0.08f) {
+            clipPath(g.interior) {
+                clipRect(top = g.surfaceY(fill)) {
+                    // Tres burbujitas que suben desfasadas y se desvanecen al llegar arriba
+                    for (i in 0..2) {
+                        val k = (bubbles + i / 3f) % 1f
+                        val v = g.levelV(fill * k)
+                        val u = 0.5f + g.halfWidth(v) * 0.5f * sin(i * 2.1f + k * 6f)
+                        drawCircle(Color.White.copy(alpha = 0.6f * (1f - k)), g.stroke * 0.9f, Offset(g.px(u), g.py(v)))
+                    }
+                }
+            }
+        }
         drawPath(
             g.outline,
             outlineColor,
@@ -328,6 +348,27 @@ private fun DrawScope.drawLiquid(
     }
 }
 
+/** Chorrito que cae desde arriba hasta la superficie, ondulando un poco. */
+private fun DrawScope.drawPour(g: VesselGeometry, fill: Float, color: Color, t: Float) {
+    val start = g.top - g.height * 0.12f
+    val end = g.surfaceY(fill)
+    if (end <= start) return
+    val x = g.px(0.5f)
+    val width = g.stroke * 0.8f
+    val stream = Path().apply {
+        val steps = 16
+        for (i in 0..steps) {
+            val k = i.toFloat() / steps
+            val y = start + (end - start) * k
+            // La ondulación crece al caer, como un chorro de verdad
+            val wobble = sin(t * 9f + k * 6f) * width * 0.5f * k
+            if (i == 0) moveTo(x + wobble, y) else lineTo(x + wobble, y)
+        }
+    }
+    drawPath(stream, color.copy(alpha = 0.85f), style = Stroke(width = width, cap = StrokeCap.Round))
+    drawPath(stream, Color.White.copy(alpha = 0.3f), style = Stroke(width = width * 0.3f, cap = StrokeCap.Round))
+}
+
 private fun DrawScope.drawGlass(g: VesselGeometry, glass: GlassStyle) {
     val highlight = glass.highlight
     when (g.shape) {
@@ -403,6 +444,12 @@ private enum class Kind {
 
     /** Gotita que salta al tocar el líquido y vuelve a caer. */
     DROP,
+
+    /** Gota de condensación pegada al vidrio sobre el líquido; al rato resbala. */
+    CONDENSE,
+
+    /** Anillo que deja una burbuja al reventar en la superficie. */
+    RING,
 }
 
 private class Particle(
@@ -433,10 +480,13 @@ private class ParticleSystem {
     private var fizzBudget = 0f
     private var mainBudget = 0f
     private var specialBudget = 0f
+    private var condenseBudget = 0f
+    private var pourBudget = 0f
 
     fun isNotEmpty() = particles.isNotEmpty()
 
     fun update(dt: Float, fill: Float, effect: LiquidEffect, behavior: ElementBehavior?, spawn: Boolean) {
+        val rings = ArrayList<Particle>()
         val iterator = particles.iterator()
         while (iterator.hasNext()) {
             val p = iterator.next()
@@ -467,12 +517,20 @@ private class ParticleSystem {
             val stranded = (p.kind == Kind.SPARKLE || p.kind == Kind.FLAKE) && p.v > fill
             // La chispa vuelve a caer al líquido y se apaga
             val landed = (p.kind == Kind.SPARK || p.kind == Kind.DROP) && p.speed < 0f && p.v < fill
-            if (p.age >= p.life || popped || stranded || landed) iterator.remove()
+            // La gota de condensación se une al líquido al alcanzarlo
+            val merged = p.kind == Kind.CONDENSE && p.v <= fill
+            if (popped && p.kind == Kind.BUBBLE) {
+                rings += Particle(lane = p.lane, v = fill, speed = 0f, life = 0.6f, size = p.size, phase = 0f, kind = Kind.RING)
+            }
+            if (p.age >= p.life || popped || stranded || landed || merged) iterator.remove()
         }
+        if (particles.size + rings.size <= MAX_PARTICLES) particles += rings
 
         if (!spawn || effect == LiquidEffect.NONE || dt == 0f || fill <= 0.02f) return
 
         spawnSpecial(dt, fill, behavior)
+        if (effect == LiquidEffect.VAPOR) spawnCondensation(dt, fill)
+        if (effect == LiquidEffect.BUBBLES && fill < 0.97f) spawnPourSplash(dt, fill)
 
         // Efervescencia: la mayoría nace en el fondo y algunas en las paredes. Los alcalinos
         // reaccionan con el agua y los gases licuados hierven: mucha más
@@ -539,6 +597,46 @@ private class ParticleSystem {
         }
         if (fizzBudget > 1f) fizzBudget = 0f
         if (mainBudget > 1f) mainBudget = 0f
+    }
+
+    /** Trabajo: el vapor deja gotitas en el vidrio, sobre el líquido, que al rato resbalan. */
+    private fun spawnCondensation(dt: Float, fill: Float) {
+        if (fill > 0.93f || particles.count { it.kind == Kind.CONDENSE } >= MAX_CONDENSE) return
+        condenseBudget += 0.6f * dt
+        while (condenseBudget >= 1f) {
+            condenseBudget -= 1f
+            particles += Particle(
+                lane = (0.86f + random.nextFloat() * 0.1f) * if (random.nextBoolean()) 1f else -1f,
+                v = fill + 0.04f + random.nextFloat() * (0.98f - fill - 0.04f).coerceAtLeast(0f),
+                speed = 0f,
+                // Se queda pegada unos segundos y luego resbala despacio
+                stick = 3f + random.nextFloat() * 6f,
+                gravity = -0.012f,
+                life = 30f,
+                size = 0.006f + random.nextFloat() * 0.01f,
+                phase = random.nextFloat() * 6.28f,
+                kind = Kind.CONDENSE,
+            )
+        }
+    }
+
+    /** Descanso: gotitas que salpican donde el chorro pega en la superficie. */
+    private fun spawnPourSplash(dt: Float, fill: Float) {
+        pourBudget += 5f * dt
+        while (pourBudget >= 1f && particles.size < MAX_PARTICLES) {
+            pourBudget -= 1f
+            particles += Particle(
+                lane = random.nextFloat() * 0.2f - 0.1f,
+                v = fill + 0.005f,
+                speed = 0.12f + random.nextFloat() * 0.15f,
+                gravity = -1.8f,
+                drift = random.nextFloat() * 1.2f - 0.6f,
+                life = 0.6f,
+                size = 0.006f + random.nextFloat() * 0.006f,
+                phase = random.nextFloat() * 6.28f,
+                kind = Kind.DROP,
+            )
+        }
     }
 
     /** Salpicadura al tocar el líquido: unas gotitas saltan desde la superficie en [lane]. */
@@ -647,15 +745,37 @@ private class ParticleSystem {
                             drawCircle(liquidColor.copy(alpha = 0.5f * flash), g.unit * p.size * 3f, c)
                             drawCircle(Color.White.copy(alpha = 0.9f * flash), g.unit * p.size, c)
                         }
-                        Kind.VAPOR, Kind.SPARK, Kind.DROP -> Unit
+                        Kind.VAPOR, Kind.SPARK, Kind.DROP, Kind.CONDENSE, Kind.RING -> Unit
                     }
                 }
             }
         }
     }
 
-    fun drawVapor(scope: DrawScope, g: VesselGeometry, vaporColor: Color, sparkColor: Color) = with(scope) {
+    fun drawVapor(scope: DrawScope, g: VesselGeometry, vaporColor: Color, sparkColor: Color, condenseColor: Color) = with(scope) {
         for (p in particles) {
+            if (p.kind == Kind.CONDENSE) {
+                // Gotita translúcida con un brillo; aparece poco a poco
+                val c = position(g, p, 0f)
+                val r = g.unit * p.size
+                val alpha = (p.age / 1.5f).coerceAtMost(1f)
+                drawCircle(condenseColor.copy(alpha = 0.35f * alpha), r, c)
+                drawCircle(Color.White.copy(alpha = 0.5f * alpha), r * 0.35f, Offset(c.x - r * 0.3f, c.y - r * 0.3f))
+                continue
+            }
+            if (p.kind == Kind.RING) {
+                // Anillo que se abre sobre la superficie y se desvanece
+                val progress = p.age / p.life
+                val c = position(g, p, 0f)
+                val r = g.unit * p.size * (1.2f + progress * 3f)
+                drawOval(
+                    sparkColor.copy(alpha = 0.6f * (1f - progress)),
+                    topLeft = Offset(c.x - r, c.y - r * 0.3f),
+                    size = Size(2 * r, r * 0.6f),
+                    style = Stroke(width = g.stroke * 0.35f),
+                )
+                continue
+            }
             if (p.kind == Kind.SPARK) {
                 // Chispa del color de la llama del elemento, con centro blanco
                 val fade = 1f - p.age / p.life
@@ -688,6 +808,7 @@ private class ParticleSystem {
 
     private companion object {
         const val MAX_PARTICLES = 90
+        const val MAX_CONDENSE = 16
 
         /** Altura del fondo, para que nada atraviese el vidrio. */
         const val FLOOR = 0.015f

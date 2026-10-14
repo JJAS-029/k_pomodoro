@@ -2,6 +2,15 @@ package com.jjas.labpomodoro.ui.components
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -74,17 +83,44 @@ fun VesselShelf(items: List<ShelfItemUi>, modifier: Modifier = Modifier) {
 @Composable
 private fun ShelfVessel(item: ShelfItemUi) {
     val fill by animateFloatAsState(item.fill.coerceIn(0f, 1f), tween(300), label = "shelf")
-    MiniVessel(
-        shape = item.shape,
-        fill = if (item.skipped) 0f else fill,
-        liquidColor = item.color,
-        outlineColor = when {
-            item.isCurrent -> item.color
-            item.skipped -> MaterialTheme.colorScheme.onBackground.copy(alpha = 0.25f)
-            else -> glassOutlineColor().copy(alpha = 0.7f)
-        },
-        // Recipiente punteado = sesión saltada
-        dashed = item.skipped,
-        modifier = Modifier.size(width = ItemHeight * item.shape.aspect + 4.dp, height = ItemHeight),
-    )
+    val full = item.fill >= 1f && !item.skipped
+    // Destello al llenarse (no al abrir la pantalla con recipientes ya llenos)
+    val glow = remember { Animatable(0f) }
+    var wasFull by remember { mutableStateOf(full) }
+    LaunchedEffect(full) {
+        if (full && !wasFull) {
+            glow.snapTo(1f)
+            glow.animateTo(0f, tween(1400))
+        }
+        wasFull = full
+    }
+    // El recipiente de la sesión actual burbujea suave
+    val bubbles = if (item.isCurrent && !item.skipped) {
+        rememberInfiniteTransition(label = "shelfBubbles")
+            .animateFloat(0f, 1f, infiniteRepeatable(tween(2200, easing = LinearEasing)), label = "phase").value
+    } else {
+        null
+    }
+    Box(contentAlignment = Alignment.Center) {
+        if (glow.value > 0f) {
+            Canvas(Modifier.size(ItemHeight)) {
+                val r = size.minDimension * 0.6f
+                drawCircle(Brush.radialGradient(listOf(item.color.copy(alpha = 0.55f * glow.value), Color.Transparent), center, r), r)
+            }
+        }
+        MiniVessel(
+            shape = item.shape,
+            fill = if (item.skipped) 0f else fill,
+            liquidColor = item.color,
+            outlineColor = when {
+                item.isCurrent -> item.color
+                item.skipped -> MaterialTheme.colorScheme.onBackground.copy(alpha = 0.25f)
+                else -> glassOutlineColor().copy(alpha = 0.7f)
+            },
+            // Recipiente punteado = sesión saltada
+            dashed = item.skipped,
+            modifier = Modifier.size(width = ItemHeight * item.shape.aspect + 4.dp, height = ItemHeight),
+            bubbles = bubbles,
+        )
+    }
 }

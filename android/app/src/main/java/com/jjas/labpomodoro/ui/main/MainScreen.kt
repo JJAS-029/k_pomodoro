@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
@@ -90,6 +91,7 @@ import com.jjas.labpomodoro.service.labelRes
 import com.jjas.labpomodoro.service.requestExactAlarms
 import com.jjas.labpomodoro.ui.components.Celebration
 import com.jjas.labpomodoro.ui.components.ConfettiBurst
+import com.jjas.labpomodoro.ui.components.BunsenBurner
 import com.jjas.labpomodoro.ui.components.DotState
 import com.jjas.labpomodoro.ui.components.ElementTile
 import com.jjas.labpomodoro.ui.components.LiquidEffect
@@ -361,11 +363,20 @@ private fun MainContent(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxWidth()
-                        .padding(vertical = 8.dp),
+                        .padding(top = 8.dp),
                     // Pro: vidrio con refracción (Android 13+)
                     refraction = !showTitle,
                     // Se inclina con el teléfono y hace ondas al tocarlo
                     interactive = true,
+                )
+                // Mechero bajo el recipiente: encendido mientras se trabaja (por eso se evapora)
+                val active = timer as? TimerUi.Active
+                BunsenBurner(
+                    lit = active != null && active.type == SessionType.WORK && !active.isPaused,
+                    modifier = Modifier
+                        // La punta de la llama toca el fondo del recipiente
+                        .offset(y = (-6).dp)
+                        .size(width = 120.dp, height = 60.dp),
                 )
                 when (timer) {
                     null -> CircularProgressIndicator()
