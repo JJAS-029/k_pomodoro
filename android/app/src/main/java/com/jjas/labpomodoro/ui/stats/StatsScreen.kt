@@ -53,6 +53,8 @@ import com.jjas.labpomodoro.R
 import com.jjas.labpomodoro.ads.AdBanner
 import com.jjas.labpomodoro.ui.medals.MedalDialog
 import com.jjas.labpomodoro.ui.medals.MedalGrid
+import com.jjas.labpomodoro.ui.medals.MedalFilter
+import com.jjas.labpomodoro.ui.medals.MedalHeader
 import com.jjas.labpomodoro.data.local.entity.PlaceTotal
 import com.jjas.labpomodoro.domain.model.MedalProgress
 import com.jjas.labpomodoro.domain.usecase.FocusStats
@@ -183,11 +185,14 @@ private fun Summary(stats: FocusStats, streak: Int) {
 @Composable
 private fun Medals(medals: List<MedalProgress>) {
     var selected by remember { mutableStateOf<MedalProgress?>(null) }
+    var filter by rememberSaveable { mutableStateOf(MedalFilter.ALL) }
     Section(
         stringResource(R.string.prog_medals),
         stringResource(R.string.prog_medals_subtitle, medals.count { it.earned }, medals.size),
     )
-    MedalGrid(medals, onSelect = { selected = it })
+    MedalHeader(medals, filter, onFilter = { filter = it })
+    Spacer(Modifier.height(16.dp))
+    MedalGrid(medals, onSelect = { selected = it }, filter = filter)
     selected?.let { chosen ->
         // Se busca de nuevo para que el progreso se actualice si la ventana sigue abierta
         MedalDialog(medals.firstOrNull { it.medal == chosen.medal } ?: chosen, onDismiss = { selected = null })

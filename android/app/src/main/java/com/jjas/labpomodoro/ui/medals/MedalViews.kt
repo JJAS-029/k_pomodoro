@@ -53,6 +53,31 @@ import com.jjas.labpomodoro.domain.model.MedalTier
 import com.jjas.labpomodoro.ui.promo.ShareText
 import com.jjas.labpomodoro.ui.promo.shareText
 import dagger.hilt.android.lifecycle.HiltViewModel
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.FilterChip
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.clipPath
+import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.text.font.FontWeight
+import com.jjas.labpomodoro.ui.components.LocalGlassShimmer
+import com.jjas.labpomodoro.ui.components.rememberGlassShimmer
+import com.jjas.labpomodoro.ui.components.rememberLiquidTilt
+import kotlin.math.abs
+import kotlin.math.cos
+import kotlin.math.roundToInt
+import kotlin.math.sin
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -79,70 +104,293 @@ fun MedalTier.colors(): List<Color> = when (this) {
     MedalTier.GOLD -> listOf(Color(0xFFFFE680), Color(0xFFC08A12))
 }
 
+/** Cristal de cada metal: brillo, cuerpo, fondo hondo (del mismo tono, sin gris) y resplandor. */
+private class MedalGlass(val highlight: Color, val base: Color, val deep: Color, val glow: Color)
+
+private fun MedalTier.glass(): MedalGlass = when (this) {
+    MedalTier.BRONZE -> MedalGlass(Color(0xFFFFCBA4), Color(0xFFD97742), Color(0xFF5C240E), Color(0xFFFF9E6D))
+    MedalTier.SILVER -> MedalGlass(Color.White, Color(0xFF94A3B8), Color(0xFF1E293B), Color(0xFFE2E8F0))
+    MedalTier.GOLD -> MedalGlass(Color(0xFFFFF59D), Color(0xFFF59E0B), Color(0xFF78350F), Color(0xFFFFD54F))
+}
+
+/** Arco de avance de las medallas sin ganar: índigo que termina en una punta brillante. */
+private val ArcDark = listOf(Color(0xFF6366F1), Color(0xFFA5B4FC), Color.White)
+private val ArcLight = listOf(Color(0xFF4F46E5), Color(0xFF6366F1), Color(0xFF818CF8))
+
 /**
- * Medalla redonda: ganada, de metal con su símbolo; sin ganar, apagada y con un anillo que muestra
- * cuánto falta.
+ * Medalla de cristal: ganada, una esfera del metal con halo, anillo grabado, borde especular y
+ * domo de lente encima del símbolo (plata y oro con destello); sin ganar, cristal ahumado con un
+ * arco que muestra cuánto falta y, si [showPercent], el porcentaje.
+ * [lean] (-1..1) corre el reflejo del domo hacia donde se inclina el teléfono.
  */
 @Composable
-fun MedalBadge(progress: MedalProgress, size: Dp, modifier: Modifier = Modifier) {
-    val (light, dark) = progress.medal.tier.colors()
-    val track = MaterialTheme.colorScheme.outlineVariant
-    val ring = MaterialTheme.colorScheme.primary
+fun MedalBadge(
+    progress: MedalProgress,
+    size: Dp,
+    modifier: Modifier = Modifier,
+    showPercent: Boolean = true,
+    lean: (() -> Float)? = null,
+) {
+    val light = MaterialTheme.colorScheme.background.luminance() > 0.5f
+    val earned = progress.earned
+    val tier = progress.medal.tier
+    val shimmer: State<Float>? = if (earned && tier != MedalTier.BRONZE) LocalGlassShimmer.current ?: rememberGlassShimmer() else null
     Box(modifier.size(size), contentAlignment = Alignment.Center) {
-        if (progress.earned) {
-            Box(
-                Modifier
-                    .fillMaxSize()
-                    .background(Brush.linearGradient(listOf(light, dark)), CircleShape)
-                    .border(BorderStroke(size * 0.06f, Brush.linearGradient(listOf(dark, light))), CircleShape),
-            )
-        } else {
-            Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceVariant, CircleShape))
-            Canvas(Modifier.fillMaxSize()) {
-                val stroke = this.size.minDimension * 0.06f
-                val inset = stroke / 2
-                val arc = Size(this.size.width - stroke, this.size.height - stroke)
-                val topLeft = Offset(inset, inset)
-                drawArc(track, 0f, 360f, false, topLeft, arc, style = Stroke(stroke))
-                if (progress.fraction > 0f) {
-                    drawArc(ring, -90f, 360f * progress.fraction, false, topLeft, arc, style = Stroke(stroke, cap = StrokeCap.Round))
-                }
-            }
+        Canvas(Modifier.fillMaxSize()) {
+            if (earned) drawEarnedBody(tier.glass(), tier == MedalTier.GOLD, light) else drawLockedBody(progress.fraction, light)
         }
         Text(
             progress.medal.symbol,
-            fontSize = (size.value * 0.42f).sp,
-            modifier = Modifier.alpha(if (progress.earned) 1f else 0.3f),
+            fontSize = (size.value * 0.4f).sp,
+            modifier = Modifier.graphicsLayer {
+                alpha = if (earned) 1f else 0.35f
+                val scale = if (earned) 1f else 0.92f
+                scaleX = scale
+                scaleY = scale
+            },
+        )
+        Canvas(Modifier.fillMaxSize()) {
+            drawDome(earned, light, lean?.invoke() ?: 0f)
+            if (shimmer != null) drawMedalShimmer(shimmer.value, tier == MedalTier.GOLD)
+        }
+        if (!earned && showPercent && progress.fraction > 0f) {
+            val accent = if (light) Color(0xFF4F46E5) else Color(0xFF818CF8)
+            Text(
+                "${(progress.fraction * 100).roundToInt()}%",
+                fontSize = (size.value * 0.16f).coerceIn(8f, 11f).sp,
+                fontWeight = FontWeight.Bold,
+                color = if (light) accent else Color(0xFFC7D2FE),
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .offset(y = size * 0.06f)
+                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.92f), CircleShape)
+                    .border(1.dp, accent.copy(alpha = 0.45f), CircleShape)
+                    .padding(horizontal = 5.dp),
+            )
+        }
+    }
+}
+
+/** Radio del cuerpo: el resto, hasta el borde del lienzo, es para el halo. */
+private fun DrawScope.bodyRadius() = size.minDimension / 2f * 0.86f
+
+private fun DrawScope.drawEarnedBody(g: MedalGlass, gold: Boolean, light: Boolean) {
+    val r = bodyRadius()
+    val c = center
+    // Halo: degradado radial en vez de desenfoque, que en Android 8 no se ve
+    drawCircle(
+        Brush.radialGradient(0.72f to g.glow.copy(alpha = if (gold) 0.5f else 0.3f), 1f to Color.Transparent, center = c, radius = size.minDimension / 2f),
+        radius = size.minDimension / 2f,
+    )
+    // Esfera: la luz entra arriba a la izquierda y el fondo es el metal hondo
+    drawCircle(
+        Brush.radialGradient(
+            0f to g.highlight.copy(alpha = if (light) 0.95f else 0.65f),
+            0.55f to g.base.copy(alpha = if (light) 0.9f else 0.55f),
+            1f to g.deep.copy(alpha = 0.94f),
+            center = Offset(c.x - r * 0.3f, c.y - r * 0.3f),
+            radius = r * 1.45f,
+        ),
+        radius = r,
+    )
+    // Rebote de luz del metal abajo a la derecha
+    drawCircle(
+        Brush.radialGradient(listOf(g.glow.copy(alpha = 0.35f), Color.Transparent), center = Offset(c.x + r * 0.35f, c.y + r * 0.45f), radius = r * 0.6f),
+        radius = r,
+    )
+    // Anillo grabado, como la tapa de una cápsula
+    drawCircle(
+        Brush.linearGradient(listOf(Color.Black.copy(alpha = 0.3f), Color.White.copy(alpha = 0.4f)), start = Offset(c.x - r, c.y - r), end = Offset(c.x + r, c.y + r)),
+        radius = r * 0.8f,
+        style = Stroke(width = r * 0.04f),
+    )
+    // Borde especular: blanco arriba a la izquierda, resplandor del metal abajo a la derecha
+    drawCircle(
+        Brush.linearGradient(
+            0f to (if (light) g.base else Color.White).copy(alpha = 0.95f),
+            0.35f to g.highlight.copy(alpha = 0.6f),
+            0.7f to g.base.copy(alpha = 0.4f),
+            1f to g.glow.copy(alpha = 0.95f),
+            start = Offset(c.x - r, c.y - r),
+            end = Offset(c.x + r, c.y + r),
+        ),
+        radius = r,
+        style = Stroke(width = r * 0.08f),
+    )
+}
+
+private fun DrawScope.drawLockedBody(fraction: Float, light: Boolean) {
+    val r = bodyRadius()
+    val c = center
+    val body = if (light) {
+        listOf(Color(0xFFF8FAFC), Color(0xFFE2E8F0), Color(0xFFCBD5E1))
+    } else {
+        listOf(Color(0xFF94A3B8).copy(alpha = 0.16f), Color(0xFF1E293B).copy(alpha = 0.5f), Color(0xFF090D16).copy(alpha = 0.92f))
+    }
+    drawCircle(
+        Brush.radialGradient(0f to body[0], 0.58f to body[1], 1f to body[2], center = Offset(c.x - r * 0.3f, c.y - r * 0.3f), radius = r * 1.45f),
+        radius = r,
+    )
+    val stroke = r * 0.09f
+    drawCircle((if (light) Color.Black else Color.White).copy(alpha = 0.08f), radius = r, style = Stroke(stroke))
+    if (fraction <= 0f) return
+    val colors = if (light) ArcLight else ArcDark
+    val sweep = 360f * fraction
+    // El degradado de barrido empieza a las 3; se gira para que empiece arriba con el arco
+    rotate(-90f) {
+        drawArc(
+            Brush.sweepGradient(0f to colors[0], fraction * 0.7f to colors[1], fraction to colors[2], center = c),
+            startAngle = 0f,
+            sweepAngle = sweep,
+            useCenter = false,
+            topLeft = Offset(c.x - r, c.y - r),
+            size = Size(r * 2, r * 2),
+            style = Stroke(stroke, cap = StrokeCap.Round),
+        )
+    }
+    // Punta brillante al final del arco
+    val end = Math.toRadians((sweep - 90f).toDouble())
+    val tip = Offset(c.x + r * cos(end).toFloat(), c.y + r * sin(end).toFloat())
+    drawCircle(Color.White, radius = stroke * 0.62f, center = tip)
+    if (light) drawCircle(colors[0], radius = stroke * 0.62f, center = tip, style = Stroke(stroke * 0.25f))
+}
+
+/** Domo de lente sobre el símbolo: el reflejo que lo encierra dentro del cristal. */
+private fun DrawScope.drawDome(earned: Boolean, light: Boolean, lean: Float) {
+    val r = bodyRadius()
+    val alpha = when {
+        earned -> if (light) 0.5f else 0.38f
+        else -> if (light) 0.45f else 0.14f
+    }
+    drawCircle(
+        Brush.radialGradient(
+            listOf(Color.White.copy(alpha = alpha), Color.White.copy(alpha = alpha * 0.13f), Color.Transparent),
+            center = Offset(center.x - r * 0.25f + lean * r * 0.35f, center.y - r * 0.32f),
+            radius = r * 0.75f,
+        ),
+        radius = r * 0.97f,
+    )
+}
+
+/** Destello diagonal que cruza plata y oro, recortado a la esfera. */
+private fun DrawScope.drawMedalShimmer(phase: Float, gold: Boolean) {
+    val r = bodyRadius()
+    val x = size.width * (phase * 3f - 1f)
+    val sphere = Path().apply { addOval(Rect(center, r)) }
+    clipPath(sphere) {
+        drawRect(
+            Brush.linearGradient(
+                listOf(Color.Transparent, Color.White.copy(alpha = if (gold) 0.4f else 0.28f), Color.Transparent),
+                start = Offset(x, 0f),
+                end = Offset(x + size.width * 0.45f, size.height),
+            ),
         )
     }
 }
 
-/** Todas las medallas, cuatro por fila; al tocar una se ve su detalle. */
+/** Qué medallas resaltar: las demás se apagan. */
+enum class MedalFilter { ALL, EARNED, IN_PROGRESS }
+
+/**
+ * Cabecera de las medallas: cuántas de cada metal, barra de avance general (bronce → plata → oro)
+ * y filtro para resaltar ganadas o en curso.
+ */
 @Composable
-fun MedalGrid(medals: List<MedalProgress>, onSelect: (MedalProgress) -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        medals.chunked(COLUMNS).forEach { row ->
-            Row(Modifier.fillMaxWidth()) {
-                row.forEach { progress ->
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier
-                            .weight(1f)
-                            .clickable { onSelect(progress) }
-                            .padding(vertical = 4.dp),
-                    ) {
-                        MedalBadge(progress, 56.dp)
-                        Spacer(Modifier.height(4.dp))
-                        Text(
-                            stringResource(progress.medal.titleRes),
-                            style = MaterialTheme.typography.labelSmall,
-                            textAlign = TextAlign.Center,
-                            maxLines = 2,
-                            color = if (progress.earned) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
+fun MedalHeader(medals: List<MedalProgress>, filter: MedalFilter, onFilter: (MedalFilter) -> Unit) {
+    val earned = medals.count { it.earned }
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            MedalTier.entries.reversed().forEach { tier ->
+                val count = medals.count { it.earned && it.medal.tier == tier }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape)
+                        .padding(horizontal = 9.dp, vertical = 3.dp),
+                ) {
+                    Box(Modifier.size(7.dp).background(tier.glass().base, CircleShape))
+                    Spacer(Modifier.width(5.dp))
+                    Text("$count ${stringResource(tier.labelRes)}", style = MaterialTheme.typography.labelMedium)
                 }
-                repeat(COLUMNS - row.size) { Spacer(Modifier.weight(1f)) }
+            }
+        }
+        Canvas(Modifier.fillMaxWidth().height(8.dp)) {
+            val radius = CornerRadius(size.height / 2)
+            drawRoundRect(Color.Gray.copy(alpha = 0.18f), cornerRadius = radius)
+            val w = size.width * earned / medals.size.coerceAtLeast(1)
+            if (w > 0f) {
+                drawRoundRect(
+                    Brush.horizontalGradient(listOf(Color(0xFFD97742), Color(0xFFCBD5E1), Color(0xFFFBBF24)), endX = size.width),
+                    size = Size(w, size.height),
+                    cornerRadius = radius,
+                )
+            }
+        }
+        Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            val counts = mapOf(
+                MedalFilter.ALL to medals.size,
+                MedalFilter.EARNED to earned,
+                MedalFilter.IN_PROGRESS to medals.size - earned,
+            )
+            MedalFilter.entries.forEach { option ->
+                FilterChip(
+                    selected = filter == option,
+                    onClick = { onFilter(option) },
+                    label = {
+                        Text(
+                            stringResource(
+                                when (option) {
+                                    MedalFilter.ALL -> R.string.prog_medal_filter_all
+                                    MedalFilter.EARNED -> R.string.prog_medal_filter_earned
+                                    MedalFilter.IN_PROGRESS -> R.string.prog_medal_filter_progress
+                                },
+                                counts.getValue(option),
+                            ),
+                        )
+                    },
+                )
+            }
+        }
+    }
+}
+
+/** Todas las medallas, cuatro por fila; al tocar una se ve su detalle. Las que no pasan el filtro se apagan. */
+@Composable
+fun MedalGrid(medals: List<MedalProgress>, onSelect: (MedalProgress) -> Unit, filter: MedalFilter = MedalFilter.ALL) {
+    val anyShiny = medals.any { it.earned && it.medal.tier != MedalTier.BRONZE }
+    CompositionLocalProvider(LocalGlassShimmer provides if (anyShiny) rememberGlassShimmer() else null) {
+        Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+            medals.chunked(COLUMNS).forEach { row ->
+                Row(Modifier.fillMaxWidth()) {
+                    row.forEach { progress ->
+                        val shown = when (filter) {
+                            MedalFilter.ALL -> true
+                            MedalFilter.EARNED -> progress.earned
+                            MedalFilter.IN_PROGRESS -> !progress.earned
+                        }
+                        val alpha by animateFloatAsState(if (shown) 1f else 0.16f, label = "filtro")
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier
+                                .weight(1f)
+                                .graphicsLayer { this.alpha = alpha }
+                                .clickable { onSelect(progress) }
+                                .padding(vertical = 4.dp),
+                        ) {
+                            MedalBadge(progress, 64.dp)
+                            Spacer(Modifier.height(6.dp))
+                            Text(
+                                stringResource(progress.medal.titleRes),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = if (progress.earned) FontWeight.SemiBold else FontWeight.Normal,
+                                textAlign = TextAlign.Center,
+                                maxLines = 2,
+                                color = if (progress.earned) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                    repeat(COLUMNS - row.size) { Spacer(Modifier.weight(1f)) }
+                }
             }
         }
     }
@@ -158,7 +406,23 @@ fun MedalDialog(progress: MedalProgress, onDismiss: () -> Unit) {
     val description = stringResource(medal.descriptionRes)
     AlertDialog(
         onDismissRequest = onDismiss,
-        icon = { MedalBadge(progress, 88.dp) },
+        icon = {
+            // Se ladea con el teléfono y el reflejo se corre al mismo lado, como la ficha del elemento
+            val tilt = rememberLiquidTilt(enabled = true)
+            val lean = remember(tilt) { { (tilt.value / TILT_RANGE).coerceIn(-1f, 1f) } }
+            MedalBadge(
+                progress,
+                112.dp,
+                showPercent = false,
+                lean = lean,
+                modifier = Modifier.graphicsLayer {
+                    val t = lean()
+                    rotationY = t * MAX_ROTATION
+                    rotationX = -abs(t) * MAX_ROTATION * 0.35f
+                    cameraDistance = 14f * density
+                },
+            )
+        },
         title = { Text(title, textAlign = TextAlign.Center) },
         text = {
             Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
@@ -233,3 +497,9 @@ fun MedalBanner(medals: List<Medal>, onOpen: () -> Unit, onDismiss: () -> Unit, 
 }
 
 private const val COLUMNS = 4
+
+/** Inclinación del teléfono que lleva la medalla del detalle a su giro máximo. */
+private const val TILT_RANGE = 0.3f
+
+/** Giro máximo de la medalla del detalle, en grados. */
+private const val MAX_ROTATION = 12f

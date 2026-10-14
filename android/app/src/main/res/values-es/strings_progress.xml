@@ -201,4 +201,7 @@
     <string name="prog_guide_mastery_body">Los repetidos no se desperdician: cada vez que obtienes un elemento sube su maestría, de bronce a plata y a oro (5, 10 y 15 veces; los sintéticos, 2, 4 y 6). Si toda la tabla llega a un nivel, lo celebramos.</string>
     <string name="prog_guide_medals_body">En Progreso están tus medallas: rachas, horas de enfoque, madrugadas, fusiones y más. Las que te faltan se ven apagadas, con un anillo que muestra cuánto llevas.</string>
     <string name="prog_guide_league_body">En ★ Logros › Liga compites cada semana con hasta 30 personas: tus puntos son tus minutos de enfoque. Los primeros suben de liga y los últimos bajan, del Hidrógeno al Platino. Necesitas entrar con tu cuenta.</string>
+    <string name="prog_medal_filter_all">Todas (%1$d)</string>
+    <string name="prog_medal_filter_earned">Ganadas (%1$d)</string>
+    <string name="prog_medal_filter_progress">En curso (%1$d)</string>
 </resources>

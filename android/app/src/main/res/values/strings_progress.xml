@@ -194,4 +194,7 @@
     <string name="prog_guide_mastery_body">Duplicates aren\'t wasted: every time you get an element, its mastery goes up, from bronze to silver to gold (5, 10 and 15 times; 2, 4 and 6 for synthetic ones). If the whole table reaches a level, we celebrate.</string>
     <string name="prog_guide_medals_body">Your medals live in Progress: streaks, focus hours, early mornings, fusions and more. The ones you\'re missing look faded, with a ring that shows how far along you are.</string>
     <string name="prog_guide_league_body">In ★ Achievements › League you compete each week with up to 30 people: your points are your focus minutes. The top ones move up a league and the bottom ones move down, from Hydrogen to Platinum. You need to sign in to your account.</string>
+    <string name="prog_medal_filter_all">All (%1$d)</string>
+    <string name="prog_medal_filter_earned">Earned (%1$d)</string>
+    <string name="prog_medal_filter_progress">In progress (%1$d)</string>
 </resources>

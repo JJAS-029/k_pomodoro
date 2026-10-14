@@ -556,6 +556,8 @@ Prototipo **LIQUID_GLASS** (en la pantalla de prueba de debug, junto a los demá
 - **Siluetas suavizadas**: pico curvo del vaso de precipitados y hombros curvos del Erlenmeyer.
 - **Paletas de laboratorio (Pro)** (`domain/model/LabPalette.kt`): Clásica, Neón, Atardecer, Océano, Aurora y Pastel, en Config › Apariencia. Cambian los colores de los pomodoros y descansos; con la clásica los colores son idénticos a los de antes. Sin Pro se muestran y llevan a la pantalla de Pro.
 - **Casillas de cristal** (`ui/components/ElementTile.kt`, `GlassStyle.kt`): degradado diagonal del tono de la familia, filo y reflejo; ×N en pastilla y barra de avance hacia el siguiente nivel de maestría. Plata y oro con halo y destello (un solo reloj por pantalla). La leyenda de la tabla son fichas que resaltan su familia; el sintetizador usa tarjetas grandes; la cabecera del detalle se ladea con el teléfono y su recipiente usa la firma del elemento.
+- **Medallas de cristal** (`ui/medals/MedalViews.kt`): esfera del metal con halo (degradado radial, no desenfoque, para que se vea en Android 8), anillo grabado, borde especular y domo de lente sobre el símbolo; plata y oro con el destello compartido. Sin ganar: cristal ahumado con arco índigo, punta brillante y porcentaje. Cabecera con cuántas de cada metal, barra general y filtro (Todas / Ganadas / En curso) que apaga las demás. En el detalle la medalla se ladea con el teléfono.
+- Etiqueta de rareza con contorno sutil en el tema claro (el amarillo de los halógenos no se leía).
 
 **Menú estilo Android**: el dock desplegable se cambió por un botón ☰ que abre una `ModalBottomSheet` completa con `ListItem` (ícono, nombre y descripción), en dos secciones: "Este plan" (Plan, Ambiente, Sonido; solo con plan en curso) y "Lab Pomodoro" (Logros, Progreso, Config, Guía, Pro, cuenta).
 
@@ -594,6 +596,23 @@ Hecho: **Ajustar el plan en curso** — `TimerEngine.extendCurrent` (+5 min, top
 | Tableta y horizontal | Diseño a dos columnas en tabletas y plegables, y pantalla principal en horizontal | 🟡 | No |
 | Wear OS | Tile y complicación con el tiempo restante en el reloj | 🔴 | Pro |
 | Accesibilidad | Revisión completa con TalkBack y tamaños de letra grandes | 🟢 | No |
+
+#### Ideas nuevas (14 de octubre de 2026, por decidir)
+
+| Idea | Qué hace | Esfuerzo | Pro |
+|---|---|---|---|
+| Negro puro (AMOLED) | En el tema oscuro, tarjetas, hojas, diálogos y menús en negro profundo en vez del gris de Material (Android no avisa si la pantalla es AMOLED: interruptor "Negro puro" en Apariencia, encendido por defecto) | 🟢 | No |
+| Ficha del elemento ampliada | Más datos: masa atómica, configuración electrónica, estado a temperatura ambiente, densidad, puntos de fusión y ebullición, quién lo descubrió y dato curioso | 🟡 | No |
+| Medallas con Koala | Recalcular las medallas alrededor del koala del laboratorio (nombres, historia, niveles) e ilustraciones propias en vez de emojis | 🟡/🔴 | No |
+
+#### Pendientes de publicación y técnicos
+
+- Subir `versionCode` a 3 en la próxima subida a Play (el 2 ya está usado).
+- Probar la compra real de Pro (suscripción y pago único) con testers.
+- Prueba cerrada: 12 testers durante 14 días antes de pedir producción.
+- Al pasar a producción: vincular AdMob con Play y publicar `app-ads.txt`.
+- `setSourceRectHint` en PiP (sugerencia de lint) y `setAutoEnterEnabled`.
+- iPhone: en pausa.
 
 
 ---
