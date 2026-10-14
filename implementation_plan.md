@@ -549,6 +549,10 @@ Esfuerzo: 🟢 poco · 🟡 medio · 🔴 mucho. "Pro" es una sugerencia, se dec
 
 Hecho: `LiquidTilt.kt` (sensor de gravedad + resorte amortiguado; sin movimiento no pide cuadros), `Ripples` y `Kind.DROP` en `VesselView` (solo con `interactive`, en la pantalla principal; vibración suave al tocar), `VesselShape.GRADUATED_CYLINDER` (pie y graduación fina) y `VOLUMETRIC_FLASK` (cuello largo, líquido hasta la marca de aforo). Después: `Kind.CONDENSE` (gotas en el vidrio sobre el líquido que resbalan), `drawPour` y salpicaduras en los descansos, `Kind.RING` al reventar cada burbuja, `BunsenBurner.kt` bajo el recipiente de la pantalla principal (llama solo en el trabajo) y en la repisa burbujeo del recipiente actual y destello al llenarse. `VesselGeometry.levelV` hace que en la probeta el nivel empiece arriba del pie.
 
+Prototipo **LIQUID_GLASS** (en la pantalla de prueba de debug, junto a los demás): paleta calculada del color del líquido (`LiquidTones`: brillo, sombra saturada sin negro y resplandor), menisco que sube junto a las paredes, brillo interno con `BlendMode.Plus`, cuerpo esmerilado, resplandor cáustico bajo el recipiente y borde especular en diagonal teñido del líquido (gris azulado en el tema claro). Pendiente de elegir.
+
+**Menú estilo Android**: el dock desplegable se cambió por un botón ☰ que abre una `ModalBottomSheet` completa con `ListItem` (ícono, nombre y descripción), en dos secciones: "Este plan" (Plan, Ambiente, Sonido; solo con plan en curso) y "Lab Pomodoro" (Logros, Progreso, Config, Guía, Pro, cuenta).
+
 #### Más ideas de estética (por decidir)
 
 | Idea | Qué hace | Esfuerzo | Pro |

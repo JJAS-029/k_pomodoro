@@ -9,6 +9,7 @@ import android.location.Geocoder
 import android.os.Build
 import android.util.Log
 import androidx.core.content.ContextCompat
+import androidx.core.content.edit
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
@@ -77,7 +78,7 @@ class PlaceTracker @Inject constructor(
                             currentPlaceId = null
                             pending.clear()
                         }
-                        saved.edit().clear().apply()
+                        saved.edit { clear() }
                         val seed = (engine.state.value as? TimerState.Active)?.planSeed
                         val prefs = settings.settings.first()
                         if (prefs.isPro && prefs.placesEnabled && hasPermission()) {
@@ -85,7 +86,7 @@ class PlaceTracker @Inject constructor(
                             launch {
                                 val id = locate() ?: return@launch
                                 lock.withLock { setPlace(id) }
-                                if (seed != null) saved.edit().putLong(KEY_SEED, seed).putLong(KEY_PLACE, id).apply()
+                                if (seed != null) saved.edit { putLong(KEY_SEED, seed).putLong(KEY_PLACE, id) }
                             }
                         }
                     }

@@ -267,7 +267,7 @@ private fun ControlsPage() {
     LegendRow({ ControlButton(R.drawable.ic_pause, highlighted = true) }, stringResource(R.string.prog_guide_pause))
     LegendRow({ ControlButton(R.drawable.ic_skip) }, stringResource(R.string.prog_guide_skip_session))
     LegendRow({ ControlButton(R.drawable.ic_stop) }, stringResource(R.string.prog_guide_stop))
-    LegendRow({ ControlButton(R.drawable.ic_chevron_up) }, stringResource(R.string.prog_guide_open_menu))
+    LegendRow({ ControlButton(R.drawable.ic_menu) }, stringResource(R.string.prog_guide_open_menu))
     Spacer(Modifier.height(12.dp))
     Text(stringResource(R.string.prog_guide_in_menu), style = MaterialTheme.typography.titleMedium)
     Spacer(Modifier.height(4.dp))

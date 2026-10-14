@@ -41,9 +41,15 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.AlertDialog
@@ -534,112 +540,129 @@ private val ConfettiPalette = listOf(
  * Barra flotante inferior: el botón principal siempre visible y el resto de opciones
  * desplegables con la flecha, para dejar la pantalla libre para el recipiente.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun LabDock(timer: TimerUi?, account: MainUiState, actions: MainActions, modifier: Modifier = Modifier) {
-    var expanded by rememberSaveable { mutableStateOf(false) }
-    val arrowRotation by animateFloatAsState(if (expanded) 180f else 0f, label = "arrow")
-    // Cada opción cierra el dock después de ejecutarse
-    fun run(action: () -> Unit): () -> Unit = {
-        expanded = false
-        action()
-    }
-
-    // La burbuja contenedora solo aparece al desplegar; contraído, los botones flotan solos
-    val bubble = if (MaterialTheme.colorScheme.isLight) MaterialTheme.colorScheme.surfaceContainerHigh else Color(0xFA141414)
-    val bubbleColor by animateColorAsState(if (expanded) bubble else Color.Transparent, label = "bubble")
-    val borderColor by animateColorAsState(
-        if (expanded) MaterialTheme.colorScheme.outline else Color.Transparent,
-        label = "bubbleBorder",
-    )
-    val elevation by animateDpAsState(if (expanded) 8.dp else 0.dp, label = "bubbleShadow")
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(32.dp),
-        color = bubbleColor,
-        border = BorderStroke(1.dp, borderColor),
-        shadowElevation = elevation,
-    ) {
-        Column(Modifier.padding(8.dp)) {
-            AnimatedVisibility(
-                visible = expanded,
-                enter = expandVertically(expandFrom = Alignment.Bottom) + fadeIn(),
-                exit = shrinkVertically(shrinkTowards = Alignment.Bottom) + fadeOut(),
-            ) {
-                Column {
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                        DockItem(R.drawable.ic_tune, stringResource(R.string.main_dock_settings), run(actions.onOpenSettings))
-                        DockItem(R.drawable.ic_star, stringResource(R.string.main_dock_achievements), run(actions.onOpenAchievements))
-                        DockItem(R.drawable.ic_chart, stringResource(R.string.main_dock_progress), run(actions.onOpenStats))
-                        DockItem(R.drawable.ic_diamond, stringResource(R.string.main_dock_pro), run(actions.onOpenPro))
-                    }
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                        DockItem(R.drawable.ic_help, stringResource(R.string.main_dock_guide), run(actions.onOpenGuide))
-                        if (timer is TimerUi.Active) DockItem(R.drawable.ic_more_time, stringResource(R.string.main_dock_plan), run(actions.onOpenPlan))
-                        if (timer is TimerUi.Active) DockItem(R.drawable.ic_moon, stringResource(R.string.main_dock_ambient), run(actions.onEnterAmbient))
-                        DockItem(R.drawable.ic_headphones, stringResource(R.string.main_dock_sound), run(actions.onOpenSound))
-                        when {
-                            account.isBusy -> DockItem(R.drawable.ic_person, "…", onClick = {})
-                            account.isSignedIn -> DockItem(R.drawable.ic_person, stringResource(R.string.main_dock_sign_out), run(actions.onSignOut))
-                            else -> DockItem(R.drawable.ic_person, stringResource(R.string.main_dock_sign_in), run(actions.onSignIn))
-                        }
-                    }
-                    Spacer(Modifier.height(8.dp))
-                }
-            }
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                if (timer is TimerUi.Active) {
-                    // Controles tipo reproductor: detener · pausar/continuar · saltar
-                    PlayerButton(R.drawable.ic_stop, stringResource(R.string.main_action_stop), actions.onStop)
-                    Spacer(Modifier.size(8.dp))
-                    Button(
-                        onClick = if (timer.isPaused) actions.onResume else actions.onPause,
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(52.dp),
-                        shape = RoundedCornerShape(26.dp),
-                    ) {
-                        Icon(
-                            painterResource(if (timer.isPaused) R.drawable.ic_play else R.drawable.ic_pause),
-                            contentDescription = stringResource(if (timer.isPaused) R.string.main_action_resume else R.string.main_action_pause),
-                            modifier = Modifier.size(26.dp),
-                        )
-                    }
-                    Spacer(Modifier.size(8.dp))
-                    PlayerButton(R.drawable.ic_skip, stringResource(R.string.main_action_skip), actions.onSkip)
-                } else {
-                    val (label, onClick) = when (timer) {
-                        is TimerUi.Finished -> stringResource(R.string.main_new_experiment) to actions.onDismissSummary
-                        else -> stringResource(R.string.main_start_button) to actions.onStart
-                    }
-                    Button(
-                        onClick = onClick,
-                        enabled = timer != null,
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(52.dp),
-                        shape = RoundedCornerShape(26.dp),
-                    ) {
-                        Text(label, fontSize = 16.sp)
-                    }
-                }
-                Spacer(Modifier.size(8.dp))
-                IconButton(
-                    onClick = { expanded = !expanded },
-                    modifier = Modifier
-                        .size(52.dp)
-                        .clip(CircleShape),
-                ) {
-                    Icon(
-                        painterResource(R.drawable.ic_chevron_up),
-                        contentDescription = stringResource(if (expanded) R.string.main_hide_options else R.string.main_more_options),
-                        tint = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.rotate(arrowRotation),
-                    )
-                }
-            }
+    // Todas las opciones viven en una hoja inferior; abajo quedan siempre los controles del timer
+    var menu by rememberSaveable { mutableStateOf(false) }
+    if (menu) {
+        // Completa desde el inicio: la lista es larga
+        ModalBottomSheet(onDismissRequest = { menu = false }, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
+            LabMenu(timer, account, actions, close = { menu = false })
         }
     }
+
+    Row(modifier.fillMaxWidth().padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+        if (timer is TimerUi.Active) {
+            // Controles tipo reproductor: detener · pausar/continuar · saltar
+            PlayerButton(R.drawable.ic_stop, stringResource(R.string.main_action_stop), actions.onStop)
+            Spacer(Modifier.size(8.dp))
+            Button(
+                onClick = if (timer.isPaused) actions.onResume else actions.onPause,
+                modifier = Modifier
+                    .weight(1f)
+                    .height(52.dp),
+                shape = RoundedCornerShape(26.dp),
+            ) {
+                Icon(
+                    painterResource(if (timer.isPaused) R.drawable.ic_play else R.drawable.ic_pause),
+                    contentDescription = stringResource(if (timer.isPaused) R.string.main_action_resume else R.string.main_action_pause),
+                    modifier = Modifier.size(26.dp),
+                )
+            }
+            Spacer(Modifier.size(8.dp))
+            PlayerButton(R.drawable.ic_skip, stringResource(R.string.main_action_skip), actions.onSkip)
+        } else {
+            val (label, onClick) = when (timer) {
+                is TimerUi.Finished -> stringResource(R.string.main_new_experiment) to actions.onDismissSummary
+                else -> stringResource(R.string.main_start_button) to actions.onStart
+            }
+            Button(
+                onClick = onClick,
+                enabled = timer != null,
+                modifier = Modifier
+                    .weight(1f)
+                    .height(52.dp),
+                shape = RoundedCornerShape(26.dp),
+            ) {
+                Text(label, fontSize = 16.sp)
+            }
+        }
+        Spacer(Modifier.size(8.dp))
+        IconButton(
+            onClick = { menu = true },
+            modifier = Modifier
+                .size(52.dp)
+                .clip(CircleShape),
+        ) {
+            Icon(
+                painterResource(R.drawable.ic_menu),
+                contentDescription = stringResource(R.string.main_more_options),
+                tint = MaterialTheme.colorScheme.onSurface,
+            )
+        }
+    }
+}
+
+/** El menú completo, como lista de Android: lo del plan en curso arriba y luego la app. */
+@Composable
+private fun LabMenu(timer: TimerUi?, account: MainUiState, actions: MainActions, close: () -> Unit) {
+    // Cada opción cierra la hoja antes de abrir lo suyo
+    fun run(action: () -> Unit): () -> Unit = {
+        close()
+        action()
+    }
+    Column(
+        Modifier
+            .navigationBarsPadding()
+            .verticalScroll(rememberScrollState())
+            .padding(bottom = 16.dp),
+    ) {
+        if (timer is TimerUi.Active) {
+            MenuSection(stringResource(R.string.main_menu_section_plan))
+            MenuItem(R.drawable.ic_more_time, stringResource(R.string.main_dock_plan), stringResource(R.string.main_menu_plan_desc), run(actions.onOpenPlan))
+            MenuItem(R.drawable.ic_moon, stringResource(R.string.main_dock_ambient), stringResource(R.string.main_menu_ambient_desc), run(actions.onEnterAmbient))
+            MenuItem(R.drawable.ic_headphones, stringResource(R.string.main_dock_sound), stringResource(R.string.main_menu_sound_desc), run(actions.onOpenSound))
+            HorizontalDivider(Modifier.padding(vertical = 8.dp))
+        }
+        MenuSection(stringResource(R.string.app_name))
+        MenuItem(R.drawable.ic_star, stringResource(R.string.main_dock_achievements), stringResource(R.string.main_menu_achievements_desc), run(actions.onOpenAchievements))
+        MenuItem(R.drawable.ic_chart, stringResource(R.string.main_dock_progress), stringResource(R.string.main_menu_progress_desc), run(actions.onOpenStats))
+        if (timer !is TimerUi.Active) {
+            MenuItem(R.drawable.ic_headphones, stringResource(R.string.main_dock_sound), stringResource(R.string.main_menu_sound_desc), run(actions.onOpenSound))
+        }
+        MenuItem(R.drawable.ic_tune, stringResource(R.string.main_dock_settings), stringResource(R.string.main_menu_settings_desc), run(actions.onOpenSettings))
+        MenuItem(R.drawable.ic_help, stringResource(R.string.main_dock_guide), stringResource(R.string.main_menu_guide_desc), run(actions.onOpenGuide))
+        MenuItem(R.drawable.ic_diamond, stringResource(R.string.main_dock_pro), stringResource(R.string.main_menu_pro_desc), run(actions.onOpenPro))
+        when {
+            account.isBusy -> MenuItem(R.drawable.ic_person, "…", null) {}
+            account.isSignedIn -> MenuItem(R.drawable.ic_person, stringResource(R.string.main_dock_sign_out), stringResource(R.string.main_menu_sign_out_desc), run(actions.onSignOut))
+            else -> MenuItem(R.drawable.ic_person, stringResource(R.string.main_dock_sign_in), stringResource(R.string.main_menu_sign_in_desc), run(actions.onSignIn))
+        }
+    }
+}
+
+@Composable
+private fun MenuSection(title: String) {
+    Text(
+        title,
+        style = MaterialTheme.typography.titleSmall,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 4.dp),
+    )
+}
+
+@Composable
+private fun MenuItem(icon: Int, title: String, description: String?, onClick: () -> Unit) {
+    ListItem(
+        headlineContent = { Text(title) },
+        supportingContent = description?.let { { Text(it) } },
+        leadingContent = { Icon(painterResource(icon), contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
+        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+        modifier = Modifier
+            .clickable(onClick = onClick)
+            .padding(horizontal = 8.dp),
+    )
 }
 
 @Composable
@@ -653,26 +676,6 @@ private fun PlayerButton(icon: Int, description: String, onClick: () -> Unit) {
         Box(contentAlignment = Alignment.Center) {
             Icon(painterResource(icon), contentDescription = description, tint = MaterialTheme.colorScheme.onSurface)
         }
-    }
-}
-
-@Composable
-private fun DockItem(icon: Int, label: String, onClick: () -> Unit) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .clip(RoundedCornerShape(16.dp))
-            .clickable(onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 8.dp),
-    ) {
-        Icon(painterResource(icon), contentDescription = null, tint = MaterialTheme.colorScheme.onSurface)
-        Text(
-            label,
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
     }
 }
 

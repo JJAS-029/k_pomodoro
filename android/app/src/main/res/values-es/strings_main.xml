@@ -35,7 +35,6 @@
     <string name="main_dock_sign_in">Entrar</string>
     <string name="main_new_experiment">Nuevo experimento</string>
     <string name="main_start_button">Start</string>
-    <string name="main_hide_options">Ocultar opciones</string>
     <string name="main_more_options">Más opciones</string>
     <plurals name="main_plan_summary">
         <item quantity="one">%1$d pomodoro · %2$s de trabajo</item>
@@ -184,4 +183,15 @@
     <string name="main_plan_add">+1 pomodoro al final</string>
     <string name="main_plan_remove">Quitar el último pomodoro</string>
     <string name="main_plan_finish_after">Terminar después de esta sesión</string>
+    <string name="main_menu_section_plan">Este plan</string>
+    <string name="main_menu_plan_desc">Alargar, sumar o quitar pomodoros</string>
+    <string name="main_menu_ambient_desc">Solo el recipiente y el reloj, atenuados</string>
+    <string name="main_menu_sound_desc">Ruido, lluvia u olas mientras trabajas</string>
+    <string name="main_menu_achievements_desc">Tabla periódica, sintetizador y liga</string>
+    <string name="main_menu_progress_desc">Estadísticas y medallas</string>
+    <string name="main_menu_settings_desc">Plan, avisos, idioma y respaldo</string>
+    <string name="main_menu_guide_desc">Cómo funciona Lab Pomodoro</string>
+    <string name="main_menu_pro_desc">Sin anuncios y más funciones</string>
+    <string name="main_menu_sign_in_desc">Respaldo en la nube y ligas</string>
+    <string name="main_menu_sign_out_desc">Cerrar sesión de tu cuenta de Google</string>
 </resources>

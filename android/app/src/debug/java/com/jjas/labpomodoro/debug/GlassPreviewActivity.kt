@@ -35,7 +35,7 @@ class GlassPreviewActivity : ComponentActivity() {
                     Column(Modifier.safeDrawingPadding().padding(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         GlassLook.entries.forEach { look ->
                             Text(look.name, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onBackground)
-                            Row(Modifier.fillMaxWidth().height(150.dp)) {
+                            Row(Modifier.fillMaxWidth().height(128.dp)) {
                                 VesselShape.entries.forEachIndexed { i, shape ->
                                     VesselView(
                                         shape = shape,
