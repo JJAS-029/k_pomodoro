@@ -95,6 +95,13 @@ class VesselGeometry private constructor(
         }
     }
 
+    /** Donde empieza el interior por arriba (y en px): la boca, debajo del labio. */
+    val mouthY: Float = when (shape) {
+        VesselShape.BEAKER -> top
+        VesselShape.GRADUATED_CYLINDER -> py(0.96f)
+        else -> py(0.94f)
+    }
+
     /** Silueta cerrada del interior, para recortar el líquido y las burbujas. */
     val interior: Path = Path().apply { body(closed = true) }
 

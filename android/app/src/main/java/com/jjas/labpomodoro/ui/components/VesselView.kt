@@ -176,11 +176,16 @@ fun VesselView(
         Canvas(Modifier.matchParentSize()) {
             val g = VesselGeometry.fit(shape, size.width, size.height, headroom = 0.18f)
             clipRect {
-                drawGlass(g, glass)
-                // Descanso: un chorrito cae al centro mientras el recipiente se llena
+                // Descanso: un chorrito cae al centro mientras el recipiente se llena. Se dibuja
+                // antes del vidrio y recortado (arriba de la boca y dentro del recipiente), para
+                // que el borde quede encima y se vea caer adentro, sin pisar el fondo
                 if (animate && effect == LiquidEffect.BUBBLES && animatedFill < 0.97f) {
-                    drawPour(g, animatedFill, animatedColor, frameNanos / 1_000_000_000f)
+                    val t = frameNanos / 1_000_000_000f
+                    // Las dos partes se juntan en la boca (debajo del labio), sin hueco
+                    clipRect(bottom = g.mouthY) { drawPour(g, animatedFill, animatedColor, t) }
+                    clipPath(g.interior) { clipRect(top = g.mouthY) { drawPour(g, animatedFill, animatedColor, t) } }
                 }
+                drawGlass(g, glass)
                 particles.drawVapor(
                     this,
                     g,
@@ -365,8 +370,8 @@ private fun DrawScope.drawPour(g: VesselGeometry, fill: Float, color: Color, t: 
             if (i == 0) moveTo(x + wobble, y) else lineTo(x + wobble, y)
         }
     }
-    drawPath(stream, color.copy(alpha = 0.85f), style = Stroke(width = width, cap = StrokeCap.Round))
-    drawPath(stream, Color.White.copy(alpha = 0.3f), style = Stroke(width = width * 0.3f, cap = StrokeCap.Round))
+    drawPath(stream, color, style = Stroke(width = width, cap = StrokeCap.Butt))
+    drawPath(stream, Color.White.copy(alpha = 0.3f), style = Stroke(width = width * 0.3f, cap = StrokeCap.Butt))
 }
 
 private fun DrawScope.drawGlass(g: VesselGeometry, glass: GlassStyle) {
