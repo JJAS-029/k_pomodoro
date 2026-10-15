@@ -521,41 +521,31 @@ private fun Legend(
 }
 
 /**
- * Esfera de cristal del color de la familia, como las medallas: cuerpo con la luz arriba a la
- * izquierda, rebote del color abajo a la derecha, borde especular y un destello nítido.
+ * Canica neón de la familia, a juego con las casillas: vidrio oscuro con un núcleo luminoso del
+ * color, aro neón y un destello nítido arriba a la izquierda.
  */
 @Composable
 private fun GlassOrb(glass: GlassPalette, modifier: Modifier = Modifier) {
+    val light = MaterialTheme.colorScheme.isLight
     Box(
         modifier.drawWithCache {
             val r = size.minDimension / 2f
             val center = Offset(size.width / 2f, size.height / 2f)
             val body = Brush.radialGradient(
-                0f to lerp(glass.orb, Color.White, 0.55f),
-                0.45f to glass.orb,
-                1f to glass.deep.copy(alpha = 1f),
-                center = Offset(center.x - r * 0.3f, center.y - r * 0.35f),
-                radius = r * 1.5f,
-            )
-            val bounce = Brush.radialGradient(
-                listOf(lerp(glass.orb, Color.White, 0.3f).copy(alpha = 0.7f), Color.Transparent),
-                center = Offset(center.x + r * 0.35f, center.y + r * 0.45f),
-                radius = r * 0.6f,
-            )
-            val rim = Brush.linearGradient(
-                listOf(Color.White.copy(alpha = 0.95f), Color.White.copy(alpha = 0.1f), lerp(glass.orb, Color.White, 0.4f)),
-                start = Offset.Zero,
-                end = Offset(size.width, size.height),
+                0f to lerp(glass.border, Color.White, 0.35f),
+                0.35f to glass.border,
+                1f to if (light) lerp(glass.border, Color.Black, 0.35f) else Color(0xFF07080B),
+                center = Offset(center.x, center.y + r * 0.15f),
+                radius = r * 1.05f,
             )
             onDrawBehind {
                 drawCircle(body)
-                drawCircle(bounce)
-                drawCircle(rim, radius = r - r * 0.06f, style = Stroke(width = r * 0.12f))
-                // Destello: el reflejo de la ventana sobre el cristal
+                drawCircle(glass.border, radius = r - r * 0.06f, style = Stroke(width = r * 0.12f))
+                // Destello: el reflejo de la ventana sobre el vidrio
                 drawOval(
-                    Color.White.copy(alpha = 0.9f),
+                    Color.White.copy(alpha = 0.85f),
                     topLeft = Offset(center.x - r * 0.55f, center.y - r * 0.62f),
-                    size = Size(r * 0.55f, r * 0.34f),
+                    size = Size(r * 0.5f, r * 0.3f),
                 )
             }
         }

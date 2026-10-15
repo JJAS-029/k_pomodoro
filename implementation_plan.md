@@ -575,6 +575,8 @@ Prototipo **LIQUID_GLASS** (en la pantalla de prueba de debug, junto a los demá
 
 #### Funcionalidades (no estéticas, por decidir)
 
+Hecho: **Casillas "neón vial"** — colores de familia armonizados (`ElementCategory.hue()`/`saturation()`, misma luminosidad; sin olivos ni cafés). Cada casilla es un frasco casi negro (casi blanco en el tema claro) con borde neón y el líquido de la familia; el nivel es la maestría (en la tabla, el escalón alcanzado; en las tarjetas, el avance al siguiente metal, en lugar de la barra). Leyenda con canicas neón. Las propuestas (actual, Joya, Vial, Neón) siguen en la pantalla de prueba `TilePreviewActivity`.
+
 Hecho: **Elemento que nace del recipiente** — `LabRepository.reservePrizes` sortea al empezar cada pomodoro los elementos que ganará si se completa y los guarda en `PrizeStore` (clave "BASIC_32" → número atómico); `syncRewards` entrega lo reservado. En el último 20 % del pomodoro el líquido muta hacia el color del premio (y, pasada la mitad, a su comportamiento); con varios, alterna entre ellos. Al ganarlo sale de la boca del recipiente en una burbuja de cristal (`ElementBubble.kt`) que flota arriba a la derecha: tocarla abre la tabla, arrastrarla lejos la descarta. Reemplaza al aviso anterior.
 
 Hecho: **Mechero de cristal** — `BunsenBurner.kt` con tubo metálico (degradado de cilindro pulido y filo especular), boca, anillo regulador con orificios, manguera del gas, base con brillo y sombra; llama con halo que tiñe la base del recipiente, cono exterior, núcleo brillante, parpadeo de dos ritmos y chispitas. Colores en `FlameTones` (azul por defecto) para los futuros temas de laboratorio.
@@ -618,7 +620,7 @@ Hecho: **Ajustar el plan en curso** — `TimerEngine.extendCurrent` (+5 min, top
 
 #### Pendientes de publicación y técnicos
 
-- Subir `versionCode` a 3 en la próxima subida a Play (el 2 ya está usado).
+- ✅ `versionCode` 3 (versión 1.1) para la prueba cerrada, el 14 de octubre de 2026. La siguiente subida necesita el 4.
 - Probar la compra real de Pro (suscripción y pago único) con testers.
 - Prueba cerrada: 12 testers durante 14 días antes de pedir producción.
 - Al pasar a producción: vincular AdMob con Play y publicar `app-ads.txt`.

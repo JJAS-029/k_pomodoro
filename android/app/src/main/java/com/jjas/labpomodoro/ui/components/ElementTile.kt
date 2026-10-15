@@ -43,18 +43,28 @@ import com.jjas.labpomodoro.domain.model.Mastery
 import com.jjas.labpomodoro.ui.theme.isLight
 
 /** Color de cada familia de la tabla periódica, en tonos suaves sobre fondo negro. */
-fun ElementCategory.color(): Color = when (this) {
-    ElementCategory.ALKALI_METAL -> Color(0xFFEF9A9A)
-    ElementCategory.ALKALINE_EARTH_METAL -> Color(0xFFFFCC80)
-    ElementCategory.TRANSITION_METAL -> Color(0xFF90CAF9)
-    ElementCategory.POST_TRANSITION_METAL -> Color(0xFFB0BEC5)
-    ElementCategory.METALLOID -> Color(0xFFC5E1A5)
-    ElementCategory.NONMETAL -> Color(0xFF80CBC4)
-    ElementCategory.HALOGEN -> Color(0xFFFFF59D)
-    ElementCategory.NOBLE_GAS -> Color(0xFFCE93D8)
-    ElementCategory.LANTHANIDE -> Color(0xFFF48FB1)
-    ElementCategory.ACTINIDE -> Color(0xFFBCAAA4)
-    ElementCategory.UNKNOWN -> Color(0xFF9E9E9E)
+fun ElementCategory.color(): Color = Color.hsl(hue(), saturation(), 0.62f)
+
+/** Matiz de cada familia, repartidos para que ninguna se confunda con su vecina. */
+fun ElementCategory.hue(): Float = when (this) {
+    ElementCategory.ALKALI_METAL -> 2f
+    ElementCategory.ALKALINE_EARTH_METAL -> 28f
+    ElementCategory.TRANSITION_METAL -> 212f
+    ElementCategory.POST_TRANSITION_METAL -> 192f
+    ElementCategory.METALLOID -> 96f
+    ElementCategory.NONMETAL -> 162f
+    ElementCategory.HALOGEN -> 46f
+    ElementCategory.NOBLE_GAS -> 274f
+    ElementCategory.LANTHANIDE -> 326f
+    ElementCategory.ACTINIDE -> 246f
+    ElementCategory.UNKNOWN -> 220f
+}
+
+/** Saturación: casi todas igual de vivas; "otros metales" va acerado y los desconocidos, grises. */
+fun ElementCategory.saturation(): Float = when (this) {
+    ElementCategory.POST_TRANSITION_METAL -> 0.28f
+    ElementCategory.UNKNOWN -> 0.06f
+    else -> 0.72f
 }
 
 /** A partir de este tamaño la casilla es una "tarjeta": nombre y barra de maestría. */
@@ -67,12 +77,13 @@ private val COMPACT_SIZE = 32.dp
 private val GoldFrame = Color(0xFFFFD54F)
 
 /**
- * Casilla de la tabla periódica, de cristal tintado con el color de su familia. Si aún no se
- * descubre se ve un cristal apagado con el símbolo tenue, para que se note lo que falta sin
- * revelar el color.
+ * Casilla de la tabla periódica, estilo "neón vial": un frasco casi negro con borde luminoso del
+ * color de su familia y su líquido adentro. El nivel del líquido es la maestría: en la tabla, el
+ * nivel alcanzado; en las tarjetas grandes, el avance hacia el siguiente metal. Si aún no se
+ * descubre se ve el frasco vacío y apagado, con el símbolo tenue.
  *
- * @param progress avance hacia el siguiente nivel de maestría (0..1); se dibuja como barra solo en
- *   casillas grandes.
+ * @param progress avance hacia el siguiente nivel de maestría (0..1); si es null, el nivel sale de
+ *   [mastery].
  * @param specular corrimiento horizontal del reflejo (-1..1), para que se mueva al ladear el
  *   teléfono; se lee al dibujar, así que no recompone.
  */
@@ -105,8 +116,17 @@ fun ElementTile(
     }
     val glow = if (shiny && !highlighted) frame else null
     val borderWidth = if (frame != null) (size * 0.05f).coerceIn(1.dp, 2.2.dp) else (size * 0.0375f).coerceIn(0.75.dp, 1.5.dp)
-    val barColor = if (mastery == Mastery.GOLD) GoldFrame else nextMetal(mastery)
-    val showBar = card && discovered && progress != null
+    // Nivel del líquido: el avance si lo hay; si no, el escalón de maestría
+    val level = when {
+        !discovered -> 0f
+        progress != null -> 0.12f + 0.83f * progress.coerceIn(0f, 1f)
+        else -> when (mastery) {
+            Mastery.NONE, Mastery.DISCOVERED -> 0.3f
+            Mastery.BRONZE -> 0.5f
+            Mastery.SILVER -> 0.7f
+            Mastery.GOLD -> 0.9f
+        }
+    }
     // Ola diagonal en la tabla: cada casilla brillante pasa el destello un poco después que la anterior
     val phaseOffset = ((element.group ?: 3) + element.period) * 0.035f
 
@@ -138,6 +158,13 @@ fun ElementTile(
                     Brush.linearGradient(listOf(palette.dimTop, palette.dimDeep), Offset.Zero, Offset(w, h))
                 }
                 val lens = specularBrush(w, h, 0f, discovered)
+                val surface = h * (1f - level)
+                val liquid = Brush.verticalGradient(listOf(palette.liquidTop, palette.liquidDeep), startY = surface, endY = h)
+                val bottomGlow = Brush.radialGradient(
+                    listOf(palette.border.copy(alpha = if (light) 0.18f else 0.35f), Color.Transparent),
+                    center = Offset(w / 2f, h),
+                    radius = w * 0.9f,
+                )
                 val bw = borderWidth.toPx()
                 val edge = frame ?: if (discovered) palette.border else palette.dimBorder
                 val rim = Brush.verticalGradient(
@@ -147,9 +174,6 @@ fun ElementTile(
                     endY = h,
                 )
                 val glowWidth = (size * 0.07f).coerceIn(1.5.dp, 5.dp).toPx()
-                val barHeight = (size * 0.035f).toPx()
-                val barInset = (size * 0.12f).toPx()
-                val barBottom = (size * 0.08f).toPx()
                 onDrawWithContent {
                     // Halo de plata u oro: trazos anchos y tenues alrededor (sin blur, que no hay en API 26)
                     if (glow != null) {
@@ -158,21 +182,18 @@ fun ElementTile(
                     }
                     clipPath(clip) {
                         drawRect(background)
-                        // Reflejo convexo de lente; se corre con la inclinación si la hay
-                        drawRect(if (specular != null) specularBrush(w, h, specular(), discovered) else lens)
-                        if (showBar) {
-                            val left = barInset
-                            val top = h - barBottom - barHeight
-                            val track = w - barInset * 2
-                            val r = CornerRadius(barHeight / 2)
-                            drawRoundRect(Color.White.copy(alpha = if (light) 0.25f else 0.16f), Offset(left, top), Size(track, barHeight), r)
-                            drawRoundRect(
-                                barColor,
-                                Offset(left, top),
-                                Size(track * (progress ?: 0f).coerceIn(0f, 1f), barHeight),
-                                r,
+                        if (level > 0f) {
+                            drawRect(bottomGlow)
+                            drawRect(liquid, topLeft = Offset(0f, surface), size = Size(w, h - surface))
+                            // Menisco: una línea de luz en la superficie del líquido
+                            drawRect(
+                                palette.border.copy(alpha = 0.9f),
+                                topLeft = Offset(0f, surface),
+                                size = Size(w, (h * 0.025f).coerceAtLeast(1f)),
                             )
                         }
+                        // Reflejo convexo de lente; se corre con la inclinación si la hay
+                        drawRect(if (specular != null) specularBrush(w, h, specular(), discovered) else lens)
                         this@onDrawWithContent.drawContent()
                         if (shimmer != null) drawShimmer(w, h, (shimmer.value + phaseOffset) % 1f, mastery == Mastery.GOLD)
                     }
@@ -197,7 +218,7 @@ fun ElementTile(
             },
     ) {
         val faint = MaterialTheme.colorScheme.onSurface.copy(alpha = if (light) 0.4f else 0.35f)
-        val symbolColor = if (discovered) Color.White else faint
+        val symbolColor = if (discovered) palette.symbol else faint
         val numberColor = if (discovered) palette.number else faint
         val shadow = if (discovered) {
             Shadow(palette.symbolShadow, Offset(0f, with(density) { (size * 0.02f).toPx() }), with(density) { (size * 0.08f).toPx() })
@@ -242,7 +263,7 @@ fun ElementTile(
                         ratio(0.11f),
                         Modifier
                             .align(Alignment.BottomEnd)
-                            .padding(end = size * 0.07f, bottom = if (showBar) size * 0.15f else size * 0.06f),
+                            .padding(end = size * 0.07f, bottom = size * 0.06f),
                     )
                 }
             }
@@ -297,7 +318,7 @@ private fun tileText(fontSize: TextUnit, weight: FontWeight, color: Color, shado
 
 /** Reflejo convexo: blanco arriba a la izquierda que se desvanece hacia el centro. */
 private fun specularBrush(w: Float, h: Float, shift: Float, discovered: Boolean): Brush = Brush.radialGradient(
-    0f to Color.White.copy(alpha = if (discovered) 0.32f else 0.08f),
+    0f to Color.White.copy(alpha = if (discovered) 0.16f else 0.06f),
     1f to Color.Transparent,
     center = Offset(w * (0.22f + 0.3f * shift.coerceIn(-1f, 1f)), h * 0.18f),
     radius = maxOf(w, h) * 0.7f,
@@ -317,13 +338,6 @@ private fun DrawScope.drawShimmer(w: Float, h: Float, phase: Float, gold: Boolea
             end = Offset(w * (pos + band), h * (pos + band)),
         )
     )
-}
-
-/** Color de la meta que viene, para la barra de avance. */
-private fun nextMetal(mastery: Mastery): Color = when (mastery) {
-    Mastery.NONE, Mastery.DISCOVERED -> BronzeColor
-    Mastery.BRONZE -> SilverColor
-    Mastery.SILVER, Mastery.GOLD -> GoldFrame
 }
 
 val BronzeColor = Color(0xFFCD7F32)
