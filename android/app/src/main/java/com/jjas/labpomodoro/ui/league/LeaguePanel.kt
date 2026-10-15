@@ -1,6 +1,8 @@
 package com.jjas.labpomodoro.ui.league
 
 import android.content.Context
+import android.util.Log
+import com.google.firebase.firestore.FirebaseFirestoreException
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -147,7 +149,15 @@ class LeagueViewModel @Inject constructor(
             _error.value = null
             runCatching { leagues.join(nickname, avatar, sync.currentXp()) }
                 .onSuccess { refresh.value++ }
-                .onFailure { _error.value = R.string.set_league_join_failed }
+                .onFailure { error ->
+                    // El motivo real queda en el registro (adb logcat -s LeaguePanel)
+                    Log.w(TAG, "No se pudo entrar a la liga", error)
+                    _error.value = if ((error as? FirebaseFirestoreException)?.code == FirebaseFirestoreException.Code.PERMISSION_DENIED) {
+                        R.string.set_league_join_denied
+                    } else {
+                        R.string.set_league_join_failed
+                    }
+                }
         }
     }
 
@@ -345,3 +355,5 @@ private fun ResultDialog(result: LeagueResult, onDismiss: () -> Unit) {
         text = { Text(text) },
     )
 }
+
+private const val TAG = "LeaguePanel"

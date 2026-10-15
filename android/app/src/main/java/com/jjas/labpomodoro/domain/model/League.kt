@@ -89,9 +89,22 @@ object LeagueRules {
         LeagueOutcome.STAYED -> league
     }
 
+    private const val NAME_SEED = 0x5EED
+    private const val LEGACY_NAME_COUNT = 15
+
+    /** Científicos de todas las épocas y lugares; más que integrantes de un grupo, así no se repiten. */
     private val BOT_NAMES = listOf(
         "Curie", "Newton", "Mendeléyev", "Lavoisier", "Faraday", "Franklin", "Bohr", "Hopper",
         "Lovelace", "Meitner", "Tesla", "Darwin", "Kepler", "Noether", "Galileo",
+        // Latinoamérica
+        "Molina", "Haro", "Del Río", "Houssay", "Leloir", "Milstein", "Chagas", "Lattes",
+        "Finlay", "Cori", "Ramón y Cajal", "Guerra", "Vázquez", "Ochoa", "Herrera",
+        // Química y física
+        "Dalton", "Avogadro", "Boyle", "Hodgkin", "Pauling", "Rutherford", "Planck", "Heisenberg",
+        "Dirac", "Fermi", "Feynman", "Wu", "Raman", "Bose", "Hahn", "Seaborg", "Nobel", "Arrhenius",
+        // Biología, matemáticas y astronomía
+        "Franklin R.", "McClintock", "Pasteur", "Mendel", "Hypatia", "Euler", "Gauss", "Ramanujan",
+        "Turing", "Leavitt", "Hubble", "Sagan", "Johnson", "Goodall",
     )
 
     /**
@@ -104,11 +117,16 @@ object LeagueRules {
         val random = Random(groupId.hashCode())
         // En ligas más altas los bots rinden más: la competencia sube con la liga
         val base = 60 + league.ordinal * 45
+        // Se baraja una vez por grupo y cada bot toma el siguiente: nunca dos con el mismo nombre.
+        // Con su propio generador, para que los puntos de los bots no cambien respecto a antes
+        val names = BOT_NAMES.shuffled(Random(groupId.hashCode() xor NAME_SEED))
         return List(missing) { i ->
             val weeklyGoal = base + random.nextInt(base * 2)
+            // Antes aquí se sorteaba el nombre: se conserva el sorteo para que avatares y puntos no cambien
+            random.nextInt(LEGACY_NAME_COUNT)
             LeagueMember(
                 id = "bot_$i",
-                nickname = "Asistente ${BOT_NAMES[(random.nextInt(BOT_NAMES.size) + i) % BOT_NAMES.size]}",
+                nickname = "Asistente ${names[i % names.size]}",
                 avatar = 1 + random.nextInt(PeriodicTable.SIZE),
                 xp = (weeklyGoal * weekProgress.coerceIn(0f, 1f)).toInt(),
                 isBot = true,

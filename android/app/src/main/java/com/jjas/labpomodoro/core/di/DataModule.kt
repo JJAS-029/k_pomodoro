@@ -10,6 +10,7 @@ import com.jjas.labpomodoro.data.local.LabDatabase
 import com.jjas.labpomodoro.data.local.dao.DiscoveryDao
 import com.jjas.labpomodoro.data.local.dao.InventoryDao
 import com.jjas.labpomodoro.data.local.dao.PlaceDao
+import com.jjas.labpomodoro.data.local.dao.TagDao
 import com.jjas.labpomodoro.data.local.dao.SessionDao
 import dagger.Module
 import dagger.Provides
@@ -41,6 +42,9 @@ object DataModule {
 
     @Provides
     fun providePlaceDao(db: LabDatabase): PlaceDao = db.placeDao()
+
+    @Provides
+    fun provideTagDao(db: LabDatabase): TagDao = db.tagDao()
 
     @Provides
     @Singleton

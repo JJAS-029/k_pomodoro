@@ -123,6 +123,7 @@ fun SettingsScreen(
                     onAmbientChange = viewModel::setAmbientMode,
                     onAmbientDelayChange = viewModel::setAmbientDelayMinutes,
                     onDynamicColorChange = viewModel::setDynamicColor,
+                    onPureBlackChange = viewModel::setPureBlack,
                     onPaletteChange = viewModel::setLabPalette,
                     onOpenPro = onOpenPro,
                     onResetVesselElement = viewModel::resetVesselElement,
@@ -188,6 +189,7 @@ private fun SettingsContent(
     onAmbientChange: (Boolean) -> Unit,
     onAmbientDelayChange: (Int) -> Unit,
     onDynamicColorChange: (Boolean) -> Unit,
+    onPureBlackChange: (Boolean) -> Unit = {},
     onPaletteChange: (LabPalette) -> Unit = {},
     onOpenPro: () -> Unit = {},
     modifier: Modifier = Modifier,
@@ -353,7 +355,14 @@ private fun SettingsContent(
 
         // Material You existe desde Android 12
         val dynamicAvailable = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-        SectionTitle(proTitle(R.string.set_section_appearance, settings.isPro))
+        SectionTitle(stringResource(R.string.set_section_appearance))
+        SwitchRow(stringResource(R.string.set_pure_black), settings.pureBlack, onPureBlackChange)
+        Text(
+            stringResource(R.string.set_pure_black_desc),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.height(12.dp))
         SwitchRow(
             label = stringResource(R.string.set_dynamic_color),
             checked = settings.dynamicColorActive,

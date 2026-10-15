@@ -39,10 +39,11 @@ object HistoryCsv {
         }
     }
 
-    fun build(sessions: List<SessionEntity>, zone: ZoneId, resources: Resources): String =
-        build(sessions, zone, Labels.from(resources))
+    fun build(sessions: List<SessionEntity>, zone: ZoneId, resources: Resources, tagNames: Map<Long, String> = emptyMap()): String =
+        build(sessions, zone, Labels.from(resources), tagNames)
 
-    fun build(sessions: List<SessionEntity>, zone: ZoneId, labels: Labels): String = buildString {
+    /** [tagNames]: nombre de cada etiqueta por id; las sesiones sin etiqueta dejan la columna vacía. */
+    fun build(sessions: List<SessionEntity>, zone: ZoneId, labels: Labels, tagNames: Map<Long, String> = emptyMap()): String = buildString {
         append(BOM)
         appendLine(labels.header)
         sessions.sortedBy { it.startedAtMillis }.forEach { s ->
@@ -57,10 +58,15 @@ object HistoryCsv {
                     minutes(s.plannedSeconds),
                     minutes(s.actualSeconds),
                     if (s.completed) labels.yes else labels.no,
+                    s.tagId?.let { tagNames[it] }?.let(::quote).orEmpty(),
                 ).joinToString(",")
             )
         }
     }
+
+    /** Entre comillas si hace falta: el nombre lo escribe el usuario y puede llevar comas. */
+    private fun quote(text: String): String =
+        if (text.any { it == ',' || it == '"' || it == '\n' }) "\"" + text.replace("\"", "\"\"") + "\"" else text
 
     // Con un decimal y punto, para que las hojas de cálculo lo lean como número
     private fun minutes(seconds: Int): String = "%.1f".format(Locale.ROOT, seconds / 60.0)

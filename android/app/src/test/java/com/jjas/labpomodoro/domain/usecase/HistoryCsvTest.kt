@@ -14,7 +14,7 @@ class HistoryCsvTest {
 
     // Los mismos textos que values-es/strings_progress.xml (las pruebas de JVM no leen recursos)
     private val labels = HistoryCsv.Labels(
-        header = "fecha,inicio,fin,tipo,minutos_planeados,minutos_reales,completada",
+        header = "fecha,inicio,fin,tipo,minutos_planeados,minutos_reales,completada,etiqueta",
         work = "trabajo",
         shortBreak = "descanso corto",
         longBreak = "descanso largo",
@@ -22,7 +22,7 @@ class HistoryCsvTest {
         no = "no",
     )
 
-    private fun session(hour: Int, minutes: Int, type: SessionType, completed: Boolean, actual: Int = minutes * 60): SessionEntity {
+    private fun session(hour: Int, minutes: Int, type: SessionType, completed: Boolean, actual: Int = minutes * 60, tagId: Long? = null): SessionEntity {
         val start = LocalDateTime.of(2026, 10, 5, hour, 0).atZone(zone).toInstant().toEpochMilli()
         return SessionEntity(
             type = type,
@@ -33,6 +33,7 @@ class HistoryCsvTest {
             completed = completed,
             epochDay = 0,
             hourOfDay = hour,
+            tagId = tagId,
         )
     }
 
@@ -50,9 +51,9 @@ class HistoryCsvTest {
         val lines = csv.removePrefix(HistoryCsv.BOM).lines().filter { it.isNotEmpty() }
         assertEquals(
             listOf(
-                "fecha,inicio,fin,tipo,minutos_planeados,minutos_reales,completada",
-                "2026-10-05,09:00:00,09:12:34,trabajo,25.0,12.6,no",
-                "2026-10-05,10:00:00,10:05:00,descanso corto,5.0,5.0,sí",
+                "fecha,inicio,fin,tipo,minutos_planeados,minutos_reales,completada,etiqueta",
+                "2026-10-05,09:00:00,09:12:34,trabajo,25.0,12.6,no,",
+                "2026-10-05,10:00:00,10:05:00,descanso corto,5.0,5.0,sí,",
             ),
             lines,
         )
@@ -62,5 +63,24 @@ class HistoryCsvTest {
     fun `sin historial queda solo el encabezado`() {
         val lines = HistoryCsv.build(emptyList(), zone, labels).removePrefix(HistoryCsv.BOM).lines().filter { it.isNotEmpty() }
         assertEquals(1, lines.size)
+    }
+
+    @Test
+    fun `la etiqueta va al final y entre comillas si lleva comas`() {
+        val csv = HistoryCsv.build(
+            listOf(
+                session(9, 25, SessionType.WORK, completed = true, tagId = 1),
+                session(10, 25, SessionType.WORK, completed = true, tagId = 2),
+                session(11, 25, SessionType.WORK, completed = true, tagId = 99),
+            ),
+            zone,
+            labels,
+            tagNames = mapOf(1L to "Tesis", 2L to "Física, tarea \"2\""),
+        )
+        val lines = csv.removePrefix(HistoryCsv.BOM).lines().filter { it.isNotEmpty() }
+        assertTrue(lines[1].endsWith(",sí,Tesis"))
+        assertTrue(lines[2].endsWith(",sí,\"Física, tarea \"\"2\"\"\""))
+        // Etiqueta borrada: la columna queda vacía
+        assertTrue(lines[3].endsWith(",sí,"))
     }
 }

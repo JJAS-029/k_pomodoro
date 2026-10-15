@@ -188,4 +188,15 @@
     <string name="main_menu_pro_desc">No ads and more features</string>
     <string name="main_menu_sign_in_desc">Cloud backup and leagues</string>
     <string name="main_menu_sign_out_desc">Sign out of your Google account</string>
+    <string name="tag_question">What are you working on?</string>
+    <string name="tag_none">No tag</string>
+    <string name="tag_add">+ Tag</string>
+    <string name="tag_add_pro">+ Tag · Pro</string>
+    <string name="tag_new_title">New tag</string>
+    <string name="tag_edit_title">Edit tag</string>
+    <string name="tag_name_hint">Math, Thesis, Reading…</string>
+    <string name="tag_save">Save</string>
+    <string name="tag_cancel">Cancel</string>
+    <string name="tag_delete">Delete tag</string>
+    <string name="tag_change_hint">Counts from the next session that ends. Long-press a tag to edit it.</string>
 </resources>

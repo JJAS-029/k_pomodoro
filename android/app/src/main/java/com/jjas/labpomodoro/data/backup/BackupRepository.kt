@@ -11,6 +11,7 @@ import com.jjas.labpomodoro.data.local.LabDatabase
 import com.jjas.labpomodoro.data.local.dao.DiscoveryDao
 import com.jjas.labpomodoro.data.local.dao.InventoryDao
 import com.jjas.labpomodoro.data.local.dao.PlaceDao
+import com.jjas.labpomodoro.data.local.dao.TagDao
 import com.jjas.labpomodoro.data.local.dao.SessionDao
 import com.jjas.labpomodoro.data.repository.SettingsRepository
 import kotlinx.coroutines.Dispatchers
@@ -52,6 +53,7 @@ class BackupRepository @Inject constructor(
     private val inventoryDao: InventoryDao,
     private val discoveryDao: DiscoveryDao,
     private val placeDao: PlaceDao,
+    private val tagDao: TagDao,
     private val settings: SettingsRepository,
     private val firestore: FirebaseFirestore,
     private val auth: FirebaseAuth,
@@ -168,6 +170,7 @@ class BackupRepository @Inject constructor(
         inventory = inventoryDao.all(),
         discoveries = discoveryDao.all(),
         places = placeDao.all(),
+        tags = tagDao.all(),
         settings = settings.exportForBackup(),
     )
 
@@ -178,6 +181,8 @@ class BackupRepository @Inject constructor(
             discoveryDao.deleteAll()
             placeDao.deleteAll()
             placeDao.insertAll(snapshot.places)
+            tagDao.deleteAll()
+            tagDao.insertAll(snapshot.tags)
             sessionDao.insertAll(snapshot.sessions)
             inventoryDao.insertAll(snapshot.inventory)
             discoveryDao.insertAll(snapshot.discoveries)

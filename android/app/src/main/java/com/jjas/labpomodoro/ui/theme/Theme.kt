@@ -50,17 +50,38 @@ private val LabLightScheme = lightColorScheme(
     outline = LabOutlineLight,
 )
 
+/**
+ * Negro puro para pantallas AMOLED: fondo y contenedores (tarjetas, hojas, diálogos, menús) en negros
+ * profundos, con escalones mínimos para que se distingan entre sí. Sin el tinte de elevación de
+ * Material, que aclara las superficies elevadas.
+ */
+private fun ColorScheme.pureBlack(): ColorScheme = copy(
+    background = TrueBlack,
+    surface = TrueBlack,
+    surfaceDim = TrueBlack,
+    surfaceContainerLowest = TrueBlack,
+    surfaceContainerLow = PureBlackLow,
+    surfaceContainer = PureBlackMid,
+    surfaceContainerHigh = PureBlackHigh,
+    surfaceContainerHighest = PureBlackHighest,
+    surfaceVariant = PureBlackHighest,
+    surfaceBright = PureBlackBright,
+    surfaceTint = TrueBlack,
+)
+
 /** true con el tema claro; los dibujos (vidrio, vapor) cambian de blanco a gris. */
 val ColorScheme.isLight: Boolean get() = background.luminance() > 0.5f
 
 /**
  * Sigue el tema del teléfono (claro u oscuro); el modo ambiente y la ventana flotante lo fuerzan a
- * oscuro con [darkTheme]. Con color dinámico (Material You) el oscuro conserva el fondo negro puro.
+ * oscuro con [darkTheme]. Con color dinámico (Material You) el oscuro conserva el fondo negro puro;
+ * con [pureBlack] también tarjetas, hojas y diálogos (pantallas AMOLED).
  */
 @Composable
 fun LabPomodoroTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     dynamicColor: Boolean = false,
+    pureBlack: Boolean = true,
     content: @Composable () -> Unit
 ) {
     val dynamic = dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
@@ -69,7 +90,7 @@ fun LabPomodoroTheme(
         dynamic -> dynamicLightColorScheme(LocalContext.current)
         darkTheme -> LabDarkScheme
         else -> LabLightScheme
-    }
+    }.let { if (darkTheme && pureBlack) it.pureBlack() else it }
 
     MaterialTheme(
         colorScheme = scheme,

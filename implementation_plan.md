@@ -575,11 +575,13 @@ Prototipo **LIQUID_GLASS** (en la pantalla de prueba de debug, junto a los demá
 
 #### Funcionalidades (no estéticas, por decidir)
 
+Hecho: **Etiquetas por plan** — tabla `tags` y columna `sessions.tagId` (Room v4, migración automática). En la pantalla de inicio, "¿En qué vas a trabajar?" con fichas (Sin etiqueta, las del usuario y "+ Etiqueta"; mantener presionada edita o borra; 8 colores). `TagTracker` asigna la etiqueta del plan a cada sesión al terminar y la guarda con la semilla del plan; a medio plan se cambia tocando la etiqueta bajo el contador. Progreso › "Por etiqueta" (pomodoros completados, tiempo y porcentaje). El CSV suma la columna `etiqueta` y el respaldo lleva las etiquetas. Gratis 3, Pro ilimitadas.
+
 Hecho: **Ajustar el plan en curso** — `TimerEngine.extendCurrent` (+5 min, tope 90 min por sesión, corra o esté en pausa), `addPomodoro` (con su descanso antes, tope 24), `removeLastPomodoro` y `finishAfterCurrent`; todo se guarda para recuperar el plan. Botón "Plan" en el dock mientras hay plan, con hoja `AdjustPlanSheet` y resumen (pomodoros que faltan, tiempo y hora aproximada de fin). Detalles: el aviso de restaurar usa plurales, el apodo por defecto de la liga es "Koala NNN" (neutro) y `PlaceTracker` guarda el lugar con la semilla del plan para recuperarlo si Android cierra la app.
 
 | Idea | Qué hace | Esfuerzo | Pro |
 |---|---|---|---|
-| Etiquetas por plan | Al iniciar: "¿En qué vas a trabajar?" (Matemáticas, Tesis…); estadísticas y exportación por etiqueta | 🟡 | Gratis 3 etiquetas, Pro ilimitadas |
+| ✅ Etiquetas por plan | Al iniciar: "¿En qué vas a trabajar?" (Matemáticas, Tesis…); estadísticas y exportación por etiqueta | 🟡 | Gratis 3 etiquetas, Pro ilimitadas |
 | Plantillas de plan | Planes guardados ("Estudio 2 h", "Trabajo profundo 4 h") para iniciar con un toque; también desde el widget y el ícono | 🟢 | No |
 | ✅ Ajustar el plan en curso | +1 pomodoro, extender 5 min, saltar el descanso o terminar después de este pomodoro | 🟢 | No |
 | No molestar automático | Activa "No molestar" durante el trabajo y lo quita en los descansos (permiso de acceso a No molestar) | 🟢 | Pro |
@@ -601,7 +603,7 @@ Hecho: **Ajustar el plan en curso** — `TimerEngine.extendCurrent` (+5 min, top
 
 | Idea | Qué hace | Esfuerzo | Pro |
 |---|---|---|---|
-| Negro puro (AMOLED) | En el tema oscuro, tarjetas, hojas, diálogos y menús en negro profundo en vez del gris de Material (Android no avisa si la pantalla es AMOLED: interruptor "Negro puro" en Apariencia, encendido por defecto) | 🟢 | No |
+| ✅ Negro puro (AMOLED) | En el tema oscuro, tarjetas, hojas, diálogos y menús en negro profundo en vez del gris de Material (Android no avisa si la pantalla es AMOLED: interruptor "Negro puro" en Apariencia, encendido por defecto). `ColorScheme.pureBlack()` en `Theme.kt` lleva los contenedores a negros con escalones mínimos y quita el tinte de elevación; también con Material You. La sección Apariencia ya no es toda Pro: cada opción Pro lo dice | 🟢 | No |
 | Ficha del elemento ampliada | Más datos: masa atómica, configuración electrónica, estado a temperatura ambiente, densidad, puntos de fusión y ebullición, quién lo descubrió y dato curioso | 🟡 | No |
 | Medallas con Koala | Recalcular las medallas alrededor del koala del laboratorio (nombres, historia, niveles) e ilustraciones propias en vez de emojis | 🟡/🔴 | No |
 | Elemento que nace del recipiente | En vez de solo el aviso: la app ya sabe qué elemento dará de premio, así que en el último tramo del pomodoro que lo gana el líquido empieza a mutar hacia el color (y comportamiento) de ese elemento; si gana varios, va pasando por cada uno. Al terminar, el elemento sale del recipiente en una burbuja, como las burbujas de notificación de Android, que se puede tocar para ver su ficha (o descartar) | 🟡 | No |

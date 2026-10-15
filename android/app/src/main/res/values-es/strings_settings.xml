@@ -238,4 +238,7 @@
     <string name="set_palette_ocean">Océano</string>
     <string name="set_palette_aurora">Aurora</string>
     <string name="set_palette_pastel">Pastel</string>
+    <string name="set_pure_black">Negro puro</string>
+    <string name="set_pure_black_desc">En el modo oscuro, tarjetas, menús y diálogos también en negro profundo. Se ve mejor y ahorra batería en pantallas AMOLED.</string>
+    <string name="set_league_join_denied">Las ligas no están disponibles por ahora. Intenta más tarde.</string>
 </resources>

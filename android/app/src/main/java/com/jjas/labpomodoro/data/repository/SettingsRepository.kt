@@ -59,6 +59,8 @@ class SettingsRepository @Inject constructor(
 
     suspend fun setDynamicColor(enabled: Boolean) = dataStore.edit { it[Keys.DYNAMIC_COLOR] = enabled }
 
+    suspend fun setPureBlack(enabled: Boolean) = dataStore.edit { it[Keys.PURE_BLACK] = enabled }
+
     suspend fun setGuideSeen() = dataStore.edit { it[Keys.GUIDE_SEEN] = true }
 
     suspend fun setExactAlarmAsked() = dataStore.edit { it[Keys.EXACT_ALARM_ASKED] = true }
@@ -84,6 +86,10 @@ class SettingsRepository @Inject constructor(
     suspend fun setReminderHour(hour: Int) = dataStore.edit { it[Keys.REMINDER_HOUR] = hour.coerceIn(0, 23) }
 
     suspend fun setPlacesEnabled(enabled: Boolean) = dataStore.edit { it[Keys.PLACES] = enabled }
+
+    suspend fun setSelectedTag(tagId: Long?) = dataStore.edit {
+        if (tagId == null) it.remove(Keys.SELECTED_TAG) else it[Keys.SELECTED_TAG] = tagId
+    }
 
     suspend fun setFocusVolume(volume: Float) = dataStore.edit { it[Keys.FOCUS_VOLUME] = volume.coerceIn(0f, 1f) }
 
@@ -138,6 +144,7 @@ class SettingsRepository @Inject constructor(
             ambientDelayMinutes = this[Keys.AMBIENT_DELAY]?.takeIf { it in AppSettings.AMBIENT_DELAYS }
                 ?: defaults.ambientDelayMinutes,
             dynamicColor = this[Keys.DYNAMIC_COLOR] ?: defaults.dynamicColor,
+            pureBlack = this[Keys.PURE_BLACK] ?: defaults.pureBlack,
             proPurchased = this[Keys.PRO_PURCHASED] ?: defaults.proPurchased,
             proTesting = BuildConfig.DEBUG && (this[Keys.PRO] ?: defaults.proTesting),
             proReview = this[Keys.PRO_REVIEW] ?: defaults.proReview,
@@ -148,6 +155,7 @@ class SettingsRepository @Inject constructor(
             focusSound = this[Keys.FOCUS_SOUND]?.let { name -> FocusSound.entries.firstOrNull { it.name == name } } ?: defaults.focusSound,
             focusVolume = this[Keys.FOCUS_VOLUME] ?: defaults.focusVolume,
             placesEnabled = this[Keys.PLACES] ?: defaults.placesEnabled,
+            selectedTagId = this[Keys.SELECTED_TAG],
             tableCelebrated = this[Keys.TABLE_CELEBRATED] ?: defaults.tableCelebrated,
             masteryCelebrated = this[Keys.MASTERY_CELEBRATED] ?: defaults.masteryCelebrated,
             medalsSeen = this[Keys.MEDALS_SEEN].toMedalSet(),
@@ -176,6 +184,7 @@ class SettingsRepository @Inject constructor(
         val AMBIENT_MODE = booleanPreferencesKey("ambient_mode")
         val AMBIENT_DELAY = intPreferencesKey("ambient_delay_minutes")
         val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
+        val PURE_BLACK = booleanPreferencesKey("pure_black")
         val PRO = booleanPreferencesKey("pro_unlocked")
         val PRO_REVIEW = booleanPreferencesKey("pro_review")
         val GUIDE_SEEN = booleanPreferencesKey("guide_seen")
@@ -186,6 +195,7 @@ class SettingsRepository @Inject constructor(
         val FOCUS_SOUND = stringPreferencesKey("focus_sound")
         val FOCUS_VOLUME = floatPreferencesKey("focus_volume")
         val PLACES = booleanPreferencesKey("places_enabled")
+        val SELECTED_TAG = longPreferencesKey("selected_tag")
         val TABLE_CELEBRATED = booleanPreferencesKey("table_celebrated")
         val MASTERY_CELEBRATED = intPreferencesKey("mastery_celebrated")
         val MEDALS_SEEN = stringPreferencesKey("medals_seen")

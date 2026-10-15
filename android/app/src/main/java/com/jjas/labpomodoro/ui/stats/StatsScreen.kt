@@ -50,6 +50,13 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jjas.labpomodoro.R
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.background
+import com.jjas.labpomodoro.domain.model.TagColors
+import com.jjas.labpomodoro.data.local.entity.TagTotal
 import com.jjas.labpomodoro.ads.AdBanner
 import com.jjas.labpomodoro.ui.medals.MedalDialog
 import com.jjas.labpomodoro.ui.medals.MedalGrid
@@ -128,6 +135,8 @@ fun StatsScreen(onBack: () -> Unit, onOpenPro: () -> Unit, viewModel: StatsViewM
                     } else {
                         Charts(current.stats)
                     }
+                    Section(stringResource(R.string.tag_stats_section), stringResource(R.string.tag_stats_subtitle))
+                    Tags(current.tags)
                     Section(stringResource(R.string.prog_places_section))
                     Places(
                         ui = current.places,
@@ -272,6 +281,42 @@ private fun Charts(stats: FocusStats) {
         labels = (0..23).map { if (it % 6 == 0) resources.getString(R.string.prog_hour_axis, it) else "" },
         describe = { i -> value(hourRange(i), stats.byHour[i]) },
     )
+}
+
+/** Enfoque por etiqueta: tiempo, pomodoros y qué parte del total fue cada una. */
+@Composable
+private fun Tags(tags: List<TagTotal>) {
+    if (tags.isEmpty()) {
+        Text(
+            stringResource(R.string.tag_stats_empty),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        return
+    }
+    val total = tags.sumOf { it.workSeconds }.coerceAtLeast(1)
+    tags.forEach { tag ->
+        val color = Color(TagColors.of(tag.color))
+        Column(Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(Modifier.size(10.dp).background(color, CircleShape))
+                Spacer(Modifier.width(8.dp))
+                Text(tag.name, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+                Text(formatFocus(tag.workSeconds), style = MaterialTheme.typography.bodyLarge)
+            }
+            Spacer(Modifier.height(4.dp))
+            LinearProgressIndicator(
+                progress = { tag.workSeconds.toFloat() / total },
+                color = color,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Text(
+                pluralStringResource(R.plurals.tag_stats_row, tag.completed, tag.completed, tag.workSeconds * 100 / total),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
 }
 
 @Composable

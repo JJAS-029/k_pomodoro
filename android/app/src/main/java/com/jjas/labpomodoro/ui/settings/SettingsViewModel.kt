@@ -10,6 +10,8 @@ import androidx.lifecycle.viewModelScope
 import com.jjas.labpomodoro.R
 import com.jjas.labpomodoro.ads.AdsManager
 import com.jjas.labpomodoro.data.repository.SessionRepository
+import kotlinx.coroutines.flow.first
+import com.jjas.labpomodoro.data.repository.TagRepository
 import com.jjas.labpomodoro.data.repository.SettingsRepository
 import com.jjas.labpomodoro.domain.model.AppSettings
 import com.jjas.labpomodoro.domain.model.SessionConfig
@@ -31,6 +33,7 @@ import javax.inject.Inject
 class SettingsViewModel @Inject constructor(
     private val repository: SettingsRepository,
     private val sessions: SessionRepository,
+    private val tagRepository: TagRepository,
     private val ads: AdsManager,
     @ApplicationContext private val context: Context,
 ) : ViewModel() {
@@ -57,9 +60,10 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             _message.value = runCatching {
                 val all = sessions.all()
+                val tagNames = tagRepository.tags.first().associate { it.id to it.name }
                 withContext(Dispatchers.IO) {
                     context.contentResolver.openOutputStream(uri)?.use { out ->
-                        out.write(HistoryCsv.build(all, ZoneId.systemDefault(), context.resources).toByteArray(Charsets.UTF_8))
+                        out.write(HistoryCsv.build(all, ZoneId.systemDefault(), context.resources, tagNames).toByteArray(Charsets.UTF_8))
                     } ?: error("sin archivo")
                 }
                 context.resources.getQuantityString(R.plurals.set_export_done, all.size, all.size)
@@ -93,6 +97,10 @@ class SettingsViewModel @Inject constructor(
 
     fun setLabPalette(palette: LabPalette) {
         viewModelScope.launch { repository.setLabPalette(palette) }
+    }
+
+    fun setPureBlack(enabled: Boolean) {
+        viewModelScope.launch { repository.setPureBlack(enabled) }
     }
 
     fun setDynamicColor(enabled: Boolean) {

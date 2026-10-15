@@ -231,4 +231,7 @@
     <string name="set_palette_ocean">Ocean</string>
     <string name="set_palette_aurora">Aurora</string>
     <string name="set_palette_pastel">Pastel</string>
+    <string name="set_pure_black">Pure black</string>
+    <string name="set_pure_black_desc">In dark mode, cards, menus and dialogs are deep black too. Looks better and saves battery on AMOLED screens.</string>
+    <string name="set_league_join_denied">The leagues aren\'t available right now. Try again later.</string>
 </resources>

@@ -134,12 +134,21 @@ fun MainScreen(
     timerViewModel: TimerViewModel = hiltViewModel(),
     discoveryViewModel: DiscoveryViewModel = hiltViewModel(),
     medalViewModel: MedalViewModel = hiltViewModel(),
+    tagViewModel: TagViewModel = hiltViewModel(),
 ) {
     val account by viewModel.uiState.collectAsStateWithLifecycle()
     val discoveries by discoveryViewModel.unseen.collectAsStateWithLifecycle()
     val medals by medalViewModel.unseen.collectAsStateWithLifecycle()
     val timer by timerViewModel.state.collectAsStateWithLifecycle()
+    val tags by tagViewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val tagActions = TagActions(
+        onSelect = tagViewModel::select,
+        onCreate = tagViewModel::create,
+        onUpdate = tagViewModel::update,
+        onDelete = tagViewModel::delete,
+        onOpenPro = onOpenPro,
+    )
 
     // La primera vez se abre la guía sola (una sola vez, aunque DataStore tarde en guardar)
     var guideAutoOpened by rememberSaveable { mutableStateOf(false) }
@@ -249,6 +258,27 @@ fun MainScreen(
             }
         }
     }
+    // Cambiar la etiqueta a medio plan
+    var tagSheet by rememberSaveable { mutableStateOf(false) }
+    if (tagSheet) {
+        ModalBottomSheet(onDismissRequest = { tagSheet = false }) {
+            Column(
+                Modifier
+                    .navigationBarsPadding()
+                    .padding(horizontal = 24.dp)
+                    .padding(bottom = 24.dp)
+            ) {
+                Text(stringResource(R.string.tag_question), style = MaterialTheme.typography.titleLarge)
+                Text(
+                    stringResource(R.string.tag_change_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.height(12.dp))
+                TagChips(tags, tags.current, tagActions.copy(onSelect = { tagViewModel.select(it); tagSheet = false }))
+            }
+        }
+    }
     AmbientWindowEffect(showAmbient)
 
     // La pantalla no se apaga mientras corre la sesión (si el usuario lo activó) ni en modo ambiente
@@ -297,6 +327,8 @@ fun MainScreen(
                 dynamicColor = timer.dynamicColor,
                 discoveries = discoveries,
                 medals = medals,
+                tags = tags,
+                tagActions = tagActions,
                 // Observa los toques sin consumirlos, para reiniciar la cuenta del modo ambiente
                 modifier = Modifier.pointerInput(Unit) {
                     awaitPointerEventScope {
@@ -324,6 +356,7 @@ fun MainScreen(
                     onDismissDiscoveries = discoveryViewModel::dismiss,
                     onDismissMedals = medalViewModel::dismiss,
                     onOpenSound = { soundSheet = true },
+                    onOpenTags = { tagSheet = true },
                     onOpenPlan = { planSheet = true },
                     onSignIn = { viewModel.signIn(context) },
                     onSignOut = viewModel::signOut,
@@ -348,6 +381,7 @@ data class MainActions(
     val onOpenGuide: () -> Unit = {},
     val onOpenStats: () -> Unit = {},
     val onOpenSound: () -> Unit = {},
+    val onOpenTags: () -> Unit = {},
     val onOpenPlan: () -> Unit = {},
     val onDismissDiscoveries: () -> Unit = {},
     val onDismissMedals: () -> Unit = {},
@@ -366,6 +400,8 @@ private fun MainContent(
     dynamicColor: Boolean = false,
     discoveries: List<Discovery> = emptyList(),
     medals: List<Medal> = emptyList(),
+    tags: TagsUi = TagsUi(),
+    tagActions: TagActions = TagActions(),
 ) {
     // Con Material You el reloj toma el color del sistema
     val clockColor = if (dynamicColor) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
@@ -408,8 +444,8 @@ private fun MainContent(
                 )
                 when (timer) {
                     null -> CircularProgressIndicator()
-                    is TimerUi.Idle -> IdlePanel(timer, clockColor)
-                    is TimerUi.Active -> ActivePanel(timer, clockColor)
+                    is TimerUi.Idle -> IdlePanel(timer, clockColor, tags, tagActions)
+                    is TimerUi.Active -> ActivePanel(timer, clockColor, tags, actions.onOpenTags)
                     is TimerUi.Finished -> FinishedPanel(timer)
                 }
                 if (timer is TimerUi.Active) {
@@ -689,7 +725,7 @@ private fun ClockText(millis: Long, color: Color = MaterialTheme.colorScheme.onB
 }
 
 @Composable
-private fun IdlePanel(idle: TimerUi.Idle, clockColor: Color) {
+private fun IdlePanel(idle: TimerUi.Idle, clockColor: Color, tags: TagsUi = TagsUi(), tagActions: TagActions = TagActions()) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         // La hora se toma al mostrar la pantalla; no hace falta que cambie mientras está abierta
         val resources = LocalResources.current
@@ -710,11 +746,19 @@ private fun IdlePanel(idle: TimerUi.Idle, clockColor: Color) {
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+        Spacer(Modifier.height(12.dp))
+        Text(
+            stringResource(R.string.tag_question),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.height(6.dp))
+        TagChips(tags, tags.selected, tagActions)
     }
 }
 
 @Composable
-private fun ActivePanel(active: TimerUi.Active, clockColor: Color) {
+private fun ActivePanel(active: TimerUi.Active, clockColor: Color, tags: TagsUi = TagsUi(), onOpenTags: () -> Unit = {}) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             val element = active.vessel.element
@@ -737,6 +781,8 @@ private fun ActivePanel(active: TimerUi.Active, clockColor: Color) {
         }
         Spacer(Modifier.height(4.dp))
         ActiveIndicator(active)
+        // Solo si ya usa etiquetas: quien no las usa no ve nada nuevo mientras trabaja
+        if (tags.tags.isNotEmpty()) CurrentTag(tags.find(tags.current), onOpenTags)
     }
 }
 

@@ -194,4 +194,15 @@
     <string name="main_menu_pro_desc">Sin anuncios y más funciones</string>
     <string name="main_menu_sign_in_desc">Respaldo en la nube y ligas</string>
     <string name="main_menu_sign_out_desc">Cerrar sesión de tu cuenta de Google</string>
+    <string name="tag_question">¿En qué vas a trabajar?</string>
+    <string name="tag_none">Sin etiqueta</string>
+    <string name="tag_add">+ Etiqueta</string>
+    <string name="tag_add_pro">+ Etiqueta · Pro</string>
+    <string name="tag_new_title">Etiqueta nueva</string>
+    <string name="tag_edit_title">Editar etiqueta</string>
+    <string name="tag_name_hint">Matemáticas, Tesis, Lectura…</string>
+    <string name="tag_save">Guardar</string>
+    <string name="tag_cancel">Cancelar</string>
+    <string name="tag_delete">Borrar etiqueta</string>
+    <string name="tag_change_hint">Cuenta desde la siguiente sesión que termine. Mantén presionada una etiqueta para editarla.</string>
 </resources>

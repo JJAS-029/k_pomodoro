@@ -49,6 +49,8 @@ data class AppSettings(
     val ambientDelayMinutes: Int = 3,
     /** Pro: colores de Material You tomados del fondo de pantalla (Android 12+). */
     val dynamicColor: Boolean = false,
+    /** Tema oscuro en negro profundo también en tarjetas, hojas y diálogos (AMOLED). */
+    val pureBlack: Boolean = true,
     /** Pro comprado en Google Play (suscripción vigente o pago único). Lo actualiza la tienda. */
     val proPurchased: Boolean = false,
     /** Interruptor de pruebas: solo tiene efecto en compilaciones debug. */
@@ -72,6 +74,8 @@ data class AppSettings(
     val focusVolume: Float = 0.5f,
     /** Pro, opcional: guardar dónde se hace cada plan (ubicación aproximada, solo en el teléfono). */
     val placesEnabled: Boolean = false,
+    /** Etiqueta elegida para el próximo plan (null = sin etiqueta). */
+    val selectedTagId: Long? = null,
     /** Ya se mostró la celebración por completar la tabla periódica. */
     val tableCelebrated: Boolean = false,
     /** Nivel de maestría de la tabla completa ya celebrado (ordinal de [Mastery]). */

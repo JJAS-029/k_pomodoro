@@ -4,6 +4,7 @@ import com.jjas.labpomodoro.data.local.entity.DiscoveryEntity
 import com.jjas.labpomodoro.data.local.entity.InventoryEntity
 import com.jjas.labpomodoro.data.local.entity.PlaceEntity
 import com.jjas.labpomodoro.data.local.entity.SessionEntity
+import com.jjas.labpomodoro.data.local.entity.TagEntity
 import com.jjas.labpomodoro.domain.model.DiscoverySource
 import com.jjas.labpomodoro.domain.model.SessionType
 import org.json.JSONArray
@@ -21,6 +22,7 @@ data class BackupSnapshot(
     val discoveries: List<DiscoveryEntity>,
     val places: List<PlaceEntity>,
     val settings: Map<String, Any>,
+    val tags: List<TagEntity> = emptyList(),
 ) {
     val discoveredCount: Int get() = inventory.count { it.firstObtainedAtMillis != null }
 }
@@ -39,7 +41,7 @@ object BackupCodec {
             .put("createdAt", snapshot.createdAtMillis)
             .put("sessions", JSONArray().apply {
                 snapshot.sessions.forEach { s ->
-                    put(JSONArray(listOf(s.id, s.type.name, s.startedAtMillis, s.endedAtMillis, s.plannedSeconds, s.actualSeconds, s.completed, s.epochDay, s.hourOfDay, s.placeId ?: JSONObject.NULL)))
+                    put(JSONArray(listOf(s.id, s.type.name, s.startedAtMillis, s.endedAtMillis, s.plannedSeconds, s.actualSeconds, s.completed, s.epochDay, s.hourOfDay, s.placeId ?: JSONObject.NULL, s.tagId ?: JSONObject.NULL)))
                 }
             })
             .put("inventory", JSONArray().apply {
@@ -51,6 +53,9 @@ object BackupCodec {
             .put("places", JSONArray().apply {
                 // Sin coordenadas: la ubicación nunca sale del teléfono, solo el nombre del lugar
                 snapshot.places.forEach { p -> put(JSONArray(listOf(p.id, p.name, JSONObject.NULL, JSONObject.NULL, p.createdAtMillis))) }
+            })
+            .put("tags", JSONArray().apply {
+                snapshot.tags.forEach { t -> put(JSONArray(listOf(t.id, t.name, t.color, t.createdAtMillis))) }
             })
             .put("settings", JSONObject().apply {
                 snapshot.settings.forEach { (key, value) ->
@@ -85,6 +90,7 @@ object BackupCodec {
                     epochDay = r.getLong(7),
                     hourOfDay = r.getInt(8),
                     placeId = if (r.isNull(9)) null else r.getLong(9),
+                    tagId = if (r.length() <= 10 || r.isNull(10)) null else r.getLong(10),
                 )
             },
             inventory = json.getJSONArray("inventory").rows { r ->
@@ -93,6 +99,7 @@ object BackupCodec {
             discoveries = json.getJSONArray("discoveries").rows { r ->
                 DiscoveryEntity(r.getLong(0), r.getInt(1), DiscoverySource.valueOf(r.getString(2)), r.getLong(3), r.getBoolean(4))
             },
+            tags = json.optJSONArray("tags")?.rows { r -> TagEntity(r.getLong(0), r.getString(1), r.getInt(2), r.getLong(3)) }.orEmpty(),
             places = json.getJSONArray("places").rows { r ->
                 // Llegan sin coordenadas (NaN): las recupera la primera ubicación con el mismo nombre
                 PlaceEntity(r.getLong(0), r.getString(1), r.optCoordinate(2), r.optCoordinate(3), r.getLong(4))

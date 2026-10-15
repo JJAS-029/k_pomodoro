@@ -102,11 +102,12 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val settings by settingsRepository.settings.collectAsStateWithLifecycle(initialValue = null)
-            LabPomodoroTheme(dynamicColor = settings?.dynamicColorActive == true) {
+            val pureBlack = settings?.pureBlack ?: true
+            LabPomodoroTheme(dynamicColor = settings?.dynamicColorActive == true, pureBlack = pureBlack) {
                 // Fuera del if para conservar la pantalla en la que estaba al volver de PiP
                 val navController = rememberNavController()
                 // La ventana flotante es siempre oscura: se lee mejor encima de cualquier app
-                if (isInPip) LabPomodoroTheme(darkTheme = true, dynamicColor = settings?.dynamicColorActive == true) { PipScreen() } else LabNavHost(navController)
+                if (isInPip) LabPomodoroTheme(darkTheme = true, dynamicColor = settings?.dynamicColorActive == true, pureBlack = pureBlack) { PipScreen() } else LabNavHost(navController)
                 // Los avisos y celebraciones esperan a la app completa: no caben en la ventana flotante
                 if (!isInPip) {
                     // Anuncio propio de fin de plan (podcast)

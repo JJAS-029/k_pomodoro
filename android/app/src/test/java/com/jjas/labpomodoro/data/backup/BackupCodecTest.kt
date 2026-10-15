@@ -4,6 +4,7 @@ import com.jjas.labpomodoro.data.local.entity.DiscoveryEntity
 import com.jjas.labpomodoro.data.local.entity.InventoryEntity
 import com.jjas.labpomodoro.data.local.entity.PlaceEntity
 import com.jjas.labpomodoro.data.local.entity.SessionEntity
+import com.jjas.labpomodoro.data.local.entity.TagEntity
 import com.jjas.labpomodoro.domain.model.DiscoverySource
 import com.jjas.labpomodoro.domain.model.SessionType
 import org.junit.Assert.assertEquals
@@ -15,12 +16,13 @@ class BackupCodecTest {
     private val snapshot = BackupSnapshot(
         createdAtMillis = 1_791_259_000_000,
         sessions = listOf(
-            SessionEntity(1, SessionType.WORK, 1000, 1_501_000, 1500, 1500, true, 20_000, 9, placeId = 2),
+            SessionEntity(1, SessionType.WORK, 1000, 1_501_000, 1500, 1500, true, 20_000, 9, placeId = 2, tagId = 4),
             SessionEntity(2, SessionType.SHORT_BREAK, 1_501_000, 1_801_000, 300, 120, false, 20_000, 9, placeId = null),
         ),
         inventory = listOf(InventoryEntity(1, 3, 5000), InventoryEntity(2, 0, null)),
         discoveries = listOf(DiscoveryEntity(7, 1, DiscoverySource.BASIC_REWARD, 5000, seen = true)),
         places = listOf(PlaceEntity(2, "Biblioteca", 19.4326, -99.1332, 4000)),
+        tags = listOf(TagEntity(4, "Tesis", 2, 3000)),
         settings = mapOf(
             "work_minutes" to 25,
             "sound_enabled" to false,

@@ -130,7 +130,7 @@
     <string name="prog_mastery_discovered">Discovered</string>
 
     <!-- Historial en CSV (encabezados para quien abre el archivo) -->
-    <string name="prog_csv_header">date,start,end,type,planned_minutes,actual_minutes,completed</string>
+    <string name="prog_csv_header">date,start,end,type,planned_minutes,actual_minutes,completed,tag</string>
     <string name="prog_csv_work">work</string>
     <string name="prog_csv_short_break">short break</string>
     <string name="prog_csv_long_break">long break</string>
@@ -197,4 +197,11 @@
     <string name="prog_medal_filter_all">All (%1$d)</string>
     <string name="prog_medal_filter_earned">Earned (%1$d)</string>
     <string name="prog_medal_filter_progress">In progress (%1$d)</string>
+    <string name="tag_stats_section">By tag</string>
+    <string name="tag_stats_subtitle">What you worked on</string>
+    <string name="tag_stats_empty">Pick a tag before starting a plan ("What are you working on?") to see your focus by subject here.</string>
+    <plurals name="tag_stats_row">
+        <item quantity="one">%1$d pomodoro · %2$d%% of your focus</item>
+        <item quantity="other">%1$d pomodoros · %2$d%% of your focus</item>
+    </plurals>
 </resources>

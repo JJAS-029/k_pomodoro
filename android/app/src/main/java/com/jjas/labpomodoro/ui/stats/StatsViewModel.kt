@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.jjas.labpomodoro.data.local.entity.PlaceTotal
 import com.jjas.labpomodoro.data.repository.MedalRepository
 import com.jjas.labpomodoro.data.repository.PlaceRepository
+import com.jjas.labpomodoro.data.repository.TagRepository
+import com.jjas.labpomodoro.data.local.entity.TagTotal
 import com.jjas.labpomodoro.data.repository.SessionRepository
 import com.jjas.labpomodoro.data.repository.SettingsRepository
 import com.jjas.labpomodoro.domain.model.MedalProgress
@@ -36,6 +38,7 @@ data class StatsUi(
     val stats: FocusStats,
     val streak: Streak,
     val places: PlacesUi,
+    val tags: List<TagTotal> = emptyList(),
     val medals: List<MedalProgress>,
 )
 
@@ -45,6 +48,7 @@ class StatsViewModel @Inject constructor(
     sessions: SessionRepository,
     private val settings: SettingsRepository,
     private val placeRepository: PlaceRepository,
+    private val tagRepository: TagRepository,
     private val medalRepository: MedalRepository,
     private val clock: Clock,
 ) : ViewModel() {
@@ -57,9 +61,9 @@ class StatsViewModel @Inject constructor(
             sessions.allSessions,
             sessions.streak,
             settings.settings,
-            placeRepository.totals(range.days),
+            combine(placeRepository.totals(range.days), tagRepository.totals(range.days), ::Pair),
             medalRepository.progress,
-        ) { all, streak, prefs, places, medals ->
+        ) { all, streak, prefs, (places, tags), medals ->
             StatsUi(
                 stats = StatsCalculator.calculate(all, LocalDate.now(clock), range),
                 streak = streak,
@@ -69,6 +73,7 @@ class StatsViewModel @Inject constructor(
                     else -> PlacesUi.Enabled(places)
                 },
                 medals = medals,
+                tags = tags,
             )
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)

@@ -57,4 +57,12 @@ class LeagueTest {
         assertTrue(start.all { it.xp == 0 })
         assertTrue(end.all { it.xp > 0 })
     }
+
+    @Test
+    fun `los asistentes de un grupo no repiten nombre`() {
+        repeat(200) { n ->
+            val bots = LeagueRules.bots("2026-W42_${n % 7}_$n", League.HYDROGEN, realPlayers = 0, weekProgress = 0.5f)
+            assertEquals(bots.size, bots.map { it.nickname }.toSet().size)
+        }
+    }
 }

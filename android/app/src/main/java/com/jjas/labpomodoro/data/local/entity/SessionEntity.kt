@@ -27,6 +27,8 @@ data class SessionEntity(
     val hourOfDay: Int,
     /** Lugar donde se hizo (Pro, si el usuario activó los lugares). */
     @ColumnInfo(defaultValue = "NULL") val placeId: Long? = null,
+    /** En qué se trabajó: etiqueta del plan, si se eligió una. */
+    @ColumnInfo(defaultValue = "NULL") val tagId: Long? = null,
 )
 
 /** Fila de la consulta de horas productivas. */

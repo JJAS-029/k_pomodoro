@@ -11,6 +11,13 @@ val LabText = Color(0xFFE0E0E0)
 val LabSurfaceVariant = Color(0xFF121212)
 val LabOutline = Color(0xFF2E2E2E)
 
+// Negro puro (AMOLED): contenedores apenas por encima del negro
+val PureBlackLow = Color(0xFF050506)
+val PureBlackMid = Color(0xFF09090A)
+val PureBlackHigh = Color(0xFF0E0E10)
+val PureBlackHighest = Color(0xFF141416)
+val PureBlackBright = Color(0xFF1C1C1F)
+
 // Tema claro: papel de cuaderno de laboratorio y tinta
 val LabPaper = Color(0xFFF8F8F6)
 val LabPaperVariant = Color(0xFFE9EAE7)
