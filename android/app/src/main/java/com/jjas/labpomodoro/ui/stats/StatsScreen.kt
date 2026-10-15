@@ -50,6 +50,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jjas.labpomodoro.R
+import com.jjas.labpomodoro.ui.league.LeaguePanel
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.material3.Tab
+import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.size
@@ -92,9 +96,10 @@ fun formatFocus(seconds: Long): String {
 }
 
 @Composable
-fun StatsScreen(onBack: () -> Unit, onOpenPro: () -> Unit, viewModel: StatsViewModel = hiltViewModel()) {
+fun StatsScreen(onBack: () -> Unit, onOpenPro: () -> Unit, initialTab: Int = 0, viewModel: StatsViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val range by viewModel.range.collectAsStateWithLifecycle()
+    var tab by rememberSaveable { mutableIntStateOf(initialTab) }
 
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Column {
@@ -114,17 +119,26 @@ fun StatsScreen(onBack: () -> Unit, onOpenPro: () -> Unit, viewModel: StatsViewM
                     )
                     TextButton(onClick = onBack) { Text(stringResource(R.string.prog_done)) }
                 }
-                Spacer(Modifier.height(12.dp))
-                RangeSelector(range, viewModel::setRange)
+                Spacer(Modifier.height(8.dp))
+                PrimaryTabRow(selectedTabIndex = tab) {
+                    Tab(selected = tab == 0, onClick = { tab = 0 }, text = { Text(stringResource(R.string.prog_tab_stats)) })
+                    Tab(selected = tab == 1, onClick = { tab = 1 }, text = { Text(stringResource(R.string.prog_tab_medals)) })
+                    Tab(selected = tab == 2, onClick = { tab = 2 }, text = { Text(stringResource(R.string.el_lab_tab_league)) })
+                }
                 Spacer(Modifier.height(16.dp))
 
                 val current = state
-                if (current == null) {
+                if (tab == 2) {
+                    LeaguePanel()
+                } else if (current == null) {
                     Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
-                } else {
-                    Summary(current.stats, current.streak.current)
+                } else if (tab == 1) {
                     LaunchedEffect(current.medals) { viewModel.markMedalsSeen(current.medals) }
                     Medals(current.medals)
+                } else {
+                    RangeSelector(range, viewModel::setRange)
+                    Spacer(Modifier.height(16.dp))
+                    Summary(current.stats, current.streak.current)
                     if (current.stats.isEmpty) {
                         Spacer(Modifier.height(24.dp))
                         Text(

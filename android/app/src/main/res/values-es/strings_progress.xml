@@ -6,7 +6,7 @@
     <string name="prog_focus_hours_minutes">%1$d h %2$d min</string>
 
     <!-- Pantalla de progreso -->
-    <string name="prog_title">Progreso</string>
+    <string name="prog_title">Tu progreso</string>
     <string name="prog_done">Listo</string>
     <string name="prog_range_week">7 días</string>
     <string name="prog_range_month">30 días</string>
@@ -180,8 +180,8 @@
     <string name="prog_guide_open_menu">Abrir el menú</string>
     <string name="prog_guide_in_menu">En el menú</string>
     <string name="prog_guide_menu_settings">Config: horas, duraciones y avisos</string>
-    <string name="prog_guide_menu_achievements">Logros: tabla periódica, sintetizador y liga</string>
-    <string name="prog_guide_menu_progress">Progreso: estadísticas y medallas</string>
+    <string name="prog_guide_menu_achievements">Laboratorio: tabla periódica y sintetizador</string>
+    <string name="prog_guide_menu_progress">Tu progreso: estadísticas, medallas y liga</string>
     <string name="prog_guide_menu_ambient">Modo ambiente al instante (Pro)</string>
     <string name="prog_guide_menu_help">Volver a ver esta guía</string>
     <string name="prog_guide_controls_notification">Los mismos controles aparecen en la notificación.</string>
@@ -193,14 +193,14 @@
 
     <string name="prog_guide_elements_title">Colecciona la tabla periódica</string>
     <string name="prog_guide_elements_body1">Tu tiempo de enfoque se convierte en elementos: cada 25 min completados ganas uno básico y cada 60 min uno raro. Saltar una sesión no cuenta.</string>
-    <string name="prog_guide_elements_body2">En ★ Logros › Sintetizador fusiona dos elementos: sus números atómicos se suman (H 1 + U 92 → Np 93). Es la única forma de conseguir los sintéticos.</string>
+    <string name="prog_guide_elements_body2">En Laboratorio › Sintetizador fusiona dos elementos: sus números atómicos se suman (H 1 + U 92 → Np 93). Es la única forma de conseguir los sintéticos.</string>
     <string name="prog_guide_elements_body3">Tus elementos llenan los recipientes de trabajo y se comportan como en la realidad: el sodio burbujea, el neón brilla, el mercurio refleja como metal. Toca uno en la tabla para saber qué es y para qué sirve.</string>
     <string name="prog_guide_sound">Sonido (Pro): ruido blanco, rosa o café, lluvia u olas mientras trabajas.</string>
 
     <string name="prog_guide_progress_title">Maestría, medallas y ligas</string>
     <string name="prog_guide_mastery_body">Los repetidos no se desperdician: cada vez que obtienes un elemento sube su maestría, de bronce a plata y a oro (5, 10 y 15 veces; los sintéticos, 2, 4 y 6). Si toda la tabla llega a un nivel, lo celebramos.</string>
-    <string name="prog_guide_medals_body">En Progreso están tus medallas: rachas, horas de enfoque, madrugadas, fusiones y más. Las que te faltan se ven apagadas, con un anillo que muestra cuánto llevas.</string>
-    <string name="prog_guide_league_body">En ★ Logros › Liga compites cada semana con hasta 30 personas: tus puntos son tus minutos de enfoque. Los primeros suben de liga y los últimos bajan, del Hidrógeno al Platino. Necesitas entrar con tu cuenta.</string>
+    <string name="prog_guide_medals_body">En Tu progreso › Medallas están tus medallas: rachas, horas de enfoque, madrugadas, fusiones y más. Las que te faltan se ven apagadas, con un anillo que muestra cuánto llevas.</string>
+    <string name="prog_guide_league_body">En Tu progreso › Liga compites cada semana con hasta 30 personas: tus puntos son tus minutos de enfoque. Los primeros suben de liga y los últimos bajan, del Hidrógeno al Platino. Necesitas entrar con tu cuenta.</string>
     <string name="prog_medal_filter_all">Todas (%1$d)</string>
     <string name="prog_medal_filter_earned">Ganadas (%1$d)</string>
     <string name="prog_medal_filter_progress">En curso (%1$d)</string>
@@ -212,4 +212,6 @@
         <item quantity="many">%1$d pomodoros · %2$d%% de tu enfoque</item>
         <item quantity="other">%1$d pomodoros · %2$d%% de tu enfoque</item>
     </plurals>
+    <string name="prog_tab_stats">Estadísticas</string>
+    <string name="prog_tab_medals">Medallas</string>
 </resources>

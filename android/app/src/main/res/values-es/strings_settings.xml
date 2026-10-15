@@ -42,7 +42,7 @@
     <string name="set_vessels_varied">Variados: cada sesión de trabajo usa un elemento distinto de tu colección.</string>
     <string name="set_vessels_fixed">Fijo: todos los recipientes usan %1$s.</string>
     <string name="set_vessels_reset">Volver a variados</string>
-    <string name="set_vessels_hint">Para fijar uno, ábrelo en Logros › Tabla periódica y toca \"Usar en todos mis recipientes\".</string>
+    <string name="set_vessels_hint">Para fijar uno, ábrelo en Laboratorio › Tabla periódica y toca \"Usar en todos mis recipientes\".</string>
 
     <string name="set_section_appearance">Apariencia</string>
     <string name="set_dynamic_color">Colores del sistema (Material You)</string>
@@ -241,4 +241,11 @@
     <string name="set_pure_black">Negro puro</string>
     <string name="set_pure_black_desc">En el modo oscuro, tarjetas, menús y diálogos también en negro profundo. Se ve mejor y ahorra batería en pantallas AMOLED.</string>
     <string name="set_league_join_denied">Las ligas no están disponibles por ahora. Intenta más tarde.</string>
+    <string name="set_back">Atrás</string>
+    <string name="set_group_timer">Temporizador</string>
+    <string name="set_group_timer_desc">Plan de siempre, avisos, modo ambiente y sonido de concentración</string>
+    <string name="set_group_look">Apariencia</string>
+    <string name="set_group_look_desc">Negro puro, colores, paletas, recipientes y atajos</string>
+    <string name="set_group_account">Cuenta y datos</string>
+    <string name="set_group_account_desc">Idioma, respaldo en la nube, exportar y acerca de</string>
 </resources>

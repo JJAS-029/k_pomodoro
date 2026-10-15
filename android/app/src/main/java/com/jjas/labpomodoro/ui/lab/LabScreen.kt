@@ -127,7 +127,6 @@ import com.jjas.labpomodoro.ui.components.elementLookOrigin
 import com.jjas.labpomodoro.ui.components.localizedName
 import com.jjas.labpomodoro.ui.components.look
 import com.jjas.labpomodoro.ui.components.metalColor
-import com.jjas.labpomodoro.ui.league.LeaguePanel
 import com.jjas.labpomodoro.ui.promo.ShareText
 import com.jjas.labpomodoro.ui.promo.shareText
 import com.jjas.labpomodoro.ui.stats.formatFocus
@@ -141,7 +140,7 @@ import com.jjas.labpomodoro.ui.theme.isLight
 
 /** Logros: tabla periódica con lo descubierto, avance de recompensas y sintetizador. */
 @Composable
-fun LabScreen(onBack: () -> Unit, viewModel: LabViewModel = hiltViewModel()) {
+fun LabScreen(onBack: () -> Unit, initialTab: Int = 0, viewModel: LabViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val newOnes by viewModel.newAtomicNumbers.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
@@ -175,7 +174,7 @@ fun LabScreen(onBack: () -> Unit, viewModel: LabViewModel = hiltViewModel()) {
                 if (current == null) {
                     CircularProgressIndicator(Modifier.align(Alignment.Center))
                 } else {
-                    LabContent(current, newOnes, onBack, viewModel::fuse, viewModel::setVesselElement)
+                    LabContent(current, newOnes, onBack, viewModel::fuse, viewModel::setVesselElement, initialTab)
                 }
                 // Ráfaga con los colores del elemento recién fabricado, una por fusión
                 val burst = remember(fused) {
@@ -199,8 +198,9 @@ private fun LabContent(
     onBack: () -> Unit,
     onFuse: (Fusion.Recipe) -> Unit,
     onVesselElement: (Int) -> Unit,
+    initialTab: Int = 0,
 ) {
-    var tab by rememberSaveable { mutableIntStateOf(0) }
+    var tab by rememberSaveable { mutableIntStateOf(initialTab) }
     var selected by rememberSaveable { mutableStateOf<Int?>(null) }
     var target by rememberSaveable { mutableStateOf<Int?>(null) }
     // Familia resaltada desde la leyenda; null = todas
@@ -250,7 +250,6 @@ private fun LabContent(
             PrimaryTabRow(selectedTabIndex = tab) {
                 Tab(selected = tab == 0, onClick = { tab = 0 }, text = { Text(stringResource(R.string.el_lab_tab_table)) })
                 Tab(selected = tab == 1, onClick = { tab = 1 }, text = { Text(stringResource(R.string.el_lab_tab_synthesizer)) })
-                Tab(selected = tab == 2, onClick = { tab = 2 }, text = { Text(stringResource(R.string.el_lab_tab_league)) })
             }
             Spacer(Modifier.height(16.dp))
             when (tab) {
@@ -270,12 +269,11 @@ private fun LabContent(
                         modifier = Modifier.padding(horizontal = 16.dp),
                     )
                 }
-                1 -> Synthesizer(
+                else -> Synthesizer(
                     state = state,
                     onTarget = { target = it },
                     modifier = Modifier.padding(horizontal = 24.dp),
                 )
-                else -> LeaguePanel(Modifier.padding(horizontal = 24.dp))
             }
         }
 

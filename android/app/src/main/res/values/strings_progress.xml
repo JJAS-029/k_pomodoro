@@ -6,7 +6,7 @@
     <string name="prog_focus_hours_minutes">%1$d h %2$d min</string>
 
     <!-- Pantalla de progreso -->
-    <string name="prog_title">Progress</string>
+    <string name="prog_title">Your progress</string>
     <string name="prog_done">Done</string>
     <string name="prog_range_week">7 days</string>
     <string name="prog_range_month">30 days</string>
@@ -173,8 +173,8 @@
     <string name="prog_guide_open_menu">Open the menu</string>
     <string name="prog_guide_in_menu">In the menu</string>
     <string name="prog_guide_menu_settings">Settings: hours, durations and alerts</string>
-    <string name="prog_guide_menu_achievements">Achievements: periodic table, synthesizer and league</string>
-    <string name="prog_guide_menu_progress">Progress: stats and medals</string>
+    <string name="prog_guide_menu_achievements">Lab: periodic table and synthesizer</string>
+    <string name="prog_guide_menu_progress">Your progress: statistics, medals and league</string>
     <string name="prog_guide_menu_ambient">Instant ambient mode (Pro)</string>
     <string name="prog_guide_menu_help">See this guide again</string>
     <string name="prog_guide_controls_notification">The same controls show up in the notification.</string>
@@ -186,14 +186,14 @@
 
     <string name="prog_guide_elements_title">Collect the periodic table</string>
     <string name="prog_guide_elements_body1">Your focus time turns into elements: every 25 min completed earns you a basic one, and every 60 min a rare one. Skipped sessions don\'t count.</string>
-    <string name="prog_guide_elements_body2">In ★ Achievements › Synthesizer, fuse two elements: their atomic numbers add up (H 1 + U 92 → Np 93). It\'s the only way to get the synthetic ones.</string>
+    <string name="prog_guide_elements_body2">In Lab › Synthesizer, fuse two elements: their atomic numbers add up (H 1 + U 92 → Np 93). It\'s the only way to get the synthetic ones.</string>
     <string name="prog_guide_elements_body3">Your elements fill the work vessels and behave like the real thing: sodium fizzes, neon glows, mercury shines like metal. Tap one in the table to learn what it is and what it\'s used for.</string>
     <string name="prog_guide_sound">Sound (Pro): white, pink or brown noise, rain or waves while you work.</string>
 
     <string name="prog_guide_progress_title">Mastery, medals and leagues</string>
     <string name="prog_guide_mastery_body">Duplicates aren\'t wasted: every time you get an element, its mastery goes up, from bronze to silver to gold (5, 10 and 15 times; 2, 4 and 6 for synthetic ones). If the whole table reaches a level, we celebrate.</string>
     <string name="prog_guide_medals_body">Your medals live in Progress: streaks, focus hours, early mornings, fusions and more. The ones you\'re missing look faded, with a ring that shows how far along you are.</string>
-    <string name="prog_guide_league_body">In ★ Achievements › League you compete each week with up to 30 people: your points are your focus minutes. The top ones move up a league and the bottom ones move down, from Hydrogen to Platinum. You need to sign in to your account.</string>
+    <string name="prog_guide_league_body">In Your progress › League you compete each week with up to 30 people: your points are your focus minutes. The top ones move up a league and the bottom ones move down, from Hydrogen to Platinum. You need to sign in to your account.</string>
     <string name="prog_medal_filter_all">All (%1$d)</string>
     <string name="prog_medal_filter_earned">Earned (%1$d)</string>
     <string name="prog_medal_filter_progress">In progress (%1$d)</string>
@@ -204,4 +204,6 @@
         <item quantity="one">%1$d pomodoro · %2$d%% of your focus</item>
         <item quantity="other">%1$d pomodoros · %2$d%% of your focus</item>
     </plurals>
+    <string name="prog_tab_stats">Statistics</string>
+    <string name="prog_tab_medals">Medals</string>
 </resources>

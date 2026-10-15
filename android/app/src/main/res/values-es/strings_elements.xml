@@ -36,7 +36,7 @@
     <string name="el_legend_hint">Toca una familia para resaltarla en la tabla</string>
 
     <!-- Pantalla de logros -->
-    <string name="el_lab_title">Logros</string>
+    <string name="el_lab_title">Laboratorio</string>
     <string name="el_lab_share_progress">Compartir mi progreso</string>
     <string name="el_lab_done">Listo</string>
     <string name="el_lab_tab_table">Tabla periódica</string>

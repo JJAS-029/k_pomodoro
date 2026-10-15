@@ -42,7 +42,7 @@
     <string name="set_vessels_varied">Mixed: each work session uses a different element from your collection.</string>
     <string name="set_vessels_fixed">Fixed: every vessel uses %1$s.</string>
     <string name="set_vessels_reset">Back to mixed</string>
-    <string name="set_vessels_hint">To pick one, open it in Achievements › Periodic table and tap \"Use in all my vessels\".</string>
+    <string name="set_vessels_hint">To pick one, open it in Lab › Periodic table and tap \"Use in all my vessels\".</string>
 
     <string name="set_section_appearance">Appearance</string>
     <string name="set_dynamic_color">System colors (Material You)</string>
@@ -234,4 +234,11 @@
     <string name="set_pure_black">Pure black</string>
     <string name="set_pure_black_desc">In dark mode, cards, menus and dialogs are deep black too. Looks better and saves battery on AMOLED screens.</string>
     <string name="set_league_join_denied">The leagues aren\'t available right now. Try again later.</string>
+    <string name="set_back">Back</string>
+    <string name="set_group_timer">Timer</string>
+    <string name="set_group_timer_desc">Usual plan, alerts, ambient mode and focus sound</string>
+    <string name="set_group_look">Appearance</string>
+    <string name="set_group_look_desc">Pure black, colors, palettes, vessels and shortcuts</string>
+    <string name="set_group_account">Account and data</string>
+    <string name="set_group_account_desc">Language, cloud backup, export and about</string>
 </resources>

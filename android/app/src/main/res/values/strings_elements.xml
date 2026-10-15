@@ -36,7 +36,7 @@
     <string name="el_legend_hint">Tap a family to highlight it in the table</string>
 
     <!-- Pantalla de logros -->
-    <string name="el_lab_title">Achievements</string>
+    <string name="el_lab_title">Lab</string>
     <string name="el_lab_share_progress">Share my progress</string>
     <string name="el_lab_done">Done</string>
     <string name="el_lab_tab_table">Periodic table</string>

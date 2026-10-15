@@ -212,4 +212,19 @@
     <string name="main_plan_editor_hint">Estos cambios son solo para el próximo plan. Tu plan de siempre sigue en Configuración.</string>
     <string name="main_plan_reset">Usar mi plan de siempre</string>
     <string name="main_plan_save_default">Guardar como mi plan de siempre</string>
+    <string name="main_menu_section_lab">Laboratorio</string>
+    <string name="main_menu_section_progress">Tu progreso</string>
+    <string name="main_menu_section_app">App</string>
+    <string name="main_menu_edit_plan">Ajustar este plan</string>
+    <string name="main_menu_edit_plan_desc">Horas, duraciones y etiqueta antes de iniciar</string>
+    <string name="main_menu_table">Tabla periódica</string>
+    <string name="main_menu_table_desc">Tu colección de elementos y su maestría</string>
+    <string name="main_menu_synth">Sintetizador</string>
+    <string name="main_menu_synth_desc">Fusiona elementos para crear otros</string>
+    <string name="main_menu_stats">Estadísticas</string>
+    <string name="main_menu_stats_desc">Enfoque, racha, etiquetas y lugares</string>
+    <string name="main_menu_medals">Medallas</string>
+    <string name="main_menu_medals_desc">Por constancia, horas y descubrimientos</string>
+    <string name="main_menu_league">Liga</string>
+    <string name="main_menu_league_desc">Compite cada semana con tus minutos</string>
 </resources>

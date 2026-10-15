@@ -69,6 +69,11 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jjas.labpomodoro.BuildConfig
 import com.jjas.labpomodoro.R
+import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.ListItem
+import androidx.annotation.DrawableRes
+import androidx.activity.compose.BackHandler
 import com.jjas.labpomodoro.domain.model.LabPalette
 import com.jjas.labpomodoro.service.requestExactAlarms
 import com.jjas.labpomodoro.service.canScheduleExactAlarms
@@ -202,6 +207,8 @@ private fun SettingsContent(
     onRedeemReviewCode: (String) -> Boolean = { false },
 ) {
     val session = settings.session
+    var group by rememberSaveable { mutableStateOf<SettingsGroup?>(null) }
+    BackHandler(enabled = group != null) { group = null }
     Column(
         modifier = modifier
             .safeDrawingPadding()
@@ -210,16 +217,35 @@ private fun SettingsContent(
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = stringResource(R.string.set_title),
+                text = stringResource(group?.titleRes ?: R.string.set_title),
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.weight(1f),
             )
-            TextButton(onClick = onBack) { Text(stringResource(R.string.set_done)) }
+            if (group != null) {
+                TextButton(onClick = { group = null }) { Text(stringResource(R.string.set_back)) }
+            } else {
+                TextButton(onClick = onBack) { Text(stringResource(R.string.set_done)) }
+            }
         }
 
-        LanguageSection()
+        // Tres grupos en vez de once secciones seguidas
+        if (group == null) {
+            Spacer(Modifier.height(8.dp))
+            SettingsGroup.entries.forEach { g ->
+                ListItem(
+                    headlineContent = { Text(stringResource(g.titleRes)) },
+                    supportingContent = { Text(stringResource(g.descriptionRes)) },
+                    leadingContent = { Icon(painterResource(g.icon), contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                    modifier = Modifier.clickable { group = g },
+                )
+            }
+        }
 
+        if (group == SettingsGroup.ACCOUNT) LanguageSection()
+
+        if (group == SettingsGroup.TIMER) {
         SectionTitle(stringResource(R.string.set_section_plan))
         StepperRow(stringResource(R.string.set_total_hours), session.totalHours, SessionConfig.TOTAL_HOURS, "h") { v ->
             onSessionChange { it.copy(totalHours = v) }
@@ -315,44 +341,8 @@ private fun SettingsContent(
             }
         }
 
-        SectionTitle(stringResource(R.string.set_section_shortcuts))
-        val context = LocalContext.current
-        Text(
-            stringResource(R.string.set_shortcuts_desc),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        OutlinedButton(onClick = { context.requestPinTimerWidget() }) { Text(stringResource(R.string.set_add_home_screen)) }
-        // Widget claro: Pro (sin Pro, el widget invita a conocerlo)
-        OutlinedButton(onClick = { context.requestPinTimerWidget(light = true) }) {
-            Text(proTitle(R.string.set_add_home_screen_light, settings.isPro))
         }
-        // Android 13+ permite agregar el botón de los ajustes rápidos desde la app
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            OutlinedButton(onClick = { context.requestAddTimerTile() }) { Text(stringResource(R.string.set_add_quick_settings)) }
-        }
-
-        SectionTitle(stringResource(R.string.set_section_vessels))
-        val fixed = settings.vesselElement.takeIf { it in 1..PeriodicTable.SIZE }?.let { PeriodicTable[it] }
-        Text(
-            text = if (fixed == null) {
-                stringResource(R.string.set_vessels_varied)
-            } else {
-                val locale = LocalConfiguration.current.locales[0]
-                stringResource(R.string.set_vessels_fixed, fixed.localizedName().lowercase(locale))
-            },
-            style = MaterialTheme.typography.bodyLarge,
-        )
-        if (fixed != null) {
-            TextButton(onClick = onResetVesselElement) { Text(stringResource(R.string.set_vessels_reset)) }
-        } else {
-            Text(
-                stringResource(R.string.set_vessels_hint),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-
+        if (group == SettingsGroup.LOOK) {
         // Material You existe desde Android 12
         val dynamicAvailable = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
         SectionTitle(stringResource(R.string.set_section_appearance))
@@ -386,9 +376,51 @@ private fun SettingsContent(
             onOpenPro = onOpenPro,
         )
 
+        SectionTitle(stringResource(R.string.set_section_vessels))
+        val fixed = settings.vesselElement.takeIf { it in 1..PeriodicTable.SIZE }?.let { PeriodicTable[it] }
+        Text(
+            text = if (fixed == null) {
+                stringResource(R.string.set_vessels_varied)
+            } else {
+                val locale = LocalConfiguration.current.locales[0]
+                stringResource(R.string.set_vessels_fixed, fixed.localizedName().lowercase(locale))
+            },
+            style = MaterialTheme.typography.bodyLarge,
+        )
+        if (fixed != null) {
+            TextButton(onClick = onResetVesselElement) { Text(stringResource(R.string.set_vessels_reset)) }
+        } else {
+            Text(
+                stringResource(R.string.set_vessels_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+
+
+        SectionTitle(stringResource(R.string.set_section_shortcuts))
+        val context = LocalContext.current
+        Text(
+            stringResource(R.string.set_shortcuts_desc),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        OutlinedButton(onClick = { context.requestPinTimerWidget() }) { Text(stringResource(R.string.set_add_home_screen)) }
+        // Widget claro: Pro (sin Pro, el widget invita a conocerlo)
+        OutlinedButton(onClick = { context.requestPinTimerWidget(light = true) }) {
+            Text(proTitle(R.string.set_add_home_screen_light, settings.isPro))
+        }
+        // Android 13+ permite agregar el botón de los ajustes rápidos desde la app
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            OutlinedButton(onClick = { context.requestAddTimerTile() }) { Text(stringResource(R.string.set_add_quick_settings)) }
+        }
+        }
+        if (group == SettingsGroup.TIMER) {
         SectionTitle(proTitle(R.string.set_section_focus_sound, settings.isPro))
         soundSection()
+        }
 
+        if (group == SettingsGroup.ACCOUNT) {
         SectionTitle(stringResource(R.string.set_section_backup))
         backupSection()
 
@@ -397,8 +429,16 @@ private fun SettingsContent(
 
         SectionTitle(stringResource(R.string.set_section_about))
         AboutSection(onRedeemReviewCode = onRedeemReviewCode)
+        }
         Spacer(Modifier.height(24.dp))
     }
+}
+
+/** Grupos de Configuración. */
+private enum class SettingsGroup(@StringRes val titleRes: Int, @StringRes val descriptionRes: Int, @DrawableRes val icon: Int) {
+    TIMER(R.string.set_group_timer, R.string.set_group_timer_desc, R.drawable.ic_flask),
+    LOOK(R.string.set_group_look, R.string.set_group_look_desc, R.drawable.ic_tune),
+    ACCOUNT(R.string.set_group_account, R.string.set_group_account_desc, R.drawable.ic_person),
 }
 
 /** Título de sección con " · Pro" si el usuario aún no es Pro. */

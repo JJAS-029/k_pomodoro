@@ -88,6 +88,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jjas.labpomodoro.R
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.FilledTonalButton
 import com.jjas.labpomodoro.domain.model.SessionConfig
 import com.jjas.labpomodoro.ui.settings.StepperRow
@@ -139,6 +140,9 @@ fun MainScreen(
     onOpenPro: () -> Unit,
     onOpenGuide: () -> Unit,
     onOpenStats: () -> Unit = {},
+    onOpenSynthesizer: () -> Unit = {},
+    onOpenMedals: () -> Unit = {},
+    onOpenLeague: () -> Unit = {},
     viewModel: MainViewModel = hiltViewModel(),
     timerViewModel: TimerViewModel = hiltViewModel(),
     discoveryViewModel: DiscoveryViewModel = hiltViewModel(),
@@ -233,7 +237,7 @@ fun MainScreen(
     var planSheet by rememberSaveable { mutableStateOf(false) }
     val adjustable = timer.timer as? TimerUi.Active
     if (planSheet && adjustable != null) {
-        ModalBottomSheet(onDismissRequest = { planSheet = false }) {
+        ModalBottomSheet(onDismissRequest = { planSheet = false }, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
             AdjustPlanSheet(
                 active = adjustable,
                 onExtend = timerViewModel::extend,
@@ -251,7 +255,7 @@ fun MainScreen(
 
     var soundSheet by rememberSaveable { mutableStateOf(false) }
     if (soundSheet) {
-        ModalBottomSheet(onDismissRequest = { soundSheet = false }) {
+        ModalBottomSheet(onDismissRequest = { soundSheet = false }, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
             Column(
                 Modifier
                     .navigationBarsPadding()
@@ -271,7 +275,7 @@ fun MainScreen(
     var planEditor by rememberSaveable { mutableStateOf(false) }
     val idle = timer.timer as? TimerUi.Idle
     if (planEditor && idle != null) {
-        ModalBottomSheet(onDismissRequest = { planEditor = false }) {
+        ModalBottomSheet(onDismissRequest = { planEditor = false }, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
             PlanEditorSheet(
                 idle = idle,
                 tags = tags,
@@ -288,7 +292,7 @@ fun MainScreen(
     // Cambiar la etiqueta a medio plan
     var tagSheet by rememberSaveable { mutableStateOf(false) }
     if (tagSheet) {
-        ModalBottomSheet(onDismissRequest = { tagSheet = false }) {
+        ModalBottomSheet(onDismissRequest = { tagSheet = false }, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
             Column(
                 Modifier
                     .navigationBarsPadding()
@@ -380,6 +384,9 @@ fun MainScreen(
                     onOpenPro = onOpenPro,
                     onOpenGuide = onOpenGuide,
                     onOpenStats = onOpenStats,
+                    onOpenSynthesizer = onOpenSynthesizer,
+                    onOpenMedals = onOpenMedals,
+                    onOpenLeague = onOpenLeague,
                     onDismissDiscoveries = discoveryViewModel::dismiss,
                     onDismissMedals = medalViewModel::dismiss,
                     onOpenSound = { soundSheet = true },
@@ -408,6 +415,9 @@ data class MainActions(
     val onOpenPro: () -> Unit = {},
     val onOpenGuide: () -> Unit = {},
     val onOpenStats: () -> Unit = {},
+    val onOpenSynthesizer: () -> Unit = {},
+    val onOpenMedals: () -> Unit = {},
+    val onOpenLeague: () -> Unit = {},
     val onOpenSound: () -> Unit = {},
     val onOpenTags: () -> Unit = {},
     val onOpenPlanEditor: () -> Unit = {},
@@ -527,7 +537,7 @@ private fun MainContent(
                     if (medals.isNotEmpty()) shown = medals
                     MedalBanner(
                         medals = shown,
-                        onOpen = actions.onOpenStats,
+                        onOpen = actions.onOpenMedals,
                         onDismiss = actions.onDismissMedals,
                         modifier = Modifier.fillMaxWidth(),
                     )
@@ -688,27 +698,57 @@ private fun LabMenu(timer: TimerUi?, account: MainUiState, actions: MainActions,
             .verticalScroll(rememberScrollState())
             .padding(bottom = 16.dp),
     ) {
+        // Este plan: lo del plan en curso o, antes de iniciar, ajustar el siguiente
+        MenuSection(stringResource(R.string.main_menu_section_plan))
         if (timer is TimerUi.Active) {
-            MenuSection(stringResource(R.string.main_menu_section_plan))
             MenuItem(R.drawable.ic_more_time, stringResource(R.string.main_dock_plan), stringResource(R.string.main_menu_plan_desc), run(actions.onOpenPlan))
             MenuItem(R.drawable.ic_moon, stringResource(R.string.main_dock_ambient), stringResource(R.string.main_menu_ambient_desc), run(actions.onEnterAmbient))
-            MenuItem(R.drawable.ic_headphones, stringResource(R.string.main_dock_sound), stringResource(R.string.main_menu_sound_desc), run(actions.onOpenSound))
-            HorizontalDivider(Modifier.padding(vertical = 8.dp))
+        } else if (timer is TimerUi.Idle) {
+            MenuItem(R.drawable.ic_more_time, stringResource(R.string.main_menu_edit_plan), stringResource(R.string.main_menu_edit_plan_desc), run(actions.onOpenPlanEditor))
         }
-        MenuSection(stringResource(R.string.app_name))
-        MenuItem(R.drawable.ic_star, stringResource(R.string.main_dock_achievements), stringResource(R.string.main_menu_achievements_desc), run(actions.onOpenAchievements))
-        MenuItem(R.drawable.ic_chart, stringResource(R.string.main_dock_progress), stringResource(R.string.main_menu_progress_desc), run(actions.onOpenStats))
-        if (timer !is TimerUi.Active) {
-            MenuItem(R.drawable.ic_headphones, stringResource(R.string.main_dock_sound), stringResource(R.string.main_menu_sound_desc), run(actions.onOpenSound))
+        MenuItem(R.drawable.ic_headphones, stringResource(R.string.main_dock_sound), stringResource(R.string.main_menu_sound_desc), run(actions.onOpenSound))
+        // Laboratorio: tu colección
+        MenuSection(stringResource(R.string.main_menu_section_lab))
+        MenuItem(R.drawable.ic_grid, stringResource(R.string.main_menu_table), stringResource(R.string.main_menu_table_desc), run(actions.onOpenAchievements))
+        MenuItem(R.drawable.ic_flask, stringResource(R.string.main_menu_synth), stringResource(R.string.main_menu_synth_desc), run(actions.onOpenSynthesizer))
+        // Tu progreso: cómo vas y contra quién compites
+        MenuSection(stringResource(R.string.main_menu_section_progress))
+        MenuItem(R.drawable.ic_chart, stringResource(R.string.main_menu_stats), stringResource(R.string.main_menu_stats_desc), run(actions.onOpenStats))
+        MenuItem(R.drawable.ic_medal, stringResource(R.string.main_menu_medals), stringResource(R.string.main_menu_medals_desc), run(actions.onOpenMedals))
+        MenuItem(R.drawable.ic_trophy, stringResource(R.string.main_menu_league), stringResource(R.string.main_menu_league_desc), run(actions.onOpenLeague))
+        // App: botones redondos, para que no alarguen la lista
+        MenuSection(stringResource(R.string.main_menu_section_app))
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 4.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            MenuButton(R.drawable.ic_tune, stringResource(R.string.main_dock_settings), run(actions.onOpenSettings))
+            MenuButton(R.drawable.ic_help, stringResource(R.string.main_dock_guide), run(actions.onOpenGuide))
+            MenuButton(R.drawable.ic_diamond, stringResource(R.string.main_dock_pro), run(actions.onOpenPro))
+            when {
+                account.isBusy -> MenuButton(R.drawable.ic_person, "…") {}
+                account.isSignedIn -> MenuButton(R.drawable.ic_person, stringResource(R.string.main_dock_sign_out), run(actions.onSignOut))
+                else -> MenuButton(R.drawable.ic_person, stringResource(R.string.main_dock_sign_in), run(actions.onSignIn))
+            }
         }
-        MenuItem(R.drawable.ic_tune, stringResource(R.string.main_dock_settings), stringResource(R.string.main_menu_settings_desc), run(actions.onOpenSettings))
-        MenuItem(R.drawable.ic_help, stringResource(R.string.main_dock_guide), stringResource(R.string.main_menu_guide_desc), run(actions.onOpenGuide))
-        MenuItem(R.drawable.ic_diamond, stringResource(R.string.main_dock_pro), stringResource(R.string.main_menu_pro_desc), run(actions.onOpenPro))
-        when {
-            account.isBusy -> MenuItem(R.drawable.ic_person, "…", null) {}
-            account.isSignedIn -> MenuItem(R.drawable.ic_person, stringResource(R.string.main_dock_sign_out), stringResource(R.string.main_menu_sign_out_desc), run(actions.onSignOut))
-            else -> MenuItem(R.drawable.ic_person, stringResource(R.string.main_dock_sign_in), stringResource(R.string.main_menu_sign_in_desc), run(actions.onSignIn))
+    }
+}
+
+@Composable
+private fun MenuButton(icon: Int, label: String, onClick: () -> Unit) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.width(76.dp)) {
+        FilledTonalIconButton(onClick = onClick, modifier = Modifier.size(56.dp)) {
+            Icon(painterResource(icon), contentDescription = null)
         }
+        Text(
+            label,
+            style = MaterialTheme.typography.labelSmall,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            modifier = Modifier.padding(top = 4.dp),
+        )
     }
 }
 

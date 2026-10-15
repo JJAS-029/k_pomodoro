@@ -206,4 +206,19 @@
     <string name="main_plan_editor_hint">These changes are only for the next plan. Your usual plan stays in Settings.</string>
     <string name="main_plan_reset">Use my usual plan</string>
     <string name="main_plan_save_default">Save as my usual plan</string>
+    <string name="main_menu_section_lab">Lab</string>
+    <string name="main_menu_section_progress">Your progress</string>
+    <string name="main_menu_section_app">App</string>
+    <string name="main_menu_edit_plan">Adjust this plan</string>
+    <string name="main_menu_edit_plan_desc">Hours, lengths and tag before you start</string>
+    <string name="main_menu_table">Periodic table</string>
+    <string name="main_menu_table_desc">Your element collection and its mastery</string>
+    <string name="main_menu_synth">Synthesizer</string>
+    <string name="main_menu_synth_desc">Fuse elements to create new ones</string>
+    <string name="main_menu_stats">Statistics</string>
+    <string name="main_menu_stats_desc">Focus, streak, tags and places</string>
+    <string name="main_menu_medals">Medals</string>
+    <string name="main_menu_medals_desc">For consistency, hours and discoveries</string>
+    <string name="main_menu_league">League</string>
+    <string name="main_menu_league_desc">Compete every week with your minutes</string>
 </resources>

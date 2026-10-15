@@ -5,6 +5,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import com.jjas.labpomodoro.ui.guide.GuideScreen
 import com.jjas.labpomodoro.ui.lab.LabScreen
 import com.jjas.labpomodoro.ui.main.MainScreen
@@ -19,7 +21,19 @@ object Routes {
     const val PRO = "pro"
     const val GUIDE = "guide"
     const val STATS = "stats"
+
+    fun lab(tab: Int) = "$ACHIEVEMENTS?tab=$tab"
+    fun progress(tab: Int) = "$STATS?tab=$tab"
 }
+
+/** Pestañas del Laboratorio. */
+const val LAB_TABLE = 0
+const val LAB_SYNTHESIZER = 1
+
+/** Pestañas de Tu progreso. */
+const val PROGRESS_STATS = 0
+const val PROGRESS_MEDALS = 1
+const val PROGRESS_LEAGUE = 2
 
 @Composable
 fun LabNavHost(navController: NavHostController = rememberNavController()) {
@@ -27,21 +41,34 @@ fun LabNavHost(navController: NavHostController = rememberNavController()) {
         composable(Routes.MAIN) {
             MainScreen(
                 onOpenSettings = { navController.navigate(Routes.SETTINGS) },
-                onOpenAchievements = { navController.navigate(Routes.ACHIEVEMENTS) },
+                onOpenAchievements = { navController.navigate(Routes.lab(LAB_TABLE)) },
+                onOpenSynthesizer = { navController.navigate(Routes.lab(LAB_SYNTHESIZER)) },
                 onOpenPro = { navController.navigate(Routes.PRO) },
                 onOpenGuide = { navController.navigate(Routes.GUIDE) { launchSingleTop = true } },
-                onOpenStats = { navController.navigate(Routes.STATS) },
+                onOpenStats = { navController.navigate(Routes.progress(PROGRESS_STATS)) },
+                onOpenMedals = { navController.navigate(Routes.progress(PROGRESS_MEDALS)) },
+                onOpenLeague = { navController.navigate(Routes.progress(PROGRESS_LEAGUE)) },
             )
         }
         composable(Routes.SETTINGS) {
             SettingsScreen(onBack = navController::popBackStack, onOpenPro = { navController.navigate(Routes.PRO) })
         }
-        // Destinos provisionales; cada uno se implementa en su fase
-        composable(Routes.ACHIEVEMENTS) {
-            LabScreen(onBack = navController::popBackStack)
+        // Laboratorio (tabla y sintetizador) y Tu progreso (estadísticas, medallas y liga), cada uno con su pestaña inicial
+        composable(
+            "${Routes.ACHIEVEMENTS}?tab={tab}",
+            arguments = listOf(navArgument("tab") { type = NavType.IntType; defaultValue = LAB_TABLE }),
+        ) { entry ->
+            LabScreen(onBack = navController::popBackStack, initialTab = entry.arguments?.getInt("tab") ?: LAB_TABLE)
         }
-        composable(Routes.STATS) {
-            StatsScreen(onBack = navController::popBackStack, onOpenPro = { navController.navigate(Routes.PRO) })
+        composable(
+            "${Routes.STATS}?tab={tab}",
+            arguments = listOf(navArgument("tab") { type = NavType.IntType; defaultValue = PROGRESS_STATS }),
+        ) { entry ->
+            StatsScreen(
+                onBack = navController::popBackStack,
+                onOpenPro = { navController.navigate(Routes.PRO) },
+                initialTab = entry.arguments?.getInt("tab") ?: PROGRESS_STATS,
+            )
         }
         composable(Routes.PRO) {
             ProScreen(onBack = navController::popBackStack)
