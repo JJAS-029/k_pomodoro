@@ -70,39 +70,39 @@
         <item quantity="other">¡%d medallas nuevas!</item>
     </plurals>
 
-    <string name="prog_medal_first_pomodoro_title">Primer experimento</string>
+    <string name="prog_medal_first_pomodoro_title">Koala aprendiz</string>
     <string name="prog_medal_first_pomodoro_desc">Completa tu primer pomodoro</string>
-    <string name="prog_medal_streak_3_title">Constancia</string>
+    <string name="prog_medal_streak_3_title">Koala constante</string>
     <string name="prog_medal_streak_3_desc">Racha de 3 días seguidos</string>
-    <string name="prog_medal_streak_7_title">Semana perfecta</string>
+    <string name="prog_medal_streak_7_title">Semana de eucalipto</string>
     <string name="prog_medal_streak_7_desc">Racha de 7 días seguidos</string>
-    <string name="prog_medal_streak_30_title">Mes de laboratorio</string>
+    <string name="prog_medal_streak_30_title">Koala de laboratorio</string>
     <string name="prog_medal_streak_30_desc">Racha de 30 días seguidos</string>
-    <string name="prog_medal_streak_100_title">Cien días</string>
+    <string name="prog_medal_streak_100_title">Koala legendario</string>
     <string name="prog_medal_streak_100_desc">Racha de 100 días seguidos</string>
-    <string name="prog_medal_hours_10_title">Becario</string>
+    <string name="prog_medal_hours_10_title">Koala becario</string>
     <string name="prog_medal_hours_10_desc">10 horas de enfoque en total</string>
-    <string name="prog_medal_hours_50_title">Investigador</string>
+    <string name="prog_medal_hours_50_title">Koala investigador</string>
     <string name="prog_medal_hours_50_desc">50 horas de enfoque en total</string>
-    <string name="prog_medal_hours_100_title">Doctorado</string>
+    <string name="prog_medal_hours_100_title">Doctor Koala</string>
     <string name="prog_medal_hours_100_desc">100 horas de enfoque en total</string>
-    <string name="prog_medal_marathon_title">Maratón</string>
+    <string name="prog_medal_marathon_title">Koala maratonista</string>
     <string name="prog_medal_marathon_desc">8 pomodoros en un mismo día</string>
-    <string name="prog_medal_early_bird_title">Madrugador</string>
+    <string name="prog_medal_early_bird_title">Koala madrugador</string>
     <string name="prog_medal_early_bird_desc">5 pomodoros empezados antes de las 7 de la mañana</string>
-    <string name="prog_medal_night_owl_title">Búho nocturno</string>
+    <string name="prog_medal_night_owl_title">Koala nocturno</string>
     <string name="prog_medal_night_owl_desc">5 pomodoros empezados después de las 10 de la noche</string>
-    <string name="prog_medal_first_fusion_title">Primera síntesis</string>
+    <string name="prog_medal_first_fusion_title">Koala alquimista</string>
     <string name="prog_medal_first_fusion_desc">Fusiona dos elementos en el sintetizador</string>
-    <string name="prog_medal_fusion_master_title">Maestro de la fusión</string>
+    <string name="prog_medal_fusion_master_title">Koala nuclear</string>
     <string name="prog_medal_fusion_master_desc">25 fusiones en el sintetizador</string>
-    <string name="prog_medal_collector_title">Coleccionista</string>
+    <string name="prog_medal_collector_title">Koala coleccionista</string>
     <string name="prog_medal_collector_desc">Descubre 10 elementos</string>
-    <string name="prog_medal_half_table_title">Media tabla</string>
+    <string name="prog_medal_half_table_title">Koala explorador</string>
     <string name="prog_medal_half_table_desc">Descubre 59 elementos</string>
-    <string name="prog_medal_full_table_title">Tabla completa</string>
+    <string name="prog_medal_full_table_title">Koala Mendeléyev</string>
     <string name="prog_medal_full_table_desc">Descubre los 118 elementos</string>
-    <string name="prog_medal_first_gold_title">Maestría de oro</string>
+    <string name="prog_medal_first_gold_title">Koala de oro</string>
     <string name="prog_medal_first_gold_desc">Lleva un elemento a la maestría de oro</string>
 
     <!-- Progreso de una medalla: "4/7 días" (el plural va por la meta) -->

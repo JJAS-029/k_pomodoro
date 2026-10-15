@@ -174,49 +174,43 @@ fun MedalBadge(
 /** Radio del cuerpo: el resto, hasta el borde del lienzo, es para el halo. */
 private fun DrawScope.bodyRadius() = size.minDimension / 2f * 0.86f
 
+/**
+ * Medalla ganada, neón cristalino: vidrio oscuro con el metal encendido por dentro (desde abajo),
+ * anillo grabado y aro neón del color del nivel. En el tema claro, el vidrio es claro y el aro del
+ * metal pleno.
+ */
 private fun DrawScope.drawEarnedBody(g: MedalGlass, gold: Boolean, light: Boolean) {
     val r = bodyRadius()
     val c = center
     // Halo: degradado radial en vez de desenfoque, que en Android 8 no se ve
     drawCircle(
-        Brush.radialGradient(0.72f to g.glow.copy(alpha = if (gold) 0.5f else 0.3f), 1f to Color.Transparent, center = c, radius = size.minDimension / 2f),
+        Brush.radialGradient(0.72f to g.glow.copy(alpha = if (gold) 0.55f else 0.35f), 1f to Color.Transparent, center = c, radius = size.minDimension / 2f),
         radius = size.minDimension / 2f,
     )
-    // Esfera: la luz entra arriba a la izquierda y el fondo es el metal hondo
-    drawCircle(
+    val body = if (light) {
         Brush.radialGradient(
-            0f to g.highlight.copy(alpha = if (light) 0.95f else 0.65f),
-            0.55f to g.base.copy(alpha = if (light) 0.9f else 0.55f),
-            1f to g.deep.copy(alpha = 0.94f),
-            center = Offset(c.x - r * 0.3f, c.y - r * 0.3f),
-            radius = r * 1.45f,
-        ),
-        radius = r,
-    )
-    // Rebote de luz del metal abajo a la derecha
-    drawCircle(
-        Brush.radialGradient(listOf(g.glow.copy(alpha = 0.35f), Color.Transparent), center = Offset(c.x + r * 0.35f, c.y + r * 0.45f), radius = r * 0.6f),
-        radius = r,
-    )
+            0f to Color.White,
+            0.5f to g.highlight.copy(alpha = 0.9f),
+            1f to g.base.copy(alpha = 0.85f),
+            center = Offset(c.x, c.y + r * 0.3f),
+            radius = r * 1.3f,
+        )
+    } else {
+        Brush.radialGradient(
+            0f to g.base.copy(alpha = 0.6f),
+            0.6f to g.deep.copy(alpha = 0.9f),
+            1f to Color(0xFF07080B),
+            center = Offset(c.x, c.y + r * 0.35f),
+            radius = r * 1.3f,
+        )
+    }
+    drawCircle(body, radius = r)
     // Anillo grabado, como la tapa de una cápsula
-    drawCircle(
-        Brush.linearGradient(listOf(Color.Black.copy(alpha = 0.3f), Color.White.copy(alpha = 0.4f)), start = Offset(c.x - r, c.y - r), end = Offset(c.x + r, c.y + r)),
-        radius = r * 0.8f,
-        style = Stroke(width = r * 0.04f),
-    )
-    // Borde especular: blanco arriba a la izquierda, resplandor del metal abajo a la derecha
-    drawCircle(
-        Brush.linearGradient(
-            0f to (if (light) g.base else Color.White).copy(alpha = 0.95f),
-            0.35f to g.highlight.copy(alpha = 0.6f),
-            0.7f to g.base.copy(alpha = 0.4f),
-            1f to g.glow.copy(alpha = 0.95f),
-            start = Offset(c.x - r, c.y - r),
-            end = Offset(c.x + r, c.y + r),
-        ),
-        radius = r,
-        style = Stroke(width = r * 0.08f),
-    )
+    drawCircle((if (light) g.deep else g.glow).copy(alpha = 0.45f), radius = r * 0.8f, style = Stroke(width = r * 0.03f))
+    // Aro neón: un trazo ancho y tenue con uno fino y brillante encima
+    val ring = if (light) g.base else g.glow
+    drawCircle(ring.copy(alpha = 0.35f), radius = r, style = Stroke(width = r * 0.16f))
+    drawCircle(ring, radius = r, style = Stroke(width = r * 0.06f))
 }
 
 private fun DrawScope.drawLockedBody(fraction: Float, light: Boolean) {

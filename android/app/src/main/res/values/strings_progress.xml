@@ -68,39 +68,39 @@
         <item quantity="other">%d new medals!</item>
     </plurals>
 
-    <string name="prog_medal_first_pomodoro_title">First experiment</string>
+    <string name="prog_medal_first_pomodoro_title">Apprentice koala</string>
     <string name="prog_medal_first_pomodoro_desc">Finish your first pomodoro</string>
-    <string name="prog_medal_streak_3_title">Consistency</string>
+    <string name="prog_medal_streak_3_title">Steady koala</string>
     <string name="prog_medal_streak_3_desc">A 3-day streak</string>
-    <string name="prog_medal_streak_7_title">Perfect week</string>
+    <string name="prog_medal_streak_7_title">Eucalyptus week</string>
     <string name="prog_medal_streak_7_desc">A 7-day streak</string>
-    <string name="prog_medal_streak_30_title">Lab month</string>
+    <string name="prog_medal_streak_30_title">Lab koala</string>
     <string name="prog_medal_streak_30_desc">A 30-day streak</string>
-    <string name="prog_medal_streak_100_title">A hundred days</string>
+    <string name="prog_medal_streak_100_title">Legendary koala</string>
     <string name="prog_medal_streak_100_desc">A 100-day streak</string>
-    <string name="prog_medal_hours_10_title">Intern</string>
+    <string name="prog_medal_hours_10_title">Intern koala</string>
     <string name="prog_medal_hours_10_desc">10 hours of focus in total</string>
-    <string name="prog_medal_hours_50_title">Researcher</string>
+    <string name="prog_medal_hours_50_title">Researcher koala</string>
     <string name="prog_medal_hours_50_desc">50 hours of focus in total</string>
-    <string name="prog_medal_hours_100_title">PhD</string>
+    <string name="prog_medal_hours_100_title">Doctor Koala</string>
     <string name="prog_medal_hours_100_desc">100 hours of focus in total</string>
-    <string name="prog_medal_marathon_title">Marathon</string>
+    <string name="prog_medal_marathon_title">Marathon koala</string>
     <string name="prog_medal_marathon_desc">8 pomodoros in a single day</string>
-    <string name="prog_medal_early_bird_title">Early bird</string>
+    <string name="prog_medal_early_bird_title">Early koala</string>
     <string name="prog_medal_early_bird_desc">5 pomodoros started before 7 a.m.</string>
-    <string name="prog_medal_night_owl_title">Night owl</string>
+    <string name="prog_medal_night_owl_title">Night koala</string>
     <string name="prog_medal_night_owl_desc">5 pomodoros started after 10 p.m.</string>
-    <string name="prog_medal_first_fusion_title">First synthesis</string>
+    <string name="prog_medal_first_fusion_title">Alchemist koala</string>
     <string name="prog_medal_first_fusion_desc">Fuse two elements in the synthesizer</string>
-    <string name="prog_medal_fusion_master_title">Fusion master</string>
+    <string name="prog_medal_fusion_master_title">Nuclear koala</string>
     <string name="prog_medal_fusion_master_desc">25 fusions in the synthesizer</string>
-    <string name="prog_medal_collector_title">Collector</string>
+    <string name="prog_medal_collector_title">Collector koala</string>
     <string name="prog_medal_collector_desc">Discover 10 elements</string>
-    <string name="prog_medal_half_table_title">Half the table</string>
+    <string name="prog_medal_half_table_title">Explorer koala</string>
     <string name="prog_medal_half_table_desc">Discover 59 elements</string>
-    <string name="prog_medal_full_table_title">Full table</string>
+    <string name="prog_medal_full_table_title">Mendeleev koala</string>
     <string name="prog_medal_full_table_desc">Discover all 118 elements</string>
-    <string name="prog_medal_first_gold_title">Golden mastery</string>
+    <string name="prog_medal_first_gold_title">Golden koala</string>
     <string name="prog_medal_first_gold_desc">Bring an element to gold mastery</string>
 
     <!-- Progreso de una medalla: "4/7 days" (el plural va por la meta) -->

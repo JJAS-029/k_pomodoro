@@ -14,5 +14,9 @@
         <activity
             android:name=".debug.MenuMockActivity"
             android:exported="true" />
+        <!-- Propuestas de ilustración de medallas -->
+        <activity
+            android:name=".debug.MedalArtActivity"
+            android:exported="true" />
     </application>
 </manifest>
