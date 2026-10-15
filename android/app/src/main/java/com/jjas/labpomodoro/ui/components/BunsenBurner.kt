@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import com.jjas.labpomodoro.ui.theme.isLight
+import com.jjas.labpomodoro.domain.model.FlameColor
 import kotlin.math.sin
 
 /**
@@ -36,6 +37,14 @@ class FlameTones(val halo: Color, val outer: Color, val outerBase: Color, val co
             core = Color(0xFFB3E5FC),
             spark = Color(0xFFE1F5FE),
         )
+
+        fun of(color: FlameColor): FlameTones = when (color) {
+            FlameColor.BLUE -> Blue
+            FlameColor.GREEN -> FlameTones(Color(0xFF00E676), Color(0xFF4CFF8A), Color(0xFF12A150), Color(0xFFC8FFD9), Color(0xFFE6FFEE))
+            FlameColor.VIOLET -> FlameTones(Color(0xFFB04DFF), Color(0xFFC77DFF), Color(0xFF7B2FD1), Color(0xFFEBD4FF), Color(0xFFF5EAFF))
+            FlameColor.ORANGE -> FlameTones(Color(0xFFFF9100), Color(0xFFFFB347), Color(0xFFE06A00), Color(0xFFFFF0C2), Color(0xFFFFF8E1))
+            FlameColor.RED -> FlameTones(Color(0xFFFF1744), Color(0xFFFF5A6E), Color(0xFFC2102E), Color(0xFFFFD3DA), Color(0xFFFFEBEE))
+        }
     }
 }
 
@@ -47,7 +56,7 @@ class FlameTones(val halo: Color, val outer: Color, val outerBase: Color, val co
  * se apaga con suavidad.
  */
 @Composable
-fun BunsenBurner(lit: Boolean, modifier: Modifier = Modifier, tones: FlameTones = FlameTones.Blue) {
+fun BunsenBurner(lit: Boolean, modifier: Modifier = Modifier, tones: FlameTones = LocalLabTheme.current.flame) {
     val light = MaterialTheme.colorScheme.isLight
     val flame by animateFloatAsState(if (lit) 1f else 0f, tween(600), label = "flame")
     // Reloj continuo solo mientras está encendido: sin llama no pide cuadros

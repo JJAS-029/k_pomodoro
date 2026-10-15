@@ -6,6 +6,9 @@ import android.content.pm.PackageManager
 import android.graphics.drawable.Icon
 import android.os.Build
 import android.os.Bundle
+import com.jjas.labpomodoro.ui.components.LocalLabTheme
+import com.jjas.labpomodoro.ui.components.LabThemeUi
+import androidx.compose.runtime.CompositionLocalProvider
 import android.util.Rational
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -103,6 +106,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             val settings by settingsRepository.settings.collectAsStateWithLifecycle(initialValue = null)
             val pureBlack = settings?.pureBlack ?: true
+            val labTheme = settings?.let { LabThemeUi.of(it.activeGlassTint, it.activeFlame) } ?: LabThemeUi()
+            CompositionLocalProvider(LocalLabTheme provides labTheme) {
             LabPomodoroTheme(dynamicColor = settings?.dynamicColorActive == true, pureBlack = pureBlack) {
                 // Fuera del if para conservar la pantalla en la que estaba al volver de PiP
                 val navController = rememberNavController()
@@ -129,6 +134,7 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 }
+            }
             }
         }
     }

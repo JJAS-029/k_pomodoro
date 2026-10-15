@@ -63,6 +63,10 @@ data class AppSettings(
     val exactAlarmAsked: Boolean = false,
     /** Paleta de laboratorio para los colores de los recipientes (Pro). */
     val labPalette: LabPalette = LabPalette.CLASSIC,
+    /** Tinte del cristal (Pro). */
+    val glassTint: GlassTint = GlassTint.CLEAR,
+    /** Color de la llama del mechero (Pro). */
+    val flameColor: FlameColor = FlameColor.BLUE,
     /**
      * Elemento que tiñe los recipientes de trabajo. 0 = automático: uno distinto de tu
      * colección en cada sesión.
@@ -96,6 +100,10 @@ data class AppSettings(
 
     /** La paleta elegida solo cuenta con Pro; si no, la clásica. */
     val activePalette: LabPalette get() = if (isPro) labPalette else LabPalette.CLASSIC
+
+    /** Tinte y llama solo cuentan con Pro. */
+    val activeGlassTint: GlassTint get() = if (isPro) glassTint else GlassTint.CLEAR
+    val activeFlame: FlameColor get() = if (isPro) flameColor else FlameColor.BLUE
 
     companion object {
         val AMBIENT_DELAYS = listOf(3, 5)

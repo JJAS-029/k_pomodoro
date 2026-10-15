@@ -69,6 +69,9 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jjas.labpomodoro.BuildConfig
 import com.jjas.labpomodoro.R
+import androidx.compose.foundation.border
+import com.jjas.labpomodoro.domain.model.FlameColor
+import com.jjas.labpomodoro.domain.model.GlassTint
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.ListItem
@@ -130,6 +133,8 @@ fun SettingsScreen(
                     onDynamicColorChange = viewModel::setDynamicColor,
                     onPureBlackChange = viewModel::setPureBlack,
                     onPaletteChange = viewModel::setLabPalette,
+                    onGlassTintChange = viewModel::setGlassTint,
+                    onFlameChange = viewModel::setFlameColor,
                     onOpenPro = onOpenPro,
                     onResetVesselElement = viewModel::resetVesselElement,
                     onReminderChange = viewModel::setReminder,
@@ -196,6 +201,8 @@ private fun SettingsContent(
     onDynamicColorChange: (Boolean) -> Unit,
     onPureBlackChange: (Boolean) -> Unit = {},
     onPaletteChange: (LabPalette) -> Unit = {},
+    onGlassTintChange: (GlassTint) -> Unit = {},
+    onFlameChange: (FlameColor) -> Unit = {},
     onOpenPro: () -> Unit = {},
     modifier: Modifier = Modifier,
     onResetVesselElement: () -> Unit = {},
@@ -373,6 +380,28 @@ private fun SettingsContent(
             selected = settings.activePalette,
             isPro = settings.isPro,
             onSelect = onPaletteChange,
+            onOpenPro = onOpenPro,
+        )
+        Spacer(Modifier.height(12.dp))
+        SwatchChooser(
+            title = stringResource(R.string.set_glass_tint),
+            options = GlassTint.entries,
+            selected = settings.activeGlassTint,
+            isPro = settings.isPro,
+            label = { stringResource(it.labelRes) },
+            swatch = { it.argb?.let(::Color) },
+            onSelect = onGlassTintChange,
+            onOpenPro = onOpenPro,
+        )
+        Spacer(Modifier.height(12.dp))
+        SwatchChooser(
+            title = stringResource(R.string.set_flame),
+            options = FlameColor.entries,
+            selected = settings.activeFlame,
+            isPro = settings.isPro,
+            label = { stringResource(it.labelRes) },
+            swatch = { Color(it.swatch) },
+            onSelect = onFlameChange,
             onOpenPro = onOpenPro,
         )
 
@@ -674,6 +703,43 @@ private fun PaletteChooser(selected: LabPalette, isPro: Boolean, onSelect: (LabP
                             listOf(Color(palette.shortBreak), Color(palette.longBreak))
                         swatches.forEach { Box(Modifier.size(8.dp).background(it, CircleShape)) }
                     }
+                },
+            )
+        }
+    }
+}
+
+/** Fichas con una muestra de color (Pro): tinte del cristal o color de la llama. */
+@Composable
+private fun <T> SwatchChooser(
+    title: String,
+    options: List<T>,
+    selected: T,
+    isPro: Boolean,
+    label: @Composable (T) -> String,
+    swatch: (T) -> Color?,
+    onSelect: (T) -> Unit,
+    onOpenPro: () -> Unit,
+) {
+    Text(title, style = MaterialTheme.typography.bodyLarge)
+    if (!isPro) {
+        Text(stringResource(R.string.set_available_in_pro), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+    Spacer(Modifier.height(8.dp))
+    Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        options.forEach { option ->
+            FilterChip(
+                selected = option == selected,
+                onClick = { if (isPro) onSelect(option) else onOpenPro() },
+                label = { Text(label(option)) },
+                leadingIcon = {
+                    val color = swatch(option)
+                    Box(
+                        Modifier
+                            .size(12.dp)
+                            .background(color ?: Color.Transparent, CircleShape)
+                            .border(1.dp, color ?: MaterialTheme.colorScheme.outline, CircleShape),
+                    )
                 },
             )
         }

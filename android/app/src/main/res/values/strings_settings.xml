@@ -241,4 +241,16 @@
     <string name="set_group_look_desc">Pure black, colors, palettes, vessels and shortcuts</string>
     <string name="set_group_account">Account and data</string>
     <string name="set_group_account_desc">Language, cloud backup, export and about</string>
+    <string name="set_glass_tint">Glass tint</string>
+    <string name="set_tint_clear">Clear</string>
+    <string name="set_tint_green">Greenish</string>
+    <string name="set_tint_amber">Amber</string>
+    <string name="set_tint_blue">Bluish</string>
+    <string name="set_tint_rose">Rose</string>
+    <string name="set_flame">Burner flame</string>
+    <string name="set_flame_blue">Blue (gas)</string>
+    <string name="set_flame_green">Green (copper)</string>
+    <string name="set_flame_violet">Violet (potassium)</string>
+    <string name="set_flame_orange">Orange (sodium)</string>
+    <string name="set_flame_red">Red (strontium)</string>
 </resources>

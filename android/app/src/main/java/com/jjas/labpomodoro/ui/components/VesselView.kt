@@ -171,6 +171,7 @@ fun VesselView(
         }
     }
 
+    val labTheme = LocalLabTheme.current
     // Capas: halo o aurora, líquido y gotas (a través de la lente del vidrio) y el vidrio con el vapor
     Box(modifier.then(touchModifier)) {
         // Fuera de la lente: los efectos de render recortan a su borde y el halo debe salirse
@@ -191,7 +192,7 @@ fun VesselView(
                 clipRect {
                     // Estilo plano: el vidrio tiene un tinte propio detrás del líquido
                     val liquidTones = tones ?: LiquidTones.from(animatedColor)
-                    if (look == GlassLook.LIQUID_GLASS) drawFrostedBody(g, liquidTones, glass)
+                    if (look == GlassLook.LIQUID_GLASS) drawFrostedBody(g, liquidTones, glass, labTheme.glassTint)
                     drawLiquid(
                         g, animatedFill, animatedColor, t, waving = animate || interactive, behavior = behavior,
                         sloshAge = sloshAge, surfaceOffset = surfaceOffset, look = look, tones = liquidTones,
@@ -224,7 +225,7 @@ fun VesselView(
                 }
                 when (look) {
                     GlassLook.CLASSIC -> drawGlass(g, glass)
-                    GlassLook.LIQUID_GLASS -> drawGlassLiquid(g, glass, tones ?: LiquidTones.from(animatedColor))
+                    GlassLook.LIQUID_GLASS -> drawGlassLiquid(g, glass, tones ?: LiquidTones.from(animatedColor), labTheme.glassTint)
                 }
                 particles.drawVapor(
                     this,
@@ -500,12 +501,13 @@ private fun DrawScope.drawMarks(g: VesselGeometry, color: Color) {
 private fun reflexX(g: VesselGeometry): Float = g.px(0.5f - g.halfWidth(g.maxFill * 0.45f) * 0.62f)
 
 /** Liquid Glass: cuerpo de vidrio esmerilado (detrás del líquido) con un tinte del líquido. */
-private fun DrawScope.drawFrostedBody(g: VesselGeometry, tones: LiquidTones, glass: GlassStyle) {
+private fun DrawScope.drawFrostedBody(g: VesselGeometry, tones: LiquidTones, glass: GlassStyle, tint: Color? = null) {
     val light = glass === GlassOnLight
+    val white = glassWhite(tint, light)
     val frost = Brush.linearGradient(
         listOf(
-            Color.White.copy(alpha = if (light) 0.7f else 0.13f),
-            Color.White.copy(alpha = if (light) 0.35f else 0.04f),
+            white.copy(alpha = if (light) 0.7f else if (tint != null) 0.2f else 0.13f),
+            white.copy(alpha = if (light) 0.35f else if (tint != null) 0.07f else 0.04f),
             tones.glow.copy(alpha = if (light) 0.12f else 0.08f),
         ),
         start = Offset(g.left, g.top),
@@ -532,8 +534,9 @@ private fun DrawScope.drawFrostedBody(g: VesselGeometry, tones: LiquidTones, gla
  * Liquid Glass: reflejo que sigue el contorno y
  * borde especular en diagonal (blanco arriba a la izquierda, teñido del líquido abajo a la derecha).
  */
-private fun DrawScope.drawGlassLiquid(g: VesselGeometry, glass: GlassStyle, tones: LiquidTones) {
+private fun DrawScope.drawGlassLiquid(g: VesselGeometry, glass: GlassStyle, tones: LiquidTones, tint: Color? = null) {
     val light = glass === GlassOnLight
+    val white = glassWhite(tint, light)
     // Reflejo que sigue la curva del vidrio (cono, bola, cuello), con un núcleo más nítido
     clipPath(g.interior) {
         clipRect(top = g.wallTop) {
@@ -550,15 +553,15 @@ private fun DrawScope.drawGlassLiquid(g: VesselGeometry, glass: GlassStyle, tone
             if (i == 0) ribbon.moveTo(x, g.py(v)) else ribbon.lineTo(x, g.py(v))
         }
         val ribbonW = g.width * 0.075f
-        drawPath(ribbon, Color.White.copy(alpha = if (light) 0.6f else 0.26f), style = Stroke(width = ribbonW, cap = StrokeCap.Round, join = StrokeJoin.Round))
-        drawPath(ribbon, Color.White.copy(alpha = if (light) 0.85f else 0.42f), style = Stroke(width = ribbonW * 0.28f, cap = StrokeCap.Round, join = StrokeJoin.Round))
+        drawPath(ribbon, white.copy(alpha = if (light) 0.6f else 0.26f), style = Stroke(width = ribbonW, cap = StrokeCap.Round, join = StrokeJoin.Round))
+        drawPath(ribbon, white.copy(alpha = if (light) 0.85f else 0.42f), style = Stroke(width = ribbonW * 0.28f, cap = StrokeCap.Round, join = StrokeJoin.Round))
     }
     }
     drawMarks(g, if (light) Color.Black.copy(alpha = 0.25f) else Color.White.copy(alpha = 0.38f))
     // Borde especular: en el tema claro el blanco no se vería, así que arranca en gris azulado
     val rim = Brush.linearGradient(
-        0f to (if (light) Color(0xFF6B7A90) else Color.White).copy(alpha = 0.95f),
-        0.35f to (if (light) Color(0xFF9AA6B8) else Color.White).copy(alpha = 0.3f),
+        0f to (if (light) tinted(Color(0xFF6B7A90), tint) else white).copy(alpha = 0.95f),
+        0.35f to (if (light) tinted(Color(0xFF9AA6B8), tint) else white).copy(alpha = if (tint != null) 0.45f else 0.3f),
         0.7f to tones.highlight.copy(alpha = 0.4f),
         1f to tones.glow.copy(alpha = 0.9f),
         start = Offset(g.left, g.top),
@@ -570,7 +573,7 @@ private fun DrawScope.drawGlassLiquid(g: VesselGeometry, glass: GlassStyle, tone
         val footTop = g.py(g.cylinderFloor)
         clipRect(top = g.wallTop, bottom = footTop) { drawPath(g.bodyOutline, rim, style = rimStroke) }
         clipRect(top = footTop) {
-            drawPath(g.bodyOutline, (if (light) Color(0xFF8A96A8) else Color.White).copy(alpha = 0.55f), style = rimStroke)
+            drawPath(g.bodyOutline, (if (light) tinted(Color(0xFF8A96A8), tint) else white).copy(alpha = 0.55f), style = rimStroke)
         }
     } else {
         clipRect(top = g.wallTop) { drawPath(g.bodyOutline, rim, style = rimStroke) }
@@ -1060,3 +1063,13 @@ private class Ripples {
         const val MAX = 6
     }
 }
+
+/** El "blanco" del vidrio: con tinte, se tiñe (en el tema claro, un poco más hondo). */
+private fun glassWhite(tint: Color?, light: Boolean): Color = when {
+    tint == null -> Color.White
+    light -> lerp(Color.White, tint, 0.45f)
+    else -> lerp(Color.White, tint, 0.65f)
+}
+
+/** Los grises del borde en el tema claro, teñidos si hay tinte. */
+private fun tinted(gray: Color, tint: Color?): Color = if (tint == null) gray else lerp(gray, lerp(tint, Color.Black, 0.35f), 0.6f)

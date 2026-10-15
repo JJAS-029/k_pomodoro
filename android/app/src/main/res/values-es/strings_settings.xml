@@ -248,4 +248,16 @@
     <string name="set_group_look_desc">Negro puro, colores, paletas, recipientes y atajos</string>
     <string name="set_group_account">Cuenta y datos</string>
     <string name="set_group_account_desc">Idioma, respaldo en la nube, exportar y acerca de</string>
+    <string name="set_glass_tint">Tinte del cristal</string>
+    <string name="set_tint_clear">Transparente</string>
+    <string name="set_tint_green">Verdoso</string>
+    <string name="set_tint_amber">Ámbar</string>
+    <string name="set_tint_blue">Azulado</string>
+    <string name="set_tint_rose">Rosado</string>
+    <string name="set_flame">Llama del mechero</string>
+    <string name="set_flame_blue">Azul (gas)</string>
+    <string name="set_flame_green">Verde (cobre)</string>
+    <string name="set_flame_violet">Violeta (potasio)</string>
+    <string name="set_flame_orange">Naranja (sodio)</string>
+    <string name="set_flame_red">Roja (estroncio)</string>
 </resources>

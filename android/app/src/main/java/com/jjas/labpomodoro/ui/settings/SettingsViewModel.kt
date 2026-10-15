@@ -3,6 +3,8 @@ package com.jjas.labpomodoro.ui.settings
 import android.app.Activity
 import com.jjas.labpomodoro.data.billing.ReviewAccess
 import com.jjas.labpomodoro.domain.model.LabPalette
+import com.jjas.labpomodoro.domain.model.FlameColor
+import com.jjas.labpomodoro.domain.model.GlassTint
 import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
@@ -93,6 +95,14 @@ class SettingsViewModel @Inject constructor(
 
     fun setAmbientMode(enabled: Boolean) {
         viewModelScope.launch { repository.setAmbientMode(enabled) }
+    }
+
+    fun setGlassTint(tint: GlassTint) {
+        viewModelScope.launch { repository.setGlassTint(tint) }
+    }
+
+    fun setFlameColor(color: FlameColor) {
+        viewModelScope.launch { repository.setFlameColor(color) }
     }
 
     fun setLabPalette(palette: LabPalette) {
