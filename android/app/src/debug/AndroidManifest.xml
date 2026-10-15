@@ -6,5 +6,9 @@
         <activity
             android:name=".debug.GlassPreviewActivity"
             android:exported="true" />
+        <!-- Propuestas de color de la tabla (extra entero "variant": 0 a 3) -->
+        <activity
+            android:name=".debug.TilePreviewActivity"
+            android:exported="true" />
     </application>
 </manifest>

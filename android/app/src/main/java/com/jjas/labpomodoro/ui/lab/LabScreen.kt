@@ -84,6 +84,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jjas.labpomodoro.R
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.lerp
 import java.text.NumberFormat
 import com.jjas.labpomodoro.domain.model.isGas
 import com.jjas.labpomodoro.domain.model.kelvinToCelsius
@@ -504,7 +506,7 @@ private fun Legend(
                         .toggleable(value = selected, role = Role.Checkbox, onValueChange = { onFocus(category) })
                         .padding(horizontal = 10.dp, vertical = 7.dp),
                 ) {
-                    GlassOrb(glass, Modifier.size(12.dp))
+                    GlassOrb(glass, Modifier.size(16.dp))
                     Spacer(Modifier.width(6.dp))
                     Text(
                         stringResource(category.labelRes()),
@@ -518,19 +520,44 @@ private fun Legend(
     }
 }
 
-/** Esfera de cristal del color de la familia, con su brillo arriba a la izquierda. */
+/**
+ * Esfera de cristal del color de la familia, como las medallas: cuerpo con la luz arriba a la
+ * izquierda, rebote del color abajo a la derecha, borde especular y un destello nítido.
+ */
 @Composable
 private fun GlassOrb(glass: GlassPalette, modifier: Modifier = Modifier) {
     Box(
         modifier.drawWithCache {
-            val brush = Brush.radialGradient(
-                0f to Color.White.copy(alpha = 0.9f),
-                0.35f to glass.orb,
+            val r = size.minDimension / 2f
+            val center = Offset(size.width / 2f, size.height / 2f)
+            val body = Brush.radialGradient(
+                0f to lerp(glass.orb, Color.White, 0.55f),
+                0.45f to glass.orb,
                 1f to glass.deep.copy(alpha = 1f),
-                center = Offset(size.width * 0.35f, size.height * 0.3f),
-                radius = size.minDimension * 0.75f,
+                center = Offset(center.x - r * 0.3f, center.y - r * 0.35f),
+                radius = r * 1.5f,
             )
-            onDrawBehind { drawCircle(brush) }
+            val bounce = Brush.radialGradient(
+                listOf(lerp(glass.orb, Color.White, 0.3f).copy(alpha = 0.7f), Color.Transparent),
+                center = Offset(center.x + r * 0.35f, center.y + r * 0.45f),
+                radius = r * 0.6f,
+            )
+            val rim = Brush.linearGradient(
+                listOf(Color.White.copy(alpha = 0.95f), Color.White.copy(alpha = 0.1f), lerp(glass.orb, Color.White, 0.4f)),
+                start = Offset.Zero,
+                end = Offset(size.width, size.height),
+            )
+            onDrawBehind {
+                drawCircle(body)
+                drawCircle(bounce)
+                drawCircle(rim, radius = r - r * 0.06f, style = Stroke(width = r * 0.12f))
+                // Destello: el reflejo de la ventana sobre el cristal
+                drawOval(
+                    Color.White.copy(alpha = 0.9f),
+                    topLeft = Offset(center.x - r * 0.55f, center.y - r * 0.62f),
+                    size = Size(r * 0.55f, r * 0.34f),
+                )
+            }
         }
     )
 }

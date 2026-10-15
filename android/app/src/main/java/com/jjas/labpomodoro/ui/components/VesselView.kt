@@ -529,19 +529,11 @@ private fun DrawScope.drawFrostedBody(g: VesselGeometry, tones: LiquidTones, gla
 }
 
 /**
- * Liquid Glass: resplandor del líquido bajo el recipiente, reflejo cilíndrico y
+ * Liquid Glass: reflejo que sigue el contorno y
  * borde especular en diagonal (blanco arriba a la izquierda, teñido del líquido abajo a la derecha).
  */
 private fun DrawScope.drawGlassLiquid(g: VesselGeometry, glass: GlassStyle, tones: LiquidTones) {
     val light = glass === GlassOnLight
-    // Resplandor cáustico: la luz que atraviesa el líquido pinta la mesa
-    val glowW = g.width * 1.1f
-    val glowCenter = Offset(g.px(0.5f), g.bottom)
-    drawOval(
-        Brush.radialGradient(listOf(tones.glow.copy(alpha = if (light) 0.3f else 0.45f), Color.Transparent), glowCenter, glowW / 2),
-        topLeft = Offset(glowCenter.x - glowW / 2, g.bottom - g.stroke * 2f),
-        size = Size(glowW, g.stroke * 6f),
-    )
     // Reflejo que sigue la curva del vidrio (cono, bola, cuello), con un núcleo más nítido
     clipPath(g.interior) {
         clipRect(top = g.wallTop) {
