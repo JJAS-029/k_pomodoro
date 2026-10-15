@@ -84,6 +84,12 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jjas.labpomodoro.R
+import java.text.NumberFormat
+import com.jjas.labpomodoro.domain.model.isGas
+import com.jjas.labpomodoro.domain.model.kelvinToCelsius
+import com.jjas.labpomodoro.domain.model.prettyConfiguration
+import com.jjas.labpomodoro.domain.model.ElementState
+import com.jjas.labpomodoro.domain.model.ElementPropertiesTable
 import com.jjas.labpomodoro.ads.AdBanner
 import com.jjas.labpomodoro.data.repository.InventoryItem
 import com.jjas.labpomodoro.domain.model.Element
@@ -594,6 +600,8 @@ private fun ElementDetail(
         }
         Spacer(Modifier.height(16.dp))
         DiscoveryCard(element)
+        Spacer(Modifier.height(12.dp))
+        PropertiesCard(element)
         Spacer(Modifier.height(16.dp))
         Text(fact.description, style = MaterialTheme.typography.bodyLarge)
         Spacer(Modifier.height(8.dp))
@@ -773,14 +781,72 @@ private fun DiscoveryCard(element: Element) {
     }
 }
 
+/**
+ * Propiedades físicas (PubChem): masa, configuración electrónica, estado, densidad, fusión,
+ * ebullición y electronegatividad. Lo que nadie ha medido (superpesados) no se muestra.
+ */
 @Composable
-private fun FactRow(label: String, value: String) {
+private fun PropertiesCard(element: Element) {
+    val props = ElementPropertiesTable.of(element.atomicNumber)
+    val locale = LocalConfiguration.current.locales[0]
+    fun number(value: Double, decimals: Int, fixed: Boolean = false): String =
+        NumberFormat.getNumberInstance(locale).apply {
+            maximumFractionDigits = decimals
+            if (fixed) minimumFractionDigits = decimals
+        }.format(value)
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(stringResource(R.string.el_props_title), style = MaterialTheme.typography.titleSmall)
+            val labelWidth = 150.dp
+            FactRow(stringResource(R.string.el_prop_mass), "${number(props.atomicMass, 3)} u", labelWidth)
+            val config = props.prettyConfiguration()
+            FactRow(
+                stringResource(R.string.el_prop_configuration),
+                if (props.configurationPredicted) stringResource(R.string.el_prop_theoretical, config) else config,
+                labelWidth,
+            )
+            val state = stringResource(
+                when (props.state) {
+                    ElementState.SOLID, ElementState.SOLID_PREDICTED -> R.string.el_state_solid
+                    ElementState.LIQUID, ElementState.LIQUID_PREDICTED -> R.string.el_state_liquid
+                    ElementState.GAS, ElementState.GAS_PREDICTED -> R.string.el_state_gas
+                },
+            )
+            val predicted = props.state in setOf(ElementState.SOLID_PREDICTED, ElementState.LIQUID_PREDICTED, ElementState.GAS_PREDICTED)
+            FactRow(
+                stringResource(R.string.el_prop_state),
+                if (predicted) stringResource(R.string.el_prop_predicted, state) else state,
+                labelWidth,
+            )
+            props.density?.let { density ->
+                // Los gases pesan tan poco que en g/cm³ serían puros ceros: van en g/L
+                val text = if (props.state.isGas) "${number(density * 1000, 4)} g/L" else "${number(density, 3)} g/cm³"
+                FactRow(stringResource(R.string.el_prop_density), text, labelWidth)
+            }
+            props.meltingKelvin?.let { FactRow(stringResource(R.string.el_prop_melting), "${number(kelvinToCelsius(it), 1)} °C", labelWidth) }
+            props.boilingKelvin?.let { FactRow(stringResource(R.string.el_prop_boiling), "${number(kelvinToCelsius(it), 1)} °C", labelWidth) }
+            props.electronegativity?.let { FactRow(stringResource(R.string.el_prop_electronegativity), number(it, 2, fixed = true), labelWidth) }
+            Text(
+                stringResource(R.string.el_props_source),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+@Composable
+private fun FactRow(label: String, value: String, labelWidth: Dp = 120.dp) {
     Row {
         Text(
             label,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.width(120.dp),
+            modifier = Modifier.width(labelWidth),
         )
         Text(value, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
     }

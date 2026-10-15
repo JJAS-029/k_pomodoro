@@ -14,6 +14,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -87,6 +88,11 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jjas.labpomodoro.R
+import com.jjas.labpomodoro.ui.components.ElementSignatures
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.rememberInfiniteTransition
 import com.jjas.labpomodoro.data.repository.Discovery
 import com.jjas.labpomodoro.domain.model.DiscoverySource
 import com.jjas.labpomodoro.domain.model.Medal
@@ -463,25 +469,30 @@ private fun MainContent(
                 }
             }
 
+            // Elementos ganados: salen del recipiente en una burbuja; tocarla abre la tabla periódica
+            AnimatedVisibility(
+                visible = discoveries.any { it.source != DiscoverySource.FUSION },
+                enter = fadeIn(),
+                exit = fadeOut() + scaleOut(),
+            ) {
+                // Se conserva la última lista mientras se anima la salida
+                var shown by remember { mutableStateOf(discoveries) }
+                if (discoveries.any { it.source != DiscoverySource.FUSION }) shown = discoveries
+                ElementBubble(
+                    discoveries = shown,
+                    onOpen = {
+                        actions.onDismissDiscoveries()
+                        actions.onOpenAchievements()
+                    },
+                    onDismiss = actions.onDismissDiscoveries,
+                )
+            }
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .padding(horizontal = 16.dp, vertical = 8.dp),
             ) {
-                // Elementos ganados con el tiempo de enfoque; "Ver" lleva a la tabla periódica
-                AnimatedVisibility(
-                    visible = discoveries.any { it.source != DiscoverySource.FUSION },
-                    enter = slideInVertically { -it } + fadeIn(),
-                    exit = slideOutVertically { -it } + fadeOut(),
-                ) {
-                    DiscoveryBanner(
-                        discoveries = discoveries,
-                        onOpen = actions.onOpenAchievements,
-                        onDismiss = actions.onDismissDiscoveries,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                }
                 // Medallas nuevas; "Ver" lleva a Progreso, donde están todas
                 AnimatedVisibility(
                     visible = medals.isNotEmpty(),
@@ -851,20 +862,51 @@ fun ActiveIndicator(active: TimerUi.Active, modifier: Modifier = Modifier) {
 
 @Composable
 fun Vessel(vessel: VesselUi, modifier: Modifier = Modifier, refraction: Boolean = false, interactive: Boolean = false) {
+    // En el último tramo de un pomodoro con premio, el líquido muta hacia el elemento que se va a
+    // ganar; si son varios, pasa de uno a otro
+    val targets = vessel.morphTo
+    val morphing = targets.isNotEmpty() && vessel.morph > 0f
+    var liquid = vessel.liquid
+    var behavior = vessel.behavior
+    var tones = vessel.tones
+    if (morphing) {
+        val cycle = if (targets.size > 1) {
+            rememberInfiniteTransition(label = "muta").animateFloat(
+                0f,
+                targets.size.toFloat(),
+                infiniteRepeatable(tween(MORPH_SLOT_MS * targets.size, easing = LinearEasing)),
+                label = "ciclo",
+            ).value
+        } else {
+            0f
+        }
+        val slot = cycle.toInt() % targets.size
+        val current = targets[slot]
+        // Se queda en cada elemento y se funde con el siguiente al final de su turno
+        val crossfade = ((cycle - cycle.toInt() - 0.7f) / 0.3f).coerceIn(0f, 1f)
+        val target = lerp(current.look().color, targets[(slot + 1) % targets.size].look().color, crossfade)
+        liquid = lerp(vessel.liquid, target, vessel.morph)
+        // Pasada la mitad ya se comporta como el premio (metal fundido, brillo radiactivo…)
+        if (vessel.morph > 0.6f) behavior = current.look().behavior
+        tones = if (vessel.morph >= 0.99f && targets.size == 1) ElementSignatures.tones(current.atomicNumber) else null
+    }
     VesselView(
         shape = vessel.shape,
         fill = vessel.fill,
-        liquidColor = vessel.liquid,
+        liquidColor = liquid,
         bubbleColor = vessel.bubbles,
         effect = vessel.effect,
         animate = vessel.animate,
         modifier = modifier,
-        behavior = vessel.behavior,
+        behavior = behavior,
         refraction = refraction,
         interactive = interactive,
-        tones = vessel.tones,
+        tones = tones,
     )
 }
+
+/** Cuánto se queda el líquido en cada premio cuando son varios. */
+private const val MORPH_SLOT_MS = 1_600
 
 private fun formatDuration(minutes: Int): String {
     val h = minutes / 60

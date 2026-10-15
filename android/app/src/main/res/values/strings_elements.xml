@@ -115,8 +115,6 @@
         <item quantity="one">%d new element!</item>
         <item quantity="other">%d new elements!</item>
     </plurals>
-    <string name="el_banner_close">Close</string>
-    <string name="el_banner_view">View</string>
 
     <!-- Tabla completa en bronce, plata u oro -->
     <string name="el_mastery_table_bronze_title">Bronze table!</string>
@@ -139,4 +137,18 @@
     <string name="el_table_complete_body3">This isn\'t just a collection: it\'s proof that consistency transforms. Just as these elements make up everything that exists, your hours of focus are shaping the person you want to be.</string>
     <string name="el_table_complete_body4">Thank you for letting this little lab keep you company. We\'re still here for whatever comes next.</string>
     <string name="el_table_complete_confirm">Thanks, koala</string>
+    <string name="el_props_title">Properties</string>
+    <string name="el_prop_mass">Atomic mass</string>
+    <string name="el_prop_configuration">Electron configuration</string>
+    <string name="el_prop_theoretical">%1$s (theoretical)</string>
+    <string name="el_prop_state">State at 25 °C</string>
+    <string name="el_prop_predicted">%1$s (predicted)</string>
+    <string name="el_state_solid">Solid</string>
+    <string name="el_state_liquid">Liquid</string>
+    <string name="el_state_gas">Gas</string>
+    <string name="el_prop_density">Density</string>
+    <string name="el_prop_melting">Melting point</string>
+    <string name="el_prop_boiling">Boiling point</string>
+    <string name="el_prop_electronegativity">Electronegativity</string>
+    <string name="el_props_source">Data: PubChem (NIH)</string>
 </resources>

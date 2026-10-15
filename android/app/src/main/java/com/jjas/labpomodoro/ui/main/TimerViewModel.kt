@@ -36,6 +36,10 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import com.jjas.labpomodoro.data.repository.SessionRepository
+import com.jjas.labpomodoro.data.repository.LabRepository
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -84,6 +88,10 @@ data class VesselUi(
     val animate: Boolean,
     /** Elemento de tu colección que tiñe el líquido y define su comportamiento (solo en trabajo). */
     val element: Element? = null,
+    /** Elementos que gana este pomodoro al completarse: en el último tramo el líquido muta hacia ellos. */
+    val morphTo: List<Element> = emptyList(),
+    /** Cuánto ha mutado (0..1). */
+    val morph: Float = 0f,
 ) {
     val behavior: ElementBehavior? get() = element?.look()?.behavior
 
@@ -119,9 +127,29 @@ class TimerViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
     private val time: TimeSource,
     inventory: InventoryRepository,
+    private val lab: LabRepository,
+    private val sessions: SessionRepository,
 ) : ViewModel() {
 
     private val inventoryItems = inventory.items
+
+    /**
+     * Premios del pomodoro en curso, reservados al empezarlo (clave = plan, sesión y duración, por si
+     * se alarga). Así el líquido muta hacia el elemento que de verdad se va a ganar.
+     */
+    private val prizes: StateFlow<Pair<String, List<Element>>?> = engine.state
+        .map { state ->
+            (state as? TimerState.Active)?.takeIf { it.current.type == SessionType.WORK }?.let {
+                "${it.planSeed}_${it.index}_${it.current.durationSeconds}" to it.current.durationSeconds.toLong()
+            }
+        }
+        .distinctUntilChanged()
+        .mapLatest { key ->
+            key?.let { (id, seconds) ->
+                id to runCatching { lab.reservePrizes(sessions.totalWorkSeconds.first(), seconds) }.getOrDefault(emptyList())
+            }
+        }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     // Solo hace falta "tic" en pantalla mientras corre; el motor no depende de esto
     private val ticking = engine.state.flatMapLatest { state ->
@@ -137,7 +165,7 @@ class TimerViewModel @Inject constructor(
         }
     }
 
-    val state: StateFlow<TimerScreenState> = combine(ticking, settingsRepository.settings, inventoryItems) { timer, settings, items ->
+    val state: StateFlow<TimerScreenState> = combine(ticking, settingsRepository.settings, inventoryItems, prizes) { timer, settings, items, prizes ->
         val ui = when (timer) {
             TimerState.Idle -> {
                 val plan = SessionPlanGenerator.generate(settings.session)
@@ -175,6 +203,9 @@ class TimerViewModel @Inject constructor(
                         effect = if (type == SessionType.WORK) LiquidEffect.VAPOR else LiquidEffect.BUBBLES,
                         animate = !timer.isPaused,
                         element = reagent(timer.index),
+                        morphTo = prizes?.takeIf { it.first == "${timer.planSeed}_${timer.index}_${timer.current.durationSeconds}" }?.second.orEmpty(),
+                        // En el último tramo del pomodoro (solo trabajo)
+                        morph = if (type == SessionType.WORK) ((progress - MORPH_START) / (1f - MORPH_START)).coerceIn(0f, 1f) else 0f,
                     ),
                     upNext = timer.next?.let {
                         UpNext(it.type, liquid(timer.index + 1), it.durationSeconds / 60)
@@ -277,3 +308,6 @@ class TimerViewModel @Inject constructor(
         const val TICK_MILLIS = 200L
     }
 }
+
+/** Desde qué avance del pomodoro el líquido empieza a mutar hacia el premio (último 20 %). */
+private const val MORPH_START = 0.8f

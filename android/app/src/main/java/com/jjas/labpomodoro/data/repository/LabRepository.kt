@@ -31,6 +31,7 @@ class LabRepository @Inject constructor(
     private val inventoryDao: InventoryDao,
     private val discoveryDao: DiscoveryDao,
     private val clock: Clock,
+    private val prizes: PrizeStore = InMemoryPrizeStore(),
 ) {
     private val picker = ElementPicker()
     private val mutex = Mutex()
@@ -55,16 +56,44 @@ class LabRepository @Inject constructor(
             )
             if (pending.isEmpty) return@withTransaction
             val counts = currentCounts().toMutableMap()
-            repeat(pending.basic) { grant(Rarity.BASIC, DiscoverySource.BASIC_REWARD, counts) }
-            repeat(pending.rare) { grant(Rarity.RARE, DiscoverySource.RARE_REWARD, counts) }
+            val basicFrom = discoveryDao.countBySource(DiscoverySource.BASIC_REWARD)
+            val rareFrom = discoveryDao.countBySource(DiscoverySource.RARE_REWARD)
+            repeat(pending.basic) { grant(Rarity.BASIC, DiscoverySource.BASIC_REWARD, counts, basicFrom + it) }
+            repeat(pending.rare) { grant(Rarity.RARE, DiscoverySource.RARE_REWARD, counts, rareFrom + it) }
         }
     }
 
-    private suspend fun grant(rarity: Rarity, source: DiscoverySource, counts: MutableMap<Int, Int>) {
-        val element = picker.pick(rarity, counts)
-        give(element.atomicNumber, source)
-        counts[element.atomicNumber] = (counts[element.atomicNumber] ?: 0) + 1
+    /** Entrega la recompensa número [index] de su rareza: la que se reservó, si la hay. */
+    private suspend fun grant(rarity: Rarity, source: DiscoverySource, counts: MutableMap<Int, Int>, index: Int) {
+        val key = prizeKey(rarity, index)
+        val z = prizes.get(key)?.also { prizes.remove(key) } ?: picker.pick(rarity, counts).atomicNumber
+        give(z, source)
+        counts[z] = (counts[z] ?: 0) + 1
     }
+
+    /**
+     * Qué elementos dará una sesión de trabajo de [sessionSeconds] si se completa, sumada a
+     * [totalWorkSeconds]. Se sortean una sola vez y se reservan: al terminar se entregan esos mismos.
+     */
+    suspend fun reservePrizes(totalWorkSeconds: Long, sessionSeconds: Long): List<Element> = mutex.withLock {
+        val basicGranted = discoveryDao.countBySource(DiscoverySource.BASIC_REWARD)
+        val rareGranted = discoveryDao.countBySource(DiscoverySource.RARE_REWARD)
+        val before = RewardSchedule.pending(totalWorkSeconds, basicGranted, rareGranted)
+        val after = RewardSchedule.pending(totalWorkSeconds + sessionSeconds, basicGranted, rareGranted)
+        val counts = currentCounts().toMutableMap()
+        val result = mutableListOf<Element>()
+        fun reserve(rarity: Rarity, index: Int) {
+            val key = prizeKey(rarity, index)
+            val z = prizes.get(key) ?: picker.pick(rarity, counts).atomicNumber.also { prizes.put(key, it) }
+            counts[z] = (counts[z] ?: 0) + 1
+            result += PeriodicTable[z]
+        }
+        for (i in before.basic until after.basic) reserve(Rarity.BASIC, basicGranted + i)
+        for (i in before.rare until after.rare) reserve(Rarity.RARE, rareGranted + i)
+        result
+    }
+
+    private fun prizeKey(rarity: Rarity, index: Int) = "${rarity.name}_$index"
 
     /** Veces obtenido; los descubiertos sin registro (de antes de la tabla de hallazgos) cuentan como 1. */
     private suspend fun currentCounts(): Map<Int, Int> {

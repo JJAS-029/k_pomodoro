@@ -120,8 +120,6 @@
         <item quantity="many">¡%d elementos nuevos!</item>
         <item quantity="other">¡%d elementos nuevos!</item>
     </plurals>
-    <string name="el_banner_close">Cerrar</string>
-    <string name="el_banner_view">Ver</string>
 
     <!-- Tabla completa en bronce, plata u oro -->
     <string name="el_mastery_table_bronze_title">¡Tabla de bronce!</string>
@@ -144,4 +142,18 @@
     <string name="el_table_complete_body3">Esto no es solo una colección: es la prueba de que la constancia transforma. Así como estos elementos forman todo lo que existe, tus horas de enfoque están formando a la persona que quieres ser.</string>
     <string name="el_table_complete_body4">Gracias por dejar que este pequeño laboratorio te acompañara. Aquí seguimos para lo que sigue.</string>
     <string name="el_table_complete_confirm">Gracias, koala</string>
+    <string name="el_props_title">Propiedades</string>
+    <string name="el_prop_mass">Masa atómica</string>
+    <string name="el_prop_configuration">Configuración electrónica</string>
+    <string name="el_prop_theoretical">%1$s (teórica)</string>
+    <string name="el_prop_state">Estado a 25 °C</string>
+    <string name="el_prop_predicted">%1$s (previsto)</string>
+    <string name="el_state_solid">Sólido</string>
+    <string name="el_state_liquid">Líquido</string>
+    <string name="el_state_gas">Gas</string>
+    <string name="el_prop_density">Densidad</string>
+    <string name="el_prop_melting">Punto de fusión</string>
+    <string name="el_prop_boiling">Punto de ebullición</string>
+    <string name="el_prop_electronegativity">Electronegatividad</string>
+    <string name="el_props_source">Datos: PubChem (NIH)</string>
 </resources>
