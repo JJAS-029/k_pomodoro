@@ -98,6 +98,11 @@ data class VesselUi(
     val morphTo: List<Element> = emptyList(),
     /** Cuánto ha mutado (0..1). */
     val morph: Float = 0f,
+    /**
+     * Fenolftaleína (0..1): en el último tramo de un pomodoro sin premio el líquido vira a rosa,
+     * como una titulación que llega a su punto final.
+     */
+    val indicator: Float = 0f,
 ) {
     val behavior: ElementBehavior? get() = element?.look()?.behavior
 
@@ -193,6 +198,8 @@ class TimerViewModel @Inject constructor(
                 val total = timer.current.durationSeconds * 1000f
                 val progress = (1f - remaining / total).coerceIn(0f, 1f)
                 val type = timer.current.type
+                // Premios de esta sesión; null mientras se calculan
+                val sessionPrizes = prizes?.takeIf { it.first == "${timer.planSeed}_${timer.index}_${timer.current.durationSeconds}" }?.second
                 // La semilla del plan es su hora de inicio: se usan los elementos que ya se tenían
                 val pool = VesselReagents.pool(items, timer.planSeed)
                 fun reagent(i: Int): Element? =
@@ -215,9 +222,15 @@ class TimerViewModel @Inject constructor(
                         effect = if (type == SessionType.WORK) LiquidEffect.VAPOR else LiquidEffect.BUBBLES,
                         animate = !timer.isPaused,
                         element = reagent(timer.index),
-                        morphTo = prizes?.takeIf { it.first == "${timer.planSeed}_${timer.index}_${timer.current.durationSeconds}" }?.second.orEmpty(),
+                        morphTo = sessionPrizes.orEmpty(),
                         // En el último tramo del pomodoro (solo trabajo)
                         morph = if (type == SessionType.WORK) ((progress - MORPH_START) / (1f - MORPH_START)).coerceIn(0f, 1f) else 0f,
+                        // Sin premio (ya se sabe que no hay): vira a rosa al final
+                        indicator = if (type == SessionType.WORK && sessionPrizes?.isEmpty() == true) {
+                            ((progress - INDICATOR_START) / (1f - INDICATOR_START)).coerceIn(0f, 1f)
+                        } else {
+                            0f
+                        },
                     ),
                     upNext = timer.next?.let {
                         UpNext(it.type, liquid(timer.index + 1), it.durationSeconds / 60)
@@ -349,3 +362,6 @@ class TimerViewModel @Inject constructor(
 
 /** Desde qué avance del pomodoro el líquido empieza a mutar hacia el premio (último 20 %). */
 private const val MORPH_START = 0.8f
+
+/** Desde qué avance vira a rosa un pomodoro sin premio (último 15 %). */
+private const val INDICATOR_START = 0.85f

@@ -974,6 +974,12 @@ fun Vessel(vessel: VesselUi, modifier: Modifier = Modifier, refraction: Boolean 
         if (vessel.morph > 0.6f) behavior = current.look().behavior
         tones = if (vessel.morph >= 0.99f && targets.size == 1) ElementSignatures.tones(current.atomicNumber) else null
     }
+    if (vessel.indicator > 0f) {
+        // Fenolftaleína: vira a rosa fucsia, más rápido al principio, como al caer la gota
+        val turn = 1f - (1f - vessel.indicator) * (1f - vessel.indicator)
+        liquid = lerp(liquid, Phenolphthalein, turn)
+        tones = null
+    }
     VesselView(
         shape = vessel.shape,
         fill = vessel.fill,
@@ -988,6 +994,9 @@ fun Vessel(vessel: VesselUi, modifier: Modifier = Modifier, refraction: Boolean 
         tones = tones,
     )
 }
+
+/** Rosa de la fenolftaleína en medio básico. */
+private val Phenolphthalein = Color(0xFFE6197E)
 
 /** Cuánto se queda el líquido en cada premio cuando son varios. */
 private const val MORPH_SLOT_MS = 1_600

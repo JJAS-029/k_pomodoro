@@ -565,7 +565,7 @@ Prototipo **LIQUID_GLASS** (en la pantalla de prueba de debug, junto a los demá
 
 | Idea | Qué hace | Esfuerzo | Pro |
 |---|---|---|---|
-| Indicador al terminar | Al completar un pomodoro el líquido cambia de color como un indicador (fenolftaleína: transparente → rosa) antes del descanso | 🟢 | No |
+| ✅ Indicador al terminar (fenolftaleína: en el último 15 % de los pomodoros sin premio el líquido vira a rosa fucsia) | Al completar un pomodoro el líquido cambia de color como un indicador (fenolftaleína: transparente → rosa) antes del descanso | 🟢 | No |
 | Descubrimiento con tarjeta | El elemento nuevo aparece como una tarjeta que gira y brilla según su rareza, en vez de solo el aviso | 🟡 | No |
 | Hervor al final | En el último minuto de trabajo el líquido hierve (burbujas grandes y vapor más denso) para avisar sin sonido | 🟢 | No |
 | Sonidos de laboratorio | Opcionales: tintineo de vidrio al terminar y burbujeo suave (además de los avisos actuales) | 🟢 | Pro |
