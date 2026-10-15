@@ -5,6 +5,9 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.graphics.Path
 import kotlin.math.asin
+import kotlin.math.cos
+import kotlin.math.hypot
+import kotlin.math.sin
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sqrt
@@ -210,14 +213,25 @@ class VesselGeometry private constructor(
                 val cx = px(0.5f)
                 val neckTop = py(0.94f)
                 val alpha = Math.toDegrees(asin((neckHalf / sphereR).toDouble())).toFloat()
+                // Hombro curvo: el cuello se abre en una curva tangente a la bola, sin escalón
+                val start = 270f - alpha - SHOULDER_DEGREES
+                val theta = Math.toRadians(start.toDouble())
+                val joinX = cx + sphereR * cos(theta).toFloat()
+                val joinY = sphereCy + sphereR * sin(theta).toFloat()
+                // Esquina donde se cruzan el cuello y la tangente a la bola en el punto de unión
+                val t = (joinX - (cx - neckHalf)) / sin(theta).toFloat()
+                val cornerY = joinY + t * cos(theta).toFloat()
+                val reach = hypot(joinX - (cx - neckHalf), joinY - cornerY)
                 moveTo(cx - neckHalf, neckTop)
-                lineTo(cx - neckHalf, neckJunctionY)
+                lineTo(cx - neckHalf, cornerY - reach)
+                quadraticTo(cx - neckHalf, cornerY, joinX, joinY)
                 arcTo(
                     Rect(cx - sphereR, sphereCy - sphereR, cx + sphereR, sphereCy + sphereR),
-                    270f - alpha,
-                    -(360f - 2 * alpha),
+                    start,
+                    -(360f - 2 * (alpha + SHOULDER_DEGREES)),
                     false,
                 )
+                quadraticTo(cx + neckHalf, cornerY, cx + neckHalf, cornerY - reach)
                 lineTo(cx + neckHalf, neckTop)
                 if (closed) close()
             }
@@ -248,3 +262,6 @@ class VesselGeometry private constructor(
         }
     }
 }
+
+/** Cuánto de la bola (en grados) ocupa la curva del hombro del matraz. */
+private const val SHOULDER_DEGREES = 16f

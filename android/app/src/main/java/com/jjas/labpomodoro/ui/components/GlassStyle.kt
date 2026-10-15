@@ -36,9 +36,10 @@ class GlassPalette(
     val orb: Color,
 )
 
-private fun paletteOf(category: ElementCategory, light: Boolean): GlassPalette {
-    val h = category.hue()
-    val s = category.saturation()
+private fun paletteOf(category: ElementCategory, light: Boolean): GlassPalette =
+    paletteOf(category.hue(), category.saturation(), light)
+
+private fun paletteOf(h: Float, s: Float, light: Boolean): GlassPalette {
     val vivid = (s + 0.2f).coerceAtMost(1f)
     return if (light) {
         GlassPalette(
@@ -81,6 +82,18 @@ private val lightPalettes = ElementCategory.entries.associateWith { paletteOf(it
 
 fun ElementCategory.glass(light: Boolean): GlassPalette =
     (if (light) lightPalettes else darkPalettes).getValue(this)
+
+/**
+ * Metales con un color que todos reconocen: el oro dorado, la plata plateada y el cobre cobrizo,
+ * aunque su familia (metales de transición) sea azul. (número atómico → matiz y saturación)
+ */
+private val ICONIC_METALS = mapOf(79 to (44f to 0.85f), 47 to (210f to 0.12f), 29 to (20f to 0.75f))
+private val iconicDark = ICONIC_METALS.mapValues { (_, hs) -> paletteOf(hs.first, hs.second, light = false) }
+private val iconicLight = ICONIC_METALS.mapValues { (_, hs) -> paletteOf(hs.first, hs.second, light = true) }
+
+/** Colores de la casilla de un elemento: los de su familia, salvo los metales emblemáticos. */
+fun Element.glass(light: Boolean): GlassPalette =
+    (if (light) iconicLight else iconicDark)[atomicNumber] ?: category.glass(light)
 
 /**
  * Fase (0..1) del destello de plata y oro. Una sola animación compartida por toda la pantalla:

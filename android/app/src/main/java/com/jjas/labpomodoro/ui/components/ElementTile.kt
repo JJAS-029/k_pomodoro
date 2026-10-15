@@ -100,7 +100,7 @@ fun ElementTile(
     specular: (() -> Float)? = null,
 ) {
     val light = MaterialTheme.colorScheme.isLight
-    val palette = element.category.glass(light)
+    val palette = element.glass(light)
     val compact = size < COMPACT_SIZE
     val card = size >= CARD_SIZE
     val shiny = discovered && (mastery == Mastery.SILVER || mastery == Mastery.GOLD)

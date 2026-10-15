@@ -32,6 +32,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalConfiguration
@@ -139,16 +140,20 @@ fun MedalBadge(
         Canvas(Modifier.fillMaxSize()) {
             if (earned) drawEarnedBody(tier.glass(), tier == MedalTier.GOLD, light) else drawLockedBody(progress.fraction, light)
         }
-        Text(
-            progress.medal.symbol,
-            fontSize = (size.value * 0.4f).sp,
-            modifier = Modifier.graphicsLayer {
-                alpha = if (earned) 1f else 0.35f
-                val scale = if (earned) 1f else 0.92f
-                scaleX = scale
-                scaleY = scale
-            },
-        )
+        // Ilustración en línea neón: el koala con el objeto de la medalla
+        val glass = tier.glass()
+        val artColor = when {
+            !earned -> (if (light) Color.Black else Color.White).copy(alpha = 0.3f)
+            light -> glass.deep
+            else -> glass.glow
+        }
+        val knockout = when {
+            !earned && light -> Color(0xFFE2E8F0)
+            !earned -> Color(0xFF111620)
+            light -> glass.highlight
+            else -> lerp(glass.deep, Color.Black, 0.55f)
+        }
+        Canvas(Modifier.fillMaxSize()) { drawKoalaArt(progress.medal.prop, bodyRadius(), artColor, knockout) }
         Canvas(Modifier.fillMaxSize()) {
             drawDome(earned, light, lean?.invoke() ?: 0f)
             if (shimmer != null) drawMedalShimmer(shimmer.value, tier == MedalTier.GOLD)
