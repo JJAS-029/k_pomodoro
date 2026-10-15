@@ -221,4 +221,30 @@
     <string name="main_menu_medals_desc">For consistency, hours and discoveries</string>
     <string name="main_menu_league">League</string>
     <string name="main_menu_league_desc">Compete every week with your minutes</string>
+    <string name="template_title">Templates</string>
+    <string name="template_summary">%1$d h · %2$d/%3$d min</string>
+    <string name="template_save">+ Save</string>
+    <string name="template_save_title">Save as template</string>
+    <string name="template_name_hint">Evening study, Thesis…</string>
+    <string name="template_delete_title">Delete \"%1$s\"?</string>
+    <string name="template_delete">Delete</string>
+    <string name="template_quick">Quick</string>
+    <string name="template_study">Study</string>
+    <string name="template_deep">Deep work</string>
+    <string name="goal_title">Today\'s goal</string>
+    <string name="goal_label">Daily goal (pomodoros)</string>
+    <string name="goal_hint">0 means no goal. It shows as a ring on the main screen.</string>
+    <plurals name="goal_today">
+        <item quantity="one">Today: %1$d of %2$d pomodoro</item>
+        <item quantity="other">Today: %1$d of %2$d pomodoros</item>
+    </plurals>
+    <plurals name="goal_streak">
+        <item quantity="one">Goal streak: %1$d day</item>
+        <item quantity="other">Goal streak: %1$d days</item>
+    </plurals>
+    <plurals name="goal_reached">
+        <item quantity="one">Daily goal reached! %1$d pomodoros · %2$d-day streak</item>
+        <item quantity="other">Daily goal reached! %1$d pomodoros · %2$d-day streak</item>
+    </plurals>
+    <string name="goal_short">Goal</string>
 </resources>

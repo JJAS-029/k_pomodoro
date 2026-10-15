@@ -13,6 +13,7 @@ import com.jjas.labpomodoro.BuildConfig
 import com.jjas.labpomodoro.domain.model.AppSettings
 import com.jjas.labpomodoro.domain.model.FocusSound
 import com.jjas.labpomodoro.domain.model.LabPalette
+import com.jjas.labpomodoro.domain.model.PlanTemplate
 import com.jjas.labpomodoro.domain.model.FlameColor
 import com.jjas.labpomodoro.domain.model.GlassTint
 import com.jjas.labpomodoro.domain.model.PlanRounding
@@ -70,6 +71,14 @@ class SettingsRepository @Inject constructor(
     suspend fun setLabPalette(palette: LabPalette) = dataStore.edit { it[Keys.LAB_PALETTE] = palette.name }
 
     suspend fun setGlassTint(tint: GlassTint) = dataStore.edit { it[Keys.GLASS_TINT] = tint.name }
+
+    suspend fun setDailyGoal(goal: Int) = dataStore.edit { it[Keys.DAILY_GOAL] = goal }
+
+    suspend fun setGoalCelebratedDay(day: Long) = dataStore.edit { it[Keys.GOAL_CELEBRATED_DAY] = day }
+
+    suspend fun setPlanTemplates(templates: List<PlanTemplate>) = dataStore.edit {
+        it[Keys.PLAN_TEMPLATES] = PlanTemplate.encode(templates.take(PlanTemplate.MAX_TEMPLATES))
+    }
 
     suspend fun setFlameColor(color: FlameColor) = dataStore.edit { it[Keys.FLAME_COLOR] = color.name }
 
@@ -157,6 +166,9 @@ class SettingsRepository @Inject constructor(
             guideSeen = this[Keys.GUIDE_SEEN] ?: defaults.guideSeen,
             exactAlarmAsked = this[Keys.EXACT_ALARM_ASKED] ?: defaults.exactAlarmAsked,
             labPalette = this[Keys.LAB_PALETTE]?.let { name -> LabPalette.entries.firstOrNull { it.name == name } } ?: defaults.labPalette,
+            dailyGoal = this[Keys.DAILY_GOAL] ?: defaults.dailyGoal,
+            goalCelebratedDay = this[Keys.GOAL_CELEBRATED_DAY] ?: defaults.goalCelebratedDay,
+            planTemplates = this[Keys.PLAN_TEMPLATES]?.let(PlanTemplate::decode),
             glassTint = this[Keys.GLASS_TINT]?.let { name -> GlassTint.entries.firstOrNull { it.name == name } } ?: defaults.glassTint,
             flameColor = this[Keys.FLAME_COLOR]?.let { name -> FlameColor.entries.firstOrNull { it.name == name } } ?: defaults.flameColor,
             vesselElement = this[Keys.VESSEL_ELEMENT] ?: defaults.vesselElement,
@@ -199,6 +211,9 @@ class SettingsRepository @Inject constructor(
         val EXACT_ALARM_ASKED = booleanPreferencesKey("exact_alarm_asked")
         val LAB_PALETTE = stringPreferencesKey("lab_palette")
         val GLASS_TINT = stringPreferencesKey("glass_tint")
+        val DAILY_GOAL = intPreferencesKey("daily_goal")
+        val GOAL_CELEBRATED_DAY = longPreferencesKey("goal_celebrated_day")
+        val PLAN_TEMPLATES = stringPreferencesKey("plan_templates")
         val FLAME_COLOR = stringPreferencesKey("flame_color")
         val PRO_PURCHASED = booleanPreferencesKey("pro_purchased")
         val VESSEL_ELEMENT = intPreferencesKey("vessel_element")

@@ -227,4 +227,33 @@
     <string name="main_menu_medals_desc">Por constancia, horas y descubrimientos</string>
     <string name="main_menu_league">Liga</string>
     <string name="main_menu_league_desc">Compite cada semana con tus minutos</string>
+    <string name="template_title">Plantillas</string>
+    <string name="template_summary">%1$d h · %2$d/%3$d min</string>
+    <string name="template_save">+ Guardar</string>
+    <string name="template_save_title">Guardar como plantilla</string>
+    <string name="template_name_hint">Estudio de la tarde, Tesis…</string>
+    <string name="template_delete_title">¿Borrar \"%1$s\"?</string>
+    <string name="template_delete">Borrar</string>
+    <string name="template_quick">Rápido</string>
+    <string name="template_study">Estudio</string>
+    <string name="template_deep">Profundo</string>
+    <string name="goal_title">Meta del día</string>
+    <string name="goal_label">Meta diaria (pomodoros)</string>
+    <string name="goal_hint">En 0 no hay meta. Se ve como un anillo en la pantalla principal.</string>
+    <plurals name="goal_today">
+        <item quantity="one">Hoy: %1$d de %2$d pomodoro</item>
+        <item quantity="many">Hoy: %1$d de %2$d pomodoros</item>
+        <item quantity="other">Hoy: %1$d de %2$d pomodoros</item>
+    </plurals>
+    <plurals name="goal_streak">
+        <item quantity="one">Racha de metas: %1$d día</item>
+        <item quantity="many">Racha de metas: %1$d días</item>
+        <item quantity="other">Racha de metas: %1$d días</item>
+    </plurals>
+    <plurals name="goal_reached">
+        <item quantity="one">¡Meta del día cumplida! %1$d pomodoros · racha de %2$d día</item>
+        <item quantity="many">¡Meta del día cumplida! %1$d pomodoros · racha de %2$d días</item>
+        <item quantity="other">¡Meta del día cumplida! %1$d pomodoros · racha de %2$d días</item>
+    </plurals>
+    <string name="goal_short">Meta</string>
 </resources>

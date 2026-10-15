@@ -36,6 +36,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import com.jjas.labpomodoro.domain.model.PlanTemplate
 import com.jjas.labpomodoro.domain.model.SessionConfig
 import kotlinx.coroutines.flow.MutableStateFlow
 import com.jjas.labpomodoro.data.repository.SessionRepository
@@ -129,6 +130,8 @@ data class TimerScreenState(
     val rainAmbience: Boolean = false,
     /** Si no es null, tras este tiempo sin tocar la pantalla se entra al modo ambiente. */
     val ambientDelayMillis: Long? = null,
+    /** Plantillas guardadas; null = aún no se tocan (se muestran las sugeridas). */
+    val templates: List<PlanTemplate>? = null,
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -282,6 +285,7 @@ class TimerViewModel @Inject constructor(
             exactAlarmAsked = settings.exactAlarmAsked,
             rainAmbience = settings.isPro && settings.focusSound == FocusSound.RAIN,
             ambientDelayMillis = if (running && settings.ambientActive) settings.ambientDelayMinutes * 60_000L else null,
+            templates = settings.planTemplates,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), TimerScreenState())
 
@@ -303,6 +307,25 @@ class TimerViewModel @Inject constructor(
             val base = planOverride.value ?: settingsRepository.settings.first().session
             planOverride.value = transform(base).normalized()
         }
+    }
+
+    /** Usa una plantilla para el próximo plan. */
+    fun applyTemplate(template: PlanTemplate) {
+        planOverride.value = template.config.normalized()
+    }
+
+    /** Guarda el plan como está ahora (con su etiqueta) en la lista de plantillas. */
+    fun saveTemplate(name: String, tagId: Long?, current: List<PlanTemplate>) {
+        val trimmed = name.trim().take(PlanTemplate.MAX_NAME).ifEmpty { return }
+        viewModelScope.launch {
+            val config = planOverride.value ?: settingsRepository.settings.first().session
+            val list = current.filterNot { it.name == trimmed } + PlanTemplate(trimmed, config, tagId)
+            settingsRepository.setPlanTemplates(list.takeLast(PlanTemplate.MAX_TEMPLATES))
+        }
+    }
+
+    fun deleteTemplate(name: String, current: List<PlanTemplate>) {
+        viewModelScope.launch { settingsRepository.setPlanTemplates(current.filterNot { it.name == name }) }
     }
 
     /** Vuelve a lo de Configuración. */

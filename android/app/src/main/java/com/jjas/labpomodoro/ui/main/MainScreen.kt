@@ -88,6 +88,18 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jjas.labpomodoro.R
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.border
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.ExperimentalFoundationApi
+import com.jjas.labpomodoro.domain.usecase.DailyGoal
+import com.jjas.labpomodoro.domain.model.PlanTemplate
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.FilledTonalButton
 import com.jjas.labpomodoro.domain.model.SessionConfig
@@ -148,12 +160,30 @@ fun MainScreen(
     discoveryViewModel: DiscoveryViewModel = hiltViewModel(),
     medalViewModel: MedalViewModel = hiltViewModel(),
     tagViewModel: TagViewModel = hiltViewModel(),
+    goalViewModel: GoalViewModel = hiltViewModel(),
 ) {
     val account by viewModel.uiState.collectAsStateWithLifecycle()
     val discoveries by discoveryViewModel.unseen.collectAsStateWithLifecycle()
     val medals by medalViewModel.unseen.collectAsStateWithLifecycle()
     val timer by timerViewModel.state.collectAsStateWithLifecycle()
     val tags by tagViewModel.state.collectAsStateWithLifecycle()
+    val goal by goalViewModel.state.collectAsStateWithLifecycle()
+    // Plantillas: las sugeridas hasta que se guarde o borre alguna
+    val templates = timer.templates ?: suggestedTemplates()
+    var goalDialog by rememberSaveable { mutableStateOf(false) }
+    if (goalDialog) GoalDialog(goal, onGoalChange = goalViewModel::setGoal, onDismiss = { goalDialog = false })
+    // Meta cumplida: confeti y aviso, una vez al día
+    var goalBanner by remember { mutableStateOf(false) }
+    var goalCelebration by remember { mutableStateOf<Celebration?>(null) }
+    LaunchedEffect(goal.reached, goal.celebratedToday) {
+        if (goal.reached && !goal.celebratedToday) {
+            goalViewModel.markCelebrated()
+            goalCelebration = Celebration(System.nanoTime(), GoalConfetti, big = true, originY = 0.1f)
+            goalBanner = true
+            delay(GOAL_BANNER_MILLIS)
+            goalBanner = false
+        }
+    }
     val context = LocalContext.current
     val tagActions = TagActions(
         onSelect = tagViewModel::select,
@@ -283,6 +313,16 @@ fun MainScreen(
                 onEdit = timerViewModel::editPlan,
                 onReset = timerViewModel::resetPlan,
                 onSaveDefault = timerViewModel::savePlanAsDefault,
+                templates = templates,
+                onApplyTemplate = { template ->
+                    timerViewModel.applyTemplate(template)
+                    // La etiqueta de la plantilla, si trae una y sigue existiendo; si no, se queda la elegida
+                    tags.find(template.tagId)?.let { tagViewModel.select(it.id) }
+                },
+                onSaveTemplate = { name -> timerViewModel.saveTemplate(name, tags.selected, templates) },
+                onDeleteTemplate = { name -> timerViewModel.deleteTemplate(name, templates) },
+                goal = goal.goal,
+                onGoalChange = goalViewModel::setGoal,
             )
         }
     } else if (planEditor) {
@@ -360,6 +400,9 @@ fun MainScreen(
                 medals = medals,
                 tags = tags,
                 tagActions = tagActions,
+                goal = goal,
+                goalBanner = goalBanner,
+                goalCelebration = goalCelebration,
                 // Observa los toques sin consumirlos, para reiniciar la cuenta del modo ambiente
                 modifier = Modifier.pointerInput(Unit) {
                     awaitPointerEventScope {
@@ -392,6 +435,7 @@ fun MainScreen(
                     onOpenSound = { soundSheet = true },
                     onOpenTags = { tagSheet = true },
                     onOpenPlanEditor = { planEditor = true },
+                    onOpenGoal = { goalDialog = true },
                     onOpenPlan = { planSheet = true },
                     onSignIn = { viewModel.signIn(context) },
                     onSignOut = viewModel::signOut,
@@ -421,6 +465,7 @@ data class MainActions(
     val onOpenSound: () -> Unit = {},
     val onOpenTags: () -> Unit = {},
     val onOpenPlanEditor: () -> Unit = {},
+    val onOpenGoal: () -> Unit = {},
     val onOpenPlan: () -> Unit = {},
     val onDismissDiscoveries: () -> Unit = {},
     val onDismissMedals: () -> Unit = {},
@@ -441,6 +486,9 @@ private fun MainContent(
     medals: List<Medal> = emptyList(),
     tags: TagsUi = TagsUi(),
     tagActions: TagActions = TagActions(),
+    goal: GoalUi = GoalUi(),
+    goalBanner: Boolean = false,
+    goalCelebration: Celebration? = null,
 ) {
     // Con Material You el reloj toma el color del sistema
     val clockColor = if (dynamicColor) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
@@ -544,7 +592,27 @@ private fun MainContent(
                 }
             }
 
-            Celebrations(timer, discoveries, medals)
+            // Meta diaria: anillo arriba a la izquierda (solo si hay meta)
+            if (goal.goal > 0) {
+                GoalRing(goal, onClick = actions.onOpenGoal, modifier = Modifier.align(Alignment.TopStart).padding(12.dp))
+            }
+            AnimatedVisibility(
+                visible = goalBanner,
+                enter = slideInVertically { -it } + fadeIn(),
+                exit = slideOutVertically { -it } + fadeOut(),
+                modifier = Modifier.align(Alignment.TopCenter).padding(top = 8.dp, start = 16.dp, end = 16.dp),
+            ) {
+                Surface(shape = RoundedCornerShape(24.dp), color = MaterialTheme.colorScheme.primaryContainer, shadowElevation = 8.dp) {
+                    Text(
+                        pluralStringResource(R.plurals.goal_reached, goal.streak, goal.today, goal.streak),
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp),
+                    )
+                }
+            }
+
+            Celebrations(timer, discoveries, medals, goalCelebration)
 
             LabDock(
                 timer = timer,
@@ -563,8 +631,9 @@ private fun MainContent(
  * recipiente), el plan terminado y elementos nuevos (con los colores de los elementos).
  */
 @Composable
-private fun Celebrations(timer: TimerUi?, discoveries: List<Discovery>, medals: List<Medal>) {
+private fun Celebrations(timer: TimerUi?, discoveries: List<Discovery>, medals: List<Medal>, goal: Celebration? = null) {
     var celebration by remember { mutableStateOf<Celebration?>(null) }
+    LaunchedEffect(goal) { if (goal != null) celebration = goal }
 
     val active = timer as? TimerUi.Active
     // Se recuerda al girar la pantalla para no repetir la ráfaga
@@ -1049,6 +1118,12 @@ private fun PlanEditorSheet(
     onEdit: ((SessionConfig) -> SessionConfig) -> Unit,
     onReset: () -> Unit,
     onSaveDefault: () -> Unit,
+    templates: List<PlanTemplate> = emptyList(),
+    onApplyTemplate: (PlanTemplate) -> Unit = {},
+    onSaveTemplate: (String) -> Unit = {},
+    onDeleteTemplate: (String) -> Unit = {},
+    goal: Int = 0,
+    onGoalChange: (Int) -> Unit = {},
 ) {
     val config = idle.config
     Column(
@@ -1065,6 +1140,8 @@ private fun PlanEditorSheet(
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+        Spacer(Modifier.height(12.dp))
+        TemplateRow(templates, config, onApplyTemplate, onSaveTemplate, onDeleteTemplate)
         Spacer(Modifier.height(8.dp))
         StepperRow(stringResource(R.string.set_total_hours), config.totalHours, SessionConfig.TOTAL_HOURS, "h") { v -> onEdit { it.copy(totalHours = v) } }
         StepperRow(stringResource(R.string.set_pomodoro), config.workMinutes, SessionConfig.WORK_MINUTES, "min", step = 5) { v -> onEdit { it.copy(workMinutes = v) } }
@@ -1075,6 +1152,13 @@ private fun PlanEditorSheet(
         Text(stringResource(R.string.tag_question), style = MaterialTheme.typography.titleSmall)
         Spacer(Modifier.height(6.dp))
         TagChips(tags, tags.selected, tagActions)
+        Spacer(Modifier.height(12.dp))
+        StepperRow(stringResource(R.string.goal_label), goal, DailyGoal.GOAL_RANGE, "") { onGoalChange(it) }
+        Text(
+            stringResource(R.string.goal_hint),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
         Spacer(Modifier.height(16.dp))
         Text(
             stringResource(R.string.main_plan_editor_hint),
@@ -1089,3 +1173,153 @@ private fun PlanEditorSheet(
         }
     }
 }
+
+/** Plantillas sugeridas hasta que el usuario guarde o borre alguna. */
+@Composable
+private fun suggestedTemplates(): List<PlanTemplate> = listOf(
+    PlanTemplate(stringResource(R.string.template_quick), SessionConfig(totalHours = 1)),
+    PlanTemplate(stringResource(R.string.template_study), SessionConfig(totalHours = 2)),
+    PlanTemplate(stringResource(R.string.template_deep), SessionConfig(totalHours = 4, workMinutes = 50, shortBreakMinutes = 10, longBreakMinutes = 20, pomodorosUntilLong = 3)),
+)
+
+/**
+ * Plantillas: tocar una la usa para este plan; mantenerla presionada la borra; "+ Guardar"
+ * guarda el plan como está ahora (con su etiqueta).
+ */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun TemplateRow(
+    templates: List<PlanTemplate>,
+    current: SessionConfig,
+    onApply: (PlanTemplate) -> Unit,
+    onSave: (String) -> Unit,
+    onDelete: (String) -> Unit,
+) {
+    var saving by rememberSaveable { mutableStateOf(false) }
+    var deleting by rememberSaveable { mutableStateOf<String?>(null) }
+    Text(stringResource(R.string.template_title), style = MaterialTheme.typography.titleSmall)
+    Spacer(Modifier.height(6.dp))
+    Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        templates.forEach { template ->
+            val selected = template.config == current
+            Surface(
+                shape = CircleShape,
+                color = if (selected) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent,
+                modifier = Modifier
+                    .border(1.dp, if (selected) Color.Transparent else MaterialTheme.colorScheme.outline, CircleShape)
+                    .clip(CircleShape)
+                    .combinedClickable(onClick = { onApply(template) }, onLongClick = { deleting = template.name }),
+            ) {
+                Column(Modifier.padding(horizontal = 14.dp, vertical = 6.dp)) {
+                    Text(template.name, style = MaterialTheme.typography.labelLarge)
+                    Text(
+                        stringResource(R.string.template_summary, template.config.totalHours, template.config.workMinutes, template.config.shortBreakMinutes),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        }
+        if (templates.size < PlanTemplate.MAX_TEMPLATES) {
+            Surface(
+                shape = CircleShape,
+                color = Color.Transparent,
+                modifier = Modifier
+                    .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
+                    .clip(CircleShape)
+                    .clickable { saving = true },
+            ) {
+                Text(
+                    stringResource(R.string.template_save),
+                    style = MaterialTheme.typography.labelLarge,
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 14.dp),
+                )
+            }
+        }
+    }
+    if (saving) {
+        var name by rememberSaveable { mutableStateOf("") }
+        AlertDialog(
+            onDismissRequest = { saving = false },
+            title = { Text(stringResource(R.string.template_save_title)) },
+            text = {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it.take(PlanTemplate.MAX_NAME) },
+                    singleLine = true,
+                    placeholder = { Text(stringResource(R.string.template_name_hint)) },
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = { onSave(name); saving = false }, enabled = name.isNotBlank()) { Text(stringResource(R.string.tag_save)) }
+            },
+            dismissButton = { TextButton(onClick = { saving = false }) { Text(stringResource(R.string.tag_cancel)) } },
+        )
+    }
+    deleting?.let { target ->
+        AlertDialog(
+            onDismissRequest = { deleting = null },
+            title = { Text(stringResource(R.string.template_delete_title, target)) },
+            confirmButton = {
+                TextButton(onClick = { onDelete(target); deleting = null }) {
+                    Text(stringResource(R.string.template_delete), color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = { TextButton(onClick = { deleting = null }) { Text(stringResource(R.string.tag_cancel)) } },
+        )
+    }
+}
+
+/** Anillo de la meta diaria: cuántos pomodoros van de los que se propuso hoy. */
+@Composable
+private fun GoalRing(goal: GoalUi, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val color = if (goal.reached) Color(0xFF39FF14) else MaterialTheme.colorScheme.primary
+    val track = MaterialTheme.colorScheme.outlineVariant
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+            .size(52.dp)
+            .clip(CircleShape)
+            .clickable(onClickLabel = stringResource(R.string.goal_title), onClick = onClick),
+    ) {
+        Canvas(Modifier.fillMaxSize().padding(4.dp)) {
+            val stroke = size.minDimension * 0.1f
+            val inset = stroke / 2
+            val arc = Size(size.width - stroke, size.height - stroke)
+            drawArc(track, 0f, 360f, false, Offset(inset, inset), arc, style = Stroke(stroke))
+            if (goal.fraction > 0f) {
+                drawArc(color, -90f, 360f * goal.fraction, false, Offset(inset, inset), arc, style = Stroke(stroke, cap = StrokeCap.Round))
+            }
+        }
+        Text("${goal.today}/${goal.goal}", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onBackground)
+    }
+}
+
+/** Meta del día: cómo vas, la racha y para cambiarla. */
+@Composable
+private fun GoalDialog(goal: GoalUi, onGoalChange: (Int) -> Unit, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.goal_title)) },
+        text = {
+            Column {
+                if (goal.goal > 0) {
+                    Text(pluralStringResource(R.plurals.goal_today, goal.goal, goal.today, goal.goal), style = MaterialTheme.typography.bodyLarge)
+                    Text(
+                        pluralStringResource(R.plurals.goal_streak, goal.streak, goal.streak),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Spacer(Modifier.height(12.dp))
+                }
+                StepperRow(stringResource(R.string.goal_short), goal.goal, DailyGoal.GOAL_RANGE, "") { onGoalChange(it) }
+                Text(stringResource(R.string.goal_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.prog_close)) } },
+    )
+}
+
+private val GoalConfetti = listOf(Color(0xFF39FF14), Color(0xFFFFD54F), Color(0xFF29B6F6), Color(0xFFF06292))
+
+private const val GOAL_BANNER_MILLIS = 4_500L

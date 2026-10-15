@@ -596,10 +596,10 @@ Hecho: **Ajustar el plan en curso** — `TimerEngine.extendCurrent` (+5 min, top
 | Idea | Qué hace | Esfuerzo | Pro |
 |---|---|---|---|
 | ✅ Etiquetas por plan | Al iniciar: "¿En qué vas a trabajar?" (Matemáticas, Tesis…); estadísticas y exportación por etiqueta | 🟡 | Gratis 3 etiquetas, Pro ilimitadas |
-| Plantillas de plan | Planes guardados ("Estudio 2 h", "Trabajo profundo 4 h") para iniciar con un toque; también desde el widget y el ícono | 🟢 | No |
+| ✅ Plantillas de plan (en la hoja "Este plan": sugeridas Rápido, Estudio y Profundo; "+ Guardar" guarda duraciones y etiqueta; mantener presionada borra; hasta 8) | Planes guardados ("Estudio 2 h", "Trabajo profundo 4 h") para iniciar con un toque; también desde el widget y el ícono | 🟢 | No |
 | ✅ Ajustar el plan en curso | +1 pomodoro, extender 5 min, saltar el descanso o terminar después de este pomodoro | 🟢 | No |
 | No molestar automático | Activa "No molestar" durante el trabajo y lo quita en los descansos (permiso de acceso a No molestar) | 🟢 | Pro |
-| Metas diarias y semanales | "4 pomodoros al día": anillo de progreso en la pantalla principal, racha de metas y aviso al cumplirla | 🟡 | No |
+| ✅ Metas diarias (anillo en la pantalla principal, diálogo con racha de metas, confeti y aviso al cumplirla una vez al día; se ajusta en "Este plan" o tocando el anillo). Semanales: pendiente | "4 pomodoros al día": anillo de progreso en la pantalla principal, racha de metas y aviso al cumplirla | 🟡 | No |
 | Notas de logro | Al terminar un pomodoro, una línea opcional "¿Qué lograste?"; historial tipo diario | 🟢 | Pro |
 | Mapa de calor anual | Cuadrícula de días del año (estilo GitHub) en Progreso | 🟢 | No |
 | Accesos directos del ícono | Mantener presionado el ícono: "Iniciar plan", "Plan corto", "Ver progreso"; y "Ok Google, inicia un pomodoro" (App Actions) | 🟢 | No |

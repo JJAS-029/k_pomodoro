@@ -63,6 +63,12 @@ data class AppSettings(
     val exactAlarmAsked: Boolean = false,
     /** Paleta de laboratorio para los colores de los recipientes (Pro). */
     val labPalette: LabPalette = LabPalette.CLASSIC,
+    /** Meta diaria de pomodoros; 0 = sin meta. */
+    val dailyGoal: Int = 0,
+    /** Día (epochDay) en que ya se celebró la meta, para no repetir el aviso. */
+    val goalCelebratedDay: Long = -1,
+    /** Plantillas de plan; null = aún no se tocan (se muestran las sugeridas). */
+    val planTemplates: List<PlanTemplate>? = null,
     /** Tinte del cristal (Pro). */
     val glassTint: GlassTint = GlassTint.CLEAR,
     /** Color de la llama del mechero (Pro). */
