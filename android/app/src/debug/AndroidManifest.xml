@@ -10,5 +10,9 @@
         <activity
             android:name=".debug.TilePreviewActivity"
             android:exported="true" />
+        <!-- Maquetas de la reorganización de menús (extra entero "variant": 1 a 4) -->
+        <activity
+            android:name=".debug.MenuMockActivity"
+            android:exported="true" />
     </application>
 </manifest>

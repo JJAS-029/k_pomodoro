@@ -36,6 +36,8 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import com.jjas.labpomodoro.domain.model.SessionConfig
+import kotlinx.coroutines.flow.MutableStateFlow
 import com.jjas.labpomodoro.data.repository.SessionRepository
 import com.jjas.labpomodoro.data.repository.LabRepository
 import kotlinx.coroutines.flow.mapLatest
@@ -51,6 +53,10 @@ sealed interface TimerUi {
         val pomodoros: Int,
         val workMinutes: Int,
         val totalMinutes: Int,
+        /** Con lo que arrancará el próximo plan. */
+        val config: SessionConfig = SessionConfig(),
+        /** true si se ajustó solo para este plan (distinto de lo de Configuración). */
+        val customized: Boolean = false,
     ) : TimerUi
 
     data class Active(
@@ -133,6 +139,9 @@ class TimerViewModel @Inject constructor(
 
     private val inventoryItems = inventory.items
 
+    /** Ajuste del próximo plan hecho desde la pantalla de inicio; null = lo de Configuración. */
+    private val planOverride = MutableStateFlow<SessionConfig?>(null)
+
     /**
      * Premios del pomodoro en curso, reservados al empezarlo (clave = plan, sesión y duración, por si
      * se alarga). Así el líquido muta hacia el elemento que de verdad se va a ganar.
@@ -165,11 +174,14 @@ class TimerViewModel @Inject constructor(
         }
     }
 
-    val state: StateFlow<TimerScreenState> = combine(ticking, settingsRepository.settings, inventoryItems, prizes) { timer, settings, items, prizes ->
+    val state: StateFlow<TimerScreenState> = combine(ticking, settingsRepository.settings, inventoryItems, prizes, planOverride) { timer, settings, items, prizes, override ->
         val ui = when (timer) {
             TimerState.Idle -> {
-                val plan = SessionPlanGenerator.generate(settings.session)
+                val config = override ?: settings.session
+                val plan = SessionPlanGenerator.generate(config)
                 TimerUi.Idle(
+                    config = config,
+                    customized = override != null && override != settings.session,
                     firstSessionMillis = plan.first().durationSeconds * 1000L,
                     pomodoros = plan.count { it.type == SessionType.WORK },
                     workMinutes = plan.filter { it.type == SessionType.WORK }.sumOf { it.durationSeconds } / 60,
@@ -265,7 +277,33 @@ class TimerViewModel @Inject constructor(
     }
 
     fun start() {
-        viewModelScope.launch { engine.start(settingsRepository.settings.first().session) }
+        viewModelScope.launch {
+            engine.start(planOverride.value ?: settingsRepository.settings.first().session)
+            // El ajuste era solo para este plan
+            planOverride.value = null
+        }
+    }
+
+    /** Ajusta solo el próximo plan, sin tocar Configuración. */
+    fun editPlan(transform: (SessionConfig) -> SessionConfig) {
+        viewModelScope.launch {
+            val base = planOverride.value ?: settingsRepository.settings.first().session
+            planOverride.value = transform(base).normalized()
+        }
+    }
+
+    /** Vuelve a lo de Configuración. */
+    fun resetPlan() {
+        planOverride.value = null
+    }
+
+    /** Guarda el ajuste como el plan de siempre. */
+    fun savePlanAsDefault() {
+        val config = planOverride.value ?: return
+        viewModelScope.launch {
+            settingsRepository.updateSession { config }
+            planOverride.value = null
+        }
     }
 
     fun extend() {

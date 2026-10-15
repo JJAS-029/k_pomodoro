@@ -31,6 +31,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -87,12 +89,15 @@ fun ElementBubble(
         -1f, 1f, infiniteRepeatable(tween(1_800, easing = FastOutSlowInEasing), RepeatMode.Reverse), label = "bob",
     )
 
+    val contentWidth = remember { mutableIntStateOf(0) }
     BoxWithConstraints(modifier.fillMaxSize()) {
         val bubble = 76.dp
         val bubblePx = with(density) { bubble.toPx() }
         val margin = with(density) { 16.dp.toPx() }
-        val start = Offset(with(density) { maxWidth.toPx() } / 2f - bubblePx / 2f, with(density) { maxHeight.toPx() } * fromY)
-        val end = Offset(with(density) { maxWidth.toPx() } - bubblePx - margin, margin)
+        // El conjunto (burbuja y nombre) se mide para que el nombre no se salga de la pantalla
+        val width = contentWidth.intValue.toFloat().coerceAtLeast(bubblePx)
+        val start = Offset(with(density) { maxWidth.toPx() } / 2f - width / 2f, with(density) { maxHeight.toPx() } * fromY)
+        val end = Offset(with(density) { maxWidth.toPx() } - width - margin, margin)
         val t = rise.value
         val arc = sin(PI * t).toFloat() * with(density) { 48.dp.toPx() }
         val x = start.x + (end.x - start.x) * t + drag.value.x
@@ -101,6 +106,7 @@ fun ElementBubble(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
+                .onSizeChanged { contentWidth.intValue = it.width }
                 .offset { IntOffset(x.roundToInt(), y.roundToInt()) }
                 .graphicsLayer {
                     val scale = 0.3f + 0.7f * t

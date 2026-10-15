@@ -199,4 +199,11 @@
     <string name="tag_cancel">Cancel</string>
     <string name="tag_delete">Delete tag</string>
     <string name="tag_change_hint">Counts from the next session that ends. Long-press a tag to edit it.</string>
+    <string name="main_tap_to_edit">Tap to adjust this plan</string>
+    <string name="main_plan_customized">Adjusted for this plan</string>
+    <string name="main_edit_plan">Adjust this plan</string>
+    <string name="main_plan_editor_title">This plan</string>
+    <string name="main_plan_editor_hint">These changes are only for the next plan. Your usual plan stays in Settings.</string>
+    <string name="main_plan_reset">Use my usual plan</string>
+    <string name="main_plan_save_default">Save as my usual plan</string>
 </resources>

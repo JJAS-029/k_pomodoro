@@ -88,6 +88,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jjas.labpomodoro.R
+import androidx.compose.material3.FilledTonalButton
+import com.jjas.labpomodoro.domain.model.SessionConfig
+import com.jjas.labpomodoro.ui.settings.StepperRow
 import com.jjas.labpomodoro.ui.components.ElementSignatures
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.infiniteRepeatable
@@ -264,6 +267,24 @@ fun MainScreen(
             }
         }
     }
+    // Antes de iniciar: tocar el reloj ajusta este plan (duraciones y etiqueta)
+    var planEditor by rememberSaveable { mutableStateOf(false) }
+    val idle = timer.timer as? TimerUi.Idle
+    if (planEditor && idle != null) {
+        ModalBottomSheet(onDismissRequest = { planEditor = false }) {
+            PlanEditorSheet(
+                idle = idle,
+                tags = tags,
+                tagActions = tagActions,
+                onEdit = timerViewModel::editPlan,
+                onReset = timerViewModel::resetPlan,
+                onSaveDefault = timerViewModel::savePlanAsDefault,
+            )
+        }
+    } else if (planEditor) {
+        planEditor = false
+    }
+
     // Cambiar la etiqueta a medio plan
     var tagSheet by rememberSaveable { mutableStateOf(false) }
     if (tagSheet) {
@@ -363,6 +384,7 @@ fun MainScreen(
                     onDismissMedals = medalViewModel::dismiss,
                     onOpenSound = { soundSheet = true },
                     onOpenTags = { tagSheet = true },
+                    onOpenPlanEditor = { planEditor = true },
                     onOpenPlan = { planSheet = true },
                     onSignIn = { viewModel.signIn(context) },
                     onSignOut = viewModel::signOut,
@@ -388,6 +410,7 @@ data class MainActions(
     val onOpenStats: () -> Unit = {},
     val onOpenSound: () -> Unit = {},
     val onOpenTags: () -> Unit = {},
+    val onOpenPlanEditor: () -> Unit = {},
     val onOpenPlan: () -> Unit = {},
     val onDismissDiscoveries: () -> Unit = {},
     val onDismissMedals: () -> Unit = {},
@@ -450,7 +473,7 @@ private fun MainContent(
                 )
                 when (timer) {
                     null -> CircularProgressIndicator()
-                    is TimerUi.Idle -> IdlePanel(timer, clockColor, tags, tagActions)
+                    is TimerUi.Idle -> IdlePanel(timer, clockColor, tags, tagActions, actions.onOpenPlanEditor)
                     is TimerUi.Active -> ActivePanel(timer, clockColor, tags, actions.onOpenTags)
                     is TimerUi.Finished -> FinishedPanel(timer)
                 }
@@ -736,7 +759,13 @@ private fun ClockText(millis: Long, color: Color = MaterialTheme.colorScheme.onB
 }
 
 @Composable
-private fun IdlePanel(idle: TimerUi.Idle, clockColor: Color, tags: TagsUi = TagsUi(), tagActions: TagActions = TagActions()) {
+private fun IdlePanel(
+    idle: TimerUi.Idle,
+    clockColor: Color,
+    tags: TagsUi = TagsUi(),
+    tagActions: TagActions = TagActions(),
+    onEditPlan: () -> Unit = {},
+) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         // La hora se toma al mostrar la pantalla; no hace falta que cambie mientras está abierta
         val resources = LocalResources.current
@@ -747,16 +776,31 @@ private fun IdlePanel(idle: TimerUi.Idle, clockColor: Color, tags: TagsUi = Tags
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
         )
-        ClockText(idle.firstSessionMillis, clockColor)
-        Text(
-            text = pluralStringResource(R.plurals.main_plan_summary, idle.pomodoros, idle.pomodoros, formatDuration(idle.workMinutes)),
-            style = MaterialTheme.typography.bodyLarge,
-        )
-        Text(
-            text = stringResource(R.string.main_with_breaks, formatDuration(idle.totalMinutes)),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        // Reloj y resumen se tocan para ajustar este plan
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .clip(RoundedCornerShape(24.dp))
+                .clickable(onClickLabel = stringResource(R.string.main_edit_plan), onClick = onEditPlan)
+                .padding(horizontal = 16.dp),
+        ) {
+            ClockText(idle.firstSessionMillis, clockColor)
+            Text(
+                text = pluralStringResource(R.plurals.main_plan_summary, idle.pomodoros, idle.pomodoros, formatDuration(idle.workMinutes)),
+                style = MaterialTheme.typography.bodyLarge,
+            )
+            Text(
+                text = stringResource(R.string.main_with_breaks, formatDuration(idle.totalMinutes)),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = stringResource(if (idle.customized) R.string.main_plan_customized else R.string.main_tap_to_edit),
+                style = MaterialTheme.typography.labelMedium,
+                color = if (idle.customized) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                modifier = Modifier.padding(top = 2.dp, bottom = 4.dp),
+            )
+        }
         Spacer(Modifier.height(12.dp))
         Text(
             stringResource(R.string.tag_question),
@@ -944,5 +988,55 @@ private fun MainContentActivePreview() {
             account = MainUiState(),
             actions = MainActions(),
         )
+    }
+}
+
+/** Hoja "Este plan": duraciones y etiqueta del próximo plan, sin tocar Configuración. */
+@Composable
+private fun PlanEditorSheet(
+    idle: TimerUi.Idle,
+    tags: TagsUi,
+    tagActions: TagActions,
+    onEdit: ((SessionConfig) -> SessionConfig) -> Unit,
+    onReset: () -> Unit,
+    onSaveDefault: () -> Unit,
+) {
+    val config = idle.config
+    Column(
+        Modifier
+            .navigationBarsPadding()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 24.dp)
+            .padding(bottom = 24.dp)
+    ) {
+        Text(stringResource(R.string.main_plan_editor_title), style = MaterialTheme.typography.titleLarge)
+        Text(
+            pluralStringResource(R.plurals.main_plan_summary, idle.pomodoros, idle.pomodoros, formatDuration(idle.workMinutes)) +
+                " · " + stringResource(R.string.main_with_breaks, formatDuration(idle.totalMinutes)),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.height(8.dp))
+        StepperRow(stringResource(R.string.set_total_hours), config.totalHours, SessionConfig.TOTAL_HOURS, "h") { v -> onEdit { it.copy(totalHours = v) } }
+        StepperRow(stringResource(R.string.set_pomodoro), config.workMinutes, SessionConfig.WORK_MINUTES, "min", step = 5) { v -> onEdit { it.copy(workMinutes = v) } }
+        StepperRow(stringResource(R.string.set_short_break), config.shortBreakMinutes, SessionConfig.SHORT_BREAK_MINUTES, "min") { v -> onEdit { it.copy(shortBreakMinutes = v) } }
+        StepperRow(stringResource(R.string.set_long_break), config.longBreakMinutes, SessionConfig.LONG_BREAK_MINUTES, "min", step = 5) { v -> onEdit { it.copy(longBreakMinutes = v) } }
+        StepperRow(stringResource(R.string.set_pomodoros_until_long), config.pomodorosUntilLong, SessionConfig.POMODOROS_UNTIL_LONG, "") { v -> onEdit { it.copy(pomodorosUntilLong = v) } }
+        Spacer(Modifier.height(12.dp))
+        Text(stringResource(R.string.tag_question), style = MaterialTheme.typography.titleSmall)
+        Spacer(Modifier.height(6.dp))
+        TagChips(tags, tags.selected, tagActions)
+        Spacer(Modifier.height(16.dp))
+        Text(
+            stringResource(R.string.main_plan_editor_hint),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        if (idle.customized) {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 8.dp)) {
+                TextButton(onClick = onReset) { Text(stringResource(R.string.main_plan_reset)) }
+                FilledTonalButton(onClick = onSaveDefault) { Text(stringResource(R.string.main_plan_save_default)) }
+            }
+        }
     }
 }

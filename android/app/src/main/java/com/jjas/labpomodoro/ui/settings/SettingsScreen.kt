@@ -466,7 +466,7 @@ private fun SectionTitle(text: String) {
 }
 
 @Composable
-private fun StepperRow(
+internal fun StepperRow(
     label: String,
     value: Int,
     range: IntRange,

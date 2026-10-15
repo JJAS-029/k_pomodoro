@@ -205,4 +205,11 @@
     <string name="tag_cancel">Cancelar</string>
     <string name="tag_delete">Borrar etiqueta</string>
     <string name="tag_change_hint">Cuenta desde la siguiente sesión que termine. Mantén presionada una etiqueta para editarla.</string>
+    <string name="main_tap_to_edit">Toca para ajustar este plan</string>
+    <string name="main_plan_customized">Ajustado para este plan</string>
+    <string name="main_edit_plan">Ajustar este plan</string>
+    <string name="main_plan_editor_title">Este plan</string>
+    <string name="main_plan_editor_hint">Estos cambios son solo para el próximo plan. Tu plan de siempre sigue en Configuración.</string>
+    <string name="main_plan_reset">Usar mi plan de siempre</string>
+    <string name="main_plan_save_default">Guardar como mi plan de siempre</string>
 </resources>

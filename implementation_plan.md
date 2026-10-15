@@ -575,6 +575,10 @@ Prototipo **LIQUID_GLASS** (en la pantalla de prueba de debug, junto a los demá
 
 #### Funcionalidades (no estéticas, por decidir)
 
+Hecho: **Ajustar este plan desde el inicio** — tocar el reloj (o el resumen) abre la hoja "Este plan": horas, pomodoro, descansos, cada cuántos el largo y la etiqueta. Los cambios son solo para el próximo plan (`TimerViewModel.planOverride`); se puede volver al plan de siempre o guardarlo como tal. Configuración queda con los valores por defecto.
+
+**Reorganización de menús (por elegir)**: maquetas en `MenuMockActivity` (debug) y en `prototipos/menus/`: opción 1, menú agrupado (Este plan · Laboratorio · Tu progreso · App); opción 2, barra inferior (Timer · Laboratorio · Progreso); pantalla "Tu progreso" con pestañas Estadísticas, Medallas y Liga; Configuración en tres grupos (Temporizador, Apariencia, Cuenta y datos).
+
 Hecho: **Casillas "neón vial"** — colores de familia armonizados (`ElementCategory.hue()`/`saturation()`, misma luminosidad; sin olivos ni cafés). Cada casilla es un frasco casi negro (casi blanco en el tema claro) con borde neón y el líquido de la familia; el nivel es la maestría (en la tabla, el escalón alcanzado; en las tarjetas, el avance al siguiente metal, en lugar de la barra). Leyenda con canicas neón. Las propuestas (actual, Joya, Vial, Neón) siguen en la pantalla de prueba `TilePreviewActivity`.
 
 Hecho: **Elemento que nace del recipiente** — `LabRepository.reservePrizes` sortea al empezar cada pomodoro los elementos que ganará si se completa y los guarda en `PrizeStore` (clave "BASIC_32" → número atómico); `syncRewards` entrega lo reservado. En el último 20 % del pomodoro el líquido muta hacia el color del premio (y, pasada la mitad, a su comportamiento); con varios, alterna entre ellos. Al ganarlo sale de la boca del recipiente en una burbuja de cristal (`ElementBubble.kt`) que flota arriba a la derecha: tocarla abre la tabla, arrastrarla lejos la descarta. Reemplaza al aviso anterior.
