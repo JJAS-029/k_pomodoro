@@ -18,10 +18,10 @@ import com.jjas.labpomodoro.domain.model.PeriodicTable
 
 @Database(
     entities = [SessionEntity::class, InventoryEntity::class, DiscoveryEntity::class, PlaceEntity::class, TagEntity::class],
-    version = 4,
+    version = 5,
     exportSchema = true,
-    // v2 (Fase 4): tabla de hallazgos. v3: lugares. v4: etiquetas
-    autoMigrations = [AutoMigration(from = 1, to = 2), AutoMigration(from = 2, to = 3), AutoMigration(from = 3, to = 4)],
+    // v2 (Fase 4): tabla de hallazgos. v3: lugares. v4: etiquetas. v5: notas de logro
+    autoMigrations = [AutoMigration(from = 1, to = 2), AutoMigration(from = 2, to = 3), AutoMigration(from = 3, to = 4), AutoMigration(from = 4, to = 5)],
 )
 abstract class LabDatabase : RoomDatabase() {
     abstract fun sessionDao(): SessionDao

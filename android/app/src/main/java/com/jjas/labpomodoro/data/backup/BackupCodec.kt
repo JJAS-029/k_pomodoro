@@ -41,7 +41,7 @@ object BackupCodec {
             .put("createdAt", snapshot.createdAtMillis)
             .put("sessions", JSONArray().apply {
                 snapshot.sessions.forEach { s ->
-                    put(JSONArray(listOf(s.id, s.type.name, s.startedAtMillis, s.endedAtMillis, s.plannedSeconds, s.actualSeconds, s.completed, s.epochDay, s.hourOfDay, s.placeId ?: JSONObject.NULL, s.tagId ?: JSONObject.NULL)))
+                    put(JSONArray(listOf(s.id, s.type.name, s.startedAtMillis, s.endedAtMillis, s.plannedSeconds, s.actualSeconds, s.completed, s.epochDay, s.hourOfDay, s.placeId ?: JSONObject.NULL, s.tagId ?: JSONObject.NULL, s.note ?: JSONObject.NULL)))
                 }
             })
             .put("inventory", JSONArray().apply {
@@ -91,6 +91,7 @@ object BackupCodec {
                     hourOfDay = r.getInt(8),
                     placeId = if (r.isNull(9)) null else r.getLong(9),
                     tagId = if (r.length() <= 10 || r.isNull(10)) null else r.getLong(10),
+                    note = if (r.length() <= 11 || r.isNull(11)) null else r.getString(11),
                 )
             },
             inventory = json.getJSONArray("inventory").rows { r ->

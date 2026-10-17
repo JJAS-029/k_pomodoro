@@ -600,12 +600,12 @@ Hecho: **Ajustar el plan en curso** — `TimerEngine.extendCurrent` (+5 min, top
 | ✅ Ajustar el plan en curso | +1 pomodoro, extender 5 min, saltar el descanso o terminar después de este pomodoro | 🟢 | No |
 | ✅ No molestar automático (`FocusDnd`: modo prioridad durante el trabajo; se quita en descansos, pausa o al terminar; no toca un No molestar puesto por el usuario. Configuración › Temporizador) | Activa "No molestar" durante el trabajo y lo quita en los descansos (permiso de acceso a No molestar) | 🟢 | Pro |
 | ✅ Metas diarias (anillo en la pantalla principal, diálogo con racha de metas, confeti y aviso al cumplirla una vez al día; se ajusta en "Este plan" o tocando el anillo). Semanales: pendiente | "4 pomodoros al día": anillo de progreso en la pantalla principal, racha de metas y aviso al cumplirla | 🟡 | No |
-| Notas de logro | Al terminar un pomodoro, una línea opcional "¿Qué lograste?"; historial tipo diario | 🟢 | Pro |
+| ✅ Notas de logro (Pro: tarjeta "¿Qué lograste?" al completar un pomodoro; Tu progreso › Diario; columna `note` en sesiones, Room v5; CSV y respaldo) | Al terminar un pomodoro, una línea opcional "¿Qué lograste?"; historial tipo diario | 🟢 | Pro |
 | ✅ Mapa de calor anual (Tu progreso › Estadísticas › Tu año: 53 semanas, 5 niveles, tocar un día muestra su enfoque) | Cuadrícula de días del año (estilo GitHub) en Progreso | 🟢 | No |
 | ✅ Accesos directos del ícono (Iniciar plan, las dos primeras plantillas y Tu progreso; `ShortcutPublisher` los actualiza al cambiar las plantillas). App Actions de "Ok Google": pendiente | Mantener presionado el ícono: "Iniciar plan", "Plan corto", "Ver progreso"; y "Ok Google, inicia un pomodoro" (App Actions) | 🟢 | No |
 | ✅ Pausas activas (una sugerencia por descanso bajo el reloj: agua, 20-20-20, estiramientos, respiración 4-7-8; más completas en los largos) | En los descansos, sugerencias breves: estirarse, respirar 4-7-8, tomar agua, mirar lejos 20 s | 🟢 | No |
 | Retos semanales | Retos que cambian cada semana ("3 pomodoros antes de las 9") con un elemento raro de premio | 🟡 | No |
-| Cuenta regresiva a una fecha | "Faltan 12 días para el examen" en la pantalla principal y el widget | 🟢 | No |
+| ✅ Cuenta regresiva a una fecha (Configuración › Temporizador; "Faltan N días para…" en la pantalla de inicio). En el widget: pendiente | "Faltan 12 días para el examen" en la pantalla principal y el widget | 🟢 | No |
 | Respaldo a archivo | Exportar e importar todo el progreso a un archivo, sin cuenta de Google | 🟢 | No |
 | Estudiar con amigos | Sala compartida: varios hacen el mismo plan sincronizado y ven quién sigue concentrado | 🔴 | Pro |
 | Tienda de cristalería | Gastar elementos repetidos en recipientes y fondos cosméticos (le da otro uso a los repetidos) | 🟡 | No |

@@ -14,7 +14,7 @@ class HistoryCsvTest {
 
     // Los mismos textos que values-es/strings_progress.xml (las pruebas de JVM no leen recursos)
     private val labels = HistoryCsv.Labels(
-        header = "fecha,inicio,fin,tipo,minutos_planeados,minutos_reales,completada,etiqueta",
+        header = "fecha,inicio,fin,tipo,minutos_planeados,minutos_reales,completada,etiqueta,nota",
         work = "trabajo",
         shortBreak = "descanso corto",
         longBreak = "descanso largo",
@@ -51,9 +51,9 @@ class HistoryCsvTest {
         val lines = csv.removePrefix(HistoryCsv.BOM).lines().filter { it.isNotEmpty() }
         assertEquals(
             listOf(
-                "fecha,inicio,fin,tipo,minutos_planeados,minutos_reales,completada,etiqueta",
-                "2026-10-05,09:00:00,09:12:34,trabajo,25.0,12.6,no,",
-                "2026-10-05,10:00:00,10:05:00,descanso corto,5.0,5.0,sí,",
+                "fecha,inicio,fin,tipo,minutos_planeados,minutos_reales,completada,etiqueta,nota",
+                "2026-10-05,09:00:00,09:12:34,trabajo,25.0,12.6,no,,",
+                "2026-10-05,10:00:00,10:05:00,descanso corto,5.0,5.0,sí,,",
             ),
             lines,
         )
@@ -78,9 +78,9 @@ class HistoryCsvTest {
             tagNames = mapOf(1L to "Tesis", 2L to "Física, tarea \"2\""),
         )
         val lines = csv.removePrefix(HistoryCsv.BOM).lines().filter { it.isNotEmpty() }
-        assertTrue(lines[1].endsWith(",sí,Tesis"))
-        assertTrue(lines[2].endsWith(",sí,\"Física, tarea \"\"2\"\"\""))
+        assertTrue(lines[1].endsWith(",sí,Tesis,"))
+        assertTrue(lines[2].endsWith(",sí,\"Física, tarea \"\"2\"\"\","))
         // Etiqueta borrada: la columna queda vacía
-        assertTrue(lines[3].endsWith(",sí,"))
+        assertTrue(lines[3].endsWith(",sí,,"))
     }
 }

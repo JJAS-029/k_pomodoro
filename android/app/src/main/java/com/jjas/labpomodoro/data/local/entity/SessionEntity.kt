@@ -29,6 +29,8 @@ data class SessionEntity(
     @ColumnInfo(defaultValue = "NULL") val placeId: Long? = null,
     /** En qué se trabajó: etiqueta del plan, si se eligió una. */
     @ColumnInfo(defaultValue = "NULL") val tagId: Long? = null,
+    /** Nota de logro: qué se logró en este pomodoro (Pro). */
+    @ColumnInfo(defaultValue = "NULL") val note: String? = null,
 )
 
 /** Fila de la consulta de horas productivas. */

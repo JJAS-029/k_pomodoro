@@ -275,4 +275,13 @@
         <item>🧘 Estira la espalda: brazos arriba, luego toca tus pies sin forzar.</item>
         <item>😌 Cierra los ojos y respira lento. Un descanso de verdad también cuenta.</item>
     </string-array>
+    <string name="note_question">¿Qué lograste en este pomodoro?</string>
+    <string name="note_hint">Terminé el capítulo 3, resolví el ejercicio…</string>
+    <string name="note_skip">Omitir</string>
+    <plurals name="countdown_left">
+        <item quantity="one">📅 Falta %1$d día para %2$s</item>
+        <item quantity="many">📅 Faltan %1$d días para %2$s</item>
+        <item quantity="other">📅 Faltan %1$d días para %2$s</item>
+    </plurals>
+    <string name="countdown_today">📅 ¡Hoy es %1$s! Mucho éxito.</string>
 </resources>

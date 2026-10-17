@@ -36,6 +36,8 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import java.time.LocalDate
+import com.jjas.labpomodoro.domain.usecase.Countdown
 import com.jjas.labpomodoro.domain.model.PlanTemplate
 import com.jjas.labpomodoro.domain.model.SessionConfig
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -58,6 +60,8 @@ sealed interface TimerUi {
         val config: SessionConfig = SessionConfig(),
         /** true si se ajustó solo para este plan (distinto de lo de Configuración). */
         val customized: Boolean = false,
+        /** Cuenta regresiva: nombre y días que faltan (null si no hay o ya pasó). */
+        val countdown: Pair<String, Long>? = null,
     ) : TimerUi
 
     data class Active(
@@ -190,6 +194,10 @@ class TimerViewModel @Inject constructor(
                 TimerUi.Idle(
                     config = config,
                     customized = override != null && override != settings.session,
+                    countdown = settings.countdownDay?.let { day ->
+                        val left = Countdown.daysLeft(LocalDate.ofEpochDay(day), LocalDate.now())
+                        if (left >= 0) settings.countdownName to left else null
+                    },
                     firstSessionMillis = plan.first().durationSeconds * 1000L,
                     pomodoros = plan.count { it.type == SessionType.WORK },
                     workMinutes = plan.filter { it.type == SessionType.WORK }.sumOf { it.durationSeconds } / 60,

@@ -69,6 +69,16 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jjas.labpomodoro.BuildConfig
 import com.jjas.labpomodoro.R
+import java.time.format.FormatStyle
+import java.time.format.DateTimeFormatter
+import java.time.LocalDate
+import kotlinx.coroutines.delay
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DatePicker
+import com.jjas.labpomodoro.domain.usecase.Countdown
 import androidx.compose.foundation.border
 import com.jjas.labpomodoro.domain.model.FlameColor
 import com.jjas.labpomodoro.domain.model.GlassTint
@@ -134,6 +144,8 @@ fun SettingsScreen(
                     onPureBlackChange = viewModel::setPureBlack,
                     onPaletteChange = viewModel::setLabPalette,
                     onGlassTintChange = viewModel::setGlassTint,
+                    onAchievementNotesChange = viewModel::setAchievementNotes,
+                    onCountdownChange = viewModel::setCountdown,
                     onFocusDndChange = { enabled ->
                         if (enabled && !viewModel.hasDndAccess()) {
                             // Android pide dar el acceso a mano; al volver, el usuario lo activa de nuevo
@@ -211,6 +223,8 @@ private fun SettingsContent(
     onPaletteChange: (LabPalette) -> Unit = {},
     onGlassTintChange: (GlassTint) -> Unit = {},
     onFocusDndChange: (Boolean) -> Unit = {},
+    onAchievementNotesChange: (Boolean) -> Unit = {},
+    onCountdownChange: (String, Long?) -> Unit = { _, _ -> },
     onFlameChange: (FlameColor) -> Unit = {},
     onOpenPro: () -> Unit = {},
     modifier: Modifier = Modifier,
@@ -305,6 +319,9 @@ private fun SettingsContent(
             modifier = Modifier.padding(top = 6.dp),
         )
 
+        SectionTitle(stringResource(R.string.countdown_section))
+        CountdownSetting(settings.countdownName, settings.countdownDay, onCountdownChange)
+
         SectionTitle(stringResource(R.string.set_section_alerts))
         SwitchRow(stringResource(R.string.set_sounds), settings.soundEnabled, onSoundChange)
         SwitchRow(stringResource(R.string.set_vibration), settings.vibrationEnabled, onVibrationChange)
@@ -316,6 +333,16 @@ private fun SettingsContent(
         )
         Text(
             stringResource(R.string.set_focus_dnd_desc),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        SwitchRow(
+            proTitle(R.string.set_notes, settings.isPro),
+            settings.isPro && settings.achievementNotes,
+            onCheckedChange = { if (settings.isPro) onAchievementNotesChange(it) else onOpenPro() },
+        )
+        Text(
+            stringResource(R.string.set_notes_desc),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -764,3 +791,56 @@ private fun <T> SwatchChooser(
         }
     }
 }
+
+/** Cuenta regresiva: nombre y fecha; se ve en la pantalla de inicio hasta que pasa la fecha. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CountdownSetting(name: String, day: Long?, onChange: (String, Long?) -> Unit) {
+    var text by rememberSaveable(name) { mutableStateOf(name) }
+    var picking by rememberSaveable { mutableStateOf(false) }
+    val locale = LocalConfiguration.current.locales[0]
+    Text(stringResource(R.string.countdown_desc), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    Spacer(Modifier.height(8.dp))
+    OutlinedTextField(
+        value = text,
+        onValueChange = { text = it.take(Countdown.MAX_NAME) },
+        singleLine = true,
+        placeholder = { Text(stringResource(R.string.countdown_name_hint)) },
+        modifier = Modifier.fillMaxWidth(),
+    )
+    Spacer(Modifier.height(8.dp))
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+        OutlinedButton(onClick = { picking = true }) {
+            Text(
+                day?.let { LocalDate.ofEpochDay(it).format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale)) }
+                    ?: stringResource(R.string.countdown_pick_date),
+            )
+        }
+        if (day != null) {
+            TextButton(onClick = { text = ""; onChange("", null) }) { Text(stringResource(R.string.countdown_clear)) }
+        }
+    }
+    if (picking) {
+        val state = rememberDatePickerState(
+            initialSelectedDateMillis = (day ?: LocalDate.now().plusDays(7).toEpochDay()) * MILLIS_PER_DAY,
+        )
+        DatePickerDialog(
+            onDismissRequest = { picking = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    state.selectedDateMillis?.let { onChange(text, it / MILLIS_PER_DAY) }
+                    picking = false
+                }) { Text(stringResource(R.string.tag_save)) }
+            },
+            dismissButton = { TextButton(onClick = { picking = false }) { Text(stringResource(R.string.tag_cancel)) } },
+        ) { DatePicker(state) }
+    } else if (day != null && text != name) {
+        // El nombre se guarda al cambiarlo, con la fecha que ya había
+        LaunchedEffect(text) {
+            delay(600)
+            onChange(text, day)
+        }
+    }
+}
+
+private const val MILLIS_PER_DAY = 86_400_000L

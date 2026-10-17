@@ -262,4 +262,11 @@
     <string name="set_flame_red">Roja (estroncio)</string>
     <string name="set_focus_dnd">No molestar al trabajar</string>
     <string name="set_focus_dnd_desc">Durante el trabajo solo suenan llamadas y avisos prioritarios; en los descansos vuelve todo. Si ya tenías No molestar puesto, no se toca. La primera vez Android te pide dar el acceso.</string>
+    <string name="set_notes">Preguntar qué lograste</string>
+    <string name="set_notes_desc">Al terminar cada pomodoro puedes escribir una línea; las ves en Tu progreso › Diario y en el CSV.</string>
+    <string name="countdown_section">Cuenta regresiva</string>
+    <string name="countdown_desc">Un examen, una entrega… Se ve en la pantalla de inicio hasta que llegue el día.</string>
+    <string name="countdown_name_hint">Examen final</string>
+    <string name="countdown_pick_date">Elegir fecha</string>
+    <string name="countdown_clear">Quitar</string>
 </resources>

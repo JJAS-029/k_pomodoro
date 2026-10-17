@@ -27,6 +27,7 @@ import com.jjas.labpomodoro.domain.usecase.HeatDay
 import com.jjas.labpomodoro.domain.usecase.YearHeatmap
 import com.jjas.labpomodoro.domain.model.SessionType
 import java.time.Clock
+import com.jjas.labpomodoro.data.local.entity.SessionEntity
 import java.time.LocalDate
 import javax.inject.Inject
 
@@ -45,6 +46,8 @@ data class StatsUi(
     val medals: List<MedalProgress>,
     /** Mapa de calor del último año (no depende del periodo elegido). */
     val year: List<List<HeatDay?>> = emptyList(),
+    /** Notas de logro recientes. */
+    val notes: List<SessionEntity> = emptyList(),
 ) {
     val activeDays: Int get() = year.sumOf { week -> week.count { (it?.minutes ?: 0) > 0 } }
 }
@@ -68,9 +71,9 @@ class StatsViewModel @Inject constructor(
             sessions.allSessions,
             sessions.streak,
             settings.settings,
-            combine(placeRepository.totals(range.days), tagRepository.totals(range.days), ::Pair),
+            combine(placeRepository.totals(range.days), tagRepository.totals(range.days), sessions.notes(), ::Triple),
             medalRepository.progress,
-        ) { all, streak, prefs, (places, tags), medals ->
+        ) { all, streak, prefs, (places, tags, notes), medals ->
             StatsUi(
                 stats = StatsCalculator.calculate(all, LocalDate.now(clock), range),
                 streak = streak,
@@ -81,6 +84,7 @@ class StatsViewModel @Inject constructor(
                 },
                 medals = medals,
                 tags = tags,
+                notes = notes,
                 year = YearHeatmap.weeks(
                     all.filter { it.type == SessionType.WORK && it.completed }
                         .groupBy { it.epochDay }

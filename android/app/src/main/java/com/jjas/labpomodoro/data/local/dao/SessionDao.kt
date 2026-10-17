@@ -46,6 +46,13 @@ interface SessionDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(sessions: List<SessionEntity>)
 
+    @Query("UPDATE sessions SET note = :note WHERE startedAtMillis = :startedAtMillis")
+    suspend fun setNote(startedAtMillis: Long, note: String)
+
+    /** Las notas de logro más recientes, para el diario. */
+    @Query("SELECT * FROM sessions WHERE note IS NOT NULL AND note != '' ORDER BY startedAtMillis DESC LIMIT :limit")
+    fun observeNotes(limit: Int): Flow<List<SessionEntity>>
+
     @Query("DELETE FROM sessions")
     suspend fun deleteAll()
 

@@ -162,6 +162,7 @@ fun MainScreen(
     medalViewModel: MedalViewModel = hiltViewModel(),
     tagViewModel: TagViewModel = hiltViewModel(),
     goalViewModel: GoalViewModel = hiltViewModel(),
+    noteViewModel: NoteViewModel = hiltViewModel(),
 ) {
     val account by viewModel.uiState.collectAsStateWithLifecycle()
     val discoveries by discoveryViewModel.unseen.collectAsStateWithLifecycle()
@@ -169,6 +170,7 @@ fun MainScreen(
     val timer by timerViewModel.state.collectAsStateWithLifecycle()
     val tags by tagViewModel.state.collectAsStateWithLifecycle()
     val goal by goalViewModel.state.collectAsStateWithLifecycle()
+    val notePending by noteViewModel.pending.collectAsStateWithLifecycle()
     // Plantillas: las sugeridas hasta que se guarde o borre alguna
     val templates = timer.templates ?: suggestedTemplates()
     var goalDialog by rememberSaveable { mutableStateOf(false) }
@@ -402,6 +404,7 @@ fun MainScreen(
                 tags = tags,
                 tagActions = tagActions,
                 goal = goal,
+                askNote = notePending != null,
                 goalBanner = goalBanner,
                 goalCelebration = goalCelebration,
                 // Observa los toques sin consumirlos, para reiniciar la cuenta del modo ambiente
@@ -437,6 +440,8 @@ fun MainScreen(
                     onOpenTags = { tagSheet = true },
                     onOpenPlanEditor = { planEditor = true },
                     onOpenGoal = { goalDialog = true },
+                    onSaveNote = noteViewModel::save,
+                    onSkipNote = noteViewModel::skip,
                     onOpenPlan = { planSheet = true },
                     onSignIn = { viewModel.signIn(context) },
                     onSignOut = viewModel::signOut,
@@ -467,6 +472,8 @@ data class MainActions(
     val onOpenTags: () -> Unit = {},
     val onOpenPlanEditor: () -> Unit = {},
     val onOpenGoal: () -> Unit = {},
+    val onSaveNote: (String) -> Unit = {},
+    val onSkipNote: () -> Unit = {},
     val onOpenPlan: () -> Unit = {},
     val onDismissDiscoveries: () -> Unit = {},
     val onDismissMedals: () -> Unit = {},
@@ -488,6 +495,7 @@ private fun MainContent(
     tags: TagsUi = TagsUi(),
     tagActions: TagActions = TagActions(),
     goal: GoalUi = GoalUi(),
+    askNote: Boolean = false,
     goalBanner: Boolean = false,
     goalCelebration: Celebration? = null,
 ) {
@@ -614,6 +622,16 @@ private fun MainContent(
             }
 
             Celebrations(timer, discoveries, medals, goalCelebration)
+
+            // Nota de logro: abajo, sobre el menú, sin tapar el reloj
+            AnimatedVisibility(
+                visible = askNote,
+                enter = slideInVertically { it } + fadeIn(),
+                exit = slideOutVertically { it } + fadeOut(),
+                modifier = Modifier.align(Alignment.BottomCenter).padding(start = 16.dp, end = 16.dp, bottom = 96.dp),
+            ) {
+                NoteCard(onSave = actions.onSaveNote, onSkip = actions.onSkipNote)
+            }
 
             LabDock(
                 timer = timer,
@@ -886,6 +904,15 @@ private fun IdlePanel(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
         )
+        idle.countdown?.let { (name, days) ->
+            Text(
+                if (days == 0L) stringResource(R.string.countdown_today, name) else pluralStringResource(R.plurals.countdown_left, days.toInt(), days.toInt(), name),
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.primary,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 4.dp),
+            )
+        }
         // Reloj y resumen se tocan para ajustar este plan
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -1344,3 +1371,26 @@ private fun GoalDialog(goal: GoalUi, onGoalChange: (Int) -> Unit, onDismiss: () 
 private val GoalConfetti = listOf(Color(0xFF39FF14), Color(0xFFFFD54F), Color(0xFF29B6F6), Color(0xFFF06292))
 
 private const val GOAL_BANNER_MILLIS = 4_500L
+
+/** "¿Qué lograste?" al completar un pomodoro: una línea opcional para el diario. */
+@Composable
+private fun NoteCard(onSave: (String) -> Unit, onSkip: () -> Unit) {
+    var text by rememberSaveable { mutableStateOf("") }
+    Surface(shape = RoundedCornerShape(24.dp), color = MaterialTheme.colorScheme.surfaceVariant, shadowElevation = 8.dp) {
+        Column(Modifier.padding(16.dp)) {
+            Text(stringResource(R.string.note_question), style = MaterialTheme.typography.titleSmall)
+            Spacer(Modifier.height(8.dp))
+            OutlinedTextField(
+                value = text,
+                onValueChange = { text = it.take(NoteViewModel.MAX_NOTE) },
+                placeholder = { Text(stringResource(R.string.note_hint)) },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                TextButton(onClick = { text = ""; onSkip() }) { Text(stringResource(R.string.note_skip)) }
+                TextButton(onClick = { onSave(text); text = "" }, enabled = text.isNotBlank()) { Text(stringResource(R.string.tag_save)) }
+            }
+        }
+    }
+}

@@ -255,4 +255,11 @@
     <string name="set_flame_red">Red (strontium)</string>
     <string name="set_focus_dnd">Do not disturb while working</string>
     <string name="set_focus_dnd_desc">While you work only priority calls and alerts come through; on breaks everything is back. If you already had Do not disturb on, it\'s left alone. The first time, Android asks you to grant access.</string>
+    <string name="set_notes">Ask what you got done</string>
+    <string name="set_notes_desc">After each pomodoro you can write one line; see them in Your progress › Journal and in the CSV.</string>
+    <string name="countdown_section">Countdown</string>
+    <string name="countdown_desc">An exam, a deadline… It shows on the home screen until the day comes.</string>
+    <string name="countdown_name_hint">Final exam</string>
+    <string name="countdown_pick_date">Pick a date</string>
+    <string name="countdown_clear">Remove</string>
 </resources>

@@ -50,6 +50,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jjas.labpomodoro.R
+import java.time.ZoneId
+import java.time.Instant
+import com.jjas.labpomodoro.data.local.entity.SessionEntity
 import java.time.format.FormatStyle
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.geometry.Size
@@ -168,6 +171,10 @@ fun StatsScreen(onBack: () -> Unit, onOpenPro: () -> Unit, initialTab: Int = 0, 
                     YearHeatmapView(current.year)
                     Section(stringResource(R.string.tag_stats_section), stringResource(R.string.tag_stats_subtitle))
                     Tags(current.tags)
+                    if (current.notes.isNotEmpty()) {
+                        Section(stringResource(R.string.note_section), stringResource(R.string.note_section_subtitle))
+                        Notes(current.notes)
+                    }
                     Section(stringResource(R.string.prog_places_section))
                     Places(
                         ui = current.places,
@@ -538,4 +545,21 @@ private fun YearHeatmapView(weeks: List<List<HeatDay?>>) {
         style = MaterialTheme.typography.bodySmall,
         color = labelColor,
     )
+}
+
+/** Diario: las notas de logro más recientes, con su fecha y hora. */
+@Composable
+private fun Notes(notes: List<SessionEntity>) {
+    val locale = LocalConfiguration.current.locales[0]
+    val format = remember(locale) { DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT).withLocale(locale) }
+    notes.forEach { session ->
+        Column(Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
+            Text(session.note.orEmpty(), style = MaterialTheme.typography.bodyLarge)
+            Text(
+                Instant.ofEpochMilli(session.startedAtMillis).atZone(ZoneId.systemDefault()).format(format),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
 }

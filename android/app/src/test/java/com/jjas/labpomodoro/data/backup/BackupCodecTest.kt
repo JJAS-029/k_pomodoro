@@ -16,7 +16,7 @@ class BackupCodecTest {
     private val snapshot = BackupSnapshot(
         createdAtMillis = 1_791_259_000_000,
         sessions = listOf(
-            SessionEntity(1, SessionType.WORK, 1000, 1_501_000, 1500, 1500, true, 20_000, 9, placeId = 2, tagId = 4),
+            SessionEntity(1, SessionType.WORK, 1000, 1_501_000, 1500, 1500, true, 20_000, 9, placeId = 2, tagId = 4, note = "Terminé el capítulo 3"),
             SessionEntity(2, SessionType.SHORT_BREAK, 1_501_000, 1_801_000, 300, 120, false, 20_000, 9, placeId = null),
         ),
         inventory = listOf(InventoryEntity(1, 3, 5000), InventoryEntity(2, 0, null)),

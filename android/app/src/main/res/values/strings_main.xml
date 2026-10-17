@@ -266,4 +266,12 @@
         <item>🧘 Stretch your back: arms up, then reach for your toes gently.</item>
         <item>😌 Close your eyes and breathe slowly. A real rest counts too.</item>
     </string-array>
+    <string name="note_question">What did you get done this pomodoro?</string>
+    <string name="note_hint">Finished chapter 3, solved the exercise…</string>
+    <string name="note_skip">Skip</string>
+    <plurals name="countdown_left">
+        <item quantity="one">📅 %1$d day until %2$s</item>
+        <item quantity="other">📅 %1$d days until %2$s</item>
+    </plurals>
+    <string name="countdown_today">📅 %1$s is today! Good luck.</string>
 </resources>

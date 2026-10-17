@@ -44,6 +44,11 @@ data class AppSettings(
     val vibrationEnabled: Boolean = true,
     /** Mantiene la pantalla encendida mientras corre el timer. */
     val keepScreenOn: Boolean = false,
+    /** Cuenta regresiva: a qué y para cuándo (epochDay); null = sin cuenta regresiva. */
+    val countdownName: String = "",
+    val countdownDay: Long? = null,
+    /** Preguntar "¿Qué lograste?" al completar un pomodoro (Pro). */
+    val achievementNotes: Boolean = true,
     /** No molestar automático durante el trabajo (Pro). */
     val focusDnd: Boolean = false,
     /** Pro: tras [ambientDelayMinutes] sin tocar la pantalla, solo queda el reloj atenuado. */

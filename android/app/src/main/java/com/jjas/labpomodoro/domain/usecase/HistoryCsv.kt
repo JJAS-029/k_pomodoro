@@ -59,6 +59,7 @@ object HistoryCsv {
                     minutes(s.actualSeconds),
                     if (s.completed) labels.yes else labels.no,
                     s.tagId?.let { tagNames[it] }?.let(::quote).orEmpty(),
+                    s.note?.let(::quote).orEmpty(),
                 ).joinToString(",")
             )
         }

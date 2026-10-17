@@ -130,7 +130,7 @@
     <string name="prog_mastery_discovered">Discovered</string>
 
     <!-- Historial en CSV (encabezados para quien abre el archivo) -->
-    <string name="prog_csv_header">date,start,end,type,planned_minutes,actual_minutes,completed,tag</string>
+    <string name="prog_csv_header">date,start,end,type,planned_minutes,actual_minutes,completed,tag,note</string>
     <string name="prog_csv_work">work</string>
     <string name="prog_csv_short_break">short break</string>
     <string name="prog_csv_long_break">long break</string>
@@ -213,4 +213,6 @@
     </plurals>
     <string name="heat_tap">Tap a day to see its focus</string>
     <string name="heat_day">%1$s: %2$s</string>
+    <string name="note_section">Journal</string>
+    <string name="note_section_subtitle">What you got done each pomodoro</string>
 </resources>

@@ -56,6 +56,14 @@ class SettingsRepository @Inject constructor(
 
     suspend fun setFocusDnd(enabled: Boolean) = dataStore.edit { it[Keys.FOCUS_DND] = enabled }
 
+    suspend fun setAchievementNotes(enabled: Boolean) = dataStore.edit { it[Keys.ACHIEVEMENT_NOTES] = enabled }
+
+    /** [day] null quita la cuenta regresiva. */
+    suspend fun setCountdown(name: String, day: Long?) = dataStore.edit {
+        it[Keys.COUNTDOWN_NAME] = name
+        if (day == null) it.remove(Keys.COUNTDOWN_DAY) else it[Keys.COUNTDOWN_DAY] = day
+    }
+
     suspend fun setAmbientMode(enabled: Boolean) = dataStore.edit { it[Keys.AMBIENT_MODE] = enabled }
 
     suspend fun setAmbientDelayMinutes(minutes: Int) = dataStore.edit {
@@ -158,6 +166,9 @@ class SettingsRepository @Inject constructor(
             vibrationEnabled = this[Keys.VIBRATION] ?: defaults.vibrationEnabled,
             keepScreenOn = this[Keys.KEEP_SCREEN_ON] ?: defaults.keepScreenOn,
             focusDnd = this[Keys.FOCUS_DND] ?: defaults.focusDnd,
+            achievementNotes = this[Keys.ACHIEVEMENT_NOTES] ?: defaults.achievementNotes,
+            countdownName = this[Keys.COUNTDOWN_NAME] ?: defaults.countdownName,
+            countdownDay = this[Keys.COUNTDOWN_DAY],
             ambientMode = this[Keys.AMBIENT_MODE] ?: defaults.ambientMode,
             ambientDelayMinutes = this[Keys.AMBIENT_DELAY]?.takeIf { it in AppSettings.AMBIENT_DELAYS }
                 ?: defaults.ambientDelayMinutes,
@@ -205,6 +216,9 @@ class SettingsRepository @Inject constructor(
         val VIBRATION = booleanPreferencesKey("vibration_enabled")
         val KEEP_SCREEN_ON = booleanPreferencesKey("keep_screen_on")
         val FOCUS_DND = booleanPreferencesKey("focus_dnd")
+        val ACHIEVEMENT_NOTES = booleanPreferencesKey("achievement_notes")
+        val COUNTDOWN_NAME = stringPreferencesKey("countdown_name")
+        val COUNTDOWN_DAY = longPreferencesKey("countdown_day")
         val AMBIENT_MODE = booleanPreferencesKey("ambient_mode")
         val AMBIENT_DELAY = intPreferencesKey("ambient_delay_minutes")
         val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")

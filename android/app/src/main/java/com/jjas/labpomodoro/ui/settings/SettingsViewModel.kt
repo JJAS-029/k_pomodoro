@@ -14,6 +14,7 @@ import com.jjas.labpomodoro.ads.AdsManager
 import com.jjas.labpomodoro.data.repository.SessionRepository
 import kotlinx.coroutines.flow.first
 import com.jjas.labpomodoro.data.repository.TagRepository
+import com.jjas.labpomodoro.domain.usecase.Countdown
 import com.jjas.labpomodoro.service.FocusDnd
 import com.jjas.labpomodoro.data.repository.SettingsRepository
 import com.jjas.labpomodoro.domain.model.AppSettings
@@ -101,6 +102,14 @@ class SettingsViewModel @Inject constructor(
 
     /** Si ya tiene el acceso a No molestar; si no, la pantalla lleva a los ajustes de Android. */
     fun hasDndAccess(): Boolean = focusDnd.hasAccess()
+
+    fun setCountdown(name: String, day: Long?) {
+        viewModelScope.launch { repository.setCountdown(name.trim().take(Countdown.MAX_NAME), day) }
+    }
+
+    fun setAchievementNotes(enabled: Boolean) {
+        viewModelScope.launch { repository.setAchievementNotes(enabled) }
+    }
 
     fun setFocusDnd(enabled: Boolean) {
         viewModelScope.launch { repository.setFocusDnd(enabled) }

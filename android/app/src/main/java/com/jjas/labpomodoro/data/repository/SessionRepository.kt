@@ -61,6 +61,11 @@ class SessionRepository @Inject constructor(
     /** Todo el historial, para las estadísticas. */
     val allSessions: Flow<List<SessionEntity>> = sessionDao.observeAll()
 
+    suspend fun setNote(startedAtMillis: Long, note: String) = sessionDao.setNote(startedAtMillis, note)
+
+    /** Diario de notas de logro, de la más reciente a la más vieja. */
+    fun notes(limit: Int = 30): Flow<List<SessionEntity>> = sessionDao.observeNotes(limit)
+
     /** Todo el historial, para exportarlo. */
     suspend fun all(): List<SessionEntity> = sessionDao.all()
 }
