@@ -76,7 +76,8 @@ fun LabBackdrop(background: LabBackground, modifier: Modifier = Modifier) {
             LabBackground.FORMULAS -> formulas.forEachIndexed { i, f ->
                 val margin = size.width * 0.04f
                 val x = if (f.left) margin + f.jitter * margin else size.width - f.layout.size.width - margin - f.jitter * margin
-                val y = (i + 0.5f) / formulas.size * size.height * 0.9f
+                // Desde el 12 % de alto: arriba a la izquierda está el anillo de la meta
+                val y = size.height * (0.12f + 0.78f * (i + 0.5f) / formulas.size)
                 rotate(f.angle, Offset(x, y)) { drawText(f.layout, topLeft = Offset(x, y)) }
             }
         }

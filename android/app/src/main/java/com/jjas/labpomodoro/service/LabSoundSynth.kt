@@ -20,11 +20,15 @@ object LabSoundSynth {
         glass(t, 0f) + glass(t, 0.22f) * 0.8f
     }
 
-    /** Burbujeo: cinco burbujas que suben de tono, como un matraz al hervir suave. Descanso corto. */
+    /**
+     * Burbujeo: cinco burbujas que suben de tono, como un matraz al hervir suave. Descanso corto.
+     * Agudas (de 900 Hz para arriba): las bocinas del teléfono casi no dan los graves y con tonos
+     * más bajos el descanso empezaba sin que se oyera.
+     */
     fun bubbles(): ShortArray = render(1.3f) { t ->
         (0 until 5).sumOf { i ->
             val start = i * 0.22f + (i % 2) * 0.05f
-            bubble(t - start, 320f + i * 70f).toDouble()
+            bubble(t - start, 900f + i * 160f).toDouble()
         }.toFloat()
     }
 
@@ -60,9 +64,9 @@ object LabSoundSynth {
 
     /** Una burbuja: tono que sube rápido y se apaga, como al reventar en la superficie. */
     private fun bubble(local: Float, base: Float): Float {
-        if (local < 0f || local > 0.18f) return 0f
-        val freq = base * (1f + local * 9f)
-        return (sin(2 * PI * freq * local) * exp(-local * 22.0)).toFloat() * attack(local) * 0.6f
+        if (local < 0f || local > 0.2f) return 0f
+        val freq = base * (1f + local * 6f)
+        return (sin(2 * PI * freq * local) * exp(-local * 14.0)).toFloat() * attack(local)
     }
 
     /** Entrada suave de 3 ms para que no truene. */

@@ -128,4 +128,4 @@ class TimerEffects @Inject constructor(
 }
 
 /** Súbelo si cambian los sonidos sintetizados: los de la caché se vuelven a generar. */
-private const val LAB_SOUNDS_VERSION = 1
+private const val LAB_SOUNDS_VERSION = 2

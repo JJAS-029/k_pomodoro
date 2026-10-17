@@ -24,7 +24,7 @@ import com.jjas.labpomodoro.service.formatMinutesSeconds
 import com.jjas.labpomodoro.ui.main.TimerUi
 import com.jjas.labpomodoro.ui.main.TimerViewModel
 import com.jjas.labpomodoro.ui.main.Vessel
-import com.jjas.labpomodoro.ui.main.VesselUi
+import com.jjas.labpomodoro.ui.main.restingVessel
 import com.jjas.labpomodoro.ui.theme.JetBrainsMono
 
 /** Ventana flotante (PiP): solo el recipiente y el tiempo, reutilizando el mismo VesselView. */
@@ -40,7 +40,7 @@ fun PipScreen(viewModel: TimerViewModel = hiltViewModel()) {
             verticalArrangement = Arrangement.Center,
         ) {
             Vessel(
-                vessel = (timer as? TimerUi.Active)?.vessel ?: VesselUi.Resting,
+                vessel = (timer as? TimerUi.Active)?.vessel ?: restingVessel(),
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth(),

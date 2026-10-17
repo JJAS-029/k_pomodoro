@@ -34,7 +34,7 @@
     <string name="main_dock_sign_out">Salir</string>
     <string name="main_dock_sign_in">Entrar</string>
     <string name="main_new_experiment">Nuevo experimento</string>
-    <string name="main_start_button">Start</string>
+    <string name="main_start_button">Iniciar</string>
     <string name="main_more_options">Más opciones</string>
     <plurals name="main_plan_summary">
         <item quantity="one">%1$d pomodoro · %2$s de trabajo</item>

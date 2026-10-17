@@ -454,15 +454,17 @@ private fun SettingsContent(
         // Material You existe desde Android 12
         val dynamicAvailable = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
         SectionTitle(stringResource(R.string.set_section_appearance))
+        // Cada descripción debajo de su interruptor
         SwitchRow(stringResource(R.string.set_pure_black), settings.pureBlack, onPureBlackChange)
-        SwitchRow(stringResource(R.string.set_seasonal), settings.seasonalThemes, onSeasonalChange)
         Text(
-            stringResource(R.string.set_seasonal_desc),
+            stringResource(R.string.set_pure_black_desc),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+        Spacer(Modifier.height(12.dp))
+        SwitchRow(stringResource(R.string.set_seasonal), settings.seasonalThemes, onSeasonalChange)
         Text(
-            stringResource(R.string.set_pure_black_desc),
+            stringResource(R.string.set_seasonal_desc),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

@@ -532,7 +532,7 @@ private fun MainContent(
                     )
                 }
                 Vessel(
-                    vessel = (timer as? TimerUi.Active)?.vessel ?: VesselUi.Resting,
+                    vessel = (timer as? TimerUi.Active)?.vessel ?: restingVessel(),
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxWidth()
@@ -1431,3 +1431,12 @@ private fun NoteCard(onSave: (String) -> Unit, onSkip: () -> Unit) {
         }
     }
 }
+
+/** Recipiente en reposo: verde neón, o el color principal del sistema si se usa Material You (Pro). */
+@Composable
+internal fun restingVessel(): VesselUi =
+    if (LocalLabTheme.current.dynamicColor) {
+        VesselUi.Resting.copy(liquid = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f))
+    } else {
+        VesselUi.Resting
+    }

@@ -6,15 +6,19 @@ import com.jjas.labpomodoro.domain.model.FlameColor
 import com.jjas.labpomodoro.domain.model.GlassTint
 import com.jjas.labpomodoro.domain.model.LabBackground
 
-/** Tema de laboratorio activo: tinte del cristal (null = transparente), colores de la llama y fondo. */
+/**
+ * Tema de laboratorio activo: tinte del cristal (null = transparente), colores de la llama, fondo
+ * y si se usan los colores del sistema (Material You, Pro).
+ */
 data class LabThemeUi(
     val glassTint: Color? = null,
     val flame: FlameTones = FlameTones.Blue,
     val background: LabBackground = LabBackground.NONE,
+    val dynamicColor: Boolean = false,
 ) {
     companion object {
-        fun of(tint: GlassTint, flame: FlameColor, background: LabBackground) =
-            LabThemeUi(tint.argb?.let(::Color), FlameTones.of(flame), background)
+        fun of(tint: GlassTint, flame: FlameColor, background: LabBackground, dynamicColor: Boolean) =
+            LabThemeUi(tint.argb?.let(::Color), FlameTones.of(flame), background, dynamicColor)
     }
 }
 

@@ -4,7 +4,7 @@ Todo lo que hace falta para la ficha está en esta carpeta. Los pasos que siguen
 
 | Archivo | Para qué |
 |---|---|
-| `listing/es-419/`, `listing/en-US/` | Título, descripción corta y completa, imagen destacada (1024×500) y 5 capturas (1080×2160) por idioma |
+| `listing/es-419/`, `listing/en-US/` | Título, descripción corta y completa, imagen destacada (1024×500) y 8 capturas (1080×2160) por idioma: temporizador, plan, tabla, ficha, sintetizador, estadísticas, tu año y medallas |
 | `icon-512.png` | Ícono de la ficha |
 | `../privacy/index.html` | Política de privacidad (se publica con GitHub Pages) |
 | `../privacy/delete-account.html` | Página para pedir que se borre la cuenta |

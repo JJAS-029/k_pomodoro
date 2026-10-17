@@ -20,6 +20,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import java.time.Clock
+import java.time.Instant
+import java.time.ZoneId
 import javax.inject.Singleton
 
 @Module
@@ -56,7 +58,17 @@ object DataModule {
     fun providePreferencesDataStore(@ApplicationContext context: Context): DataStore<Preferences> =
         PreferenceDataStoreFactory.create { context.preferencesDataStoreFile("settings") }
 
-    /** Reloj inyectable: en los tests se reemplaza por uno fijo. */
+    /**
+     * Reloj inyectable: en los tests se reemplaza por uno fijo. Lee la zona horaria en cada uso
+     * (Clock.systemDefaultZone la fija al crearse): si el usuario viaja o cambia la zona con la app
+     * abierta, "hoy" sigue siendo su día.
+     */
     @Provides
-    fun provideClock(): Clock = Clock.systemDefaultZone()
+    fun provideClock(): Clock = SystemZoneClock
+}
+
+private object SystemZoneClock : Clock() {
+    override fun getZone(): ZoneId = ZoneId.systemDefault()
+    override fun withZone(zone: ZoneId): Clock = system(zone)
+    override fun instant(): Instant = Instant.now()
 }
