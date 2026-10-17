@@ -9,6 +9,7 @@ import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import com.jjas.labpomodoro.BuildConfig
 import com.jjas.labpomodoro.domain.model.AppSettings
 import com.jjas.labpomodoro.domain.model.FocusSound
@@ -57,6 +58,22 @@ class SettingsRepository @Inject constructor(
     suspend fun setFocusDnd(enabled: Boolean) = dataStore.edit { it[Keys.FOCUS_DND] = enabled }
 
     suspend fun setAchievementNotes(enabled: Boolean) = dataStore.edit { it[Keys.ACHIEVEMENT_NOTES] = enabled }
+
+    /**
+     * Marca el reto [key] como reclamado. Devuelve false si ya lo estaba, así el premio se entrega
+     * una sola vez. Solo se conservan los de la semana [week] (las claves empiezan con ella).
+     */
+    suspend fun claimChallenge(key: String, week: String): Boolean {
+        var claimed = false
+        dataStore.edit {
+            val current = it[Keys.CLAIMED_CHALLENGES].orEmpty().filter { k -> k.startsWith(week) }.toSet()
+            if (key !in current) {
+                it[Keys.CLAIMED_CHALLENGES] = current + key
+                claimed = true
+            }
+        }
+        return claimed
+    }
 
     /** [day] null quita la cuenta regresiva. */
     suspend fun setCountdown(name: String, day: Long?) = dataStore.edit {
@@ -217,6 +234,7 @@ class SettingsRepository @Inject constructor(
         val KEEP_SCREEN_ON = booleanPreferencesKey("keep_screen_on")
         val FOCUS_DND = booleanPreferencesKey("focus_dnd")
         val ACHIEVEMENT_NOTES = booleanPreferencesKey("achievement_notes")
+        val CLAIMED_CHALLENGES = stringSetPreferencesKey("claimed_challenges")
         val COUNTDOWN_NAME = stringPreferencesKey("countdown_name")
         val COUNTDOWN_DAY = longPreferencesKey("countdown_day")
         val AMBIENT_MODE = booleanPreferencesKey("ambient_mode")

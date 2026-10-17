@@ -215,4 +215,35 @@
     <string name="heat_day">%1$s: %2$s</string>
     <string name="note_section">Journal</string>
     <string name="note_section_subtitle">What you got done each pomodoro</string>
+    <string name="challenge_section">This week\'s challenges</string>
+    <string name="challenge_reward">Reward: a rare element</string>
+    <string name="challenge_done">Done! Your rare element is already in the table.</string>
+    <plurals name="challenge_days_left">
+        <item quantity="one">%1$d day left</item>
+        <item quantity="other">%1$d days left</item>
+    </plurals>
+    <plurals name="challenge_early">
+        <item quantity="one">%1$d pomodoro before 9 a.m.</item>
+        <item quantity="other">%1$d pomodoros before 9 a.m.</item>
+    </plurals>
+    <plurals name="challenge_days">
+        <item quantity="one">Focus on %1$d different day</item>
+        <item quantity="other">Focus on %1$d different days</item>
+    </plurals>
+    <plurals name="challenge_minutes">
+        <item quantity="one">%1$d minute of focus</item>
+        <item quantity="other">%1$d minutes of focus</item>
+    </plurals>
+    <plurals name="challenge_big_day">
+        <item quantity="one">A day with %1$d pomodoro</item>
+        <item quantity="other">A day with %1$d pomodoros</item>
+    </plurals>
+    <plurals name="challenge_tagged">
+        <item quantity="one">%1$d tagged pomodoro</item>
+        <item quantity="other">%1$d tagged pomodoros</item>
+    </plurals>
+    <plurals name="challenge_weekend">
+        <item quantity="one">%1$d pomodoro on the weekend</item>
+        <item quantity="other">%1$d pomodoros on the weekend</item>
+    </plurals>
 </resources>

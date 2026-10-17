@@ -25,6 +25,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import com.jjas.labpomodoro.domain.usecase.HeatDay
 import com.jjas.labpomodoro.domain.usecase.YearHeatmap
+import com.jjas.labpomodoro.domain.usecase.WeeklyChallenges
+import com.jjas.labpomodoro.domain.usecase.ChallengeProgress
 import com.jjas.labpomodoro.domain.model.SessionType
 import java.time.Clock
 import com.jjas.labpomodoro.data.local.entity.SessionEntity
@@ -48,6 +50,10 @@ data class StatsUi(
     val year: List<List<HeatDay?>> = emptyList(),
     /** Notas de logro recientes. */
     val notes: List<SessionEntity> = emptyList(),
+    /** Retos de esta semana y su avance. */
+    val challenges: List<ChallengeProgress> = emptyList(),
+    /** Días que le quedan a la semana, contando hoy. */
+    val weekDaysLeft: Int = 7,
 ) {
     val activeDays: Int get() = year.sumOf { week -> week.count { (it?.minutes ?: 0) > 0 } }
 }
@@ -85,6 +91,8 @@ class StatsViewModel @Inject constructor(
                 medals = medals,
                 tags = tags,
                 notes = notes,
+                challenges = WeeklyChallenges.progress(all, LocalDate.now(clock)),
+                weekDaysLeft = 7 - LocalDate.now(clock).dayOfWeek.ordinal,
                 year = YearHeatmap.weeks(
                     all.filter { it.type == SessionType.WORK && it.completed }
                         .groupBy { it.epochDay }

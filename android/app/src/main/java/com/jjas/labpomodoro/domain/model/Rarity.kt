@@ -38,6 +38,9 @@ enum class DiscoverySource {
 
     /** Fabricado en el sintetizador. */
     FUSION,
+
+    /** Premio de un reto semanal cumplido. */
+    CHALLENGE,
 }
 
 @StringRes

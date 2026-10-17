@@ -50,6 +50,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jjas.labpomodoro.R
+import com.jjas.labpomodoro.domain.usecase.ChallengeKind
+import com.jjas.labpomodoro.domain.usecase.ChallengeProgress
 import java.time.ZoneId
 import java.time.Instant
 import com.jjas.labpomodoro.data.local.entity.SessionEntity
@@ -149,6 +151,8 @@ fun StatsScreen(onBack: () -> Unit, onOpenPro: () -> Unit, initialTab: Int = 0, 
                     Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
                 } else if (tab == 1) {
                     LaunchedEffect(current.medals) { viewModel.markMedalsSeen(current.medals) }
+                    Challenges(current.challenges, current.weekDaysLeft)
+                    Spacer(Modifier.height(8.dp))
                     Medals(current.medals)
                 } else {
                     RangeSelector(range, viewModel::setRange)
@@ -562,4 +566,44 @@ private fun Notes(notes: List<SessionEntity>) {
             )
         }
     }
+}
+
+/** Retos de la semana: su avance y el premio (un elemento raro). */
+@Composable
+private fun Challenges(challenges: List<ChallengeProgress>, daysLeft: Int) {
+    if (challenges.isEmpty()) return
+    Section(stringResource(R.string.challenge_section), pluralStringResource(R.plurals.challenge_days_left, daysLeft, daysLeft))
+    challenges.forEach { challenge ->
+        val target = challenge.kind.target
+        Column(Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    pluralStringResource(challenge.kind.titleRes(), target, target),
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.weight(1f),
+                )
+                Text(
+                    if (challenge.done) "✓" else "${challenge.current.coerceAtMost(target)}/$target",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = if (challenge.done) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Spacer(Modifier.height(4.dp))
+            LinearProgressIndicator(progress = { challenge.fraction }, modifier = Modifier.fillMaxWidth())
+            Text(
+                stringResource(if (challenge.done) R.string.challenge_done else R.string.challenge_reward),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+private fun ChallengeKind.titleRes(): Int = when (this) {
+    ChallengeKind.EARLY_BIRD -> R.plurals.challenge_early
+    ChallengeKind.STEADY_DAYS -> R.plurals.challenge_days
+    ChallengeKind.FOCUS_MINUTES -> R.plurals.challenge_minutes
+    ChallengeKind.BIG_DAY -> R.plurals.challenge_big_day
+    ChallengeKind.TAGGED -> R.plurals.challenge_tagged
+    ChallengeKind.WEEKEND -> R.plurals.challenge_weekend
 }

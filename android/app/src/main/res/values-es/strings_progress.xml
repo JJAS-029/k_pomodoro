@@ -224,4 +224,42 @@
     <string name="heat_day">%1$s: %2$s</string>
     <string name="note_section">Diario</string>
     <string name="note_section_subtitle">Lo que lograste en cada pomodoro</string>
+    <string name="challenge_section">Retos de la semana</string>
+    <string name="challenge_reward">Premio: un elemento raro</string>
+    <string name="challenge_done">¡Cumplido! Tu elemento raro ya está en la tabla.</string>
+    <plurals name="challenge_days_left">
+        <item quantity="one">Queda %1$d día</item>
+        <item quantity="many">Quedan %1$d días</item>
+        <item quantity="other">Quedan %1$d días</item>
+    </plurals>
+    <plurals name="challenge_early">
+        <item quantity="one">%1$d pomodoro antes de las 9</item>
+        <item quantity="many">%1$d pomodoros antes de las 9</item>
+        <item quantity="other">%1$d pomodoros antes de las 9</item>
+    </plurals>
+    <plurals name="challenge_days">
+        <item quantity="one">Enfoque en %1$d día distinto</item>
+        <item quantity="many">Enfoque en %1$d días distintos</item>
+        <item quantity="other">Enfoque en %1$d días distintos</item>
+    </plurals>
+    <plurals name="challenge_minutes">
+        <item quantity="one">%1$d minuto de enfoque</item>
+        <item quantity="many">%1$d minutos de enfoque</item>
+        <item quantity="other">%1$d minutos de enfoque</item>
+    </plurals>
+    <plurals name="challenge_big_day">
+        <item quantity="one">Un día con %1$d pomodoro</item>
+        <item quantity="many">Un día con %1$d pomodoros</item>
+        <item quantity="other">Un día con %1$d pomodoros</item>
+    </plurals>
+    <plurals name="challenge_tagged">
+        <item quantity="one">%1$d pomodoro con etiqueta</item>
+        <item quantity="many">%1$d pomodoros con etiqueta</item>
+        <item quantity="other">%1$d pomodoros con etiqueta</item>
+    </plurals>
+    <plurals name="challenge_weekend">
+        <item quantity="one">%1$d pomodoro en fin de semana</item>
+        <item quantity="many">%1$d pomodoros en fin de semana</item>
+        <item quantity="other">%1$d pomodoros en fin de semana</item>
+    </plurals>
 </resources>

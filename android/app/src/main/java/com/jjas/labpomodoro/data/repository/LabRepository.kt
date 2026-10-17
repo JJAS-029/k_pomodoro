@@ -95,6 +95,14 @@ class LabRepository @Inject constructor(
 
     private fun prizeKey(rarity: Rarity, index: Int) = "${rarity.name}_$index"
 
+    /** Premio de un reto semanal: un elemento raro, elegido como las recompensas. */
+    suspend fun grantChallengeReward() = mutex.withLock {
+        db.withTransaction {
+            val counts = currentCounts().toMutableMap()
+            give(picker.pick(Rarity.RARE, counts).atomicNumber, DiscoverySource.CHALLENGE)
+        }
+    }
+
     /** Veces obtenido; los descubiertos sin registro (de antes de la tabla de hallazgos) cuentan como 1. */
     private suspend fun currentCounts(): Map<Int, Int> {
         val counts = discoveryDao.countsByElement().associate { it.atomicNumber to it.total }.toMutableMap()
