@@ -611,7 +611,7 @@ Hecho: **Ajustar el plan en curso** — `TimerEngine.extendCurrent` (+5 min, top
 | Tienda de cristalería | Gastar elementos repetidos en recipientes y fondos cosméticos (le da otro uso a los repetidos) | 🟡 | No |
 | Tableta y horizontal | Diseño a dos columnas en tabletas y plegables, y pantalla principal en horizontal | 🟡 | No |
 | Wear OS | Tile y complicación con el tiempo restante en el reloj | 🔴 | Pro |
-| Accesibilidad | Revisión completa con TalkBack y tamaños de letra grandes | 🟢 | No |
+| 🟡 Accesibilidad (primera pasada: botones redondos del menú con nombre, anillo de la meta leído completo, burbuja con acción; falta probar con TalkBack y letra grande en un dispositivo) | Revisión completa con TalkBack y tamaños de letra grandes | 🟢 | No |
 
 #### Ideas nuevas (14 de octubre de 2026, por decidir)
 

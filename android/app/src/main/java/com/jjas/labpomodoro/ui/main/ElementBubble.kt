@@ -130,7 +130,10 @@ fun ElementBubble(
                     }
                 },
         ) {
-            Box(contentAlignment = Alignment.Center, modifier = Modifier.size(bubble).clip(CircleShape).clickable(onClick = onOpen)) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.size(bubble).clip(CircleShape).clickable(onClickLabel = stringResource(R.string.bubble_open), onClick = onOpen),
+            ) {
                 GlassOrb(first.element.category.glass(MaterialTheme.colorScheme.isLight).orb)
                 ElementTile(first.element, discovered = true, size = 44.dp)
                 if (rewards.size > 1) {

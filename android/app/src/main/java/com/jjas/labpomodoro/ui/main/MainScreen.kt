@@ -88,6 +88,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jjas.labpomodoro.R
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import com.jjas.labpomodoro.ui.components.LocalLabTheme
 import com.jjas.labpomodoro.ui.components.LabBackdrop
 import com.jjas.labpomodoro.ui.components.SeasonalBackdrop
@@ -837,7 +839,8 @@ private fun LabMenu(timer: TimerUi?, account: MainUiState, actions: MainActions,
 private fun MenuButton(icon: Int, label: String, onClick: () -> Unit) {
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.width(76.dp)) {
         FilledTonalIconButton(onClick = onClick, modifier = Modifier.size(56.dp)) {
-            Icon(painterResource(icon), contentDescription = null)
+            // El nombre va abajo como texto aparte: TalkBack lo toma del ícono
+            Icon(painterResource(icon), contentDescription = label)
         }
         Text(
             label,
@@ -1353,8 +1356,14 @@ private fun GoalRing(goal: GoalUi, onClick: () -> Unit, modifier: Modifier = Mod
                 drawArc(color, -90f, 360f * fraction, false, Offset(inset, inset), arc, style = Stroke(stroke, cap = StrokeCap.Round))
             }
         }
+        val spoken = if (daily) {
+            pluralStringResource(R.plurals.goal_today, goal.goal, goal.today, goal.goal)
+        } else {
+            pluralStringResource(R.plurals.goal_week, goal.weekGoal, goal.week, goal.weekGoal)
+        }
         Text(
             if (daily) "${goal.today}/${goal.goal}" else "${goal.week}/${goal.weekGoal}",
+            modifier = Modifier.semantics { contentDescription = spoken },
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onBackground,
         )

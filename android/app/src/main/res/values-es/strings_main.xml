@@ -290,4 +290,5 @@
         <item quantity="many">Esta semana: %1$d de %2$d pomodoros</item>
         <item quantity="other">Esta semana: %1$d de %2$d pomodoros</item>
     </plurals>
+    <string name="bubble_open">Ver en la tabla periódica</string>
 </resources>

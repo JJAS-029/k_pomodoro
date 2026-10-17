@@ -279,4 +279,5 @@
         <item quantity="one">This week: %1$d of %2$d pomodoro</item>
         <item quantity="other">This week: %1$d of %2$d pomodoros</item>
     </plurals>
+    <string name="bubble_open">See it in the periodic table</string>
 </resources>
