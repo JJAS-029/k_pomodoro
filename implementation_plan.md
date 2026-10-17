@@ -603,7 +603,7 @@ Hecho: **Ajustar el plan en curso** — `TimerEngine.extendCurrent` (+5 min, top
 | Notas de logro | Al terminar un pomodoro, una línea opcional "¿Qué lograste?"; historial tipo diario | 🟢 | Pro |
 | ✅ Mapa de calor anual (Tu progreso › Estadísticas › Tu año: 53 semanas, 5 niveles, tocar un día muestra su enfoque) | Cuadrícula de días del año (estilo GitHub) en Progreso | 🟢 | No |
 | ✅ Accesos directos del ícono (Iniciar plan, las dos primeras plantillas y Tu progreso; `ShortcutPublisher` los actualiza al cambiar las plantillas). App Actions de "Ok Google": pendiente | Mantener presionado el ícono: "Iniciar plan", "Plan corto", "Ver progreso"; y "Ok Google, inicia un pomodoro" (App Actions) | 🟢 | No |
-| Pausas activas | En los descansos, sugerencias breves: estirarse, respirar 4-7-8, tomar agua, mirar lejos 20 s | 🟢 | No |
+| ✅ Pausas activas (una sugerencia por descanso bajo el reloj: agua, 20-20-20, estiramientos, respiración 4-7-8; más completas en los largos) | En los descansos, sugerencias breves: estirarse, respirar 4-7-8, tomar agua, mirar lejos 20 s | 🟢 | No |
 | Retos semanales | Retos que cambian cada semana ("3 pomodoros antes de las 9") con un elemento raro de premio | 🟡 | No |
 | Cuenta regresiva a una fecha | "Faltan 12 días para el examen" en la pantalla principal y el widget | 🟢 | No |
 | Respaldo a archivo | Exportar e importar todo el progreso a un archivo, sin cuenta de Google | 🟢 | No |

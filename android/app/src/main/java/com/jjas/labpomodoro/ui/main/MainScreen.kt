@@ -88,6 +88,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jjas.labpomodoro.R
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.geometry.Size
@@ -947,6 +948,26 @@ private fun ActivePanel(active: TimerUi.Active, clockColor: Color, tags: TagsUi 
         ActiveIndicator(active)
         // Solo si ya usa etiquetas: quien no las usa no ve nada nuevo mientras trabaja
         if (tags.tags.isNotEmpty()) CurrentTag(tags.find(tags.current), onOpenTags)
+        // Pausa activa: una sugerencia distinta en cada descanso
+        if (active.type != SessionType.WORK) BreakTip(active.type, active.sessionNumber)
+    }
+}
+
+/** Sugerencia para el descanso: moverse, respirar o descansar la vista. Las largas son más completas. */
+@Composable
+private fun BreakTip(type: SessionType, sessionNumber: Int) {
+    val tips = stringArrayResource(if (type == SessionType.LONG_BREAK) R.array.break_tips_long else R.array.break_tips_short)
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        modifier = Modifier.padding(top = 8.dp),
+    ) {
+        Text(
+            tips[sessionNumber.mod(tips.size)],
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+        )
     }
 }
 

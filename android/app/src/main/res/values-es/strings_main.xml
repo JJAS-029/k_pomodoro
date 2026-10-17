@@ -258,4 +258,21 @@
     <string name="goal_short">Meta</string>
     <string name="shortcut_start">Iniciar plan</string>
     <string name="shortcut_progress">Tu progreso</string>
+    <!-- Pausas activas: una por descanso, en orden -->
+    <string-array name="break_tips_short">
+        <item>💧 Toma un vaso de agua.</item>
+        <item>👀 Regla 20-20-20: mira algo lejano durante 20 segundos.</item>
+        <item>🙆 Estira el cuello: inclina la cabeza a cada lado 10 segundos.</item>
+        <item>🌬️ Respira 4-7-8: inhala 4 segundos, sostén 7 y exhala 8. Tres veces.</item>
+        <item>🚶 Levántate y camina un poco, aunque sea dentro del cuarto.</item>
+        <item>✋ Abre y cierra las manos diez veces y gira las muñecas.</item>
+        <item>🪟 Abre la ventana o busca un poco de luz natural.</item>
+        <item>🧘 Hombros arriba, sostén 3 segundos y suéltalos. Cinco veces.</item>
+    </string-array>
+    <string-array name="break_tips_long">
+        <item>🍎 Come algo ligero y toma agua. Nada de pantallas un rato.</item>
+        <item>🚶 Sal a caminar 10 minutos: el cerebro ordena lo que aprendiste.</item>
+        <item>🧘 Estira la espalda: brazos arriba, luego toca tus pies sin forzar.</item>
+        <item>😌 Cierra los ojos y respira lento. Un descanso de verdad también cuenta.</item>
+    </string-array>
 </resources>

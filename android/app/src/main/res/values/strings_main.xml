@@ -249,4 +249,21 @@
     <string name="goal_short">Goal</string>
     <string name="shortcut_start">Start plan</string>
     <string name="shortcut_progress">Your progress</string>
+    <!-- Active breaks: one per break, in order -->
+    <string-array name="break_tips_short">
+        <item>💧 Drink a glass of water.</item>
+        <item>👀 20-20-20 rule: look at something far away for 20 seconds.</item>
+        <item>🙆 Stretch your neck: tilt your head to each side for 10 seconds.</item>
+        <item>🌬️ 4-7-8 breathing: inhale 4 seconds, hold 7, exhale 8. Three times.</item>
+        <item>🚶 Stand up and walk a little, even around the room.</item>
+        <item>✋ Open and close your hands ten times and roll your wrists.</item>
+        <item>🪟 Open the window or find some natural light.</item>
+        <item>🧘 Shoulders up, hold 3 seconds, let them drop. Five times.</item>
+    </string-array>
+    <string-array name="break_tips_long">
+        <item>🍎 Have a light snack and some water. No screens for a while.</item>
+        <item>🚶 Take a 10-minute walk: your brain sorts out what you learned.</item>
+        <item>🧘 Stretch your back: arms up, then reach for your toes gently.</item>
+        <item>😌 Close your eyes and breathe slowly. A real rest counts too.</item>
+    </string-array>
 </resources>
