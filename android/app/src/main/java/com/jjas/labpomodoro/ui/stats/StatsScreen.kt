@@ -50,6 +50,18 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jjas.labpomodoro.R
+import java.time.format.FormatStyle
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.Canvas
+import com.jjas.labpomodoro.domain.usecase.HeatDay
 import com.jjas.labpomodoro.ui.league.LeaguePanel
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.material3.Tab
@@ -149,6 +161,11 @@ fun StatsScreen(onBack: () -> Unit, onOpenPro: () -> Unit, initialTab: Int = 0, 
                     } else {
                         Charts(current.stats)
                     }
+                    Section(
+                        stringResource(R.string.heat_section),
+                        pluralStringResource(R.plurals.heat_subtitle, current.activeDays, current.activeDays),
+                    )
+                    YearHeatmapView(current.year)
                     Section(stringResource(R.string.tag_stats_section), stringResource(R.string.tag_stats_subtitle))
                     Tags(current.tags)
                     Section(stringResource(R.string.prog_places_section))
@@ -428,4 +445,97 @@ private fun PlaceRow(place: PlaceTotal, maxSeconds: Long, onRename: (Long, Strin
             },
         )
     }
+}
+
+/**
+ * Mapa de calor del último año, al estilo de GitHub: una columna por semana (lunes arriba) y un
+ * cuadro por día, más intenso entre más enfoque. Arranca mostrando lo más reciente; al tocar un
+ * día se ve su fecha y sus minutos.
+ */
+@Composable
+private fun YearHeatmapView(weeks: List<List<HeatDay?>>) {
+    if (weeks.isEmpty()) return
+    val locale = LocalConfiguration.current.locales[0]
+    val accent = MaterialTheme.colorScheme.primary
+    val empty = MaterialTheme.colorScheme.surfaceVariant
+    val labelColor = MaterialTheme.colorScheme.onSurfaceVariant
+    val levels = listOf(empty, accent.copy(alpha = 0.3f), accent.copy(alpha = 0.5f), accent.copy(alpha = 0.75f), accent)
+    val measurer = rememberTextMeasurer()
+    val labelStyle = MaterialTheme.typography.labelSmall.copy(color = labelColor)
+    var selected by remember { mutableStateOf<HeatDay?>(null) }
+    val scroll = rememberScrollState()
+    LaunchedEffect(scroll.maxValue) { scroll.scrollTo(scroll.maxValue) }
+    val cell = 13.dp
+    val gap = 3.dp
+    val monthFormat = remember(locale) { DateTimeFormatter.ofPattern("MMM", locale) }
+    Row {
+        // Lunes, miércoles y viernes, como referencia
+        Column(Modifier.padding(top = 18.dp, end = 4.dp)) {
+            DayOfWeek.entries.forEachIndexed { i, day ->
+                Box(Modifier.height(cell + gap), contentAlignment = Alignment.CenterStart) {
+                    if (i % 2 == 0 && i < 6) Text(day.getDisplayName(TextStyle.NARROW, locale), style = labelStyle)
+                }
+            }
+        }
+        Box(Modifier.horizontalScroll(scroll)) {
+            Canvas(
+                Modifier
+                    .width((cell + gap) * weeks.size)
+                    .height(18.dp + (cell + gap) * 7)
+                    .pointerInput(weeks) {
+                        detectTapGestures { pos ->
+                            val step = (cell + gap).toPx()
+                            val w = (pos.x / step).toInt()
+                            val d = ((pos.y - 18.dp.toPx()) / step).toInt()
+                            selected = weeks.getOrNull(w)?.getOrNull(d)
+                        }
+                    },
+            ) {
+                val step = (cell + gap).toPx()
+                val size = cell.toPx()
+                val top = 18.dp.toPx()
+                weeks.forEachIndexed { w, week ->
+                    // Nombre del mes en la semana donde empieza
+                    val first = week.firstOrNull()?.date
+                    if (first != null && first.dayOfMonth <= 7) {
+                        drawText(measurer, monthFormat.format(first).trimEnd('.'), Offset(w * step, 0f), labelStyle)
+                    }
+                    week.forEachIndexed { d, day ->
+                        if (day != null) {
+                            drawRoundRect(
+                                levels[day.level],
+                                topLeft = Offset(w * step, top + d * step),
+                                size = Size(size, size),
+                                cornerRadius = CornerRadius(size * 0.25f),
+                            )
+                            if (day == selected) {
+                                drawRoundRect(
+                                    labelColor,
+                                    topLeft = Offset(w * step, top + d * step),
+                                    size = Size(size, size),
+                                    cornerRadius = CornerRadius(size * 0.25f),
+                                    style = Stroke(1.5.dp.toPx()),
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    Spacer(Modifier.height(6.dp))
+    val day = selected
+    Text(
+        if (day == null) {
+            stringResource(R.string.heat_tap)
+        } else {
+            stringResource(
+                R.string.heat_day,
+                day.date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale)),
+                formatFocus(day.minutes * 60L),
+            )
+        },
+        style = MaterialTheme.typography.bodySmall,
+        color = labelColor,
+    )
 }

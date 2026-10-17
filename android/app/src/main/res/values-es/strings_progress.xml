@@ -214,4 +214,12 @@
     </plurals>
     <string name="prog_tab_stats">Estadísticas</string>
     <string name="prog_tab_medals">Medallas</string>
+    <string name="heat_section">Tu año</string>
+    <plurals name="heat_subtitle">
+        <item quantity="one">%1$d día con enfoque en los últimos 12 meses</item>
+        <item quantity="many">%1$d días con enfoque en los últimos 12 meses</item>
+        <item quantity="other">%1$d días con enfoque en los últimos 12 meses</item>
+    </plurals>
+    <string name="heat_tap">Toca un día para ver su enfoque</string>
+    <string name="heat_day">%1$s: %2$s</string>
 </resources>

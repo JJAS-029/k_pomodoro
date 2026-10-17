@@ -23,6 +23,9 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import com.jjas.labpomodoro.domain.usecase.HeatDay
+import com.jjas.labpomodoro.domain.usecase.YearHeatmap
+import com.jjas.labpomodoro.domain.model.SessionType
 import java.time.Clock
 import java.time.LocalDate
 import javax.inject.Inject
@@ -40,7 +43,11 @@ data class StatsUi(
     val places: PlacesUi,
     val tags: List<TagTotal> = emptyList(),
     val medals: List<MedalProgress>,
-)
+    /** Mapa de calor del último año (no depende del periodo elegido). */
+    val year: List<List<HeatDay?>> = emptyList(),
+) {
+    val activeDays: Int get() = year.sumOf { week -> week.count { (it?.minutes ?: 0) > 0 } }
+}
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -74,6 +81,12 @@ class StatsViewModel @Inject constructor(
                 },
                 medals = medals,
                 tags = tags,
+                year = YearHeatmap.weeks(
+                    all.filter { it.type == SessionType.WORK && it.completed }
+                        .groupBy { it.epochDay }
+                        .mapValues { (_, day) -> day.sumOf { it.actualSeconds } / 60 },
+                    LocalDate.now(clock),
+                ),
             )
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
