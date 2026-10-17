@@ -164,6 +164,7 @@ fun SettingsScreen(
                     onPureBlackChange = viewModel::setPureBlack,
                     onPaletteChange = viewModel::setLabPalette,
                     onGlassTintChange = viewModel::setGlassTint,
+                    onSeasonalChange = viewModel::setSeasonalThemes,
                     onAchievementNotesChange = viewModel::setAchievementNotes,
                     onLabSoundsChange = viewModel::setLabSounds,
                     onCountdownChange = viewModel::setCountdown,
@@ -259,6 +260,7 @@ private fun SettingsContent(
     onPureBlackChange: (Boolean) -> Unit = {},
     onPaletteChange: (LabPalette) -> Unit = {},
     onGlassTintChange: (GlassTint) -> Unit = {},
+    onSeasonalChange: (Boolean) -> Unit = {},
     onFocusDndChange: (Boolean) -> Unit = {},
     onAchievementNotesChange: (Boolean) -> Unit = {},
     onLabSoundsChange: (Boolean) -> Unit = {},
@@ -450,6 +452,12 @@ private fun SettingsContent(
         val dynamicAvailable = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
         SectionTitle(stringResource(R.string.set_section_appearance))
         SwitchRow(stringResource(R.string.set_pure_black), settings.pureBlack, onPureBlackChange)
+        SwitchRow(stringResource(R.string.set_seasonal), settings.seasonalThemes, onSeasonalChange)
+        Text(
+            stringResource(R.string.set_seasonal_desc),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
         Text(
             stringResource(R.string.set_pure_black_desc),
             style = MaterialTheme.typography.bodySmall,
@@ -787,7 +795,7 @@ private fun PaletteChooser(selected: LabPalette, isPro: Boolean, onSelect: (LabP
     )
     Spacer(Modifier.height(8.dp))
     Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        LabPalette.entries.forEach { palette ->
+        LabPalette.entries.filterNot { it.seasonal }.forEach { palette ->
             FilterChip(
                 selected = palette == selected,
                 onClick = { if (isPro) onSelect(palette) else onOpenPro() },

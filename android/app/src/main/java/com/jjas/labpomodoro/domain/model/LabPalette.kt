@@ -17,6 +17,8 @@ enum class LabPalette(
     val lightness: Float,
     val shortBreak: Long,
     val longBreak: Long,
+    /** De temporada: no se elige, la usa la app esos días. */
+    val seasonal: Boolean = false,
 ) {
     CLASSIC(R.string.set_palette_classic, listOf(0f..360f), 0.8f, 0.6f, 0xFF2ECC71, 0xFFE74C3C),
     NEON(R.string.set_palette_neon, listOf(290f..360f, 0f..15f, 165f..200f, 85f..130f), 1f, 0.58f, 0xFF00FFC6, 0xFFFF2E9A),
@@ -24,6 +26,10 @@ enum class LabPalette(
     OCEAN(R.string.set_palette_ocean, listOf(165f..235f), 0.75f, 0.55f, 0xFF4DD0E1, 0xFF3949AB),
     AURORA(R.string.set_palette_aurora, listOf(100f..180f, 260f..300f), 0.8f, 0.62f, 0xFF69F0AE, 0xFFB388FF),
     PASTEL(R.string.set_palette_pastel, listOf(0f..360f), 0.6f, 0.78f, 0xFFA8E6CF, 0xFFFFB7B2),
+
+    // Temporadas: cempasúchil, magenta y morado; hielo con rojo y verde
+    SEASON_MUERTOS(R.string.set_palette_muertos, listOf(25f..45f, 320f..340f, 270f..290f), 0.95f, 0.55f, 0xFFFFB300, 0xFFE91E63, seasonal = true),
+    SEASON_WINTER(R.string.set_palette_winter, listOf(185f..215f, 350f..360f, 120f..140f), 0.7f, 0.62f, 0xFFB3E5FC, 0xFFE53935, seasonal = true),
     ;
 
     /** Tono de un pomodoro a partir de un número 0..1: los rangos pesan según lo anchos que son. */

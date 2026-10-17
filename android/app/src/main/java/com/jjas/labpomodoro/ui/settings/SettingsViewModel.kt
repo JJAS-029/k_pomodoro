@@ -151,6 +151,10 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { repository.setFocusDnd(enabled) }
     }
 
+    fun setSeasonalThemes(enabled: Boolean) {
+        viewModelScope.launch { repository.setSeasonalThemes(enabled) }
+    }
+
     fun setGlassTint(tint: GlassTint) {
         viewModelScope.launch { repository.setGlassTint(tint) }
     }

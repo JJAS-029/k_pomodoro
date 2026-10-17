@@ -36,6 +36,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import com.jjas.labpomodoro.domain.model.Season
 import java.time.LocalDate
 import com.jjas.labpomodoro.domain.usecase.Countdown
 import com.jjas.labpomodoro.domain.model.PlanTemplate
@@ -138,6 +139,8 @@ data class TimerScreenState(
     val ambientDelayMillis: Long? = null,
     /** Plantillas guardadas; null = aún no se tocan (se muestran las sugeridas). */
     val templates: List<PlanTemplate>? = null,
+    /** Temporada activa (Día de Muertos, invierno), si los temas de temporada están encendidos. */
+    val season: Season? = null,
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -218,7 +221,7 @@ class TimerViewModel @Inject constructor(
                 fun reagent(i: Int): Element? =
                     VesselReagents.reagent(timer.plan, i, timer.planSeed, pool, settings.vesselElement)
                 fun liquid(i: Int): Color =
-                    reagent(i)?.look()?.color ?: LiquidPalette.liquid(timer.plan[i].type, timer.planSeed, i, settings.activePalette)
+                    reagent(i)?.look()?.color ?: LiquidPalette.liquid(timer.plan[i].type, timer.planSeed, i, settings.paletteOn(LocalDate.now()))
                 TimerUi.Active(
                     type = timer.current.type,
                     remainingMillis = remaining,
@@ -231,7 +234,7 @@ class TimerViewModel @Inject constructor(
                         shape = LiquidPalette.vessel(timer.planSeed, timer.index),
                         fill = if (type == SessionType.WORK) 1f - progress else progress,
                         liquid = liquid(timer.index),
-                        bubbles = LiquidPalette.bubble(type, timer.planSeed, timer.index, settings.activePalette),
+                        bubbles = LiquidPalette.bubble(type, timer.planSeed, timer.index, settings.paletteOn(LocalDate.now())),
                         effect = if (type == SessionType.WORK) LiquidEffect.VAPOR else LiquidEffect.BUBBLES,
                         animate = !timer.isPaused,
                         element = reagent(timer.index),
@@ -297,6 +300,7 @@ class TimerViewModel @Inject constructor(
             rainAmbience = settings.isPro && settings.focusSound == FocusSound.RAIN,
             ambientDelayMillis = if (running && settings.ambientActive) settings.ambientDelayMinutes * 60_000L else null,
             templates = settings.planTemplates,
+            season = settings.seasonOn(LocalDate.now()),
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), TimerScreenState())
 

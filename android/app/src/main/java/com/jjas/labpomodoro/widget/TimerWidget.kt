@@ -247,7 +247,7 @@ class TimerWidgetSync @Inject constructor(
                 ?: context.getString(R.string.main_last_session),
         )
         val progress = (1f - remaining / (state.current.durationSeconds * 1000f)).coerceIn(0f, 1f)
-        val color = element?.look()?.color ?: LiquidPalette.liquid(type, state.planSeed, state.index, prefs.activePalette)
+        val color = element?.look()?.color ?: LiquidPalette.liquid(type, state.planSeed, state.index, prefs.paletteOn(java.time.LocalDate.now()))
         views.setImageViewBitmap(
             R.id.widget_vessel,
             vessel(LiquidPalette.vessel(state.planSeed, state.index), if (type == SessionType.WORK) 1f - progress else progress, color, light, element?.let { ElementSignatures.tones(it.atomicNumber) }),

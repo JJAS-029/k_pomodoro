@@ -286,4 +286,8 @@
     </plurals>
     <string name="set_lab_sounds">Sonidos de laboratorio</string>
     <string name="set_lab_sounds_desc">Tintineo de vidrio al empezar a trabajar, burbujeo en los descansos cortos y copas de cristal en los largos.</string>
+    <string name="set_seasonal">Temas de temporada</string>
+    <string name="set_seasonal_desc">En Día de Muertos caen pétalos de cempasúchil y en invierno, nieve; los líquidos toman colores de la temporada (si usas la paleta clásica).</string>
+    <string name="set_palette_muertos">Día de Muertos</string>
+    <string name="set_palette_winter">Invierno</string>
 </resources>

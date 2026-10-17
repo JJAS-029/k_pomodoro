@@ -101,6 +101,8 @@ class SettingsRepository @Inject constructor(
 
     suspend fun setGlassTint(tint: GlassTint) = dataStore.edit { it[Keys.GLASS_TINT] = tint.name }
 
+    suspend fun setSeasonalThemes(enabled: Boolean) = dataStore.edit { it[Keys.SEASONAL] = enabled }
+
     suspend fun setDailyGoal(goal: Int) = dataStore.edit { it[Keys.DAILY_GOAL] = goal }
 
     suspend fun setWeeklyGoal(goal: Int) = dataStore.edit { it[Keys.WEEKLY_GOAL] = goal }
@@ -206,6 +208,7 @@ class SettingsRepository @Inject constructor(
             weeklyGoal = this[Keys.WEEKLY_GOAL] ?: defaults.weeklyGoal,
             goalCelebratedDay = this[Keys.GOAL_CELEBRATED_DAY] ?: defaults.goalCelebratedDay,
             planTemplates = this[Keys.PLAN_TEMPLATES]?.let(PlanTemplate::decode),
+            seasonalThemes = this[Keys.SEASONAL] ?: defaults.seasonalThemes,
             glassTint = this[Keys.GLASS_TINT]?.let { name -> GlassTint.entries.firstOrNull { it.name == name } } ?: defaults.glassTint,
             flameColor = this[Keys.FLAME_COLOR]?.let { name -> FlameColor.entries.firstOrNull { it.name == name } } ?: defaults.flameColor,
             vesselElement = this[Keys.VESSEL_ELEMENT] ?: defaults.vesselElement,
@@ -254,6 +257,7 @@ class SettingsRepository @Inject constructor(
         val EXACT_ALARM_ASKED = booleanPreferencesKey("exact_alarm_asked")
         val LAB_PALETTE = stringPreferencesKey("lab_palette")
         val GLASS_TINT = stringPreferencesKey("glass_tint")
+        val SEASONAL = booleanPreferencesKey("seasonal_themes")
         val DAILY_GOAL = intPreferencesKey("daily_goal")
         val WEEKLY_GOAL = intPreferencesKey("weekly_goal")
         val GOAL_CELEBRATED_DAY = longPreferencesKey("goal_celebrated_day")

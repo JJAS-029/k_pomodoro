@@ -1,5 +1,7 @@
 package com.jjas.labpomodoro.domain.model
 
+import java.time.LocalDate
+
 /** Qué hacer cuando las horas pedidas no son múltiplo exacto de la duración del pomodoro. */
 enum class PlanRounding {
     /** Recorta el último pomodoro para no pasarse nunca de las horas pedidas (por defecto). */
@@ -80,6 +82,8 @@ data class AppSettings(
     val goalCelebratedDay: Long = -1,
     /** Plantillas de plan; null = aún no se tocan (se muestran las sugeridas). */
     val planTemplates: List<PlanTemplate>? = null,
+    /** Temas de temporada (Día de Muertos, invierno): paleta y algo que cae al fondo. */
+    val seasonalThemes: Boolean = true,
     /** Tinte del cristal (Pro). */
     val glassTint: GlassTint = GlassTint.CLEAR,
     /** Color de la llama del mechero (Pro). */
@@ -117,6 +121,13 @@ data class AppSettings(
 
     /** La paleta elegida solo cuenta con Pro; si no, la clásica. */
     val activePalette: LabPalette get() = if (isPro) labPalette else LabPalette.CLASSIC
+
+    /** Temporada activa en [date], si los temas de temporada están encendidos. */
+    fun seasonOn(date: LocalDate): Season? = if (seasonalThemes) Season.on(date) else null
+
+    /** Paleta de los líquidos en [date]: la elegida (Pro) o, si es la clásica, la de temporada. */
+    fun paletteOn(date: LocalDate): LabPalette =
+        activePalette.takeIf { it != LabPalette.CLASSIC } ?: seasonOn(date)?.palette ?: LabPalette.CLASSIC
 
     /** Tinte y llama solo cuentan con Pro. */
     val activeGlassTint: GlassTint get() = if (isPro) glassTint else GlassTint.CLEAR
