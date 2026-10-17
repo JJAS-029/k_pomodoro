@@ -1109,6 +1109,7 @@ fun Vessel(vessel: VesselUi, modifier: Modifier = Modifier, refraction: Boolean 
         refraction = refraction,
         interactive = interactive,
         tones = tones,
+        boiling = vessel.boiling,
     )
 }
 

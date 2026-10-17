@@ -567,7 +567,7 @@ Prototipo **LIQUID_GLASS** (en la pantalla de prueba de debug, junto a los demá
 |---|---|---|---|
 | ✅ Indicador al terminar (fenolftaleína: en el último 15 % de los pomodoros sin premio el líquido vira a rosa fucsia) | Al completar un pomodoro el líquido cambia de color como un indicador (fenolftaleína: transparente → rosa) antes del descanso | 🟢 | No |
 | Descubrimiento con tarjeta | El elemento nuevo aparece como una tarjeta que gira y brilla según su rareza, en vez de solo el aviso | 🟡 | No |
-| Hervor al final | En el último minuto de trabajo el líquido hierve (burbujas grandes y vapor más denso) para avisar sin sonido | 🟢 | No |
+| ✅ Hervor al final (último minuto de trabajo: burbujas grandes desde el fondo y el doble de vapor) | En el último minuto de trabajo el líquido hierve (burbujas grandes y vapor más denso) para avisar sin sonido | 🟢 | No |
 | Sonidos de laboratorio | Opcionales: tintineo de vidrio al terminar y burbujeo suave (además de los avisos actuales) | 🟢 | Pro |
 | Fondos de laboratorio | Mesa de trabajo, azulejos o pizarrón detrás del recipiente (opcional, el negro sigue por defecto) | 🟡 | Pro |
 | Temas de temporada | Líquidos fluorescentes en Halloween, nieve en diciembre, etc., por unos días | 🟡 | No |
@@ -631,7 +631,9 @@ Hecho: **Ajustar el plan en curso** — `TimerEngine.extendCurrent` (+5 min, top
 - Prueba cerrada: 12 testers durante 14 días antes de pedir producción.
 - Al pasar a producción: vincular AdMob con Play y publicar `app-ads.txt`.
 - `setSourceRectHint` en PiP (sugerencia de lint) y `setAutoEnterEnabled`.
-- iPhone: en pausa.
+- iPhone: en pausa. Opciones evaluadas (16 oct 2026):
+  - **xtool** (github.com/xtool-org/xtool, MIT): compila, firma e instala apps de iOS desde Windows (WSL + USB), con el SDK sacado de Xcode.xip y un iPhone físico (sin simulador). Solo Swift/SwiftUI: habría que reescribir la app; no documenta subir a App Store/TestFlight. Útil para probar en un iPhone propio.
+  - **Recomendado para publicar:** Kotlin Multiplatform compartiendo la lógica (timer, reglas, elementos, medallas) y compilando iOS en un Mac en la nube (GitHub Actions con macOS o Codemagic). Requiere el programa de desarrollador de Apple (99 USD/año).
 
 
 ---

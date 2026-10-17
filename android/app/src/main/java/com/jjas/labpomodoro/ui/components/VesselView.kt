@@ -124,6 +124,8 @@ fun VesselView(
     look: GlassLook = GlassLook.LIQUID_GLASS,
     /** Tonos propios (firma de un elemento); si no, se calculan del color del líquido. */
     tones: LiquidTones? = null,
+    /** Último minuto del trabajo: el líquido hierve (burbujas grandes y más vapor). */
+    boiling: Boolean = false,
 ) {
     val glassShader = remember { createGlassShader() }
     val glass = glassStyle()
@@ -136,6 +138,7 @@ fun VesselView(
     val animatedColor by animateColorAsState(liquidColor, tween(600), label = "liquid")
     val currentFill by rememberUpdatedState(animatedFill)
     val currentEffect by rememberUpdatedState(effect)
+    val currentBoiling by rememberUpdatedState(boiling)
     val currentAnimate by rememberUpdatedState(animate)
     val currentBehavior by rememberUpdatedState(behavior)
 
@@ -151,7 +154,7 @@ fun VesselView(
             withFrameNanos { now ->
                 val dt = if (last == 0L) 0f else ((now - last) / 1_000_000_000f).coerceAtMost(0.1f)
                 last = now
-                particles.update(dt, currentFill, currentEffect, currentBehavior, spawn = currentAnimate)
+                particles.update(dt, currentFill, currentEffect, currentBehavior, spawn = currentAnimate, boiling = currentBoiling)
                 frameNanos = now
             }
         }
@@ -693,13 +696,14 @@ private class ParticleSystem {
     private val random = Random(System.nanoTime())
     private var fizzBudget = 0f
     private var mainBudget = 0f
+    private var boilBudget = 0f
     private var specialBudget = 0f
     private var condenseBudget = 0f
     private var pourBudget = 0f
 
     fun isNotEmpty() = particles.isNotEmpty()
 
-    fun update(dt: Float, fill: Float, effect: LiquidEffect, behavior: ElementBehavior?, spawn: Boolean) {
+    fun update(dt: Float, fill: Float, effect: LiquidEffect, behavior: ElementBehavior?, spawn: Boolean, boiling: Boolean = false) {
         val rings = ArrayList<Particle>()
         val iterator = particles.iterator()
         while (iterator.hasNext()) {
@@ -743,6 +747,7 @@ private class ParticleSystem {
         if (!spawn || effect == LiquidEffect.NONE || dt == 0f || fill <= 0.02f) return
 
         spawnSpecial(dt, fill, behavior)
+        if (boiling && effect == LiquidEffect.VAPOR) spawnBoil(dt)
         if (effect == LiquidEffect.VAPOR) spawnCondensation(dt, fill)
         if (effect == LiquidEffect.BUBBLES && fill < 0.97f) spawnPourSplash(dt, fill)
 
@@ -777,7 +782,7 @@ private class ParticleSystem {
             else -> 1f
         }
         val rate = when (effect) {
-            LiquidEffect.VAPOR -> (if (fill < 0.2f) 4f else 1.6f) * vaporBoost // Como el prototipo: más vapor al final
+            LiquidEffect.VAPOR -> (if (fill < 0.2f) 4f else 1.6f) * vaporBoost * if (boiling) 2f else 1f // Como el prototipo: más vapor al final
             LiquidEffect.BUBBLES -> 2.2f
             LiquidEffect.NONE -> 0f
         }
@@ -811,6 +816,24 @@ private class ParticleSystem {
         }
         if (fizzBudget > 1f) fizzBudget = 0f
         if (mainBudget > 1f) mainBudget = 0f
+    }
+
+    /** Hervor: burbujas grandes que nacen en el fondo y suben rápido, como agua a punto de ebullición. */
+    private fun spawnBoil(dt: Float) {
+        boilBudget += BOIL_RATE * dt
+        while (boilBudget >= 1f && particles.size < MAX_PARTICLES) {
+            boilBudget -= 1f
+            particles += Particle(
+                lane = random.nextFloat() * 1.4f - 0.7f,
+                v = FLOOR,
+                speed = 0.18f + random.nextFloat() * 0.12f,
+                life = 4f,
+                size = 0.03f + random.nextFloat() * 0.03f,
+                phase = random.nextFloat() * 6.28f,
+                kind = Kind.BUBBLE,
+                gravity = 0.25f,
+            )
+        }
     }
 
     /** Trabajo: el vapor deja gotitas en el vidrio, sobre el líquido, que al rato resbalan. */
@@ -1073,3 +1096,6 @@ private fun glassWhite(tint: Color?, light: Boolean): Color = when {
 
 /** Los grises del borde en el tema claro, teñidos si hay tinte. */
 private fun tinted(gray: Color, tint: Color?): Color = if (tint == null) gray else lerp(gray, lerp(tint, Color.Black, 0.35f), 0.6f)
+
+/** Burbujas de hervor por segundo. */
+private const val BOIL_RATE = 6f

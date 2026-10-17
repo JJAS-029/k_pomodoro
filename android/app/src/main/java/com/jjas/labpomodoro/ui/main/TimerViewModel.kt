@@ -108,6 +108,8 @@ data class VesselUi(
      * como una titulación que llega a su punto final.
      */
     val indicator: Float = 0f,
+    /** Último minuto de trabajo: hierve. */
+    val boiling: Boolean = false,
 ) {
     val behavior: ElementBehavior? get() = element?.look()?.behavior
 
@@ -237,6 +239,7 @@ class TimerViewModel @Inject constructor(
                         // En el último tramo del pomodoro (solo trabajo)
                         morph = if (type == SessionType.WORK) ((progress - MORPH_START) / (1f - MORPH_START)).coerceIn(0f, 1f) else 0f,
                         // Sin premio (ya se sabe que no hay): vira a rosa al final
+                        boiling = type == SessionType.WORK && !timer.isPaused && remaining in 1..BOIL_MILLIS,
                         indicator = if (type == SessionType.WORK && sessionPrizes?.isEmpty() == true) {
                             ((progress - INDICATOR_START) / (1f - INDICATOR_START)).coerceIn(0f, 1f)
                         } else {
@@ -393,6 +396,9 @@ class TimerViewModel @Inject constructor(
 
 /** Desde qué avance del pomodoro el líquido empieza a mutar hacia el premio (último 20 %). */
 private const val MORPH_START = 0.8f
+
+/** El último minuto del trabajo, el líquido hierve. */
+private const val BOIL_MILLIS = 60_000L
 
 /** Desde qué avance vira a rosa un pomodoro sin premio (último 15 %). */
 private const val INDICATOR_START = 0.85f
