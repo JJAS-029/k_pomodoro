@@ -626,7 +626,8 @@ Hecho: **Ajustar el plan en curso** — `TimerEngine.extendCurrent` (+5 min, top
 
 #### Pendientes de publicación y técnicos
 
-- ✅ `versionCode` 3 (versión 1.1) para la prueba cerrada, el 14 de octubre de 2026. La siguiente subida necesita el 4.
+- ✅ `versionCode` 3 (versión 1.1) para la prueba cerrada, el 14 de octubre de 2026.
+- ✅ `versionCode` 4 (versión 1.2), el 16 de octubre de 2026. La siguiente subida necesita el 5.
 - Probar la compra real de Pro (suscripción y pago único) con testers.
 - Prueba cerrada: 12 testers durante 14 días antes de pedir producción.
 - Al pasar a producción: vincular AdMob con Play y publicar `app-ads.txt`.
