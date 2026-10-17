@@ -36,7 +36,7 @@ class BackupCodecTest {
     fun `lo que se respalda vuelve igual`() {
         val restored = BackupCodec.decode(BackupCodec.encode(snapshot))
         // Todo menos las coordenadas de los lugares, que nunca salen del teléfono
-        val withoutCoordinates = snapshot.places.map { it.copy(latitude = Double.NaN, longitude = Double.NaN) }
+        val withoutCoordinates = snapshot.places.map { it.copy(latitude = PlaceEntity.UNKNOWN_COORDINATE, longitude = PlaceEntity.UNKNOWN_COORDINATE) }
         assertEquals(snapshot.copy(places = withoutCoordinates), restored)
     }
 

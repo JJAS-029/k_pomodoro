@@ -7,6 +7,7 @@ import com.jjas.labpomodoro.domain.model.FlameColor
 import com.jjas.labpomodoro.domain.model.GlassTint
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jjas.labpomodoro.R
@@ -16,6 +17,7 @@ import kotlinx.coroutines.flow.first
 import com.jjas.labpomodoro.data.repository.TagRepository
 import com.jjas.labpomodoro.domain.usecase.Countdown
 import com.jjas.labpomodoro.service.FocusDnd
+import com.jjas.labpomodoro.data.backup.BackupRepository
 import com.jjas.labpomodoro.data.repository.SettingsRepository
 import com.jjas.labpomodoro.domain.model.AppSettings
 import com.jjas.labpomodoro.domain.model.SessionConfig
@@ -39,6 +41,7 @@ class SettingsViewModel @Inject constructor(
     private val sessions: SessionRepository,
     private val tagRepository: TagRepository,
     private val focusDnd: FocusDnd,
+    private val backups: BackupRepository,
     private val ads: AdsManager,
     @ApplicationContext private val context: Context,
 ) : ViewModel() {
@@ -58,6 +61,35 @@ class SettingsViewModel @Inject constructor(
         if (!ReviewAccess.matches(code)) return false
         viewModelScope.launch { repository.setProReview() }
         return true
+    }
+
+    /** Guarda todo el progreso en el archivo que eligió el usuario. */
+    fun exportBackup(uri: Uri) {
+        viewModelScope.launch {
+            _message.value = runCatching {
+                val bytes = backups.exportBytes()
+                withContext(Dispatchers.IO) {
+                    context.contentResolver.openOutputStream(uri)?.use { it.write(bytes) } ?: error("sin archivo")
+                }
+                context.getString(R.string.file_backup_done)
+            }.getOrElse { context.getString(R.string.file_backup_failed) }
+        }
+    }
+
+    /** Restaura todo desde un archivo de respaldo (reemplaza lo que hay). */
+    fun importBackup(uri: Uri) {
+        viewModelScope.launch {
+            _message.value = runCatching {
+                val bytes = withContext(Dispatchers.IO) {
+                    context.contentResolver.openInputStream(uri)?.use { it.readBytes() } ?: error("sin archivo")
+                }
+                val sessions = backups.importBytes(bytes)
+                context.resources.getQuantityString(R.plurals.file_restore_done, sessions, sessions)
+            }.getOrElse {
+                Log.w(TAG, "No se pudo restaurar el respaldo", it)
+                context.getString(R.string.file_restore_failed)
+            }
+        }
     }
 
     /** Escribe el historial en el archivo que eligió el usuario. */
@@ -152,3 +184,5 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { repository.setAmbientDelayMinutes(minutes) }
     }
 }
+
+private const val TAG = "SettingsViewModel"

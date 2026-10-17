@@ -269,4 +269,19 @@
     <string name="countdown_name_hint">Examen final</string>
     <string name="countdown_pick_date">Elegir fecha</string>
     <string name="countdown_clear">Quitar</string>
+    <string name="file_backup_desc">Guarda todo tu progreso (historial, tabla, medallas y ajustes) en un archivo, sin cuenta: en Descargas, Drive o donde quieras. Sirve para pasarlo a otro teléfono.</string>
+    <string name="file_backup_save">Guardar en archivo</string>
+    <string name="file_backup_open">Restaurar de archivo</string>
+    <string name="file_backup_name">lab-pomodoro-%1$s.labpomodoro</string>
+    <string name="file_backup_done">Respaldo guardado.</string>
+    <string name="file_backup_failed">No se pudo guardar el respaldo.</string>
+    <string name="file_restore_title">¿Restaurar este respaldo?</string>
+    <string name="file_restore_warning">Reemplaza tu historial, tu tabla y tus ajustes por los del archivo. Lo que tienes ahora se pierde.</string>
+    <string name="file_restore_confirm">Restaurar</string>
+    <string name="file_restore_failed">Ese archivo no es un respaldo de Lab Pomodoro o está dañado.</string>
+    <plurals name="file_restore_done">
+        <item quantity="one">Respaldo restaurado: %1$d sesión.</item>
+        <item quantity="many">Respaldo restaurado: %1$d sesiones.</item>
+        <item quantity="other">Respaldo restaurado: %1$d sesiones.</item>
+    </plurals>
 </resources>

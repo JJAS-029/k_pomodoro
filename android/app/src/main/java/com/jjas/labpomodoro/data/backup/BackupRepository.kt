@@ -158,6 +158,16 @@ class BackupRepository @Inject constructor(
     }
 
     /** Si este teléfono está vacío (instalación nueva), conviene ofrecer restaurar. */
+    /** Respaldo a archivo (sin cuenta): el mismo contenido que en la nube, comprimido. */
+    suspend fun exportBytes(): ByteArray = lock.withLock { BackupCodec.encode(snapshot()) }
+
+    /** Restaura desde un archivo de respaldo; reemplaza todo. Devuelve cuántas sesiones trajo. */
+    suspend fun importBytes(bytes: ByteArray): Int = lock.withLock {
+        val snapshot = BackupCodec.decode(bytes)
+        apply(snapshot)
+        snapshot.sessions.size
+    }
+
     suspend fun isLocalEmpty(): Boolean = sessionDao.all().isEmpty() && inventoryDao.discoveredAtomicNumbers().isEmpty()
 
     fun clearStatus() {

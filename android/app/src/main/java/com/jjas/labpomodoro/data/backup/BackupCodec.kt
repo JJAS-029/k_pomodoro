@@ -102,7 +102,7 @@ object BackupCodec {
             },
             tags = json.optJSONArray("tags")?.rows { r -> TagEntity(r.getLong(0), r.getString(1), r.getInt(2), r.getLong(3)) }.orEmpty(),
             places = json.getJSONArray("places").rows { r ->
-                // Llegan sin coordenadas (NaN): las recupera la primera ubicación con el mismo nombre
+                // Llegan sin coordenadas: las recupera la primera ubicación con el mismo nombre
                 PlaceEntity(r.getLong(0), r.getString(1), r.optCoordinate(2), r.optCoordinate(3), r.getLong(4))
             },
             settings = json.getJSONObject("settings").let { s ->
@@ -129,4 +129,4 @@ object BackupCodec {
 }
 
 /** Coordenada de un lugar; los respaldos nuevos no las traen. */
-private fun JSONArray.optCoordinate(i: Int): Double = if (isNull(i)) Double.NaN else getDouble(i)
+private fun JSONArray.optCoordinate(i: Int): Double = if (isNull(i)) PlaceEntity.UNKNOWN_COORDINATE else getDouble(i)

@@ -262,4 +262,18 @@
     <string name="countdown_name_hint">Final exam</string>
     <string name="countdown_pick_date">Pick a date</string>
     <string name="countdown_clear">Remove</string>
+    <string name="file_backup_desc">Save all your progress (history, table, medals and settings) to a file, no account needed: in Downloads, Drive or wherever you like. Handy to move it to another phone.</string>
+    <string name="file_backup_save">Save to file</string>
+    <string name="file_backup_open">Restore from file</string>
+    <string name="file_backup_name">lab-pomodoro-%1$s.labpomodoro</string>
+    <string name="file_backup_done">Backup saved.</string>
+    <string name="file_backup_failed">Couldn\'t save the backup.</string>
+    <string name="file_restore_title">Restore this backup?</string>
+    <string name="file_restore_warning">It replaces your history, table and settings with the ones in the file. What you have now is lost.</string>
+    <string name="file_restore_confirm">Restore</string>
+    <string name="file_restore_failed">That file isn\'t a Lab Pomodoro backup or it\'s damaged.</string>
+    <plurals name="file_restore_done">
+        <item quantity="one">Backup restored: %1$d session.</item>
+        <item quantity="other">Backup restored: %1$d sessions.</item>
+    </plurals>
 </resources>

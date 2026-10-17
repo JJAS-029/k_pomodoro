@@ -37,12 +37,12 @@ class PlaceRepository @Inject constructor(
      */
     suspend fun resolve(latitude: Double, longitude: Double, suggestedName: String?): Long {
         val places = placeDao.all()
-        val nearest = places.minByOrNull { distance(latitude, longitude, it.latitude, it.longitude) }
+        val nearest = places.filter { it.hasCoordinates }.minByOrNull { distance(latitude, longitude, it.latitude, it.longitude) }
         if (nearest != null && distance(latitude, longitude, nearest.latitude, nearest.longitude) <= SAME_PLACE_METERS) {
             return nearest.id
         }
         // Lugares restaurados de un respaldo (sin coordenadas): se reconocen por el nombre
-        val restored = places.firstOrNull { it.latitude.isNaN() && it.name == suggestedName }
+        val restored = places.firstOrNull { !it.hasCoordinates && it.name == suggestedName }
         if (restored != null) {
             placeDao.setCoordinates(restored.id, latitude, longitude)
             return restored.id

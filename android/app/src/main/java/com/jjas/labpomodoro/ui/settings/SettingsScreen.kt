@@ -119,6 +119,26 @@ fun SettingsScreen(
     val exportMessage by viewModel.message.collectAsStateWithLifecycle()
     val activity = LocalActivity.current
     val exportFileName = stringResource(R.string.set_export_file_name)
+    // Respaldo a archivo: guardar y abrir (cualquier tipo: algunos gestores no reconocen la extensión)
+    val backupFileName = stringResource(R.string.file_backup_name, java.time.LocalDate.now().toString())
+    val backupSaver = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/octet-stream")) { uri ->
+        uri?.let(viewModel::exportBackup)
+    }
+    var restoreUri by remember { mutableStateOf<android.net.Uri?>(null) }
+    val backupOpener = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri -> restoreUri = uri }
+    restoreUri?.let { uri ->
+        AlertDialog(
+            onDismissRequest = { restoreUri = null },
+            title = { Text(stringResource(R.string.file_restore_title)) },
+            text = { Text(stringResource(R.string.file_restore_warning)) },
+            confirmButton = {
+                TextButton(onClick = { viewModel.importBackup(uri); restoreUri = null }) {
+                    Text(stringResource(R.string.file_restore_confirm), color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = { TextButton(onClick = { restoreUri = null }) { Text(stringResource(R.string.tag_cancel)) } },
+        )
+    }
     // El usuario elige dónde guardar el archivo (Descargas, Drive…)
     val exportLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { uri ->
         uri?.let(viewModel::exportCsv)
@@ -167,6 +187,8 @@ fun SettingsScreen(
                             isPro = current.isPro,
                             message = exportMessage,
                             onExport = { exportLauncher.launch(exportFileName) },
+                            onSaveBackup = { backupSaver.launch(backupFileName) },
+                            onOpenBackup = { backupOpener.launch(arrayOf("*/*")) },
                             onOpenPro = onOpenPro,
                             showPrivacy = !current.isPro && viewModel.privacyOptionsRequired,
                             onPrivacy = { activity?.let(viewModel::showPrivacyOptions) },
@@ -188,7 +210,21 @@ private fun DataSection(
     onOpenPro: () -> Unit,
     showPrivacy: Boolean,
     onPrivacy: () -> Unit,
+    onSaveBackup: () -> Unit = {},
+    onOpenBackup: () -> Unit = {},
 ) {
+    // Respaldo a archivo: gratis y sin cuenta
+    Text(
+        stringResource(R.string.file_backup_desc),
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    Spacer(Modifier.height(8.dp))
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        OutlinedButton(onClick = onSaveBackup) { Text(stringResource(R.string.file_backup_save)) }
+        OutlinedButton(onClick = onOpenBackup) { Text(stringResource(R.string.file_backup_open)) }
+    }
+    Spacer(Modifier.height(16.dp))
     Text(
         stringResource(R.string.set_export_desc),
         style = MaterialTheme.typography.bodyMedium,
