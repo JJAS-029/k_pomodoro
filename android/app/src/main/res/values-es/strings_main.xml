@@ -237,7 +237,7 @@
     <string name="template_quick">Rápido</string>
     <string name="template_study">Estudio</string>
     <string name="template_deep">Profundo</string>
-    <string name="goal_title">Meta del día</string>
+    <string name="goal_title">Tus metas</string>
     <string name="goal_label">Meta diaria (pomodoros)</string>
     <string name="goal_hint">En 0 no hay meta. Se ve como un anillo en la pantalla principal (la del día; si solo hay semanal, la de la semana).</string>
     <plurals name="goal_today">
@@ -291,4 +291,5 @@
         <item quantity="other">Esta semana: %1$d de %2$d pomodoros</item>
     </plurals>
     <string name="bubble_open">Ver en la tabla periódica</string>
+    <string name="goal_week_label">Meta semanal (pomodoros)</string>
 </resources>

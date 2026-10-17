@@ -7,6 +7,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
@@ -24,10 +25,14 @@ fun LabBackdrop(background: LabBackground, modifier: Modifier = Modifier) {
     if (background == LabBackground.NONE) return
     val ink = MaterialTheme.colorScheme.onBackground
     val measurer = rememberTextMeasurer()
-    // Fórmulas en lugares y ángulos fijos (siempre los mismos)
-    val formulas = remember {
+    // Fórmulas en los márgenes (izquierda y derecha, alternadas), repartidas a lo alto y con
+    // ángulos fijos: no se enciman con el recipiente ni con el texto del centro
+    val style = TextStyle(color = ink.copy(alpha = 0.08f), fontSize = 18.sp)
+    val formulas = remember(style) {
         val random = Random(7)
-        FORMULAS.map { Triple(it, Offset(random.nextFloat(), random.nextFloat()), random.nextFloat() * 30f - 15f) }
+        FORMULAS.mapIndexed { i, text ->
+            Placed(measurer.measure(text, style, softWrap = false, maxLines = 1), i % 2 == 0, random.nextFloat(), random.nextFloat() * 24f - 12f)
+        }
     }
     Canvas(modifier) {
         when (background) {
@@ -68,17 +73,20 @@ fun LabBackdrop(background: LabBackground, modifier: Modifier = Modifier) {
                 }
             }
             // Pizarrón: fórmulas de gis repartidas, apenas visibles
-            LabBackground.FORMULAS -> formulas.forEach { (text, at, angle) ->
-                val position = Offset(at.x * size.width * 0.8f, at.y * size.height * 0.92f)
-                rotate(angle, position) {
-                    drawText(measurer, text, position, TextStyle(color = ink.copy(alpha = 0.09f), fontSize = 20.sp))
-                }
+            LabBackground.FORMULAS -> formulas.forEachIndexed { i, f ->
+                val margin = size.width * 0.04f
+                val x = if (f.left) margin + f.jitter * margin else size.width - f.layout.size.width - margin - f.jitter * margin
+                val y = (i + 0.5f) / formulas.size * size.height * 0.9f
+                rotate(f.angle, Offset(x, y)) { drawText(f.layout, topLeft = Offset(x, y)) }
             }
         }
     }
 }
 
+private class Placed(val layout: TextLayoutResult, val left: Boolean, val jitter: Float, val angle: Float)
+
 private val FORMULAS = listOf(
-    "H₂O", "E = mc²", "PV = nRT", "NaCl", "C₆H₁₂O₆", "2H₂ + O₂ → 2H₂O", "pH = −log[H⁺]",
-    "CO₂", "F = ma", "λ = h/p", "NH₃", "Au", "ΔG = ΔH − TΔS", "CH₄", "6.022 × 10²³",
+    // Cortas: las largas se meterían debajo del recipiente
+    "H₂O", "E = mc²", "PV = nRT", "NaCl", "C₆H₁₂O₆", "O₂", "Fe",
+    "CO₂", "F = ma", "λ = h/p", "NH₃", "Au", "NaOH", "CH₄", "6.022 × 10²³",
 )

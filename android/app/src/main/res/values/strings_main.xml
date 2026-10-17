@@ -231,7 +231,7 @@
     <string name="template_quick">Quick</string>
     <string name="template_study">Study</string>
     <string name="template_deep">Deep work</string>
-    <string name="goal_title">Today\'s goal</string>
+    <string name="goal_title">Your goals</string>
     <string name="goal_label">Daily goal (pomodoros)</string>
     <string name="goal_hint">0 means no goal. It shows as a ring on the main screen (the daily one; with only a weekly goal, the weekly one).</string>
     <plurals name="goal_today">
@@ -280,4 +280,5 @@
         <item quantity="other">This week: %1$d of %2$d pomodoros</item>
     </plurals>
     <string name="bubble_open">See it in the periodic table</string>
+    <string name="goal_week_label">Weekly goal (pomodoros)</string>
 </resources>

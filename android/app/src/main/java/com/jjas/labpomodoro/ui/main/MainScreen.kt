@@ -332,6 +332,8 @@ fun MainScreen(
                 onDeleteTemplate = { name -> timerViewModel.deleteTemplate(name, templates) },
                 goal = goal.goal,
                 onGoalChange = goalViewModel::setGoal,
+                weekGoal = goal.weekGoal,
+                onWeekGoalChange = goalViewModel::setWeeklyGoal,
             )
         }
     } else if (planEditor) {
@@ -1185,6 +1187,8 @@ private fun PlanEditorSheet(
     onDeleteTemplate: (String) -> Unit = {},
     goal: Int = 0,
     onGoalChange: (Int) -> Unit = {},
+    weekGoal: Int = 0,
+    onWeekGoalChange: (Int) -> Unit = {},
 ) {
     val config = idle.config
     Column(
@@ -1215,6 +1219,7 @@ private fun PlanEditorSheet(
         TagChips(tags, tags.selected, tagActions)
         Spacer(Modifier.height(12.dp))
         StepperRow(stringResource(R.string.goal_label), goal, DailyGoal.GOAL_RANGE, "") { onGoalChange(it) }
+        StepperRow(stringResource(R.string.goal_week_label), weekGoal, DailyGoal.WEEKLY_RANGE, "", step = 5) { onWeekGoalChange(it) }
         Text(
             stringResource(R.string.goal_hint),
             style = MaterialTheme.typography.bodySmall,
