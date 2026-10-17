@@ -6,6 +6,12 @@ import android.content.pm.PackageManager
 import android.graphics.drawable.Icon
 import android.os.Build
 import android.os.Bundle
+import com.jjas.labpomodoro.ui.navigation.PROGRESS_STATS
+import com.jjas.labpomodoro.ui.navigation.Routes
+import com.jjas.labpomodoro.service.ShortcutPublisher
+import androidx.compose.runtime.LaunchedEffect
+import kotlinx.coroutines.flow.MutableStateFlow
+import android.content.Intent
 import com.jjas.labpomodoro.ui.components.LocalLabTheme
 import com.jjas.labpomodoro.ui.components.LabThemeUi
 import androidx.compose.runtime.CompositionLocalProvider
@@ -63,8 +69,34 @@ class MainActivity : ComponentActivity() {
 
     private var isInPip by mutableStateOf(false)
 
+    /** Pantalla a la que lleva un acceso directo; la navegación la toma al componerse. */
+    private val pendingRoute = MutableStateFlow<String?>(null)
+
     private val supportsPip by lazy {
         packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleShortcut(intent)
+    }
+
+    /**
+     * Accesos directos del ícono: iniciar el plan (el de siempre o una plantilla, con su etiqueta)
+     * o abrir Tu progreso. Si ya hay un plan en curso, solo se abre la app.
+     */
+    private fun handleShortcut(intent: Intent?) {
+        when (intent?.action) {
+            ShortcutPublisher.ACTION_START -> lifecycleScope.launch {
+                if (engine.state.value is TimerState.Active) return@launch
+                val prefs = settingsRepository.settings.first()
+                val index = intent.getIntExtra(ShortcutPublisher.EXTRA_TEMPLATE, -1)
+                val template = (prefs.planTemplates ?: ShortcutPublisher.suggested(this@MainActivity)).getOrNull(index)
+                template?.tagId?.let { settingsRepository.setSelectedTag(it) }
+                engine.start(template?.config ?: prefs.session)
+            }
+            ShortcutPublisher.ACTION_PROGRESS -> pendingRoute.value = Routes.progress(PROGRESS_STATS)
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -72,6 +104,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         isInPip = isInPictureInPictureMode
+        if (savedInstanceState == null) handleShortcut(intent)
         addOnPictureInPictureModeChangedListener { isInPip = it.isInPictureInPictureMode }
 
         if (supportsPip) {
@@ -111,6 +144,13 @@ class MainActivity : ComponentActivity() {
             LabPomodoroTheme(dynamicColor = settings?.dynamicColorActive == true, pureBlack = pureBlack) {
                 // Fuera del if para conservar la pantalla en la que estaba al volver de PiP
                 val navController = rememberNavController()
+                val route by pendingRoute.collectAsStateWithLifecycle()
+                LaunchedEffect(route) {
+                    route?.let {
+                        navController.navigate(it) { launchSingleTop = true }
+                        pendingRoute.value = null
+                    }
+                }
                 // La ventana flotante es siempre oscura: se lee mejor encima de cualquier app
                 if (isInPip) LabPomodoroTheme(darkTheme = true, dynamicColor = settings?.dynamicColorActive == true, pureBlack = pureBlack) { PipScreen() } else LabNavHost(navController)
                 // Los avisos y celebraciones esperan a la app completa: no caben en la ventana flotante

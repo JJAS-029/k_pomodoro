@@ -8,6 +8,7 @@ import com.jjas.labpomodoro.service.FocusSoundController
 import com.jjas.labpomodoro.service.LeagueSync
 import com.jjas.labpomodoro.service.PlaceTracker
 import com.jjas.labpomodoro.service.TagTracker
+import com.jjas.labpomodoro.service.ShortcutPublisher
 import com.jjas.labpomodoro.service.RewardSync
 import com.jjas.labpomodoro.service.StreakReminderScheduler
 import com.jjas.labpomodoro.service.TimerEffects
@@ -33,6 +34,8 @@ class LabPomodoroApp : Application() {
 
     @Inject lateinit var tagTracker: TagTracker
 
+    @Inject lateinit var shortcuts: ShortcutPublisher
+
     @Inject lateinit var autoBackup: AutoBackup
 
     @Inject lateinit var streakReminder: StreakReminderScheduler
@@ -53,6 +56,7 @@ class LabPomodoroApp : Application() {
         billing.start()
         placeTracker.start()
         tagTracker.start()
+        shortcuts.start()
         autoBackup.start()
         streakReminder.start()
         leagueSync.start()

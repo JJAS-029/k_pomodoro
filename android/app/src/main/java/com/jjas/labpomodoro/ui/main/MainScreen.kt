@@ -1176,10 +1176,10 @@ private fun PlanEditorSheet(
 
 /** Plantillas sugeridas hasta que el usuario guarde o borre alguna. */
 @Composable
-private fun suggestedTemplates(): List<PlanTemplate> = listOf(
-    PlanTemplate(stringResource(R.string.template_quick), SessionConfig(totalHours = 1)),
-    PlanTemplate(stringResource(R.string.template_study), SessionConfig(totalHours = 2)),
-    PlanTemplate(stringResource(R.string.template_deep), SessionConfig(totalHours = 4, workMinutes = 50, shortBreakMinutes = 10, longBreakMinutes = 20, pomodorosUntilLong = 3)),
+private fun suggestedTemplates(): List<PlanTemplate> = PlanTemplate.suggested(
+    stringResource(R.string.template_quick),
+    stringResource(R.string.template_study),
+    stringResource(R.string.template_deep),
 )
 
 /**

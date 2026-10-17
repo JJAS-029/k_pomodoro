@@ -256,4 +256,6 @@
         <item quantity="other">¡Meta del día cumplida! %1$d pomodoros · racha de %2$d días</item>
     </plurals>
     <string name="goal_short">Meta</string>
+    <string name="shortcut_start">Iniciar plan</string>
+    <string name="shortcut_progress">Tu progreso</string>
 </resources>

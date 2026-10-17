@@ -247,4 +247,6 @@
         <item quantity="other">Daily goal reached! %1$d pomodoros · %2$d-day streak</item>
     </plurals>
     <string name="goal_short">Goal</string>
+    <string name="shortcut_start">Start plan</string>
+    <string name="shortcut_progress">Your progress</string>
 </resources>

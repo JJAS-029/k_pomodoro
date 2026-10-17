@@ -5,6 +5,14 @@ data class PlanTemplate(val name: String, val config: SessionConfig, val tagId: 
 
     companion object {
         const val MAX_TEMPLATES = 8
+
+        /** Las que se ofrecen antes de que el usuario guarde o borre alguna. */
+        fun suggested(quick: String, study: String, deep: String): List<PlanTemplate> = listOf(
+            PlanTemplate(quick, SessionConfig(totalHours = 1)),
+            PlanTemplate(study, SessionConfig(totalHours = 2)),
+            PlanTemplate(deep, SessionConfig(totalHours = 4, workMinutes = 50, shortBreakMinutes = 10, longBreakMinutes = 20, pomodorosUntilLong = 3)),
+        )
+
         const val MAX_NAME = 24
 
         /** Una plantilla por línea, campos separados por tabulador (el nombre no puede llevarlos). */
