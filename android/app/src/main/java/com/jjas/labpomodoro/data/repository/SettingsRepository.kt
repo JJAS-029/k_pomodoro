@@ -54,6 +54,8 @@ class SettingsRepository @Inject constructor(
 
     suspend fun setKeepScreenOn(enabled: Boolean) = dataStore.edit { it[Keys.KEEP_SCREEN_ON] = enabled }
 
+    suspend fun setFocusDnd(enabled: Boolean) = dataStore.edit { it[Keys.FOCUS_DND] = enabled }
+
     suspend fun setAmbientMode(enabled: Boolean) = dataStore.edit { it[Keys.AMBIENT_MODE] = enabled }
 
     suspend fun setAmbientDelayMinutes(minutes: Int) = dataStore.edit {
@@ -155,6 +157,7 @@ class SettingsRepository @Inject constructor(
             soundEnabled = this[Keys.SOUND] ?: defaults.soundEnabled,
             vibrationEnabled = this[Keys.VIBRATION] ?: defaults.vibrationEnabled,
             keepScreenOn = this[Keys.KEEP_SCREEN_ON] ?: defaults.keepScreenOn,
+            focusDnd = this[Keys.FOCUS_DND] ?: defaults.focusDnd,
             ambientMode = this[Keys.AMBIENT_MODE] ?: defaults.ambientMode,
             ambientDelayMinutes = this[Keys.AMBIENT_DELAY]?.takeIf { it in AppSettings.AMBIENT_DELAYS }
                 ?: defaults.ambientDelayMinutes,
@@ -201,6 +204,7 @@ class SettingsRepository @Inject constructor(
         val SOUND = booleanPreferencesKey("sound_enabled")
         val VIBRATION = booleanPreferencesKey("vibration_enabled")
         val KEEP_SCREEN_ON = booleanPreferencesKey("keep_screen_on")
+        val FOCUS_DND = booleanPreferencesKey("focus_dnd")
         val AMBIENT_MODE = booleanPreferencesKey("ambient_mode")
         val AMBIENT_DELAY = intPreferencesKey("ambient_delay_minutes")
         val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")

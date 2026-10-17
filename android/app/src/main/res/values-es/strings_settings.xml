@@ -260,4 +260,6 @@
     <string name="set_flame_violet">Violeta (potasio)</string>
     <string name="set_flame_orange">Naranja (sodio)</string>
     <string name="set_flame_red">Roja (estroncio)</string>
+    <string name="set_focus_dnd">No molestar al trabajar</string>
+    <string name="set_focus_dnd_desc">Durante el trabajo solo suenan llamadas y avisos prioritarios; en los descansos vuelve todo. Si ya tenías No molestar puesto, no se toca. La primera vez Android te pide dar el acceso.</string>
 </resources>

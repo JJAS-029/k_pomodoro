@@ -44,6 +44,8 @@ data class AppSettings(
     val vibrationEnabled: Boolean = true,
     /** Mantiene la pantalla encendida mientras corre el timer. */
     val keepScreenOn: Boolean = false,
+    /** No molestar automático durante el trabajo (Pro). */
+    val focusDnd: Boolean = false,
     /** Pro: tras [ambientDelayMinutes] sin tocar la pantalla, solo queda el reloj atenuado. */
     val ambientMode: Boolean = false,
     val ambientDelayMinutes: Int = 3,

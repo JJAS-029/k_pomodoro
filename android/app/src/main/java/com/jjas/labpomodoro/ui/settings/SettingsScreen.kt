@@ -134,6 +134,14 @@ fun SettingsScreen(
                     onPureBlackChange = viewModel::setPureBlack,
                     onPaletteChange = viewModel::setLabPalette,
                     onGlassTintChange = viewModel::setGlassTint,
+                    onFocusDndChange = { enabled ->
+                        if (enabled && !viewModel.hasDndAccess()) {
+                            // Android pide dar el acceso a mano; al volver, el usuario lo activa de nuevo
+                            activity?.startActivity(Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS))
+                        } else {
+                            viewModel.setFocusDnd(enabled)
+                        }
+                    },
                     onFlameChange = viewModel::setFlameColor,
                     onOpenPro = onOpenPro,
                     onResetVesselElement = viewModel::resetVesselElement,
@@ -202,6 +210,7 @@ private fun SettingsContent(
     onPureBlackChange: (Boolean) -> Unit = {},
     onPaletteChange: (LabPalette) -> Unit = {},
     onGlassTintChange: (GlassTint) -> Unit = {},
+    onFocusDndChange: (Boolean) -> Unit = {},
     onFlameChange: (FlameColor) -> Unit = {},
     onOpenPro: () -> Unit = {},
     modifier: Modifier = Modifier,
@@ -300,6 +309,16 @@ private fun SettingsContent(
         SwitchRow(stringResource(R.string.set_sounds), settings.soundEnabled, onSoundChange)
         SwitchRow(stringResource(R.string.set_vibration), settings.vibrationEnabled, onVibrationChange)
         SwitchRow(stringResource(R.string.set_keep_screen_on), settings.keepScreenOn, onKeepScreenOnChange)
+        SwitchRow(
+            proTitle(R.string.set_focus_dnd, settings.isPro),
+            settings.isPro && settings.focusDnd,
+            onCheckedChange = { if (settings.isPro) onFocusDndChange(it) else onOpenPro() },
+        )
+        Text(
+            stringResource(R.string.set_focus_dnd_desc),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
         SwitchRow(stringResource(R.string.set_streak_reminder), settings.reminderEnabled, onReminderChange)
         Text(
             stringResource(R.string.set_streak_reminder_desc),

@@ -14,6 +14,7 @@ import com.jjas.labpomodoro.ads.AdsManager
 import com.jjas.labpomodoro.data.repository.SessionRepository
 import kotlinx.coroutines.flow.first
 import com.jjas.labpomodoro.data.repository.TagRepository
+import com.jjas.labpomodoro.service.FocusDnd
 import com.jjas.labpomodoro.data.repository.SettingsRepository
 import com.jjas.labpomodoro.domain.model.AppSettings
 import com.jjas.labpomodoro.domain.model.SessionConfig
@@ -36,6 +37,7 @@ class SettingsViewModel @Inject constructor(
     private val repository: SettingsRepository,
     private val sessions: SessionRepository,
     private val tagRepository: TagRepository,
+    private val focusDnd: FocusDnd,
     private val ads: AdsManager,
     @ApplicationContext private val context: Context,
 ) : ViewModel() {
@@ -95,6 +97,13 @@ class SettingsViewModel @Inject constructor(
 
     fun setAmbientMode(enabled: Boolean) {
         viewModelScope.launch { repository.setAmbientMode(enabled) }
+    }
+
+    /** Si ya tiene el acceso a No molestar; si no, la pantalla lleva a los ajustes de Android. */
+    fun hasDndAccess(): Boolean = focusDnd.hasAccess()
+
+    fun setFocusDnd(enabled: Boolean) {
+        viewModelScope.launch { repository.setFocusDnd(enabled) }
     }
 
     fun setGlassTint(tint: GlassTint) {

@@ -253,4 +253,6 @@
     <string name="set_flame_violet">Violet (potassium)</string>
     <string name="set_flame_orange">Orange (sodium)</string>
     <string name="set_flame_red">Red (strontium)</string>
+    <string name="set_focus_dnd">Do not disturb while working</string>
+    <string name="set_focus_dnd_desc">While you work only priority calls and alerts come through; on breaks everything is back. If you already had Do not disturb on, it\'s left alone. The first time, Android asks you to grant access.</string>
 </resources>
