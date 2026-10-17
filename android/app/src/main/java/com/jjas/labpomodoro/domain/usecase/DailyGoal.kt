@@ -21,4 +21,7 @@ object DailyGoal {
     }
 
     val GOAL_RANGE = 0..16
+
+    /** Meta semanal: de 5 en 5 hasta 100. */
+    val WEEKLY_RANGE = 0..100
 }

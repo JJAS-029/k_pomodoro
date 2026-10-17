@@ -57,6 +57,8 @@ class SettingsRepository @Inject constructor(
 
     suspend fun setFocusDnd(enabled: Boolean) = dataStore.edit { it[Keys.FOCUS_DND] = enabled }
 
+    suspend fun setLabSounds(enabled: Boolean) = dataStore.edit { it[Keys.LAB_SOUNDS] = enabled }
+
     suspend fun setAchievementNotes(enabled: Boolean) = dataStore.edit { it[Keys.ACHIEVEMENT_NOTES] = enabled }
 
     /**
@@ -100,6 +102,8 @@ class SettingsRepository @Inject constructor(
     suspend fun setGlassTint(tint: GlassTint) = dataStore.edit { it[Keys.GLASS_TINT] = tint.name }
 
     suspend fun setDailyGoal(goal: Int) = dataStore.edit { it[Keys.DAILY_GOAL] = goal }
+
+    suspend fun setWeeklyGoal(goal: Int) = dataStore.edit { it[Keys.WEEKLY_GOAL] = goal }
 
     suspend fun setGoalCelebratedDay(day: Long) = dataStore.edit { it[Keys.GOAL_CELEBRATED_DAY] = day }
 
@@ -183,6 +187,7 @@ class SettingsRepository @Inject constructor(
             vibrationEnabled = this[Keys.VIBRATION] ?: defaults.vibrationEnabled,
             keepScreenOn = this[Keys.KEEP_SCREEN_ON] ?: defaults.keepScreenOn,
             focusDnd = this[Keys.FOCUS_DND] ?: defaults.focusDnd,
+            labSounds = this[Keys.LAB_SOUNDS] ?: defaults.labSounds,
             achievementNotes = this[Keys.ACHIEVEMENT_NOTES] ?: defaults.achievementNotes,
             countdownName = this[Keys.COUNTDOWN_NAME] ?: defaults.countdownName,
             countdownDay = this[Keys.COUNTDOWN_DAY],
@@ -198,6 +203,7 @@ class SettingsRepository @Inject constructor(
             exactAlarmAsked = this[Keys.EXACT_ALARM_ASKED] ?: defaults.exactAlarmAsked,
             labPalette = this[Keys.LAB_PALETTE]?.let { name -> LabPalette.entries.firstOrNull { it.name == name } } ?: defaults.labPalette,
             dailyGoal = this[Keys.DAILY_GOAL] ?: defaults.dailyGoal,
+            weeklyGoal = this[Keys.WEEKLY_GOAL] ?: defaults.weeklyGoal,
             goalCelebratedDay = this[Keys.GOAL_CELEBRATED_DAY] ?: defaults.goalCelebratedDay,
             planTemplates = this[Keys.PLAN_TEMPLATES]?.let(PlanTemplate::decode),
             glassTint = this[Keys.GLASS_TINT]?.let { name -> GlassTint.entries.firstOrNull { it.name == name } } ?: defaults.glassTint,
@@ -233,6 +239,7 @@ class SettingsRepository @Inject constructor(
         val VIBRATION = booleanPreferencesKey("vibration_enabled")
         val KEEP_SCREEN_ON = booleanPreferencesKey("keep_screen_on")
         val FOCUS_DND = booleanPreferencesKey("focus_dnd")
+        val LAB_SOUNDS = booleanPreferencesKey("lab_sounds")
         val ACHIEVEMENT_NOTES = booleanPreferencesKey("achievement_notes")
         val CLAIMED_CHALLENGES = stringSetPreferencesKey("claimed_challenges")
         val COUNTDOWN_NAME = stringPreferencesKey("countdown_name")
@@ -248,6 +255,7 @@ class SettingsRepository @Inject constructor(
         val LAB_PALETTE = stringPreferencesKey("lab_palette")
         val GLASS_TINT = stringPreferencesKey("glass_tint")
         val DAILY_GOAL = intPreferencesKey("daily_goal")
+        val WEEKLY_GOAL = intPreferencesKey("weekly_goal")
         val GOAL_CELEBRATED_DAY = longPreferencesKey("goal_celebrated_day")
         val PLAN_TEMPLATES = stringPreferencesKey("plan_templates")
         val FLAME_COLOR = stringPreferencesKey("flame_color")

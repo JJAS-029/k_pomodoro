@@ -239,7 +239,7 @@
     <string name="template_deep">Profundo</string>
     <string name="goal_title">Meta del día</string>
     <string name="goal_label">Meta diaria (pomodoros)</string>
-    <string name="goal_hint">En 0 no hay meta. Se ve como un anillo en la pantalla principal.</string>
+    <string name="goal_hint">En 0 no hay meta. Se ve como un anillo en la pantalla principal (la del día; si solo hay semanal, la de la semana).</string>
     <plurals name="goal_today">
         <item quantity="one">Hoy: %1$d de %2$d pomodoro</item>
         <item quantity="many">Hoy: %1$d de %2$d pomodoros</item>
@@ -284,4 +284,10 @@
         <item quantity="other">📅 Faltan %1$d días para %2$s</item>
     </plurals>
     <string name="countdown_today">📅 ¡Hoy es %1$s! Mucho éxito.</string>
+    <string name="goal_week_short">Semana</string>
+    <plurals name="goal_week">
+        <item quantity="one">Esta semana: %1$d de %2$d pomodoro</item>
+        <item quantity="many">Esta semana: %1$d de %2$d pomodoros</item>
+        <item quantity="other">Esta semana: %1$d de %2$d pomodoros</item>
+    </plurals>
 </resources>

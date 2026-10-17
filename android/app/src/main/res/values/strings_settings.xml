@@ -276,4 +276,6 @@
         <item quantity="one">Backup restored: %1$d session.</item>
         <item quantity="other">Backup restored: %1$d sessions.</item>
     </plurals>
+    <string name="set_lab_sounds">Lab sounds</string>
+    <string name="set_lab_sounds_desc">A glass clink when work starts, bubbling on short breaks and crystal glasses on long ones.</string>
 </resources>

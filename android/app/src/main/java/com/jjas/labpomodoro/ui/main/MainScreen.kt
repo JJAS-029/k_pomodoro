@@ -174,7 +174,7 @@ fun MainScreen(
     // Plantillas: las sugeridas hasta que se guarde o borre alguna
     val templates = timer.templates ?: suggestedTemplates()
     var goalDialog by rememberSaveable { mutableStateOf(false) }
-    if (goalDialog) GoalDialog(goal, onGoalChange = goalViewModel::setGoal, onDismiss = { goalDialog = false })
+    if (goalDialog) GoalDialog(goal, onGoalChange = goalViewModel::setGoal, onWeeklyChange = goalViewModel::setWeeklyGoal, onDismiss = { goalDialog = false })
     // Meta cumplida: confeti y aviso, una vez al día
     var goalBanner by remember { mutableStateOf(false) }
     var goalCelebration by remember { mutableStateOf<Celebration?>(null) }
@@ -602,7 +602,7 @@ private fun MainContent(
             }
 
             // Meta diaria: anillo arriba a la izquierda (solo si hay meta)
-            if (goal.goal > 0) {
+            if (goal.hasAny) {
                 GoalRing(goal, onClick = actions.onOpenGoal, modifier = Modifier.align(Alignment.TopStart).padding(12.dp))
             }
             AnimatedVisibility(
@@ -1322,7 +1322,11 @@ private fun TemplateRow(
 /** Anillo de la meta diaria: cuántos pomodoros van de los que se propuso hoy. */
 @Composable
 private fun GoalRing(goal: GoalUi, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    val color = if (goal.reached) Color(0xFF39FF14) else MaterialTheme.colorScheme.primary
+    // Sin meta diaria, el anillo es el de la semana
+    val daily = goal.goal > 0
+    val fraction = if (daily) goal.fraction else goal.weekFraction
+    val done = if (daily) goal.reached else goal.week >= goal.weekGoal
+    val color = if (done) Color(0xFF39FF14) else MaterialTheme.colorScheme.primary
     val track = MaterialTheme.colorScheme.outlineVariant
     Box(
         contentAlignment = Alignment.Center,
@@ -1336,17 +1340,21 @@ private fun GoalRing(goal: GoalUi, onClick: () -> Unit, modifier: Modifier = Mod
             val inset = stroke / 2
             val arc = Size(size.width - stroke, size.height - stroke)
             drawArc(track, 0f, 360f, false, Offset(inset, inset), arc, style = Stroke(stroke))
-            if (goal.fraction > 0f) {
-                drawArc(color, -90f, 360f * goal.fraction, false, Offset(inset, inset), arc, style = Stroke(stroke, cap = StrokeCap.Round))
+            if (fraction > 0f) {
+                drawArc(color, -90f, 360f * fraction, false, Offset(inset, inset), arc, style = Stroke(stroke, cap = StrokeCap.Round))
             }
         }
-        Text("${goal.today}/${goal.goal}", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onBackground)
+        Text(
+            if (daily) "${goal.today}/${goal.goal}" else "${goal.week}/${goal.weekGoal}",
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onBackground,
+        )
     }
 }
 
 /** Meta del día: cómo vas, la racha y para cambiarla. */
 @Composable
-private fun GoalDialog(goal: GoalUi, onGoalChange: (Int) -> Unit, onDismiss: () -> Unit) {
+private fun GoalDialog(goal: GoalUi, onGoalChange: (Int) -> Unit, onWeeklyChange: (Int) -> Unit, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.goal_title)) },
@@ -1362,6 +1370,11 @@ private fun GoalDialog(goal: GoalUi, onGoalChange: (Int) -> Unit, onDismiss: () 
                     Spacer(Modifier.height(12.dp))
                 }
                 StepperRow(stringResource(R.string.goal_short), goal.goal, DailyGoal.GOAL_RANGE, "") { onGoalChange(it) }
+                Spacer(Modifier.height(12.dp))
+                if (goal.weekGoal > 0) {
+                    Text(pluralStringResource(R.plurals.goal_week, goal.weekGoal, goal.week, goal.weekGoal), style = MaterialTheme.typography.bodyLarge)
+                }
+                StepperRow(stringResource(R.string.goal_week_short), goal.weekGoal, DailyGoal.WEEKLY_RANGE, "", step = 5) { onWeeklyChange(it) }
                 Text(stringResource(R.string.goal_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         },

@@ -49,6 +49,8 @@ data class AppSettings(
     val countdownDay: Long? = null,
     /** Preguntar "¿Qué lograste?" al completar un pomodoro (Pro). */
     val achievementNotes: Boolean = true,
+    /** Avisos con sonidos de laboratorio: vidrio, burbujas y copas (Pro). */
+    val labSounds: Boolean = false,
     /** No molestar automático durante el trabajo (Pro). */
     val focusDnd: Boolean = false,
     /** Pro: tras [ambientDelayMinutes] sin tocar la pantalla, solo queda el reloj atenuado. */
@@ -72,6 +74,8 @@ data class AppSettings(
     val labPalette: LabPalette = LabPalette.CLASSIC,
     /** Meta diaria de pomodoros; 0 = sin meta. */
     val dailyGoal: Int = 0,
+    /** Meta semanal de pomodoros (de lunes a domingo); 0 = sin meta. */
+    val weeklyGoal: Int = 0,
     /** Día (epochDay) en que ya se celebró la meta, para no repetir el aviso. */
     val goalCelebratedDay: Long = -1,
     /** Plantillas de plan; null = aún no se tocan (se muestran las sugeridas). */

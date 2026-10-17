@@ -143,6 +143,10 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { repository.setAchievementNotes(enabled) }
     }
 
+    fun setLabSounds(enabled: Boolean) {
+        viewModelScope.launch { repository.setLabSounds(enabled) }
+    }
+
     fun setFocusDnd(enabled: Boolean) {
         viewModelScope.launch { repository.setFocusDnd(enabled) }
     }

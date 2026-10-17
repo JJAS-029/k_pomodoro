@@ -165,6 +165,7 @@ fun SettingsScreen(
                     onPaletteChange = viewModel::setLabPalette,
                     onGlassTintChange = viewModel::setGlassTint,
                     onAchievementNotesChange = viewModel::setAchievementNotes,
+                    onLabSoundsChange = viewModel::setLabSounds,
                     onCountdownChange = viewModel::setCountdown,
                     onFocusDndChange = { enabled ->
                         if (enabled && !viewModel.hasDndAccess()) {
@@ -260,6 +261,7 @@ private fun SettingsContent(
     onGlassTintChange: (GlassTint) -> Unit = {},
     onFocusDndChange: (Boolean) -> Unit = {},
     onAchievementNotesChange: (Boolean) -> Unit = {},
+    onLabSoundsChange: (Boolean) -> Unit = {},
     onCountdownChange: (String, Long?) -> Unit = { _, _ -> },
     onFlameChange: (FlameColor) -> Unit = {},
     onOpenPro: () -> Unit = {},
@@ -360,6 +362,18 @@ private fun SettingsContent(
 
         SectionTitle(stringResource(R.string.set_section_alerts))
         SwitchRow(stringResource(R.string.set_sounds), settings.soundEnabled, onSoundChange)
+        if (settings.soundEnabled) {
+            SwitchRow(
+                proTitle(R.string.set_lab_sounds, settings.isPro),
+                settings.isPro && settings.labSounds,
+                onCheckedChange = { if (settings.isPro) onLabSoundsChange(it) else onOpenPro() },
+            )
+            Text(
+                stringResource(R.string.set_lab_sounds_desc),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
         SwitchRow(stringResource(R.string.set_vibration), settings.vibrationEnabled, onVibrationChange)
         SwitchRow(stringResource(R.string.set_keep_screen_on), settings.keepScreenOn, onKeepScreenOnChange)
         SwitchRow(

@@ -233,7 +233,7 @@
     <string name="template_deep">Deep work</string>
     <string name="goal_title">Today\'s goal</string>
     <string name="goal_label">Daily goal (pomodoros)</string>
-    <string name="goal_hint">0 means no goal. It shows as a ring on the main screen.</string>
+    <string name="goal_hint">0 means no goal. It shows as a ring on the main screen (the daily one; with only a weekly goal, the weekly one).</string>
     <plurals name="goal_today">
         <item quantity="one">Today: %1$d of %2$d pomodoro</item>
         <item quantity="other">Today: %1$d of %2$d pomodoros</item>
@@ -274,4 +274,9 @@
         <item quantity="other">📅 %1$d days until %2$s</item>
     </plurals>
     <string name="countdown_today">📅 %1$s is today! Good luck.</string>
+    <string name="goal_week_short">Week</string>
+    <plurals name="goal_week">
+        <item quantity="one">This week: %1$d of %2$d pomodoro</item>
+        <item quantity="other">This week: %1$d of %2$d pomodoros</item>
+    </plurals>
 </resources>

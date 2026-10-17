@@ -284,4 +284,6 @@
         <item quantity="many">Respaldo restaurado: %1$d sesiones.</item>
         <item quantity="other">Respaldo restaurado: %1$d sesiones.</item>
     </plurals>
+    <string name="set_lab_sounds">Sonidos de laboratorio</string>
+    <string name="set_lab_sounds_desc">Tintineo de vidrio al empezar a trabajar, burbujeo en los descansos cortos y copas de cristal en los largos.</string>
 </resources>

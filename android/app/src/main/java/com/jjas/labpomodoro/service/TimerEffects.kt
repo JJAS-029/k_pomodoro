@@ -18,6 +18,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.io.File
 import java.time.ZoneId
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -49,6 +50,22 @@ class TimerEffects @Inject constructor(
     private val shortBreakSound = soundPool.load(context, R.raw.sound_short_break, 1)
     private val longBreakSound = soundPool.load(context, R.raw.sound_long_break, 1)
 
+    // Sonidos de laboratorio (Pro): se sintetizan una vez, se guardan en la caché y se cargan aparte
+    private val labSounds by lazy {
+        fun load(name: String, samples: () -> ShortArray): Int {
+            val file = File(context.cacheDir, "lab_${name}_v$LAB_SOUNDS_VERSION.wav")
+            if (!file.exists()) file.writeBytes(LabSoundSynth.wav(samples()))
+            return soundPool.load(file.path, 1)
+        }
+        LabSoundIds(
+            start = load("clink", LabSoundSynth::clink),
+            shortBreak = load("bubbles", LabSoundSynth::bubbles),
+            longBreak = load("chime", LabSoundSynth::chime),
+        )
+    }
+
+    private class LabSoundIds(val start: Int, val shortBreak: Int, val longBreak: Int)
+
     private val vibrator: Vibrator by lazy {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             context.getSystemService(VibratorManager::class.java).defaultVibrator
@@ -60,10 +77,16 @@ class TimerEffects @Inject constructor(
 
     fun start() {
         scope.launch { engine.events.collect(::handle) }
+        // El SoundPool carga en segundo plano: se cargan en cuanto se activan, para que el primero suene
+        scope.launch { settings.settings.collect { if (it.isPro && it.labSounds) labSounds } }
     }
 
     private suspend fun handle(event: TimerEvent) {
         val prefs = settings.settings.first()
+        val lab = if (prefs.isPro && prefs.labSounds) labSounds else null
+        val startSound = lab?.start ?: startSound
+        val shortBreakSound = lab?.shortBreak ?: shortBreakSound
+        val longBreakSound = lab?.longBreak ?: longBreakSound
         when (event) {
             TimerEvent.PlanStarted -> if (prefs.soundEnabled) play(startSound)
 
@@ -103,3 +126,6 @@ class TimerEffects @Inject constructor(
         vibrator.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 500, 200, 500, 200, 500), -1))
     }
 }
+
+/** Súbelo si cambian los sonidos sintetizados: los de la caché se vuelven a generar. */
+private const val LAB_SOUNDS_VERSION = 1

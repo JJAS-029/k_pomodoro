@@ -22,9 +22,14 @@ data class GoalUi(
     val today: Int = 0,
     val streak: Int = 0,
     val celebratedToday: Boolean = true,
+    /** Meta semanal y pomodoros de esta semana (desde el lunes). */
+    val weekGoal: Int = 0,
+    val week: Int = 0,
 ) {
     val reached: Boolean get() = goal > 0 && today >= goal
     val fraction: Float get() = if (goal <= 0) 0f else (today.toFloat() / goal).coerceIn(0f, 1f)
+    val weekFraction: Float get() = if (weekGoal <= 0) 0f else (week.toFloat() / weekGoal).coerceIn(0f, 1f)
+    val hasAny: Boolean get() = goal > 0 || weekGoal > 0
 }
 
 @HiltViewModel
@@ -42,6 +47,8 @@ class GoalViewModel @Inject constructor(
             today = counts[today] ?: 0,
             streak = DailyGoal.streak(counts, today, prefs.dailyGoal),
             celebratedToday = prefs.goalCelebratedDay == today,
+            weekGoal = prefs.weeklyGoal,
+            week = (0..LocalDate.ofEpochDay(today).dayOfWeek.ordinal).sumOf { counts[today - it] ?: 0 },
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), GoalUi())
 
@@ -52,6 +59,10 @@ class GoalViewModel @Inject constructor(
             if (value > 0 && state.value.today >= value) settings.setGoalCelebratedDay(LocalDate.now(clock).toEpochDay())
             settings.setDailyGoal(value)
         }
+    }
+
+    fun setWeeklyGoal(goal: Int) {
+        viewModelScope.launch { settings.setWeeklyGoal(goal.coerceIn(DailyGoal.WEEKLY_RANGE)) }
     }
 
     fun markCelebrated() {
