@@ -3,6 +3,7 @@ package com.jjas.labpomodoro.ui.settings
 import android.app.Activity
 import com.jjas.labpomodoro.data.billing.ReviewAccess
 import com.jjas.labpomodoro.domain.model.LabPalette
+import com.jjas.labpomodoro.domain.model.LabBackground
 import com.jjas.labpomodoro.domain.model.FlameColor
 import com.jjas.labpomodoro.domain.model.GlassTint
 import android.content.Context
@@ -149,6 +150,10 @@ class SettingsViewModel @Inject constructor(
 
     fun setFocusDnd(enabled: Boolean) {
         viewModelScope.launch { repository.setFocusDnd(enabled) }
+    }
+
+    fun setLabBackground(background: LabBackground) {
+        viewModelScope.launch { repository.setLabBackground(background) }
     }
 
     fun setSeasonalThemes(enabled: Boolean) {

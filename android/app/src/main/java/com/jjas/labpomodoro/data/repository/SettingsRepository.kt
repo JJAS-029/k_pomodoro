@@ -14,6 +14,7 @@ import com.jjas.labpomodoro.BuildConfig
 import com.jjas.labpomodoro.domain.model.AppSettings
 import com.jjas.labpomodoro.domain.model.FocusSound
 import com.jjas.labpomodoro.domain.model.LabPalette
+import com.jjas.labpomodoro.domain.model.LabBackground
 import com.jjas.labpomodoro.domain.model.PlanTemplate
 import com.jjas.labpomodoro.domain.model.FlameColor
 import com.jjas.labpomodoro.domain.model.GlassTint
@@ -115,6 +116,8 @@ class SettingsRepository @Inject constructor(
 
     suspend fun setFlameColor(color: FlameColor) = dataStore.edit { it[Keys.FLAME_COLOR] = color.name }
 
+    suspend fun setLabBackground(background: LabBackground) = dataStore.edit { it[Keys.LAB_BACKGROUND] = background.name }
+
     suspend fun setVesselElement(atomicNumber: Int) = dataStore.edit { it[Keys.VESSEL_ELEMENT] = atomicNumber }
 
     suspend fun setFocusSound(sound: FocusSound) = dataStore.edit { it[Keys.FOCUS_SOUND] = sound.name }
@@ -210,6 +213,7 @@ class SettingsRepository @Inject constructor(
             planTemplates = this[Keys.PLAN_TEMPLATES]?.let(PlanTemplate::decode),
             seasonalThemes = this[Keys.SEASONAL] ?: defaults.seasonalThemes,
             glassTint = this[Keys.GLASS_TINT]?.let { name -> GlassTint.entries.firstOrNull { it.name == name } } ?: defaults.glassTint,
+            labBackground = this[Keys.LAB_BACKGROUND]?.let { name -> LabBackground.entries.firstOrNull { it.name == name } } ?: defaults.labBackground,
             flameColor = this[Keys.FLAME_COLOR]?.let { name -> FlameColor.entries.firstOrNull { it.name == name } } ?: defaults.flameColor,
             vesselElement = this[Keys.VESSEL_ELEMENT] ?: defaults.vesselElement,
             focusSound = this[Keys.FOCUS_SOUND]?.let { name -> FocusSound.entries.firstOrNull { it.name == name } } ?: defaults.focusSound,
@@ -263,6 +267,7 @@ class SettingsRepository @Inject constructor(
         val GOAL_CELEBRATED_DAY = longPreferencesKey("goal_celebrated_day")
         val PLAN_TEMPLATES = stringPreferencesKey("plan_templates")
         val FLAME_COLOR = stringPreferencesKey("flame_color")
+        val LAB_BACKGROUND = stringPreferencesKey("lab_background")
         val PRO_PURCHASED = booleanPreferencesKey("pro_purchased")
         val VESSEL_ELEMENT = intPreferencesKey("vessel_element")
         val FOCUS_SOUND = stringPreferencesKey("focus_sound")

@@ -569,7 +569,7 @@ Prototipo **LIQUID_GLASS** (en la pantalla de prueba de debug, junto a los demá
 | Descubrimiento con tarjeta | El elemento nuevo aparece como una tarjeta que gira y brilla según su rareza, en vez de solo el aviso | 🟡 | No |
 | ✅ Hervor al final (último minuto de trabajo: burbujas grandes desde el fondo y el doble de vapor) | En el último minuto de trabajo el líquido hierve (burbujas grandes y vapor más denso) para avisar sin sonido | 🟢 | No |
 | ✅ Sonidos de laboratorio (Pro: sintetizados por código en `LabSoundSynth`, sin archivos: vidrio al empezar a trabajar, burbujeo en descansos cortos, copas de cristal en los largos) | Opcionales: tintineo de vidrio al terminar y burbujeo suave (además de los avisos actuales) | 🟢 | Pro |
-| Fondos de laboratorio | Mesa de trabajo, azulejos o pizarrón detrás del recipiente (opcional, el negro sigue por defecto) | 🟡 | Pro |
+| ✅ Fondos de laboratorio (Pro: azulejos, papel milimétrico o pizarrón con fórmulas, en el color del texto a poca opacidad; Configuración › Apariencia) — falta verlo en un dispositivo | Mesa de trabajo, azulejos o pizarrón detrás del recipiente (opcional, el negro sigue por defecto) | 🟡 | Pro |
 | ✅ Temas de temporada (Día de Muertos del 25 oct al 3 nov: pétalos de cempasúchil y paleta cempasúchil/magenta/morado; invierno del 12 dic al 6 ene: nieve y paleta helada; solo reemplazan la paleta clásica; se apagan en Apariencia) | Líquidos fluorescentes en Halloween, nieve en diciembre, etc., por unos días | 🟡 | No |
 | Vibración al tocar | Pulso háptico suave al tocar el líquido y al llenarse un recipiente | 🟢 | No |
 

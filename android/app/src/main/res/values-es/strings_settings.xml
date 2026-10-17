@@ -290,4 +290,9 @@
     <string name="set_seasonal_desc">En Día de Muertos caen pétalos de cempasúchil y en invierno, nieve; los líquidos toman colores de la temporada (si usas la paleta clásica).</string>
     <string name="set_palette_muertos">Día de Muertos</string>
     <string name="set_palette_winter">Invierno</string>
+    <string name="set_background">Fondo de laboratorio</string>
+    <string name="set_bg_none">Ninguno</string>
+    <string name="set_bg_tiles">Azulejos</string>
+    <string name="set_bg_graph">Papel milimétrico</string>
+    <string name="set_bg_formulas">Pizarrón</string>
 </resources>

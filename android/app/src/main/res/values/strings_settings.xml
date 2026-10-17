@@ -282,4 +282,9 @@
     <string name="set_seasonal_desc">Marigold petals fall for Day of the Dead and snow in winter; liquids take on seasonal colors (if you use the classic palette).</string>
     <string name="set_palette_muertos">Day of the Dead</string>
     <string name="set_palette_winter">Winter</string>
+    <string name="set_background">Lab background</string>
+    <string name="set_bg_none">None</string>
+    <string name="set_bg_tiles">Tiles</string>
+    <string name="set_bg_graph">Graph paper</string>
+    <string name="set_bg_formulas">Chalkboard</string>
 </resources>

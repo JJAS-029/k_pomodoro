@@ -86,6 +86,8 @@ data class AppSettings(
     val seasonalThemes: Boolean = true,
     /** Tinte del cristal (Pro). */
     val glassTint: GlassTint = GlassTint.CLEAR,
+    /** Fondo de laboratorio (Pro). */
+    val labBackground: LabBackground = LabBackground.NONE,
     /** Color de la llama del mechero (Pro). */
     val flameColor: FlameColor = FlameColor.BLUE,
     /**
@@ -132,6 +134,7 @@ data class AppSettings(
     /** Tinte y llama solo cuentan con Pro. */
     val activeGlassTint: GlassTint get() = if (isPro) glassTint else GlassTint.CLEAR
     val activeFlame: FlameColor get() = if (isPro) flameColor else FlameColor.BLUE
+    val activeBackground: LabBackground get() = if (isPro) labBackground else LabBackground.NONE
 
     companion object {
         val AMBIENT_DELAYS = listOf(3, 5)

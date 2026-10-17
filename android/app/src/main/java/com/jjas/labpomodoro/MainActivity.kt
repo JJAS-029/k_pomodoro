@@ -139,7 +139,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val settings by settingsRepository.settings.collectAsStateWithLifecycle(initialValue = null)
             val pureBlack = settings?.pureBlack ?: true
-            val labTheme = settings?.let { LabThemeUi.of(it.activeGlassTint, it.activeFlame) } ?: LabThemeUi()
+            val labTheme = settings?.let { LabThemeUi.of(it.activeGlassTint, it.activeFlame, it.activeBackground) } ?: LabThemeUi()
             CompositionLocalProvider(LocalLabTheme provides labTheme) {
             LabPomodoroTheme(dynamicColor = settings?.dynamicColorActive == true, pureBlack = pureBlack) {
                 // Fuera del if para conservar la pantalla en la que estaba al volver de PiP

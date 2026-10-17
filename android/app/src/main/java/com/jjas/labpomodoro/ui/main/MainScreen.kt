@@ -88,6 +88,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jjas.labpomodoro.R
+import com.jjas.labpomodoro.ui.components.LocalLabTheme
+import com.jjas.labpomodoro.ui.components.LabBackdrop
 import com.jjas.labpomodoro.ui.components.SeasonalBackdrop
 import com.jjas.labpomodoro.domain.model.Season
 import androidx.compose.ui.res.stringArrayResource
@@ -507,7 +509,8 @@ private fun MainContent(
     val clockColor = if (dynamicColor) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
     Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Box(Modifier.safeDrawingPadding()) {
-            // Temporada: pétalos o nieve detrás de todo
+            // Fondo de laboratorio (Pro) y, encima, la temporada: pétalos o nieve
+            LabBackdrop(LocalLabTheme.current.background, Modifier.matchParentSize())
             season?.let { SeasonalBackdrop(it, Modifier.matchParentSize()) }
             Column(
                 modifier = Modifier

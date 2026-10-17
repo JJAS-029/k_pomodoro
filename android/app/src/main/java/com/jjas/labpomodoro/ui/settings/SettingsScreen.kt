@@ -69,6 +69,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jjas.labpomodoro.BuildConfig
 import com.jjas.labpomodoro.R
+import com.jjas.labpomodoro.domain.model.LabBackground
 import java.time.format.FormatStyle
 import java.time.format.DateTimeFormatter
 import java.time.LocalDate
@@ -165,6 +166,7 @@ fun SettingsScreen(
                     onPaletteChange = viewModel::setLabPalette,
                     onGlassTintChange = viewModel::setGlassTint,
                     onSeasonalChange = viewModel::setSeasonalThemes,
+                    onBackgroundChange = viewModel::setLabBackground,
                     onAchievementNotesChange = viewModel::setAchievementNotes,
                     onLabSoundsChange = viewModel::setLabSounds,
                     onCountdownChange = viewModel::setCountdown,
@@ -261,6 +263,7 @@ private fun SettingsContent(
     onPaletteChange: (LabPalette) -> Unit = {},
     onGlassTintChange: (GlassTint) -> Unit = {},
     onSeasonalChange: (Boolean) -> Unit = {},
+    onBackgroundChange: (LabBackground) -> Unit = {},
     onFocusDndChange: (Boolean) -> Unit = {},
     onAchievementNotesChange: (Boolean) -> Unit = {},
     onLabSoundsChange: (Boolean) -> Unit = {},
@@ -495,6 +498,17 @@ private fun SettingsContent(
             label = { stringResource(it.labelRes) },
             swatch = { it.argb?.let(::Color) },
             onSelect = onGlassTintChange,
+            onOpenPro = onOpenPro,
+        )
+        Spacer(Modifier.height(12.dp))
+        SwatchChooser(
+            title = stringResource(R.string.set_background),
+            options = LabBackground.entries,
+            selected = settings.activeBackground,
+            isPro = settings.isPro,
+            label = { stringResource(it.labelRes) },
+            swatch = { null },
+            onSelect = onBackgroundChange,
             onOpenPro = onOpenPro,
         )
         Spacer(Modifier.height(12.dp))

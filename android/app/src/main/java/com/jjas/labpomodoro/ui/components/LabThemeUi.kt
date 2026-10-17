@@ -4,11 +4,17 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import com.jjas.labpomodoro.domain.model.FlameColor
 import com.jjas.labpomodoro.domain.model.GlassTint
+import com.jjas.labpomodoro.domain.model.LabBackground
 
-/** Tema de laboratorio activo: tinte del cristal (null = transparente) y colores de la llama. */
-data class LabThemeUi(val glassTint: Color? = null, val flame: FlameTones = FlameTones.Blue) {
+/** Tema de laboratorio activo: tinte del cristal (null = transparente), colores de la llama y fondo. */
+data class LabThemeUi(
+    val glassTint: Color? = null,
+    val flame: FlameTones = FlameTones.Blue,
+    val background: LabBackground = LabBackground.NONE,
+) {
     companion object {
-        fun of(tint: GlassTint, flame: FlameColor) = LabThemeUi(tint.argb?.let(::Color), FlameTones.of(flame))
+        fun of(tint: GlassTint, flame: FlameColor, background: LabBackground) =
+            LabThemeUi(tint.argb?.let(::Color), FlameTones.of(flame), background)
     }
 }
 

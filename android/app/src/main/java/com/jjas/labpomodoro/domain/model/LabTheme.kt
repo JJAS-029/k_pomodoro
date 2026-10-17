@@ -23,3 +23,11 @@ enum class FlameColor(@StringRes val labelRes: Int, val swatch: Long) {
     ORANGE(R.string.set_flame_orange, 0xFFFFB347),
     RED(R.string.set_flame_red, 0xFFFF5A6E),
 }
+
+/** Fondo de laboratorio detrás del recipiente (Pro). */
+enum class LabBackground(@StringRes val labelRes: Int) {
+    NONE(R.string.set_bg_none),
+    TILES(R.string.set_bg_tiles),
+    GRAPH(R.string.set_bg_graph),
+    FORMULAS(R.string.set_bg_formulas),
+}
