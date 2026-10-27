@@ -610,7 +610,7 @@ Hecho: **Ajustar el plan en curso** — `TimerEngine.extendCurrent` (+5 min, top
 | 🟡 Estudiar con amigos (hecho, falta probar con dos teléfonos y publicar las reglas de `android/firebase/firestore.rules`): menú › Estudiar con amigos. Crear sala es Pro, unirse con el código de 6 caracteres es gratis (hasta 8). `studyRooms/{código}` guarda el plan, el inicio y las pausas; cada teléfono se coloca solo en la sesión que toca (`TimerEngine.follow`, con la misma semilla: mismos recipientes y colores). Solo el anfitrión empieza y pausa; en sala no se salta ni se ajusta el plan. Cada quien publica su estado: concentrado, en descanso, en pausa, salió de la app (se fue a otra app con la pantalla encendida durante el trabajo), terminó o sin conexión (sin latido en 3 min). Si el anfitrión cierra la sala, cada quien sigue su plan | Sala compartida: varios hacen el mismo plan sincronizado y ven quién sigue concentrado | 🔴 | Pro |
 | ✅ Tienda de cristalería (pestaña Cristalería del Laboratorio, `ui/lab/GlassShop.kt`): 5 recipientes (crisol 20, cristalizador 25, Kitasato 30, matraz de destilación 40, embudo de decantación 50) que entran en la rotación de los planes, y 3 mecheros (lámpara de alcohol 30, Meker 40, placa calefactora 60) que se eligen. Se paga con repetidos: `LabRepository.spendRepeats` gasta primero de los que más hay y nunca el último, así que la tabla y la maestría no cambian. Lo comprado se guarda en los ajustes (`glassware`, `burner`) y viaja en el respaldo | Gastar elementos repetidos en recipientes y mecheros cosméticos (le da otro uso a los repetidos) | 🟡 | No |
 | 🟡 Tableta y horizontal (hecho: pantalla principal a dos columnas cuando es más ancha que alta y mide 560 dp o más: recipiente, mechero y repisa a la izquierda; reloj, plan y etiquetas a la derecha con el dock debajo. Las demás pantallas y hojas se desplazan bien en horizontal. Falta: probar en una tableta y, si hace falta, limitar el ancho de Progreso y Configuración) | Diseño a dos columnas en tabletas y plegables, y pantalla principal en horizontal | 🟡 | No |
-| Wear OS | Tile y complicación con el tiempo restante en el reloj | 🔴 | Pro |
+| 🟡 Wear OS (plan listo: ver "Wear OS: plan" abajo; falta desarrollarlo) | App, tile y complicación en el reloj, controlando el timer del teléfono; después, modo semiautónomo | 🔴 | Gratis y Pro |
 | 🟡 Accesibilidad (primera pasada: botones redondos del menú con nombre, anillo de la meta leído completo, burbuja con acción; falta probar con TalkBack y letra grande en un dispositivo) | Revisión completa con TalkBack y tamaños de letra grandes | 🟢 | No |
 
 #### Ideas nuevas (14 de octubre de 2026, por decidir)
@@ -624,10 +624,47 @@ Hecho: **Ajustar el plan en curso** — `TimerEngine.extendCurrent` (+5 min, top
 | ✅ Mechero Bunsen de cristal | Rehacer el mechero con el estilo Liquid Glass: cuerpo metálico con reflejos y borde especular, llama con núcleo y halo, parpadeo y chispas, y resplandor que tiñe la base del recipiente | 🟢 | No |
 | ✅ Temas de laboratorio (tinte del cristal: transparente, verdoso, ámbar, azulado, rosado; llama con los colores de la prueba de la flama: azul, verde cobre, violeta potasio, naranja sodio, roja estroncio; más las paletas. `LocalLabTheme` desde `MainActivity`) | Personalización combinada: tinte del cristal (transparente, verdoso, ámbar, azulado), color de la llama (azul, verde, violeta…) y paleta de líquidos; por ejemplo "cristal verdoso + llama azul + paleta verde". Se suma a las paletas de laboratorio que ya hay | 🟡 | Pro |
 
+#### Wear OS: plan (26 de octubre de 2026)
+
+**Cómo se publica.** Módulo nuevo `android/wear` en el mismo proyecto, con el mismo paquete (`com.jjas.labpomodoro`) y la misma llave. Se sube a la misma app de Play Console: se activa el formato Wear OS y se publica en su pista. Su `versionCode` es distinto al del teléfono (por ejemplo, teléfono 6 y reloj 1000006). Wear OS 3 o más nuevo (minSdk 30).
+
+**Arquitectura.** El teléfono manda: el timer, las sesiones, las recompensas y las salas siguen en `TimerEngine`. Se comunican con la Data Layer de Wear OS (`play-services-wearable`):
+- Teléfono → reloj (`DataClient`, `/timer`): tipo de sesión, **hora de fin en reloj de pared**, en pausa y tiempo congelado, sesión N de M, color del líquido y forma del recipiente, si hay Pro y si hay sala. El reloj cuenta solo con la hora de fin, sin mensajes cada segundo.
+- Reloj → teléfono (`MessageClient`, `/command/*`): empezar, pausar, continuar y saltar. Entran por `TimerEngine`, así que respetan las salas (ahí solo el anfitrión pausa y nadie salta).
+- En el teléfono, un `WearSync` (como `TimerWidgetSync`) publica el estado y un `WearableListenerService` recibe las órdenes.
+
+**Gratis y Pro** (como en el teléfono, que siempre haya motivos para comprar):
+
+| Función | Gratis | Pro |
+|---|---|---|
+| App del reloj: tiempo, tipo de sesión, empezar/pausar/continuar | ✅ | ✅ |
+| Vibración al terminar cada sesión | ✅ | ✅ |
+| Tile con el tiempo restante (tocarlo abre la app) | ✅ | ✅ |
+| Recipiente animado que se vacía y se llena (con su color y forma) | Vaso fijo | ✅ |
+| Saltar desde el reloj, controles en el tile | | ✅ |
+| Complicación (anillo con lo que falta) en cualquier carátula | | ✅ |
+| Modo siempre encendido con el recipiente atenuado | | ✅ |
+| Aviso de elemento ganado en el reloj | | ✅ |
+| Modo semiautónomo (sin el teléfono cerca) | | ✅ |
+
+Sin Pro, lo de Pro se ve con candado y "Disponible con Lab Pomodoro Pro".
+
+**Fases.**
+1. **Preparar:** módulo `wear` con Compose for Wear OS, emulador "Wear OS Large Round" enlazado al emulador del teléfono (asistente de enlace de Android Studio). Con 2 emuladores a la vez: teléfono con 3 GB y reloj con 2 GB, sin nada más abierto.
+2. **Enlace:** `WearSync` y el receptor de órdenes en el teléfono; en el reloj, leer el estado y mandar órdenes. Pruebas de que una orden del reloj mueve el timer del teléfono.
+3. **App del reloj:** pantalla redonda con el tiempo, el tipo de sesión, los puntos de sesiones y los botones; recipiente animado (Pro); vibración al terminar; "actividad en curso" (el ícono de Wear OS mientras corre el plan).
+4. **Tile** (ProtoLayout): tiempo restante y sesión; con Pro, botón de pausar/continuar.
+5. **Complicación** (Pro): anillo de progreso y minutos restantes.
+6. **Publicar:** capturas del reloj (redondas, 384×384 o más), descripción, pista de Wear OS en Play y revisión.
+7. **Semiautónomo** (después, Pro): si el teléfono no está cerca, el reloj corre el plan por su cuenta (con la última configuración que recibió) y guarda los pomodoros completados. Al reconectarse se los manda al teléfono (`DataClient`, `/sessions`, con id único para no contarlos dos veces); el teléfono los registra con su hora real y `RewardSync` entrega los elementos y medallas que correspondan. Si al reconectarse el teléfono también tiene un plan corriendo, manda el del teléfono.
+
+**Riesgos.** Solo emulador: el enlace entre emuladores a veces se cae y hay que volver a enlazarlos; la vibración y el modo siempre encendido no se ven bien en emulador. Esfuerzo: fases 1 a 3, varias sesiones; 4 y 5, una; 6, media; 7, una o dos.
+
 #### Pendientes de publicación y técnicos
 
 - ✅ `versionCode` 3 (versión 1.1) para la prueba cerrada, el 14 de octubre de 2026.
-- ✅ `versionCode` 4 (versión 1.2), el 16 de octubre de 2026. La siguiente subida necesita el 5.
+- ✅ `versionCode` 4 (versión 1.2), el 16 de octubre de 2026.
+- ✅ `versionCode` 5 (versión 1.3), el 17 de octubre de 2026. La siguiente subida necesita el 6.
 - Probar la compra real de Pro (suscripción y pago único) con testers.
 - Prueba cerrada: 12 testers durante 14 días antes de pedir producción.
 - Al pasar a producción: vincular AdMob con Play y publicar `app-ads.txt`.
