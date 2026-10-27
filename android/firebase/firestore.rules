@@ -34,5 +34,36 @@ service cloud.firestore {
         allow delete: if request.auth != null && request.auth.uid == uid;
       }
     }
+
+    // Salas de estudio con amigos: código de 6 caracteres; solo el anfitrión crea, cambia o cierra
+    match /studyRooms/{code} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+        && code.matches('^[A-HJ-KM-NP-Z2-9]{6}$')
+        && request.resource.data.host == request.auth.uid
+        && request.resource.data.keys().hasOnly(['host', 'hostName', 'createdAt', 'totalHours', 'workMinutes',
+             'shortBreakMinutes', 'longBreakMinutes', 'pomodorosUntilLong', 'startedAt', 'pausedAt', 'pausedTotal'])
+        && request.resource.data.hostName is string && request.resource.data.hostName.size() <= 20;
+      // Solo el inicio y las pausas cambian; el plan y el anfitrión quedan fijos
+      allow update: if request.auth != null && resource.data.host == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['startedAt', 'pausedAt', 'pausedTotal']);
+      allow delete: if request.auth != null && resource.data.host == request.auth.uid;
+
+      // Cada quien escribe solo su fila; el anfitrión también puede sacar a alguien
+      match /members/{uid} {
+        allow read: if request.auth != null;
+        allow create, update: if request.auth != null && request.auth.uid == uid
+          && exists(/databases/$(db)/documents/studyRooms/$(code))
+          && request.resource.data.keys().hasOnly(['nickname', 'avatar', 'status', 'updatedAt'])
+          && request.resource.data.nickname is string
+          && request.resource.data.nickname.size() > 0
+          && request.resource.data.nickname.size() <= 20
+          && request.resource.data.avatar is int
+          && request.resource.data.avatar >= 1 && request.resource.data.avatar <= 118
+          && request.resource.data.status in ['WAITING', 'FOCUS', 'BREAK', 'PAUSED', 'AWAY', 'DONE'];
+        allow delete: if request.auth != null && (request.auth.uid == uid
+          || get(/databases/$(db)/documents/studyRooms/$(code)).data.host == request.auth.uid);
+      }
+    }
   }
 }

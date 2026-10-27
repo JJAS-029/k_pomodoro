@@ -292,4 +292,61 @@
     </plurals>
     <string name="bubble_open">Ver en la tabla periódica</string>
     <string name="goal_week_label">Meta semanal (pomodoros)</string>
+    <string name="room_title">Estudiar con amigos</string>
+    <string name="room_menu_desc">El mismo plan, al mismo tiempo</string>
+    <string name="room_done">Listo</string>
+    <string name="room_intro">Estudien el mismo plan al mismo tiempo: los descansos llegan juntos y ves quién sigue concentrado y quién se fue a otra app.</string>
+    <string name="room_sign_in_needed">Para crear una sala o unirte, entra con tu cuenta de Google.</string>
+    <string name="room_sign_in">Entrar con Google</string>
+    <string name="room_nickname">Tu nombre en la sala</string>
+    <string name="room_create_title">Crear una sala</string>
+    <string name="room_create_desc">Lleva tu plan de siempre. Comparte el código y empiecen cuando estén todos.</string>
+    <string name="room_create">Crear sala</string>
+    <string name="room_create_pro">Crear sala · Pro</string>
+    <string name="room_join_title">Unirme a una sala</string>
+    <string name="room_code">Código</string>
+    <string name="room_join">Unirme</string>
+    <string name="room_replaces_plan">Tu plan en curso se cambia por el de la sala cuando empiece.</string>
+    <string name="room_code_label">Código de la sala</string>
+    <string name="room_share">Compartir el código</string>
+    <string name="room_share_text">Estudia conmigo en Lab Pomodoro: abre el menú › Estudiar con amigos y usa el código %1$s</string>
+    <string name="room_start_together">Empezar juntos</string>
+    <string name="room_waiting_host">Esperando a que %1$s empiece…</string>
+    <string name="room_waiting_short">Esperando al anfitrión</string>
+    <string name="room_paused_by_host">El anfitrión pausó el plan.</string>
+    <string name="room_go_to_timer">Ir al temporizador</string>
+    <plurals name="room_members">
+        <item quantity="one">%1$d de %2$d en la sala</item>
+        <item quantity="many">%1$d de %2$d en la sala</item>
+        <item quantity="other">%1$d de %2$d en la sala</item>
+    </plurals>
+    <string name="room_member_me">%1$s (tú)</string>
+    <string name="room_host">Anfitrión</string>
+    <string name="room_leave">Salir de la sala</string>
+    <string name="room_close">Cerrar la sala</string>
+    <string name="room_leave_confirm">¿Salir de la sala? Tu plan sigue corriendo, ya por tu cuenta.</string>
+    <string name="room_close_confirm">¿Cerrar la sala? Todos salen y cada quien sigue su plan por su cuenta.</string>
+    <string name="room_cancel">Cancelar</string>
+    <string name="room_ok">Entendido</string>
+    <string name="room_closed_by_host">El anfitrión cerró la sala. Tu plan sigue corriendo, ya por tu cuenta.</string>
+    <string name="room_error_not_found">No encontramos esa sala, o ya cerró. Revisa el código.</string>
+    <string name="room_error_full">La sala está llena.</string>
+    <string name="room_error_connection">No se pudo conectar. Revisa tu internet e inténtalo de nuevo.</string>
+    <string name="room_status_waiting">Esperando</string>
+    <string name="room_status_focus">Concentrado</string>
+    <string name="room_status_break">En descanso</string>
+    <string name="room_status_paused">En pausa</string>
+    <string name="room_status_away">Salió de la app</string>
+    <string name="room_status_done">Terminó</string>
+    <string name="room_status_offline">Sin conexión</string>
+    <plurals name="room_plan_summary">
+        <item quantity="one">%1$d pomodoro · %2$d h %3$d min de trabajo</item>
+        <item quantity="many">%1$d pomodoros · %2$d h %3$d min de trabajo</item>
+        <item quantity="other">%1$d pomodoros · %2$d h %3$d min de trabajo</item>
+    </plurals>
+    <plurals name="room_chip">
+        <item quantity="one">Sala %1$s · %2$d persona</item>
+        <item quantity="many">Sala %1$s · %2$d personas</item>
+        <item quantity="other">Sala %1$s · %2$d personas</item>
+    </plurals>
 </resources>

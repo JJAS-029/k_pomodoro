@@ -281,4 +281,58 @@
     </plurals>
     <string name="bubble_open">See it in the periodic table</string>
     <string name="goal_week_label">Weekly goal (pomodoros)</string>
+    <string name="room_title">Study with friends</string>
+    <string name="room_menu_desc">Same plan, same time</string>
+    <string name="room_done">Done</string>
+    <string name="room_intro">Study the same plan at the same time: breaks arrive together and you can see who\'s still focused and who left for another app.</string>
+    <string name="room_sign_in_needed">To create or join a room, sign in with your Google account.</string>
+    <string name="room_sign_in">Sign in with Google</string>
+    <string name="room_nickname">Your name in the room</string>
+    <string name="room_create_title">Create a room</string>
+    <string name="room_create_desc">It uses your usual plan. Share the code and start when everyone\'s in.</string>
+    <string name="room_create">Create room</string>
+    <string name="room_create_pro">Create room · Pro</string>
+    <string name="room_join_title">Join a room</string>
+    <string name="room_code">Code</string>
+    <string name="room_join">Join</string>
+    <string name="room_replaces_plan">Your current plan is replaced by the room\'s when it starts.</string>
+    <string name="room_code_label">Room code</string>
+    <string name="room_share">Share the code</string>
+    <string name="room_share_text">Study with me on Lab Pomodoro: open the menu › Study with friends and use the code %1$s</string>
+    <string name="room_start_together">Start together</string>
+    <string name="room_waiting_host">Waiting for %1$s to start…</string>
+    <string name="room_waiting_short">Waiting for the host</string>
+    <string name="room_paused_by_host">The host paused the plan.</string>
+    <string name="room_go_to_timer">Go to the timer</string>
+    <plurals name="room_members">
+        <item quantity="one">%1$d of %2$d in the room</item>
+        <item quantity="other">%1$d of %2$d in the room</item>
+    </plurals>
+    <string name="room_member_me">%1$s (you)</string>
+    <string name="room_host">Host</string>
+    <string name="room_leave">Leave the room</string>
+    <string name="room_close">Close the room</string>
+    <string name="room_leave_confirm">Leave the room? Your plan keeps running on its own.</string>
+    <string name="room_close_confirm">Close the room? Everyone leaves and each keeps their plan on their own.</string>
+    <string name="room_cancel">Cancel</string>
+    <string name="room_ok">Got it</string>
+    <string name="room_closed_by_host">The host closed the room. Your plan keeps running on its own.</string>
+    <string name="room_error_not_found">We couldn\'t find that room, or it already closed. Check the code.</string>
+    <string name="room_error_full">The room is full.</string>
+    <string name="room_error_connection">Couldn\'t connect. Check your internet and try again.</string>
+    <string name="room_status_waiting">Waiting</string>
+    <string name="room_status_focus">Focused</string>
+    <string name="room_status_break">On a break</string>
+    <string name="room_status_paused">Paused</string>
+    <string name="room_status_away">Left the app</string>
+    <string name="room_status_done">Done</string>
+    <string name="room_status_offline">Offline</string>
+    <plurals name="room_plan_summary">
+        <item quantity="one">%1$d pomodoro · %2$d h %3$d min of focus</item>
+        <item quantity="other">%1$d pomodoros · %2$d h %3$d min of focus</item>
+    </plurals>
+    <plurals name="room_chip">
+        <item quantity="one">Room %1$s · %2$d person</item>
+        <item quantity="other">Room %1$s · %2$d people</item>
+    </plurals>
 </resources>

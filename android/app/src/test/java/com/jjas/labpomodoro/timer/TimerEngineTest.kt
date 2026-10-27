@@ -381,4 +381,58 @@ class TimerEngineTest {
 
         assertEquals(f.active.plan, f.store.saved?.state?.plan)
     }
+
+    @Test
+    fun `al entrar tarde a una sala se coloca en la sesion que va sin registrar lo de antes`() = runTest {
+        val f = Fixture(this)
+        // 25 de trabajo + 2 del descanso corto
+        f.engine.follow(config, planSeed = 42, elapsedMillis = 27 * minute, paused = false)
+
+        assertEquals(1, f.active.index)
+        assertEquals(SessionType.SHORT_BREAK, f.active.current.type)
+        assertEquals(3 * minute, f.active.remainingMillis(f.time.elapsedRealtime()))
+        assertEquals(setOf(0), f.active.skippedIndices)
+        assertEquals(42L, f.active.planSeed)
+        assertEquals(1, f.serviceStarts)
+        assertTrue(f.dao.inserted.isEmpty())
+    }
+
+    @Test
+    fun `la pausa de la sala congela y al continuar retoma donde iba`() = runTest {
+        val f = Fixture(this)
+        f.engine.follow(config, planSeed = 7, elapsedMillis = 10 * minute, paused = false)
+        f.engine.follow(config, planSeed = 7, elapsedMillis = 10 * minute, paused = true)
+        assertTrue(f.active.isPaused)
+        assertEquals(15 * minute, f.active.remainingMillis(f.time.elapsedRealtime()))
+
+        advanceTimeBy(30 * minute)
+        f.engine.follow(config, planSeed = 7, elapsedMillis = 10 * minute, paused = false)
+        assertEquals(false, f.active.isPaused)
+        assertEquals(15 * minute, f.active.remainingMillis(f.time.elapsedRealtime()))
+        // Una sola vez se arrancó el plan
+        assertEquals(1, f.serviceStarts)
+    }
+
+    @Test
+    fun `en una sala pausar lo decide la sala y no se salta`() = runTest {
+        val f = Fixture(this)
+        var pauses = 0
+        f.engine.follow(config, planSeed = 1, elapsedMillis = 0, paused = false)
+        f.engine.roomLink = object : RoomLink {
+            override suspend fun onStart() = true
+            override suspend fun onPause(): Boolean {
+                pauses++
+                return true
+            }
+            override suspend fun onResume() = true
+            override suspend fun onStop() = Unit
+        }
+
+        f.engine.pause()
+        f.engine.skip()
+
+        assertEquals(1, pauses)
+        assertEquals(false, f.active.isPaused)
+        assertEquals(0, f.active.index)
+    }
 }

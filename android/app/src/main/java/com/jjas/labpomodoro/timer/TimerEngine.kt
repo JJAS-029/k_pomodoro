@@ -51,10 +51,15 @@ class TimerEngine @Inject constructor(
     private val _events = MutableSharedFlow<TimerEvent>(extraBufferCapacity = 16)
     val events: SharedFlow<TimerEvent> = _events.asSharedFlow()
 
+    /** Sala de estudio en curso; mientras haya una, empezar, pausar y detener pasan por ella. */
+    @Volatile
+    var roomLink: RoomLink? = null
+
     /** Recupera el plan guardado (una sola vez por proceso). Lo llaman la app, el servicio y los receptores. */
     suspend fun ensureRestored() = mutex.withLock { restoreLocked() }
 
     suspend fun start(config: SessionConfig) {
+        if (roomLink?.onStart() == true) return
         mutex.withLock {
             restoreLocked()
             if (_state.value is TimerState.Active) return
@@ -79,7 +84,12 @@ class TimerEngine @Inject constructor(
         _events.emit(TimerEvent.PlanStarted)
     }
 
-    suspend fun pause() = mutex.withLock {
+    suspend fun pause() {
+        if (roomLink?.onPause() == true) return
+        pauseLocal()
+    }
+
+    private suspend fun pauseLocal() = mutex.withLock {
         restoreLocked()
         val s = _state.value as? TimerState.Active ?: return@withLock
         if (s.isPaused) return@withLock
@@ -87,7 +97,12 @@ class TimerEngine @Inject constructor(
         publish(s.copy(isPaused = true, remainingWhenPausedMillis = s.remainingMillis(time.elapsedRealtime())))
     }
 
-    suspend fun resume() = mutex.withLock {
+    suspend fun resume() {
+        if (roomLink?.onResume() == true) return
+        resumeLocal()
+    }
+
+    private suspend fun resumeLocal() = mutex.withLock {
         restoreLocked()
         val s = _state.value as? TimerState.Active ?: return@withLock
         if (!s.isPaused) return@withLock
@@ -97,12 +112,19 @@ class TimerEngine @Inject constructor(
 
     /** Saltar ≠ completar: se guarda como no completada y no da racha ni recompensas. */
     suspend fun skip() = mutex.withLock {
+        // En una sala todos van al mismo paso: no se salta
+        if (roomLink != null) return@withLock
         restoreLocked()
         if (_state.value is TimerState.Active) finishCurrent(completed = false)
     }
 
-    /** Abandona el plan sin guardar la sesión en curso. */
-    suspend fun reset() = mutex.withLock {
+    /** Abandona el plan sin guardar la sesión en curso (y, si hay sala, sale de ella). */
+    suspend fun reset() {
+        roomLink?.onStop()
+        resetLocal()
+    }
+
+    private suspend fun resetLocal() = mutex.withLock {
         restoreLocked()
         disarmDeadline()
         publish(TimerState.Idle)
@@ -122,6 +144,8 @@ class TimerEngine @Inject constructor(
 
     /** Suma [minutes] a la sesión actual (hasta [MAX_SESSION_SECONDS]), corra o esté en pausa. */
     suspend fun extendCurrent(minutes: Int = 5) = mutex.withLock {
+        // El plan de una sala es el mismo para todos: no se ajusta por separado
+        if (roomLink != null) return@withLock
         restoreLocked()
         val s = _state.value as? TimerState.Active ?: return@withLock
         val extra = minutes * 60
@@ -138,6 +162,8 @@ class TimerEngine @Inject constructor(
 
     /** Agrega un pomodoro al final del plan, con un descanso corto antes (como los demás). */
     suspend fun addPomodoro() = mutex.withLock {
+        // El plan de una sala es el mismo para todos: no se ajusta por separado
+        if (roomLink != null) return@withLock
         restoreLocked()
         val s = _state.value as? TimerState.Active ?: return@withLock
         if (s.plan.count { it.type == SessionType.WORK } >= MAX_POMODOROS) return@withLock
@@ -153,6 +179,8 @@ class TimerEngine @Inject constructor(
 
     /** Quita el último pomodoro que falta (y el descanso que lo precedía). */
     suspend fun removeLastPomodoro() = mutex.withLock {
+        // El plan de una sala es el mismo para todos: no se ajusta por separado
+        if (roomLink != null) return@withLock
         restoreLocked()
         val s = _state.value as? TimerState.Active ?: return@withLock
         val last = s.plan.indexOfLast { it.type == SessionType.WORK }
@@ -166,10 +194,79 @@ class TimerEngine @Inject constructor(
 
     /** El plan termina al acabar la sesión actual. */
     suspend fun finishAfterCurrent() = mutex.withLock {
+        // El plan de una sala es el mismo para todos: no se ajusta por separado
+        if (roomLink != null) return@withLock
         restoreLocked()
         val s = _state.value as? TimerState.Active ?: return@withLock
         if (s.next == null) return@withLock
         publish(s.copy(plan = s.plan.take(s.index + 1), skippedIndices = s.skippedIndices.filter { it <= s.index }.toSet()))
+    }
+
+    /**
+     * Sigue el plan de una sala: [config] y [planSeed] son los de la sala (todos ven los mismos
+     * recipientes y colores) y [elapsedMillis] lo que lleva corriendo sin contar pausas. Se coloca
+     * en la sesión que toca; si ya iba ahí, solo corrige la pausa y la diferencia de reloj. Las
+     * sesiones que terminan solas se registran como siempre; las de antes de entrar, no.
+     */
+    suspend fun follow(config: SessionConfig, planSeed: Long, elapsedMillis: Long, paused: Boolean) {
+        var started = false
+        mutex.withLock {
+            restoreLocked()
+            val plan = SessionPlanGenerator.generate(config)
+            var index = -1
+            var offset = 0L
+            var before = 0L
+            for ((i, session) in plan.withIndex()) {
+                val length = session.durationSeconds * 1000L
+                if (elapsedMillis < before + length) {
+                    index = i
+                    offset = (elapsedMillis - before).coerceAtLeast(0)
+                    break
+                }
+                before += length
+            }
+            // El plan de la sala ya terminó: el propio se cierra solo con su alarma
+            if (index < 0) return@withLock
+            val s = _state.value
+            val nowElapsed = time.elapsedRealtime()
+            val remaining = plan[index].durationSeconds * 1000L - offset
+            val same = s is TimerState.Active && s.planSeed == planSeed
+            if (same && s.index == index) {
+                val drift = abs(s.remainingMillis(nowElapsed) - remaining)
+                if (s.isPaused == paused && drift <= ROOM_DRIFT_MILLIS) return@withLock
+                if (paused) {
+                    disarmDeadline()
+                    publish(s.copy(isPaused = true, remainingWhenPausedMillis = remaining))
+                } else {
+                    publish(s.copy(isPaused = false, endsAtElapsed = nowElapsed + remaining))
+                    armDeadline()
+                }
+                return@withLock
+            }
+            // Está por cerrar la sesión anterior por su cuenta: que lo haga (y la registre)
+            if (same && s.index == index - 1 && !s.isPaused && s.remainingMillis(nowElapsed) <= ROOM_DRIFT_MILLIS) return@withLock
+            started = s !is TimerState.Active
+            publish(
+                TimerState.Active(
+                    plan = plan,
+                    index = index,
+                    isPaused = paused,
+                    endsAtElapsed = nowElapsed + remaining,
+                    remainingWhenPausedMillis = if (paused) remaining else 0,
+                    sessionStartedAt = time.now().minusMillis(offset),
+                    completedWorkSessions = (s as? TimerState.Active)?.takeIf { same }?.completedWorkSessions ?: 0,
+                    completedWorkSeconds = (s as? TimerState.Active)?.takeIf { same }?.completedWorkSeconds ?: 0,
+                    planSeed = planSeed,
+                    // Lo que corrió antes de entrar queda vacío en la repisa
+                    skippedIndices = if (same) (s as TimerState.Active).skippedIndices else (0 until index).toSet(),
+                )
+            )
+            if (paused) disarmDeadline() else armDeadline()
+        }
+        if (started) {
+            serviceLauncher.start()
+            _events.emit(TimerEvent.PlanStarted)
+        }
     }
 
     /** Vuelve a Idle desde la pantalla de resumen. */
@@ -293,5 +390,8 @@ class TimerEngine @Inject constructor(
 
         private const val MAX_POMODOROS = 24
         private const val DEFAULT_BREAK_SECONDS = 5 * 60
+
+        /** Diferencia tolerada con el plan de la sala antes de corregir (relojes de distintos teléfonos). */
+        private const val ROOM_DRIFT_MILLIS = 2_000L
     }
 }

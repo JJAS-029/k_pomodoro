@@ -92,6 +92,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jjas.labpomodoro.R
+import androidx.compose.material3.AssistChip
+import com.jjas.labpomodoro.ui.room.StudyRoomViewModel
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import com.jjas.labpomodoro.ui.components.LocalLabTheme
@@ -166,6 +168,7 @@ fun MainScreen(
     onOpenSynthesizer: () -> Unit = {},
     onOpenMedals: () -> Unit = {},
     onOpenLeague: () -> Unit = {},
+    onOpenStudyRoom: () -> Unit = {},
     viewModel: MainViewModel = hiltViewModel(),
     timerViewModel: TimerViewModel = hiltViewModel(),
     discoveryViewModel: DiscoveryViewModel = hiltViewModel(),
@@ -173,8 +176,11 @@ fun MainScreen(
     tagViewModel: TagViewModel = hiltViewModel(),
     goalViewModel: GoalViewModel = hiltViewModel(),
     noteViewModel: NoteViewModel = hiltViewModel(),
+    roomViewModel: StudyRoomViewModel = hiltViewModel(),
 ) {
     val account by viewModel.uiState.collectAsStateWithLifecycle()
+    val roomState by roomViewModel.state.collectAsStateWithLifecycle()
+    val room = roomState.room?.let { RoomBadge(it.room.code, it.members.size, it.isHost, it.room.started) }
     val discoveries by discoveryViewModel.unseen.collectAsStateWithLifecycle()
     val medals by medalViewModel.unseen.collectAsStateWithLifecycle()
     val timer by timerViewModel.state.collectAsStateWithLifecycle()
@@ -420,6 +426,7 @@ fun MainScreen(
                 askNote = notePending != null,
                 goalBanner = goalBanner,
                 goalCelebration = goalCelebration,
+                room = room,
                 // Observa los toques sin consumirlos, para reiniciar la cuenta del modo ambiente
                 modifier = Modifier.pointerInput(Unit) {
                     awaitPointerEventScope {
@@ -447,6 +454,7 @@ fun MainScreen(
                     onOpenSynthesizer = onOpenSynthesizer,
                     onOpenMedals = onOpenMedals,
                     onOpenLeague = onOpenLeague,
+                    onOpenStudyRoom = onOpenStudyRoom,
                     onDismissDiscoveries = discoveryViewModel::dismiss,
                     onDismissMedals = medalViewModel::dismiss,
                     onOpenSound = { soundSheet = true },
@@ -493,7 +501,11 @@ data class MainActions(
     val onSignIn: () -> Unit = {},
     val onSignOut: () -> Unit = {},
     val onEnterAmbient: () -> Unit = {},
+    val onOpenStudyRoom: () -> Unit = {},
 )
+
+/** Sala de estudio en curso, para la pantalla principal y el dock. */
+data class RoomBadge(val code: String, val members: Int, val isHost: Boolean, val started: Boolean)
 
 @Composable
 private fun MainContent(
@@ -512,6 +524,7 @@ private fun MainContent(
     askNote: Boolean = false,
     goalBanner: Boolean = false,
     goalCelebration: Celebration? = null,
+    room: RoomBadge? = null,
 ) {
     // Con Material You el reloj toma el color del sistema
     val clockColor = if (dynamicColor) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
@@ -559,6 +572,7 @@ private fun MainContent(
                 if (wide && timer is TimerUi.Active) VesselShelf(timer.shelf, Modifier.fillMaxWidth())
             }
             val panelBlock: @Composable ColumnScope.() -> Unit = {
+                room?.let { RoomChip(it, actions.onOpenStudyRoom) }
                 when (timer) {
                     null -> CircularProgressIndicator()
                     is TimerUi.Idle -> IdlePanel(timer, clockColor, tags, tagActions, actions.onOpenPlanEditor)
@@ -711,6 +725,7 @@ private fun MainContent(
                 timer = timer,
                 account = account,
                 actions = actions,
+                room = room,
                 modifier = bottomArea.padding(horizontal = 16.dp, vertical = 12.dp),
             )
         }
@@ -788,7 +803,7 @@ private val ConfettiPalette = listOf(
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun LabDock(timer: TimerUi?, account: MainUiState, actions: MainActions, modifier: Modifier = Modifier) {
+private fun LabDock(timer: TimerUi?, account: MainUiState, actions: MainActions, modifier: Modifier = Modifier, room: RoomBadge? = null) {
     // Todas las opciones viven en una hoja inferior; abajo quedan siempre los controles del timer
     var menu by rememberSaveable { mutableStateOf(false) }
     if (menu) {
@@ -805,6 +820,8 @@ private fun LabDock(timer: TimerUi?, account: MainUiState, actions: MainActions,
             Spacer(Modifier.size(8.dp))
             Button(
                 onClick = if (timer.isPaused) actions.onResume else actions.onPause,
+                // En una sala solo el anfitrión pausa (para todos)
+                enabled = room == null || room.isHost,
                 modifier = Modifier
                     .weight(1f)
                     .height(52.dp),
@@ -816,16 +833,22 @@ private fun LabDock(timer: TimerUi?, account: MainUiState, actions: MainActions,
                     modifier = Modifier.size(26.dp),
                 )
             }
-            Spacer(Modifier.size(8.dp))
-            PlayerButton(R.drawable.ic_skip, stringResource(R.string.main_action_skip), actions.onSkip)
+            // En una sala todos van al mismo paso: no se salta
+            if (room == null) {
+                Spacer(Modifier.size(8.dp))
+                PlayerButton(R.drawable.ic_skip, stringResource(R.string.main_action_skip), actions.onSkip)
+            }
         } else {
-            val (label, onClick) = when (timer) {
-                is TimerUi.Finished -> stringResource(R.string.main_new_experiment) to actions.onDismissSummary
+            val (label, onClick) = when {
+                timer is TimerUi.Finished -> stringResource(R.string.main_new_experiment) to actions.onDismissSummary
+                room != null && !room.started && room.isHost -> stringResource(R.string.room_start_together) to actions.onStart
+                // Los invitados esperan a que el anfitrión empiece
+                room != null && !room.started -> stringResource(R.string.room_waiting_short) to actions.onStart
                 else -> stringResource(R.string.main_start_button) to actions.onStart
             }
             Button(
                 onClick = onClick,
-                enabled = timer != null,
+                enabled = timer != null && (room == null || room.started || room.isHost || timer is TimerUi.Finished),
                 modifier = Modifier
                     .weight(1f)
                     .height(52.dp),
@@ -872,6 +895,7 @@ private fun LabMenu(timer: TimerUi?, account: MainUiState, actions: MainActions,
         } else if (timer is TimerUi.Idle) {
             MenuItem(R.drawable.ic_more_time, stringResource(R.string.main_menu_edit_plan), stringResource(R.string.main_menu_edit_plan_desc), run(actions.onOpenPlanEditor))
         }
+        MenuItem(R.drawable.ic_person, stringResource(R.string.room_title), stringResource(R.string.room_menu_desc), run(actions.onOpenStudyRoom))
         MenuItem(R.drawable.ic_headphones, stringResource(R.string.main_dock_sound), stringResource(R.string.main_menu_sound_desc), run(actions.onOpenSound))
         // Laboratorio: tu colección
         MenuSection(stringResource(R.string.main_menu_section_lab))
@@ -1505,3 +1529,14 @@ internal fun restingVessel(): VesselUi =
     } else {
         VesselUi.Resting
     }
+
+/** Aviso de la sala en curso: código y cuántos hay; lleva a la sala. */
+@Composable
+private fun RoomChip(room: RoomBadge, onClick: () -> Unit) {
+    AssistChip(
+        onClick = onClick,
+        label = { Text(pluralStringResource(R.plurals.room_chip, room.members, room.code, room.members)) },
+        leadingIcon = { Icon(painterResource(R.drawable.ic_person), contentDescription = null, modifier = Modifier.size(18.dp)) },
+        modifier = Modifier.padding(bottom = 4.dp),
+    )
+}

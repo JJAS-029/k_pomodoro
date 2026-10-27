@@ -127,6 +127,10 @@ class SettingsRepository @Inject constructor(
 
     suspend fun setBurner(burner: BurnerStyle) = dataStore.edit { it[Keys.BURNER] = burner.name }
 
+    suspend fun setStudyRoom(code: String) = dataStore.edit { it[Keys.STUDY_ROOM] = code }
+
+    suspend fun setRoomNickname(nickname: String) = dataStore.edit { it[Keys.ROOM_NICKNAME] = nickname }
+
     suspend fun setVesselElement(atomicNumber: Int) = dataStore.edit { it[Keys.VESSEL_ELEMENT] = atomicNumber }
 
     suspend fun setFocusSound(sound: FocusSound) = dataStore.edit { it[Keys.FOCUS_SOUND] = sound.name }
@@ -224,6 +228,8 @@ class SettingsRepository @Inject constructor(
             glassTint = this[Keys.GLASS_TINT]?.let { name -> GlassTint.entries.firstOrNull { it.name == name } } ?: defaults.glassTint,
             labBackground = this[Keys.LAB_BACKGROUND]?.let { name -> LabBackground.entries.firstOrNull { it.name == name } } ?: defaults.labBackground,
             ownedGlassware = this[Keys.GLASSWARE].orEmpty().split(',').filter { it.isNotBlank() }.toSet(),
+            studyRoom = this[Keys.STUDY_ROOM].orEmpty(),
+            roomNickname = this[Keys.ROOM_NICKNAME].orEmpty(),
             burner = this[Keys.BURNER]?.let { name -> BurnerStyle.entries.firstOrNull { it.name == name } } ?: defaults.burner,
             flameColor = this[Keys.FLAME_COLOR]?.let { name -> FlameColor.entries.firstOrNull { it.name == name } } ?: defaults.flameColor,
             vesselElement = this[Keys.VESSEL_ELEMENT] ?: defaults.vesselElement,
@@ -243,7 +249,8 @@ class SettingsRepository @Inject constructor(
 
     private companion object {
         /** De cada teléfono: la compra la restaura Google Play y el permiso de ubicación se pide de nuevo. */
-        val NOT_BACKED_UP = setOf("pro_unlocked", "pro_purchased", "pro_review", "places_enabled")
+        // La sala en curso tampoco: en otro teléfono no tendría sentido volver a ella
+        val NOT_BACKED_UP = setOf("pro_unlocked", "pro_purchased", "pro_review", "places_enabled", "study_room")
     }
 
     private object Keys {
@@ -281,6 +288,8 @@ class SettingsRepository @Inject constructor(
         val LAB_BACKGROUND = stringPreferencesKey("lab_background")
         val GLASSWARE = stringPreferencesKey("glassware")
         val BURNER = stringPreferencesKey("burner")
+        val STUDY_ROOM = stringPreferencesKey("study_room")
+        val ROOM_NICKNAME = stringPreferencesKey("room_nickname")
         val PRO_PURCHASED = booleanPreferencesKey("pro_purchased")
         val VESSEL_ELEMENT = intPreferencesKey("vessel_element")
         val FOCUS_SOUND = stringPreferencesKey("focus_sound")

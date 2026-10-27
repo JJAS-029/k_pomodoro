@@ -6,6 +6,8 @@ import android.content.pm.PackageManager
 import android.graphics.drawable.Icon
 import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager
+import com.jjas.labpomodoro.data.room.StudyRoomRepository
 import com.jjas.labpomodoro.ui.navigation.PROGRESS_STATS
 import com.jjas.labpomodoro.ui.navigation.Routes
 import com.jjas.labpomodoro.service.ShortcutPublisher
@@ -56,6 +58,8 @@ import javax.inject.Inject
 class MainActivity : ComponentActivity() {
 
     @Inject lateinit var engine: TimerEngine
+
+    @Inject lateinit var studyRooms: StudyRoomRepository
 
     @Inject lateinit var settingsRepository: SettingsRepository
 
@@ -177,6 +181,20 @@ class MainActivity : ComponentActivity() {
             }
             }
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        studyRooms.setAway(false)
+    }
+
+    /**
+     * En una sala, irse a otra app durante el trabajo se ve como "salió de la app". Apagar la
+     * pantalla o girar el teléfono no cuentan.
+     */
+    override fun onStop() {
+        super.onStop()
+        if (!isChangingConfigurations) studyRooms.setAway(getSystemService(PowerManager::class.java).isInteractive)
     }
 
     override fun onResume() {

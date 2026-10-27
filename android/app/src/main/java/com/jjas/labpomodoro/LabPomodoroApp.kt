@@ -3,6 +3,7 @@ package com.jjas.labpomodoro
 import android.app.Application
 import com.jjas.labpomodoro.core.di.ApplicationScope
 import com.jjas.labpomodoro.data.billing.BillingRepository
+import com.jjas.labpomodoro.data.room.StudyRoomRepository
 import com.jjas.labpomodoro.service.AutoBackup
 import com.jjas.labpomodoro.service.FocusSoundController
 import com.jjas.labpomodoro.service.LeagueSync
@@ -52,6 +53,8 @@ class LabPomodoroApp : Application() {
 
     @Inject lateinit var engine: TimerEngine
 
+    @Inject lateinit var studyRooms: StudyRoomRepository
+
     @Inject @ApplicationScope lateinit var scope: CoroutineScope
 
     override fun onCreate() {
@@ -69,6 +72,7 @@ class LabPomodoroApp : Application() {
         streakReminder.start()
         leagueSync.start()
         widgetSync.start()
+        studyRooms.start()
         // Si Android cerró la app con un plan en curso, se retoma donde iba
         scope.launch { engine.ensureRestored() }
     }

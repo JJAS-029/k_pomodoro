@@ -1,6 +1,7 @@
 package com.jjas.labpomodoro.ui.navigation
 
 import androidx.compose.runtime.Composable
+import com.jjas.labpomodoro.ui.room.StudyRoomScreen
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -21,6 +22,7 @@ object Routes {
     const val PRO = "pro"
     const val GUIDE = "guide"
     const val STATS = "stats"
+    const val STUDY_ROOM = "study_room"
 
     fun lab(tab: Int) = "$ACHIEVEMENTS?tab=$tab"
     fun progress(tab: Int) = "$STATS?tab=$tab"
@@ -48,7 +50,11 @@ fun LabNavHost(navController: NavHostController = rememberNavController()) {
                 onOpenStats = { navController.navigate(Routes.progress(PROGRESS_STATS)) },
                 onOpenMedals = { navController.navigate(Routes.progress(PROGRESS_MEDALS)) },
                 onOpenLeague = { navController.navigate(Routes.progress(PROGRESS_LEAGUE)) },
+                onOpenStudyRoom = { navController.navigate(Routes.STUDY_ROOM) { launchSingleTop = true } },
             )
+        }
+        composable(Routes.STUDY_ROOM) {
+            StudyRoomScreen(onBack = navController::popBackStack, onOpenPro = { navController.navigate(Routes.PRO) })
         }
         composable(Routes.SETTINGS) {
             SettingsScreen(onBack = navController::popBackStack, onOpenPro = { navController.navigate(Routes.PRO) })

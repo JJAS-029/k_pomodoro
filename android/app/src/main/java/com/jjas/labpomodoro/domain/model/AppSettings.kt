@@ -94,6 +94,10 @@ data class AppSettings(
     val ownedGlassware: Set<String> = emptySet(),
     /** Mechero elegido; solo cuenta si se compró (el Bunsen viene de serie). */
     val burner: BurnerStyle = BurnerStyle.BUNSEN,
+    /** Código de la sala de estudio con amigos en la que se está ("" = ninguna). */
+    val studyRoom: String = "",
+    /** Apodo con el que te ven en las salas. */
+    val roomNickname: String = "",
     /**
      * Elemento que tiñe los recipientes de trabajo. 0 = automático: uno distinto de tu
      * colección en cada sesión.
