@@ -48,14 +48,14 @@ enum class ShopItem(
     val shape: VesselShape? = null,
     val burner: BurnerStyle? = null,
 ) {
-    CRUCIBLE(R.string.shop_crucible, R.string.shop_crucible_desc, 10, shape = VesselShape.CRUCIBLE),
-    CRYSTALLIZER(R.string.shop_crystallizer, R.string.shop_crystallizer_desc, 12, shape = VesselShape.CRYSTALLIZER),
-    KITASATO(R.string.shop_kitasato, R.string.shop_kitasato_desc, 15, shape = VesselShape.KITASATO),
-    DISTILLATION_FLASK(R.string.shop_distillation, R.string.shop_distillation_desc, 20, shape = VesselShape.DISTILLATION_FLASK),
-    SEPARATORY_FUNNEL(R.string.shop_separatory, R.string.shop_separatory_desc, 25, shape = VesselShape.SEPARATORY_FUNNEL),
-    ALCOHOL_LAMP(R.string.shop_burner_alcohol, R.string.shop_burner_alcohol_desc, 15, burner = BurnerStyle.ALCOHOL_LAMP),
-    MEKER(R.string.shop_burner_meker, R.string.shop_burner_meker_desc, 20, burner = BurnerStyle.MEKER),
-    HOT_PLATE(R.string.shop_burner_hot_plate, R.string.shop_burner_hot_plate_desc, 30, burner = BurnerStyle.HOT_PLATE),
+    CRUCIBLE(R.string.shop_crucible, R.string.shop_crucible_desc, 20, shape = VesselShape.CRUCIBLE),
+    CRYSTALLIZER(R.string.shop_crystallizer, R.string.shop_crystallizer_desc, 25, shape = VesselShape.CRYSTALLIZER),
+    KITASATO(R.string.shop_kitasato, R.string.shop_kitasato_desc, 30, shape = VesselShape.KITASATO),
+    DISTILLATION_FLASK(R.string.shop_distillation, R.string.shop_distillation_desc, 40, shape = VesselShape.DISTILLATION_FLASK),
+    SEPARATORY_FUNNEL(R.string.shop_separatory, R.string.shop_separatory_desc, 50, shape = VesselShape.SEPARATORY_FUNNEL),
+    ALCOHOL_LAMP(R.string.shop_burner_alcohol, R.string.shop_burner_alcohol_desc, 30, burner = BurnerStyle.ALCOHOL_LAMP),
+    MEKER(R.string.shop_burner_meker, R.string.shop_burner_meker_desc, 40, burner = BurnerStyle.MEKER),
+    HOT_PLATE(R.string.shop_burner_hot_plate, R.string.shop_burner_hot_plate_desc, 60, burner = BurnerStyle.HOT_PLATE),
     ;
 
     val key: String get() = shape?.name ?: burner!!.name

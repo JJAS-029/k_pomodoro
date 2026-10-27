@@ -121,7 +121,8 @@ private fun ShelfVessel(item: ShelfItemUi) {
             },
             // Recipiente punteado = sesión saltada
             dashed = item.skipped,
-            modifier = Modifier.size(width = ItemHeight * item.shape.aspect + 4.dp, height = ItemHeight),
+            // Los anchos (cristalizador) se achican para no ocupar media repisa
+            modifier = Modifier.size(width = ItemHeight * item.shape.aspect.coerceAtMost(1f) + 4.dp, height = ItemHeight),
             bubbles = bubbles,
             tones = item.tones,
         )

@@ -66,6 +66,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
@@ -513,17 +516,13 @@ private fun MainContent(
     // Con Material You el reloj toma el color del sistema
     val clockColor = if (dynamicColor) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
     Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-        Box(Modifier.safeDrawingPadding()) {
+        BoxWithConstraints(Modifier.safeDrawingPadding()) {
+            // Horizontal (teléfono girado, tableta): recipiente a la izquierda y el resto a la derecha
+            val wide = maxWidth > maxHeight && maxWidth >= WIDE_MIN_WIDTH
             // Fondo de laboratorio (Pro) y, encima, la temporada: pétalos o nieve
             LabBackdrop(LocalLabTheme.current.background, Modifier.matchParentSize())
             season?.let { SeasonalBackdrop(it, Modifier.matchParentSize()) }
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    // Espacio para el dock flotante
-                    .padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 96.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
+            val vesselBlock: @Composable ColumnScope.() -> Unit = {
                 // En Pro la pantalla queda limpia, sin título. Se desvanece (sin mover el recipiente)
                 // mientras arriba hay un aviso o la burbuja de elementos, que caerían encima
                 if (showTitle) {
@@ -556,13 +555,17 @@ private fun MainContent(
                         .offset(y = (-6).dp)
                         .size(width = 120.dp, height = 60.dp),
                 )
+                // En horizontal la repisa va aquí, bajo el mechero: a la derecha no cabe a lo alto
+                if (wide && timer is TimerUi.Active) VesselShelf(timer.shelf, Modifier.fillMaxWidth())
+            }
+            val panelBlock: @Composable ColumnScope.() -> Unit = {
                 when (timer) {
                     null -> CircularProgressIndicator()
                     is TimerUi.Idle -> IdlePanel(timer, clockColor, tags, tagActions, actions.onOpenPlanEditor)
                     is TimerUi.Active -> ActivePanel(timer, clockColor, tags, actions.onOpenTags)
                     is TimerUi.Finished -> FinishedPanel(timer)
                 }
-                if (timer is TimerUi.Active) {
+                if (!wide && timer is TimerUi.Active) {
                     Spacer(Modifier.height(16.dp))
                     VesselShelf(timer.shelf, Modifier.fillMaxWidth())
                 }
@@ -575,6 +578,52 @@ private fun MainContent(
                         modifier = Modifier.padding(top = 8.dp),
                     )
                 }
+            }
+            if (wide) {
+                Row(
+                    Modifier
+                        .fillMaxSize()
+                        .padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(24.dp),
+                ) {
+                    Column(
+                        Modifier
+                            .weight(WIDE_VESSEL_WEIGHT)
+                            .fillMaxHeight(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        content = vesselBlock,
+                    )
+                    // El dock va debajo de esta columna
+                    Column(
+                        Modifier
+                            .weight(1f - WIDE_VESSEL_WEIGHT)
+                            .fillMaxHeight()
+                            .padding(bottom = 84.dp)
+                            .verticalScroll(rememberScrollState()),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                        content = panelBlock,
+                    )
+                }
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        // Espacio para el dock flotante
+                        .padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 96.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    vesselBlock()
+                    panelBlock()
+                }
+            }
+            // En horizontal, el dock y la nota ocupan la columna derecha
+            val bottomArea = if (wide) {
+                Modifier
+                    .align(Alignment.BottomEnd)
+                    .fillMaxWidth(1f - WIDE_VESSEL_WEIGHT)
+            } else {
+                Modifier.align(Alignment.BottomCenter)
             }
 
             // Elementos ganados: salen del recipiente en una burbuja; tocarla abre la tabla periódica.
@@ -653,7 +702,7 @@ private fun MainContent(
                 visible = askNote,
                 enter = slideInVertically { it } + fadeIn(),
                 exit = slideOutVertically { it } + fadeOut(),
-                modifier = Modifier.align(Alignment.BottomCenter).padding(start = 16.dp, end = 16.dp, bottom = 96.dp),
+                modifier = bottomArea.padding(start = 16.dp, end = 16.dp, bottom = 96.dp),
             ) {
                 NoteCard(onSave = actions.onSaveNote, onSkip = actions.onSkipNote)
             }
@@ -662,13 +711,17 @@ private fun MainContent(
                 timer = timer,
                 account = account,
                 actions = actions,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                modifier = bottomArea.padding(horizontal = 16.dp, vertical = 12.dp),
             )
         }
     }
 }
+
+/** Ancho mínimo para el diseño a dos columnas (si además la pantalla es más ancha que alta). */
+private val WIDE_MIN_WIDTH = 560.dp
+
+/** Parte del ancho para el recipiente en el diseño a dos columnas. */
+private const val WIDE_VESSEL_WEIGHT = 0.45f
 
 /**
  * Confeti en los momentos que valen la pena: un pomodoro completado (con el color de su
