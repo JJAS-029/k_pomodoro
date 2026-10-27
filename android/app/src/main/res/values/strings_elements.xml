@@ -151,4 +151,45 @@
     <string name="el_prop_boiling">Boiling point</string>
     <string name="el_prop_electronegativity">Electronegativity</string>
     <string name="el_props_source">Data: PubChem (NIH)</string>
+    <string name="el_lab_tab_glassware">Glassware</string>
+    <string name="shop_intro">Trade your duplicate elements for new glassware. It uses up the ones you have most of first, and never the last of each: your table and your mastery stay the same.</string>
+    <plurals name="shop_repeats">
+        <item quantity="one">You have %1$d duplicate</item>
+        <item quantity="other">You have %1$d duplicates</item>
+    </plurals>
+    <string name="shop_section_vessels">Vessels</string>
+    <string name="shop_section_vessels_desc">They join your plans\' rotation, along with the usual ones.</string>
+    <string name="shop_section_burners">Burners</string>
+    <string name="shop_section_burners_desc">The one you pick heats your vessels.</string>
+    <string name="shop_buy">Buy · %1$d</string>
+    <string name="shop_owned">Yours</string>
+    <string name="shop_use">Use</string>
+    <string name="shop_in_use">In use</string>
+    <string name="shop_confirm_title">Buy %1$s?</string>
+    <plurals name="shop_confirm_text">
+        <item quantity="one">It costs %1$d duplicate, taken from the elements you have most of, never the last of each.</item>
+        <item quantity="other">It costs %1$d duplicates, taken from the elements you have most of, never the last of each.</item>
+    </plurals>
+    <string name="shop_confirm">Buy</string>
+    <string name="shop_cancel">Cancel</string>
+    <string name="shop_bought">Done! %1$s is now in your lab.</string>
+    <string name="shop_not_enough">You don\'t have enough duplicates.</string>
+    <string name="shop_kitasato">Büchner flask</string>
+    <string name="shop_kitasato_desc">An Erlenmeyer with a side arm for vacuum filtration.</string>
+    <string name="shop_distillation">Distillation flask</string>
+    <string name="shop_distillation_desc">Round-bottomed, with the arm that carries vapor to the condenser.</string>
+    <string name="shop_crucible">Crucible</string>
+    <string name="shop_crucible_desc">For heating solids to very high temperatures.</string>
+    <string name="shop_crystallizer">Crystallizing dish</string>
+    <string name="shop_crystallizer_desc">A wide dish where crystals grow as the liquid evaporates.</string>
+    <string name="shop_separatory">Separatory funnel</string>
+    <string name="shop_separatory_desc">Separates liquids that don\'t mix, with its stopcock.</string>
+    <string name="shop_burner_bunsen">Bunsen burner</string>
+    <string name="shop_burner_bunsen_desc">The classic; it comes with your lab.</string>
+    <string name="shop_burner_alcohol">Alcohol lamp</string>
+    <string name="shop_burner_alcohol_desc">A small, calm flame with a wick.</string>
+    <string name="shop_burner_meker">Meker burner</string>
+    <string name="shop_burner_meker_desc">A wide grid: lots of little flames together and more heat.</string>
+    <string name="shop_burner_hot_plate">Hot plate</string>
+    <string name="shop_burner_hot_plate_desc">No flame: the plate glows in your flame\'s color.</string>
 </resources>

@@ -31,3 +31,11 @@ enum class LabBackground(@StringRes val labelRes: Int) {
     GRAPH(R.string.set_bg_graph),
     FORMULAS(R.string.set_bg_formulas),
 }
+
+/** Fuente de calor bajo el recipiente. El Bunsen viene de serie; los demás se compran en la tienda. */
+enum class BurnerStyle(@StringRes val labelRes: Int) {
+    BUNSEN(R.string.shop_burner_bunsen),
+    ALCOHOL_LAMP(R.string.shop_burner_alcohol),
+    MEKER(R.string.shop_burner_meker),
+    HOT_PLATE(R.string.shop_burner_hot_plate),
+}

@@ -231,7 +231,7 @@ class TimerViewModel @Inject constructor(
                     isPaused = timer.isPaused,
                     next = timer.next?.type,
                     vessel = VesselUi(
-                        shape = LiquidPalette.vessel(timer.planSeed, timer.index),
+                        shape = LiquidPalette.vessel(timer.planSeed, timer.index, settings.ownedGlassware),
                         fill = if (type == SessionType.WORK) 1f - progress else progress,
                         liquid = liquid(timer.index),
                         bubbles = LiquidPalette.bubble(type, timer.planSeed, timer.index, settings.paletteOn(LocalDate.now())),
@@ -272,7 +272,7 @@ class TimerViewModel @Inject constructor(
                     canExtend = timer.current.durationSeconds + 5 * 60 <= TimerEngine.MAX_SESSION_SECONDS,
                     shelf = timer.plan.mapIndexed { i, session ->
                         ShelfItemUi(
-                            shape = LiquidPalette.vessel(timer.planSeed, i),
+                            shape = LiquidPalette.vessel(timer.planSeed, i, settings.ownedGlassware),
                             color = liquid(i),
                             fill = when {
                                 i < timer.index -> 1f

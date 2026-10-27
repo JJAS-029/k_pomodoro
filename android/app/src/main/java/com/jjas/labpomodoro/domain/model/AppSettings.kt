@@ -90,6 +90,10 @@ data class AppSettings(
     val labBackground: LabBackground = LabBackground.NONE,
     /** Color de la llama del mechero (Pro). */
     val flameColor: FlameColor = FlameColor.BLUE,
+    /** Cristalería comprada en la tienda: nombres de recipientes ([VesselShape]) y de mecheros. */
+    val ownedGlassware: Set<String> = emptySet(),
+    /** Mechero elegido; solo cuenta si se compró (el Bunsen viene de serie). */
+    val burner: BurnerStyle = BurnerStyle.BUNSEN,
     /**
      * Elemento que tiñe los recipientes de trabajo. 0 = automático: uno distinto de tu
      * colección en cada sesión.
@@ -135,6 +139,7 @@ data class AppSettings(
     val activeGlassTint: GlassTint get() = if (isPro) glassTint else GlassTint.CLEAR
     val activeFlame: FlameColor get() = if (isPro) flameColor else FlameColor.BLUE
     val activeBackground: LabBackground get() = if (isPro) labBackground else LabBackground.NONE
+    val activeBurner: BurnerStyle get() = if (burner == BurnerStyle.BUNSEN || burner.name in ownedGlassware) burner else BurnerStyle.BUNSEN
 
     companion object {
         val AMBIENT_DELAYS = listOf(3, 5)

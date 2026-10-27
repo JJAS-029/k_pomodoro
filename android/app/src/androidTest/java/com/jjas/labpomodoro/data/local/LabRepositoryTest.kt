@@ -73,6 +73,28 @@ class LabRepositoryTest {
     }
 
     @Test
+    fun la_tienda_gasta_repetidos_de_los_que_mas_hay_y_nunca_el_ultimo() = runTest {
+        db.inventoryDao().add(1, 5, 0) // 4 repetidos
+        db.inventoryDao().add(2, 3, 0) // 2 repetidos
+        db.inventoryDao().add(3, 1, 0) // ninguno
+        assertTrue(lab.spendRepeats(4))
+
+        val items = inventory.items.first()
+        // Primero del hidrógeno, el que más tiene; ya parejos, se reparte entre los dos
+        assertEquals(2, items[0].quantity)
+        assertEquals(2, items[1].quantity)
+        assertEquals(1, items[2].quantity)
+    }
+
+    @Test
+    fun si_no_alcanzan_los_repetidos_no_se_gasta_nada() = runTest {
+        db.inventoryDao().add(1, 3, 0)
+        db.inventoryDao().add(2, 1, 0)
+        assertFalse(lab.spendRepeats(3))
+        assertEquals(4, total())
+    }
+
+    @Test
     fun si_falta_un_ingrediente_no_se_gasta_nada() = runTest {
         db.inventoryDao().add(1, 1, 0)
         assertFalse(lab.fuse(Fusion.Recipe(PeriodicTable[1], PeriodicTable[92])))

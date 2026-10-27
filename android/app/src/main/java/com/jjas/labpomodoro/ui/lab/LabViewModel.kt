@@ -7,6 +7,7 @@ import com.jjas.labpomodoro.data.repository.InventoryRepository
 import com.jjas.labpomodoro.data.repository.LabRepository
 import com.jjas.labpomodoro.data.repository.SessionRepository
 import com.jjas.labpomodoro.data.repository.SettingsRepository
+import com.jjas.labpomodoro.domain.model.BurnerStyle
 import com.jjas.labpomodoro.domain.model.Element
 import com.jjas.labpomodoro.domain.model.Mastery
 import com.jjas.labpomodoro.domain.model.MasteryRules
@@ -33,7 +34,14 @@ data class LabUi(
     val vesselElement: Int = 0,
     /** Veces que se ha obtenido cada elemento (maestría). */
     val obtained: Map<Int, Int> = emptyMap(),
+    /** Cristalería comprada en la tienda. */
+    val ownedGlassware: Set<String> = emptySet(),
+    /** Mechero en uso. */
+    val burner: BurnerStyle = BurnerStyle.BUNSEN,
 ) {
+    /** Elementos repetidos (todos menos el primero de cada uno): la moneda de la tienda. */
+    val repeats: Int get() = items.sumOf { (it.quantity - 1).coerceAtLeast(0) }
+
     fun obtained(atomicNumber: Int): Int = obtained[atomicNumber] ?: 0
 
     fun mastery(element: Element): Mastery = MasteryRules.level(element, obtained(element.atomicNumber))
@@ -57,6 +65,8 @@ val InventoryItem.discovered: Boolean get() = firstObtainedAtMillis != null
 sealed interface LabEvent {
     data class Fused(val result: Element) : LabEvent
     data object FusionFailed : LabEvent
+    data class Bought(val item: ShopItem) : LabEvent
+    data object NotEnoughRepeats : LabEvent
 }
 
 @HiltViewModel
@@ -74,7 +84,7 @@ class LabViewModel @Inject constructor(
         settings.settings,
         lab.obtainedCounts,
     ) { items, streak, total, prefs, obtained ->
-        LabUi(items, streak, total, prefs.vesselElement, obtained)
+        LabUi(items, streak, total, prefs.vesselElement, obtained, prefs.ownedGlassware, prefs.activeBurner)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     /** Los hallazgos que aún no se habían visto al abrir la pantalla, para marcarlos como nuevos. */
@@ -94,6 +104,23 @@ class LabViewModel @Inject constructor(
     /** Fija [atomicNumber] en los recipientes de trabajo, o vuelve a automático con 0. */
     fun setVesselElement(atomicNumber: Int) {
         viewModelScope.launch { settings.setVesselElement(atomicNumber) }
+    }
+
+    /** Compra [item] con repetidos; un mechero nuevo se pone en uso de una vez. */
+    fun buy(item: ShopItem) {
+        viewModelScope.launch {
+            if (!lab.spendRepeats(item.price)) {
+                _events.send(LabEvent.NotEnoughRepeats)
+                return@launch
+            }
+            settings.addGlassware(item.key)
+            item.burner?.let { settings.setBurner(it) }
+            _events.send(LabEvent.Bought(item))
+        }
+    }
+
+    fun useBurner(burner: BurnerStyle) {
+        viewModelScope.launch { settings.setBurner(burner) }
     }
 
     fun fuse(recipe: Fusion.Recipe) {

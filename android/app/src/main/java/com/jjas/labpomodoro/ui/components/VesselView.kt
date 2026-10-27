@@ -605,8 +605,15 @@ private fun DrawScope.drawGlass(g: VesselGeometry, glass: GlassStyle) {
             }
             drawLine(highlight, Offset(g.px(0.5f - hw * 0.75f), g.py(0.85f)), Offset(g.px(0.5f - hw * 0.75f), g.py(0.25f)), g.stroke * 1.4f, StrokeCap.Round)
         }
-        VesselShape.ERLENMEYER -> {
+        VesselShape.ERLENMEYER, VesselShape.KITASATO -> {
             drawLine(highlight, Offset(g.px(0.13f), g.py(0.2f)), Offset(g.px(0.34f), g.py(0.52f)), g.stroke * 1.4f, StrokeCap.Round)
+        }
+        VesselShape.CRUCIBLE, VesselShape.CRYSTALLIZER -> {
+            val hw = g.halfWidth(0.5f)
+            drawLine(highlight, Offset(g.px(0.5f - hw * 0.75f), g.py(0.75f)), Offset(g.px(0.5f - hw * 0.75f), g.py(0.3f)), g.stroke * 1.4f, StrokeCap.Round)
+        }
+        VesselShape.SEPARATORY_FUNNEL -> {
+            drawLine(highlight, Offset(g.px(0.16f), g.py(0.64f)), Offset(g.px(0.3f), g.py(0.36f)), g.stroke * 1.4f, StrokeCap.Round)
         }
         VesselShape.GRADUATED_CYLINDER -> {
             // Graduación fina: una marca por décimo, más larga cada cinco
@@ -622,7 +629,7 @@ private fun DrawScope.drawGlass(g: VesselGeometry, glass: GlassStyle) {
             }
             drawLine(highlight, Offset(g.px(0.5f - hw * 0.7f), g.py(0.85f)), Offset(g.px(0.5f - hw * 0.7f), g.py(0.15f)), g.stroke * 1.2f, StrokeCap.Round)
         }
-        VesselShape.ROUND_FLASK, VesselShape.VOLUMETRIC_FLASK -> {
+        VesselShape.ROUND_FLASK, VesselShape.VOLUMETRIC_FLASK, VesselShape.DISTILLATION_FLASK -> {
             if (g.shape == VesselShape.VOLUMETRIC_FLASK) {
                 // Marca de aforo: una línea que rodea el cuello
                 val y = g.py(VesselGeometry.VOLUMETRIC_MARK)

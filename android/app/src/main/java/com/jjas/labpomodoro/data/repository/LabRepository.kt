@@ -144,6 +144,29 @@ class LabRepository @Inject constructor(
         }
     }
 
+    /**
+     * Gasta [amount] elementos repetidos (nunca el último de cada uno), empezando por los que más
+     * hay. Devuelve false si no alcanzan; entonces no se gasta nada.
+     */
+    suspend fun spendRepeats(amount: Int): Boolean = mutex.withLock {
+        val spare = inventoryDao.all().associate { it.atomicNumber to (it.quantity - 1).coerceAtLeast(0) }.toMutableMap()
+        if (spare.values.sum() < amount) return@withLock false
+        val plan = mutableMapOf<Int, Int>()
+        repeat(amount) {
+            val z = spare.maxBy { it.value }.key
+            spare[z] = spare.getValue(z) - 1
+            plan[z] = (plan[z] ?: 0) + 1
+        }
+        try {
+            db.withTransaction {
+                plan.forEach { (z, n) -> if (inventoryDao.consume(z, n) != 1) throw NotEnoughMaterial() }
+            }
+            true
+        } catch (_: NotEnoughMaterial) {
+            false
+        }
+    }
+
     /** Solo pruebas (botón en debug): obtiene [times] veces cada elemento, ya vistos. */
     suspend fun grantEachForTesting(times: Int) = mutex.withLock {
         db.withTransaction {

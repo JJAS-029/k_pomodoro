@@ -24,6 +24,29 @@ enum class VesselShape(val aspect: Float) {
 
     /** Matraz aforado: bola con cuello largo y la marca de aforo, hasta donde llega el líquido. */
     VOLUMETRIC_FLASK(0.55f),
+
+    // De la tienda de cristalería: se compran con elementos repetidos y entran en la rotación
+
+    /** Matraz Kitasato: un Erlenmeyer con tubo lateral para el vacío. */
+    KITASATO(0.72f),
+
+    /** Matraz de destilación: de bola, con el brazo lateral hacia el refrigerante. */
+    DISTILLATION_FLASK(0.69f),
+
+    /** Crisol: copa baja que se angosta hacia el fondo, con borde grueso. */
+    CRUCIBLE(0.9f),
+
+    /** Cristalizador: plato ancho y bajo de paredes rectas. */
+    CRYSTALLIZER(1.6f),
+
+    /** Embudo de decantación: pera de vidrio con llave de paso en el vástago. */
+    SEPARATORY_FUNNEL(0.5f),
+    ;
+
+    companion object {
+        /** Los de siempre; los demás se compran en la tienda. */
+        val BASE = listOf(BEAKER, ERLENMEYER, TEST_TUBE, ROUND_FLASK, GRADUATED_CYLINDER, VOLUMETRIC_FLASK)
+    }
 }
 
 /**
@@ -57,11 +80,14 @@ class VesselGeometry private constructor(
     val maxFill: Float = when (shape) {
         VesselShape.BEAKER -> 0.95f
         VesselShape.TEST_TUBE -> 0.9f
-        VesselShape.ERLENMEYER -> 0.7f
-        VesselShape.ROUND_FLASK -> (bottom - neckJunctionY) / height * 0.97f
+        VesselShape.ERLENMEYER, VesselShape.KITASATO -> 0.7f
+        VesselShape.ROUND_FLASK, VesselShape.DISTILLATION_FLASK -> (bottom - neckJunctionY) / height * 0.97f
         VesselShape.GRADUATED_CYLINDER -> 0.88f
         // Lleno hasta la marca de aforo, en el cuello
         VesselShape.VOLUMETRIC_FLASK -> VOLUMETRIC_MARK
+        VesselShape.CRUCIBLE -> 0.8f
+        VesselShape.CRYSTALLIZER -> 0.8f
+        VesselShape.SEPARATORY_FUNNEL -> 0.75f
     }
 
     /** Arriba del pie de la probeta (v); el líquido y las partículas empiezan ahí. */
@@ -85,7 +111,7 @@ class VesselGeometry private constructor(
             VesselShape.BEAKER -> 0.46f
             VesselShape.TEST_TUBE -> 0.3f
             // Cono que se curva al llegar al cuello (hombros suaves)
-            VesselShape.ERLENMEYER -> when {
+            VesselShape.ERLENMEYER, VesselShape.KITASATO -> when {
                 v >= 0.66f -> 0.12f
                 v >= 0.13f -> {
                     val k = (v - 0.13f) / 0.53f
@@ -93,19 +119,35 @@ class VesselGeometry private constructor(
                 }
                 else -> 0.4f
             }
-            VesselShape.ROUND_FLASK, VesselShape.VOLUMETRIC_FLASK -> {
+            VesselShape.ROUND_FLASK, VesselShape.VOLUMETRIC_FLASK, VesselShape.DISTILLATION_FLASK -> {
                 val y = py(v)
                 if (y < neckJunctionY) neckHalf / width * 0.9f
                 else sqrt(max(0f, sphereR * sphereR - (y - sphereCy) * (y - sphereCy))) / width * 0.9f
             }
             VesselShape.GRADUATED_CYLINDER -> 0.24f
+            VesselShape.CRUCIBLE -> if (v < 0.08f) 0.25f else (0.29f + 0.15f * ((v - 0.08f) / 0.84f).coerceAtMost(1f))
+            VesselShape.CRYSTALLIZER -> 0.46f
+            // Vástago delgado, cono que se abre, la parte ancha de la pera y el hombro hasta el cuello
+            VesselShape.SEPARATORY_FUNNEL -> when {
+                v < 0.16f -> 0.035f
+                v < 0.58f -> {
+                    val k = (v - 0.16f) / 0.42f
+                    0.04f + 0.36f * (k * (2f - k))
+                }
+                v < 0.84f -> {
+                    val k = (v - 0.58f) / 0.26f
+                    0.4f - 0.33f * k * k
+                }
+                else -> 0.07f
+            }
         }
     }
 
     /** Donde empieza el interior por arriba (y en px): la boca, debajo del labio. */
     val mouthY: Float = when (shape) {
-        VesselShape.BEAKER -> top
+        VesselShape.BEAKER, VesselShape.CRYSTALLIZER -> top
         VesselShape.GRADUATED_CYLINDER -> py(0.96f)
+        VesselShape.CRUCIBLE -> py(0.92f)
         else -> py(0.94f)
     }
 
@@ -117,23 +159,49 @@ class VesselGeometry private constructor(
 
     /** Labio de la boca: de dónde a dónde va (u) y su alto (px); null en el vaso, que lleva pico. */
     val lip: Triple<Float, Float, Float>? = when (shape) {
-        VesselShape.BEAKER -> null
+        VesselShape.BEAKER, VesselShape.CRYSTALLIZER -> null
         VesselShape.TEST_TUBE -> Triple(0f, 1f, height * 0.06f)
-        VesselShape.ERLENMEYER -> Triple(0.3f, 0.7f, height * 0.06f)
-        VesselShape.ROUND_FLASK -> Triple(0.33f, 0.67f, height * 0.06f)
+        VesselShape.ERLENMEYER, VesselShape.KITASATO -> Triple(0.3f, 0.7f, height * 0.06f)
+        VesselShape.ROUND_FLASK, VesselShape.DISTILLATION_FLASK -> Triple(0.33f, 0.67f, height * 0.06f)
+        // Borde grueso, a todo lo ancho
+        VesselShape.CRUCIBLE -> Triple(0f, 1f, height * 0.08f)
+        VesselShape.SEPARATORY_FUNNEL -> Triple(0.38f, 0.62f, height * 0.05f)
         VesselShape.VOLUMETRIC_FLASK -> Triple(0.36f, 0.64f, height * 0.06f)
         // La probeta es muy alta: el labio va por ancho para no quedar grueso
         // Alto igual al tramo sobre las paredes (py(0.96)), para que el labio y las paredes se toquen
         VesselShape.GRADUATED_CYLINDER -> Triple(0.12f, 0.88f, height * 0.04f)
     }
 
-    /** El vidrio sin el labio (con el pie de la probeta): cada estilo dibuja la boca a su manera. */
+    /**
+     * El vidrio sin el labio, con los accesorios (pie de la probeta, brazos laterales, llave de
+     * paso): cada estilo dibuja la boca a su manera.
+     */
     val bodyOutline: Path = Path().apply {
         body(closed = false)
-        if (shape == VesselShape.GRADUATED_CYLINDER) {
-            val foot = height * cylinderFloor
-            addRoundRect(RoundRect(left, bottom - foot, right, bottom, CornerRadius(foot / 2)))
+        when (shape) {
+            VesselShape.GRADUATED_CYLINDER -> {
+                val foot = height * cylinderFloor
+                addRoundRect(RoundRect(left, bottom - foot, right, bottom, CornerRadius(foot / 2)))
+            }
+            VesselShape.KITASATO -> sideArm(0.63f, 0.8f, 0.96f, 0.74f)
+            VesselShape.DISTILLATION_FLASK -> sideArm(0.5f + neckHalf / width, 0.86f, 0.99f, 0.7f)
+            VesselShape.SEPARATORY_FUNNEL -> {
+                // Llave de paso atravesada en el vástago, con su manija
+                val h = height * 0.035f
+                addRoundRect(RoundRect(px(0.36f), py(0.08f) - h / 2, px(0.64f), py(0.08f) + h / 2, CornerRadius(h / 2)))
+                addRoundRect(RoundRect(px(0.64f), py(0.08f) - h, px(0.7f), py(0.08f) + h, CornerRadius(h / 3)))
+            }
+            else -> Unit
         }
+    }
+
+    /** Tubo lateral (dos líneas paralelas) desde la pared del cuello hacia afuera. */
+    private fun Path.sideArm(u0: Float, v0: Float, u1: Float, v1: Float) {
+        val r = height * 0.018f
+        moveTo(px(u0), py(v0) - r)
+        lineTo(px(u1), py(v1) - r)
+        moveTo(px(u0), py(v0) + r)
+        lineTo(px(u1), py(v1) + r)
     }
 
     /**
@@ -186,7 +254,7 @@ class VesselGeometry private constructor(
                 if (closed) close()
             }
 
-            VesselShape.ERLENMEYER -> {
+            VesselShape.ERLENMEYER, VesselShape.KITASATO -> {
                 val neckTop = py(0.94f)
                 // Hombros curvos del cuello al cono y base redondeada
                 moveTo(px(0.37f), neckTop)
@@ -209,7 +277,53 @@ class VesselGeometry private constructor(
                 if (closed) close()
             }
 
-            VesselShape.ROUND_FLASK, VesselShape.VOLUMETRIC_FLASK -> {
+            VesselShape.CRYSTALLIZER -> {
+                val r = height * 0.22f
+                if (closed) {
+                    addRoundRect(
+                        RoundRect(
+                            left, top, right, bottom,
+                            topLeftCornerRadius = CornerRadius.Zero, topRightCornerRadius = CornerRadius.Zero,
+                            bottomLeftCornerRadius = CornerRadius(r), bottomRightCornerRadius = CornerRadius(r),
+                        )
+                    )
+                    return
+                }
+                moveTo(left, top)
+                lineTo(left, bottom - r)
+                arcTo(Rect(left, bottom - 2 * r, left + 2 * r, bottom), 180f, -90f, false)
+                lineTo(right - r, bottom)
+                arcTo(Rect(right - 2 * r, bottom - 2 * r, right, bottom), 90f, -90f, false)
+                lineTo(right, top)
+            }
+
+            VesselShape.CRUCIBLE -> {
+                val rimTop = py(0.92f)
+                moveTo(px(0.04f), rimTop)
+                lineTo(px(0.2f), py(0.1f))
+                quadraticTo(px(0.23f), py(0f), px(0.32f), py(0f))
+                lineTo(px(0.68f), py(0f))
+                quadraticTo(px(0.77f), py(0f), px(0.8f), py(0.1f))
+                lineTo(px(0.96f), rimTop)
+                if (closed) close()
+            }
+
+            VesselShape.SEPARATORY_FUNNEL -> {
+                val neckTop = py(0.94f)
+                moveTo(px(0.42f), neckTop)
+                lineTo(px(0.42f), py(0.84f))
+                cubicTo(px(0.42f), py(0.76f), px(0.06f), py(0.72f), px(0.06f), py(0.58f))
+                cubicTo(px(0.06f), py(0.42f), px(0.4f), py(0.24f), px(0.46f), py(0.16f))
+                lineTo(px(0.46f), py(0f))
+                lineTo(px(0.54f), py(0f))
+                lineTo(px(0.54f), py(0.16f))
+                cubicTo(px(0.6f), py(0.24f), px(0.94f), py(0.42f), px(0.94f), py(0.58f))
+                cubicTo(px(0.94f), py(0.72f), px(0.58f), py(0.76f), px(0.58f), py(0.84f))
+                lineTo(px(0.58f), neckTop)
+                if (closed) close()
+            }
+
+            VesselShape.ROUND_FLASK, VesselShape.VOLUMETRIC_FLASK, VesselShape.DISTILLATION_FLASK -> {
                 val cx = px(0.5f)
                 val neckTop = py(0.94f)
                 val alpha = Math.toDegrees(asin((neckHalf / sphereR).toDouble())).toFloat()

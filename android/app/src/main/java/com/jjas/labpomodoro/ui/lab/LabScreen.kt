@@ -84,6 +84,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jjas.labpomodoro.R
+import com.jjas.labpomodoro.domain.model.BurnerStyle
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.lerp
 import java.text.NumberFormat
@@ -146,12 +147,16 @@ fun LabScreen(onBack: () -> Unit, initialTab: Int = 0, viewModel: LabViewModel =
     val snackbar = remember { SnackbarHostState() }
     var fused by remember { mutableStateOf<Element?>(null) }
     val fusionFailed = stringResource(R.string.el_lab_fusion_failed)
+    val notEnough = stringResource(R.string.shop_not_enough)
+    val resources = LocalResources.current
 
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             when (event) {
                 is LabEvent.Fused -> fused = event.result
                 LabEvent.FusionFailed -> snackbar.showSnackbar(fusionFailed)
+                LabEvent.NotEnoughRepeats -> snackbar.showSnackbar(notEnough)
+                is LabEvent.Bought -> snackbar.showSnackbar(resources.getString(R.string.shop_bought, resources.getString(event.item.nameRes)))
             }
         }
     }
@@ -174,7 +179,7 @@ fun LabScreen(onBack: () -> Unit, initialTab: Int = 0, viewModel: LabViewModel =
                 if (current == null) {
                     CircularProgressIndicator(Modifier.align(Alignment.Center))
                 } else {
-                    LabContent(current, newOnes, onBack, viewModel::fuse, viewModel::setVesselElement, initialTab)
+                    LabContent(current, newOnes, onBack, viewModel::fuse, viewModel::setVesselElement, viewModel::buy, viewModel::useBurner, initialTab)
                 }
                 // Ráfaga con los colores del elemento recién fabricado, una por fusión
                 val burst = remember(fused) {
@@ -198,6 +203,8 @@ private fun LabContent(
     onBack: () -> Unit,
     onFuse: (Fusion.Recipe) -> Unit,
     onVesselElement: (Int) -> Unit,
+    onBuy: (ShopItem) -> Unit,
+    onUseBurner: (BurnerStyle) -> Unit,
     initialTab: Int = 0,
 ) {
     var tab by rememberSaveable { mutableIntStateOf(initialTab) }
@@ -250,6 +257,7 @@ private fun LabContent(
             PrimaryTabRow(selectedTabIndex = tab) {
                 Tab(selected = tab == 0, onClick = { tab = 0 }, text = { Text(stringResource(R.string.el_lab_tab_table)) })
                 Tab(selected = tab == 1, onClick = { tab = 1 }, text = { Text(stringResource(R.string.el_lab_tab_synthesizer)) })
+                Tab(selected = tab == 2, onClick = { tab = 2 }, text = { Text(stringResource(R.string.el_lab_tab_glassware)) })
             }
             Spacer(Modifier.height(16.dp))
             when (tab) {
@@ -269,9 +277,15 @@ private fun LabContent(
                         modifier = Modifier.padding(horizontal = 16.dp),
                     )
                 }
-                else -> Synthesizer(
+                1 -> Synthesizer(
                     state = state,
                     onTarget = { target = it },
+                    modifier = Modifier.padding(horizontal = 24.dp),
+                )
+                else -> GlassShop(
+                    state = state,
+                    onBuy = onBuy,
+                    onUseBurner = onUseBurner,
                     modifier = Modifier.padding(horizontal = 24.dp),
                 )
             }

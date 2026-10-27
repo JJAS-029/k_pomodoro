@@ -28,9 +28,14 @@ object LiquidPalette {
         return hsv[0]
     }
 
-    /** Cada sesión del plan usa un recipiente al azar, estable mientras dure el plan. */
-    fun vessel(planSeed: Long, index: Int): VesselShape =
-        VesselShape.entries[Random(planSeed * 31 + index + 7).nextInt(VesselShape.entries.size)]
+    /**
+     * Cada sesión del plan usa un recipiente al azar, estable mientras dure el plan: de los de
+     * siempre y los que se compraron en la tienda ([owned], nombres de [VesselShape]).
+     */
+    fun vessel(planSeed: Long, index: Int, owned: Set<String> = emptySet()): VesselShape {
+        val pool = VesselShape.entries.filter { it in VesselShape.BASE || it.name in owned }
+        return pool[Random(planSeed * 31 + index + 7).nextInt(pool.size)]
+    }
 
     /** Burbujas del tono opuesto para que contrasten con el líquido. */
     fun bubble(type: SessionType, planSeed: Long, index: Int, palette: LabPalette = LabPalette.CLASSIC): Color =

@@ -156,4 +156,47 @@
     <string name="el_prop_boiling">Punto de ebullición</string>
     <string name="el_prop_electronegativity">Electronegatividad</string>
     <string name="el_props_source">Datos: PubChem (NIH)</string>
+    <string name="el_lab_tab_glassware">Cristalería</string>
+    <string name="shop_intro">Cambia tus elementos repetidos por cristalería nueva. Se gastan primero de los que más tienes y nunca el último de cada uno: tu tabla y tu maestría no cambian.</string>
+    <plurals name="shop_repeats">
+        <item quantity="one">Tienes %1$d repetido</item>
+        <item quantity="many">Tienes %1$d repetidos</item>
+        <item quantity="other">Tienes %1$d repetidos</item>
+    </plurals>
+    <string name="shop_section_vessels">Recipientes</string>
+    <string name="shop_section_vessels_desc">Entran en la rotación de tus planes, junto a los de siempre.</string>
+    <string name="shop_section_burners">Mecheros</string>
+    <string name="shop_section_burners_desc">El que elijas calienta tus recipientes.</string>
+    <string name="shop_buy">Comprar · %1$d</string>
+    <string name="shop_owned">Tuyo</string>
+    <string name="shop_use">Usar</string>
+    <string name="shop_in_use">En uso</string>
+    <string name="shop_confirm_title">¿Comprar %1$s?</string>
+    <plurals name="shop_confirm_text">
+        <item quantity="one">Cuesta %1$d repetido. Se gasta de los elementos que más tienes, nunca el último de cada uno.</item>
+        <item quantity="many">Cuesta %1$d repetidos. Se gastan de los elementos que más tienes, nunca el último de cada uno.</item>
+        <item quantity="other">Cuesta %1$d repetidos. Se gastan de los elementos que más tienes, nunca el último de cada uno.</item>
+    </plurals>
+    <string name="shop_confirm">Comprar</string>
+    <string name="shop_cancel">Cancelar</string>
+    <string name="shop_bought">¡Listo! %1$s ya está en tu laboratorio.</string>
+    <string name="shop_not_enough">No te alcanzan los repetidos.</string>
+    <string name="shop_kitasato">Matraz Kitasato</string>
+    <string name="shop_kitasato_desc">Un Erlenmeyer con tubo lateral para filtrar al vacío.</string>
+    <string name="shop_distillation">Matraz de destilación</string>
+    <string name="shop_distillation_desc">De bola, con el brazo que lleva el vapor al refrigerante.</string>
+    <string name="shop_crucible">Crisol</string>
+    <string name="shop_crucible_desc">Para calentar sólidos a muy alta temperatura.</string>
+    <string name="shop_crystallizer">Cristalizador</string>
+    <string name="shop_crystallizer_desc">Plato ancho donde crecen cristales al evaporarse el líquido.</string>
+    <string name="shop_separatory">Embudo de decantación</string>
+    <string name="shop_separatory_desc">Separa líquidos que no se mezclan, con su llave de paso.</string>
+    <string name="shop_burner_bunsen">Mechero Bunsen</string>
+    <string name="shop_burner_bunsen_desc">El clásico; viene con tu laboratorio.</string>
+    <string name="shop_burner_alcohol">Lámpara de alcohol</string>
+    <string name="shop_burner_alcohol_desc">Llama pequeña y tranquila, con mecha.</string>
+    <string name="shop_burner_meker">Mechero Meker</string>
+    <string name="shop_burner_meker_desc">Rejilla ancha: muchas llamitas juntas y más calor.</string>
+    <string name="shop_burner_hot_plate">Placa calefactora</string>
+    <string name="shop_burner_hot_plate_desc">Sin llama: la placa se pone al rojo, del color de tu llama.</string>
 </resources>

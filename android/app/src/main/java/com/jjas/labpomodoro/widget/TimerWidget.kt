@@ -250,7 +250,7 @@ class TimerWidgetSync @Inject constructor(
         val color = element?.look()?.color ?: LiquidPalette.liquid(type, state.planSeed, state.index, prefs.paletteOn(java.time.LocalDate.now()))
         views.setImageViewBitmap(
             R.id.widget_vessel,
-            vessel(LiquidPalette.vessel(state.planSeed, state.index), if (type == SessionType.WORK) 1f - progress else progress, color, light, element?.let { ElementSignatures.tones(it.atomicNumber) }),
+            vessel(LiquidPalette.vessel(state.planSeed, state.index, prefs.ownedGlassware), if (type == SessionType.WORK) 1f - progress else progress, color, light, element?.let { ElementSignatures.tones(it.atomicNumber) }),
         )
         val (icon, action, description) = if (state.isPaused) {
             Triple(R.drawable.ic_play, TimerService.ACTION_RESUME, context.getString(R.string.main_action_resume))
