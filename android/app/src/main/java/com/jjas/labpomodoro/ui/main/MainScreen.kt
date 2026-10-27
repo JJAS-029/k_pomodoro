@@ -67,6 +67,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
@@ -523,12 +524,16 @@ private fun MainContent(
                     .padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 96.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                // En Pro la pantalla queda limpia, sin título
+                // En Pro la pantalla queda limpia, sin título. Se desvanece (sin mover el recipiente)
+                // mientras arriba hay un aviso o la burbuja de elementos, que caerían encima
                 if (showTitle) {
+                    val topBusy = medals.isNotEmpty() || goalBanner || discoveries.any { it.source != DiscoverySource.FUSION }
+                    val titleAlpha by animateFloatAsState(if (topBusy) 0f else 1f, label = "titleAlpha")
                     Text(
                         text = stringResource(R.string.app_name),
                         style = MaterialTheme.typography.headlineMedium,
                         color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.alpha(titleAlpha),
                     )
                 }
                 Vessel(
@@ -572,9 +577,10 @@ private fun MainContent(
                 }
             }
 
-            // Elementos ganados: salen del recipiente en una burbuja; tocarla abre la tabla periódica
+            // Elementos ganados: salen del recipiente en una burbuja; tocarla abre la tabla periódica.
+            // Espera a que se cierre el aviso de medallas, que ocupa la misma franja de arriba
             AnimatedVisibility(
-                visible = discoveries.any { it.source != DiscoverySource.FUSION },
+                visible = discoveries.any { it.source != DiscoverySource.FUSION } && medals.isEmpty(),
                 enter = fadeIn(),
                 exit = fadeOut() + scaleOut(),
             ) {
@@ -614,9 +620,15 @@ private fun MainContent(
                 }
             }
 
-            // Meta diaria: anillo arriba a la izquierda (solo si hay meta)
-            if (goal.hasAny) {
-                GoalRing(goal, onClick = actions.onOpenGoal, modifier = Modifier.align(Alignment.TopStart).padding(12.dp))
+            // Meta diaria: anillo arriba a la izquierda (solo si hay meta). Se esconde mientras hay
+            // un aviso de medallas o de meta, que ocupan ese mismo lugar
+            AnimatedVisibility(
+                visible = goal.hasAny && medals.isEmpty() && !goalBanner,
+                enter = fadeIn(),
+                exit = fadeOut(),
+                modifier = Modifier.align(Alignment.TopStart).padding(12.dp),
+            ) {
+                GoalRing(goal, onClick = actions.onOpenGoal)
             }
             AnimatedVisibility(
                 visible = goalBanner,
