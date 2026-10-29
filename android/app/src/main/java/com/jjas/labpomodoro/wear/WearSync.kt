@@ -6,6 +6,8 @@ import com.google.android.gms.wearable.PutDataMapRequest
 import com.google.android.gms.wearable.Wearable
 import com.jjas.labpomodoro.core.di.ApplicationScope
 import com.jjas.labpomodoro.data.repository.SettingsRepository
+import com.jjas.labpomodoro.data.repository.InventoryItem
+import com.jjas.labpomodoro.data.repository.InventoryRepository
 import com.jjas.labpomodoro.data.room.StudyRoomRepository
 import com.jjas.labpomodoro.domain.model.LabPalette
 import com.jjas.labpomodoro.domain.model.SessionType
@@ -13,6 +15,8 @@ import com.jjas.labpomodoro.timer.TimeSource
 import com.jjas.labpomodoro.timer.TimerEngine
 import com.jjas.labpomodoro.timer.TimerState
 import com.jjas.labpomodoro.ui.components.LiquidPalette
+import com.jjas.labpomodoro.ui.components.VesselReagents
+import com.jjas.labpomodoro.ui.components.look
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.combine
@@ -33,6 +37,7 @@ class WearSync @Inject constructor(
     private val engine: TimerEngine,
     private val settings: SettingsRepository,
     private val rooms: StudyRoomRepository,
+    private val inventory: InventoryRepository,
     private val time: TimeSource,
     @ApplicationScope private val scope: CoroutineScope,
 ) {
@@ -41,14 +46,16 @@ class WearSync @Inject constructor(
         val isPro: Boolean,
         val owned: Set<String>,
         val palette: LabPalette,
+        val favorite: Int,
+        val items: List<InventoryItem>,
         val inRoom: Boolean,
         val isHost: Boolean,
     )
 
     fun start() {
         scope.launch {
-            combine(engine.state, settings.settings, rooms.state) { timer, prefs, room ->
-                Snapshot(timer, prefs.isPro, prefs.ownedGlassware, prefs.paletteOn(LocalDate.now()), room != null, room?.isHost == true)
+            combine(engine.state, settings.settings, rooms.state, inventory.items) { timer, prefs, room, items ->
+                Snapshot(timer, prefs.isPro, prefs.ownedGlassware, prefs.paletteOn(LocalDate.now()), prefs.vesselElement, items, room != null, room?.isHost == true)
             }.distinctUntilChanged().collect { snapshot ->
                 runCatching { publish(snapshot) }
             }
@@ -73,7 +80,10 @@ class WearSync @Inject constructor(
                 val works = timer.plan.withIndex().filter { it.value.type == SessionType.WORK }
                 map.putInt(WearContract.KEY_POMODOROS, works.size)
                 map.putInt(WearContract.KEY_POMODORO, works.count { it.index <= timer.index }.coerceAtLeast(1))
-                val color = LiquidPalette.liquid(timer.current.type, timer.planSeed, timer.index, s.palette)
+                // El mismo color que en el teléfono: el del elemento que tiñe el trabajo, o el de la paleta
+                val pool = VesselReagents.pool(s.items, timer.planSeed)
+                val element = VesselReagents.reagent(timer.plan, timer.index, timer.planSeed, pool, s.favorite)
+                val color = element?.look()?.color ?: LiquidPalette.liquid(timer.current.type, timer.planSeed, timer.index, s.palette)
                 map.putInt(WearContract.KEY_COLOR, color.toArgb())
                 map.putString(WearContract.KEY_SHAPE, LiquidPalette.vessel(timer.planSeed, timer.index, s.owned).name)
             }
