@@ -18,6 +18,7 @@ import androidx.wear.ongoing.Status
 import com.google.android.gms.wearable.DataEvent
 import com.google.android.gms.wearable.DataEventBuffer
 import com.google.android.gms.wearable.DataMapItem
+import com.google.android.gms.wearable.MessageEvent
 import com.google.android.gms.wearable.WearableListenerService
 
 /**
@@ -33,25 +34,26 @@ class WatchTimerService : WearableListenerService() {
             .lastOrNull()
             ?.let { DataMapItem.fromDataItem(it.dataItem).dataMap.toWatchTimer() }
             ?: return
+        LocalPlan.rememberPhone(this, timer.planTypes, timer.planSeconds, timer.isPro)
+        // Si el teléfono también empezó un plan, manda el del teléfono
+        if (LocalPlan.isActive(this)) {
+            if (!timer.active) return
+            LocalPlan.stop(this)
+        }
         val prefs = getSharedPreferences(PREFS, MODE_PRIVATE)
         val session = sessionKey(timer)
         val before = prefs.getString(KEY_SESSION, null)
         // Vibra al pasar a otra sesión o al terminar el plan; pausar o continuar no cuenta
-        if (before != null && before != session && (timer.active || timer.state == "FINISHED") && before != IDLE) vibrate(timer)
+        if (before != null && before != session && (timer.active || timer.state == "FINISHED") && before != IDLE) WatchVibes.vibrate(this, timer)
         prefs.edit().putString(KEY_SESSION, session).apply()
         WatchNotifier.update(this, timer)
         LastTimer.save(this, timer)
     }
 
-    private fun vibrate(timer: WatchTimer) {
-        val vibrator = getSystemService(Vibrator::class.java) ?: return
-        // Trabajo: dos golpes firmes; descanso: tres suaves; fin del plan: uno largo
-        val pattern = when {
-            timer.state == "FINISHED" -> longArrayOf(0, 700)
-            timer.type == "WORK" -> longArrayOf(0, 300, 150, 300)
-            else -> longArrayOf(0, 150, 120, 150, 120, 150)
-        }
-        vibrator.vibrate(VibrationEffect.createWaveform(pattern, -1))
+    /** El teléfono confirma los pomodoros del reloj que ya registró. */
+    override fun onMessageReceived(event: MessageEvent) {
+        if (event.path != WearContract.ACK_PATH) return
+        LocalPlan.acknowledge(this, String(event.data).split(',').filter { it.isNotBlank() }.toSet())
     }
 
     companion object {
@@ -61,6 +63,19 @@ class WatchTimerService : WearableListenerService() {
 
         /** Qué sesión es: cambia al pasar de trabajo a descanso o de un pomodoro al siguiente. */
         fun sessionKey(timer: WatchTimer): String = if (timer.active) "${timer.type}-${timer.pomodoro}" else timer.state
+    }
+}
+
+/** Vibraciones del reloj: trabajo, dos golpes firmes; descanso, tres suaves; fin del plan, uno largo. */
+object WatchVibes {
+    fun vibrate(context: Context, timer: WatchTimer) {
+        val vibrator = context.getSystemService(Vibrator::class.java) ?: return
+        val pattern = when {
+            timer.state == "FINISHED" -> longArrayOf(0, 700)
+            timer.type == "WORK" -> longArrayOf(0, 300, 150, 300)
+            else -> longArrayOf(0, 150, 120, 150, 120, 150)
+        }
+        vibrator.vibrate(VibrationEffect.createWaveform(pattern, -1))
     }
 }
 

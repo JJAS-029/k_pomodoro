@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withTimeoutOrNull
 
 /** Estado del timer del teléfono, como lo publica `WearSync`. */
 data class WatchTimer(
@@ -27,6 +28,11 @@ data class WatchTimer(
     val isPro: Boolean = false,
     val inRoom: Boolean = false,
     val isHost: Boolean = false,
+    /** El plan de siempre del teléfono (tipo y segundos), para correrlo sin él. */
+    val planTypes: List<String> = emptyList(),
+    val planSeconds: List<Int> = emptyList(),
+    /** Es el plan que corre el reloj solo (modo semiautónomo). */
+    val local: Boolean = false,
 ) {
     val active: Boolean get() = state == "ACTIVE"
 
@@ -34,8 +40,8 @@ data class WatchTimer(
     fun remainingAt(nowMillis: Long): Long = if (paused) remaining else (endsAt - nowMillis).coerceAtLeast(0)
 
     /** En una sala solo el anfitrión pausa y nadie salta. */
-    val canPause: Boolean get() = !inRoom || isHost
-    val canSkip: Boolean get() = isPro && !inRoom
+    val canPause: Boolean get() = local || !inRoom || isHost
+    val canSkip: Boolean get() = isPro && !inRoom && !local
 }
 
 /** Lee el estado que publica el teléfono y le manda órdenes. */
@@ -71,16 +77,23 @@ class PhoneLink(context: Context) {
     /** Igual que [send], sin esperar (para el tile, que no es una corrutina). */
     fun sendAsync(command: String) {
         nodes.connectedNodes.addOnSuccessListener { connected ->
-            connected.forEach { messages.sendMessage(it.id, WearContract.COMMAND_PREFIX + command, null) }
+            connected.filter { it.isNearby }.forEach { messages.sendMessage(it.id, WearContract.COMMAND_PREFIX + command, null) }
         }
     }
 
     /** Manda [command] a los teléfonos conectados. Devuelve false si no hay ninguno cerca. */
     suspend fun send(command: String): Boolean = runCatching {
-        val connected = nodes.connectedNodes.await()
-        connected.forEach { messages.sendMessage(it.id, WearContract.COMMAND_PREFIX + command, null).await() }
-        connected.isNotEmpty()
+        // Solo el teléfono cerca: Wear OS también cuenta "la nube" como conectada
+        withTimeoutOrNull(SEND_TIMEOUT_MILLIS) {
+            val nearby = nodes.connectedNodes.await().filter { it.isNearby }
+            nearby.forEach { messages.sendMessage(it.id, WearContract.COMMAND_PREFIX + command, null).await() }
+            nearby.isNotEmpty()
+        } ?: false
     }.getOrDefault(false)
+
+    private companion object {
+        const val SEND_TIMEOUT_MILLIS = 5_000L
+    }
 }
 
 /** Lee el DataItem que publica `WearSync` en el teléfono. */
@@ -98,4 +111,6 @@ fun DataMap.toWatchTimer() = WatchTimer(
     isPro = getBoolean(WearContract.KEY_PRO),
     inRoom = getBoolean(WearContract.KEY_ROOM),
     isHost = getBoolean(WearContract.KEY_HOST),
+    planTypes = getStringArrayList(WearContract.KEY_PLAN_TYPES).orEmpty(),
+    planSeconds = getIntegerArrayList(WearContract.KEY_PLAN_SECONDS).orEmpty(),
 )

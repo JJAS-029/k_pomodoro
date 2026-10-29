@@ -36,7 +36,7 @@ class TimerComplicationService : SuspendingComplicationDataSourceService() {
     }
 
     override suspend fun onComplicationRequest(request: ComplicationRequest): ComplicationData {
-        val timer = LastTimer.read(this)
+        val timer = shownTimer(this)
         val description = text(getString(R.string.app_name))
         return when {
             timer == null || !timer.active -> idle(request.complicationType, getString(R.string.tile_idle))

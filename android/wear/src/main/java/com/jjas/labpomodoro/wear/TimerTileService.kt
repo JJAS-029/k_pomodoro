@@ -30,11 +30,12 @@ class TimerTileService : TileService() {
 
     override fun onTileRequest(request: RequestBuilders.TileRequest): ListenableFuture<TileBuilders.Tile> {
         // El botón del tile manda la orden al teléfono
+        val local = LocalPlan.isActive(this)
         when (request.currentState.lastClickableId) {
-            CLICK_PAUSE -> PhoneLink(this).sendAsync(WearContract.PAUSE)
-            CLICK_RESUME -> PhoneLink(this).sendAsync(WearContract.RESUME)
+            CLICK_PAUSE -> if (local) LocalPlan.pause(this) else PhoneLink(this).sendAsync(WearContract.PAUSE)
+            CLICK_RESUME -> if (local) LocalPlan.resume(this) else PhoneLink(this).sendAsync(WearContract.RESUME)
         }
-        val timer = LastTimer.read(this)
+        val timer = shownTimer(this)
         val root = layout(this, timer)
         return Futures.immediateFuture(
             TileBuilders.Tile.Builder()

@@ -10,7 +10,9 @@ import com.jjas.labpomodoro.data.repository.InventoryItem
 import com.jjas.labpomodoro.data.repository.InventoryRepository
 import com.jjas.labpomodoro.data.room.StudyRoomRepository
 import com.jjas.labpomodoro.domain.model.LabPalette
+import com.jjas.labpomodoro.domain.model.SessionConfig
 import com.jjas.labpomodoro.domain.model.SessionType
+import com.jjas.labpomodoro.domain.usecase.SessionPlanGenerator
 import com.jjas.labpomodoro.timer.TimeSource
 import com.jjas.labpomodoro.timer.TimerEngine
 import com.jjas.labpomodoro.timer.TimerState
@@ -48,6 +50,7 @@ class WearSync @Inject constructor(
         val palette: LabPalette,
         val favorite: Int,
         val items: List<InventoryItem>,
+        val usual: SessionConfig,
         val inRoom: Boolean,
         val isHost: Boolean,
     )
@@ -55,7 +58,7 @@ class WearSync @Inject constructor(
     fun start() {
         scope.launch {
             combine(engine.state, settings.settings, rooms.state, inventory.items) { timer, prefs, room, items ->
-                Snapshot(timer, prefs.isPro, prefs.ownedGlassware, prefs.paletteOn(LocalDate.now()), prefs.vesselElement, items, room != null, room?.isHost == true)
+                Snapshot(timer, prefs.isPro, prefs.ownedGlassware, prefs.paletteOn(LocalDate.now()), prefs.vesselElement, items, prefs.session, room != null, room?.isHost == true)
             }.distinctUntilChanged().collect { snapshot ->
                 runCatching { publish(snapshot) }
             }
@@ -68,6 +71,10 @@ class WearSync @Inject constructor(
         map.putBoolean(WearContract.KEY_PRO, s.isPro)
         map.putBoolean(WearContract.KEY_ROOM, s.inRoom)
         map.putBoolean(WearContract.KEY_HOST, s.isHost)
+        // El plan de siempre, para que el reloj lo corra solo si el teléfono no está cerca
+        val plan = SessionPlanGenerator.generate(s.usual)
+        map.putStringArrayList(WearContract.KEY_PLAN_TYPES, ArrayList(plan.map { it.type.name }))
+        map.putIntegerArrayList(WearContract.KEY_PLAN_SECONDS, ArrayList(plan.map { it.durationSeconds }))
         when (val timer = s.timer) {
             is TimerState.Active -> {
                 val remaining = timer.remainingMillis(time.elapsedRealtime())

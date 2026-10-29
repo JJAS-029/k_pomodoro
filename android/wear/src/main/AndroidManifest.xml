@@ -4,6 +4,8 @@
     <uses-feature android:name="android.hardware.type.watch" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Fin de cada sesión del plan que corre el reloj solo -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 
     <application
         android:allowBackup="true"
@@ -37,7 +39,19 @@
                     android:path="/lab/timer"
                     android:scheme="wear" />
             </intent-filter>
+            <!-- El teléfono confirma los pomodoros del reloj que ya registró -->
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED" />
+                <data
+                    android:host="*"
+                    android:path="/lab/ack"
+                    android:scheme="wear" />
+            </intent-filter>
         </service>
+        <receiver
+            android:name=".LocalPlanReceiver"
+            android:exported="false" />
+
         <!-- Tile: el tiempo que falta, al deslizar desde la carátula -->
         <service
             android:name=".TimerTileService"

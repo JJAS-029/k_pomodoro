@@ -127,6 +127,14 @@
                     android:pathPrefix="/lab/command"
                     android:scheme="wear" />
             </intent-filter>
+            <!-- Pomodoros que el reloj completó sin el teléfono -->
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.DATA_CHANGED" />
+                <data
+                    android:host="*"
+                    android:path="/lab/offline"
+                    android:scheme="wear" />
+            </intent-filter>
         </service>
     </application>
 

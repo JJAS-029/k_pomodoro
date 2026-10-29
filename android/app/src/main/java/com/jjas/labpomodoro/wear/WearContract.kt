@@ -44,4 +44,21 @@ object WearContract {
     /** En una sala de estudio; solo el anfitrión pausa y nadie salta. */
     const val KEY_ROOM = "room"
     const val KEY_HOST = "host"
+
+    /**
+     * El plan de siempre (tipo y segundos de cada sesión), para que el reloj lo corra solo si el
+     * teléfono no está cerca (Pro).
+     */
+    const val KEY_PLAN_TYPES = "planTypes"
+    const val KEY_PLAN_SECONDS = "planSeconds"
+
+    /**
+     * DataItem del reloj con los pomodoros que completó sin el teléfono (JSON: id, tipo, inicio,
+     * fin y segundos). La Data Layer lo entrega al reconectarse.
+     */
+    const val OFFLINE_PATH = "/lab/offline"
+    const val KEY_SESSIONS = "sessions"
+
+    /** El teléfono confirma (mensaje con los ids separados por comas) lo que ya registró. */
+    const val ACK_PATH = "/lab/ack"
 }

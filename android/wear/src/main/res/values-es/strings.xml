@@ -13,5 +13,8 @@
     <string name="pomodoro_of">%1$d de %2$d</string>
     <string name="channel_timer">Temporizador</string>
     <string name="tile_idle">Toca para iniciar un plan</string>
+    <string name="stop">Detener</string>
+    <string name="on_watch">%1$s · en el reloj</string>
+    <string name="no_phone">El teléfono no está cerca. Con Pro, el plan corre en el reloj y se sincroniza después.</string>
     <string name="complication_pro">Disponible con Lab Pomodoro Pro</string>
 </resources>

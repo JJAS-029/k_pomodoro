@@ -32,3 +32,6 @@ object LastTimer {
         }.getOrNull()
     }
 }
+
+/** Lo que muestran la app, el tile y la complicación: el plan del reloj si corre; si no, el del teléfono. */
+fun shownTimer(context: Context): WatchTimer? = LocalPlan.timer(context) ?: LastTimer.read(context)

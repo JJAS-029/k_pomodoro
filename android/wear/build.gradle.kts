@@ -68,4 +68,6 @@ dependencies {
     implementation(libs.wear.protolayout.expression)
     implementation(libs.guava)
     implementation(libs.kotlinx.coroutines.play.services)
+
+    testImplementation(libs.junit)
 }

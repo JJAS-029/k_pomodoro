@@ -16,7 +16,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -62,9 +64,24 @@ class WearMainActivity : ComponentActivity() {
             MaterialTheme {
                 AppScaffold {
                     ScreenScaffold {
-                        val timer by link.timer.collectAsStateWithLifecycle()
+                        val phone by link.timer.collectAsStateWithLifecycle()
                         val scope = rememberCoroutineScope()
-                        WatchTimerScreen(timer, onCommand = { command -> scope.launch { link.send(command) } })
+                        // Sube al cambiar el plan del reloj, para volver a leerlo de inmediato
+                        var version by remember { mutableIntStateOf(0) }
+                        var noPhone by remember { mutableStateOf(false) }
+                        WatchTimerScreen(
+                            phone = phone,
+                            local = { LocalPlan.timer(this@WearMainActivity) },
+                            version = version,
+                            noPhone = noPhone,
+                            onCommand = { command ->
+                                scope.launch {
+                                    noPhone = false
+                                    if (!command(command)) noPhone = true
+                                    version++
+                                }
+                            },
+                        )
                     }
                 }
             }
@@ -74,6 +91,30 @@ class WearMainActivity : ComponentActivity() {
     override fun onStart() {
         super.onStart()
         lifecycleScope.launch { link.start() }
+        // Por si el plan del reloj avanzó con la app cerrada, y lo pendiente para el teléfono
+        LocalPlan.refresh(this)
+        LocalPlan.publishPending(this)
+    }
+
+    /**
+     * Si el reloj corre su propio plan, las órdenes son para él; si no, van al teléfono. Sin
+     * teléfono cerca, "Iniciar" corre el plan en el reloj (Pro). Devuelve false si no se pudo.
+     */
+    private suspend fun command(command: String): Boolean {
+        if (LocalPlan.isActive(this)) {
+            when (command) {
+                WearContract.PAUSE -> LocalPlan.pause(this)
+                WearContract.RESUME -> LocalPlan.resume(this)
+                STOP -> LocalPlan.stop(this)
+            }
+            return true
+        }
+        if (link.send(command)) return true
+        if (command == WearContract.START && LocalPlan.canRunAlone(this)) {
+            LocalPlan.start(this)
+            return true
+        }
+        return false
     }
 
     override fun onStop() {
@@ -83,10 +124,12 @@ class WearMainActivity : ComponentActivity() {
 }
 
 @Composable
-private fun WatchTimerScreen(timer: WatchTimer?, onCommand: (String) -> Unit) {
+private fun WatchTimerScreen(phone: WatchTimer?, local: () -> WatchTimer?, version: Int, noPhone: Boolean, onCommand: (String) -> Unit) {
     // El reloj cuenta los segundos solo, con la hora de fin que mandó el teléfono
     var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
-    LaunchedEffect(timer) {
+    // El plan del reloj, si corre, manda sobre lo que dice el teléfono
+    val timer = remember(now, version, phone) { local() ?: phone }
+    LaunchedEffect(phone, version) {
         while (true) {
             now = System.currentTimeMillis()
             delay(1_000 - now % 1_000)
@@ -110,11 +153,13 @@ private fun WatchTimerScreen(timer: WatchTimer?, onCommand: (String) -> Unit) {
             modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 22.dp),
         ) {
             when {
-                timer == null -> Text(stringResource(R.string.open_phone), textAlign = TextAlign.Center)
-                timer.active -> ActiveTimer(timer, timer.remainingAt(now), color, onCommand)
+                timer == null && !noPhone -> Text(stringResource(R.string.open_phone), textAlign = TextAlign.Center)
+                timer != null && timer.active -> ActiveTimer(timer, timer.remainingAt(now), color, onCommand)
                 else -> {
                     WatchVessel("BEAKER", Color(0xFF39FF14), level = 0.8f, animated = false, modifier = Modifier.size(width = 32.dp, height = 38.dp))
-                    if (timer.state == "FINISHED") Text(stringResource(R.string.finished), textAlign = TextAlign.Center)
+                    if (timer?.state == "FINISHED") Text(stringResource(R.string.finished), textAlign = TextAlign.Center)
+                    // Sin el teléfono cerca, el plan solo se puede correr en el reloj con Pro
+                    if (noPhone) Text(stringResource(R.string.no_phone), textAlign = TextAlign.Center, style = MaterialTheme.typography.bodySmall)
                     Button(
                         onClick = { onCommand(WearContract.START) },
                         colors = ButtonDefaults.buttonColors(containerColor = LabGreen, contentColor = Color.Black),
@@ -146,7 +191,10 @@ private fun ActiveTimer(timer: WatchTimer, remaining: Long, color: Color, onComm
     )
     val seconds = (remaining + 999) / 1000
     Text("%d:%02d".format(seconds / 60, seconds % 60), fontSize = 30.sp, style = MaterialTheme.typography.displaySmall)
-    if (timer.pomodoros > 0) Text(stringResource(R.string.pomodoro_of, timer.pomodoro, timer.pomodoros), style = MaterialTheme.typography.bodySmall)
+    if (timer.pomodoros > 0) {
+        val count = stringResource(R.string.pomodoro_of, timer.pomodoro, timer.pomodoros)
+        Text(if (timer.local) stringResource(R.string.on_watch, count) else count, style = MaterialTheme.typography.bodySmall)
+    }
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         FilledIconButton(
             onClick = { onCommand(if (timer.paused) WearContract.RESUME else WearContract.PAUSE) },
@@ -158,6 +206,12 @@ private fun ActiveTimer(timer: WatchTimer, remaining: Long, color: Color, onComm
                 contentDescription = stringResource(if (timer.paused) R.string.resume else R.string.pause),
             )
         }
+        // El plan del reloj se detiene aquí (el del teléfono, en el teléfono)
+        if (timer.local) {
+            FilledIconButton(onClick = { onCommand(STOP) }, colors = IconButtonDefaults.filledTonalIconButtonColors()) {
+                Icon(painterResource(R.drawable.ic_stop), contentDescription = stringResource(R.string.stop))
+            }
+        }
         // Saltar es Pro (y en una sala nadie salta)
         if (timer.canSkip) {
             FilledIconButton(onClick = { onCommand(WearContract.SKIP) }, colors = IconButtonDefaults.filledTonalIconButtonColors()) {
@@ -166,6 +220,9 @@ private fun ActiveTimer(timer: WatchTimer, remaining: Long, color: Color, onComm
         }
     }
 }
+
+/** Orden solo para el plan del reloj: detenerlo. */
+private const val STOP = "stop"
 
 /** El verde neón de la app del teléfono. */
 private val LabGreen = Color(0xFF39FF14)
