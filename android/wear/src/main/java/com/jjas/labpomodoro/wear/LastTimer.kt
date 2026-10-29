@@ -16,6 +16,7 @@ object LastTimer {
             .put("room", timer.inRoom).put("host", timer.isHost)
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putString(KEY, json.toString()).apply()
         TimerTileService.refresh(context)
+        TimerComplicationService.refresh(context)
     }
 
     fun read(context: Context): WatchTimer? {
