@@ -21,4 +21,6 @@ dependencyResolutionManagement {
 
 rootProject.name = "Lab Pomodoro"
 include(":app")
+// App del reloj (Wear OS): mismo paquete, se publica en la misma ficha de Play
+include(":wear")
  

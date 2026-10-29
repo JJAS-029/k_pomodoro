@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="open_phone">Abre Lab Pomodoro en tu teléfono</string>
+    <string name="start">Iniciar</string>
+    <string name="pause">Pausar</string>
+    <string name="resume">Continuar</string>
+    <string name="skip">Saltar</string>
+    <string name="work">Trabajo</string>
+    <string name="short_break">Descanso corto</string>
+    <string name="long_break">Descanso largo</string>
+    <string name="paused">En pausa</string>
+    <string name="finished">¡Plan terminado!</string>
+    <string name="pomodoro_of">%1$d de %2$d</string>
+</resources>

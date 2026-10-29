@@ -136,6 +136,9 @@ dependencies {
     implementation(libs.androidx.credentials.play.services)
     implementation(libs.googleid)
 
+    // Enlace con la app del reloj (Wear OS)
+    implementation(libs.play.services.wearable)
+
     // Tests
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
