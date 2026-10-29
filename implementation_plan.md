@@ -662,6 +662,7 @@ Sin Pro, lo de Pro se ve con candado y "Disponible con Lab Pomodoro Pro".
 - Vibración al cambiar de sesión (`WatchTimerService`, aunque la app del reloj esté cerrada): trabajo, dos golpes; descanso, tres suaves; fin del plan, uno largo.
 - Actividad en curso (`WatchNotifier`): notificación con cuenta regresiva y el ícono en la carátula.
 - Recipiente (`WatchVessel`): gratis, vaso fijo; Pro, la forma de la sesión (vaso, Erlenmeyer, tubo o bola) con oleaje y burbujas.
+- ✅ Fase 4, tile (`TimerTileService`): tipo de sesión, cuenta regresiva que calcula el sistema con la hora de fin (no hay que redibujarlo cada segundo) y pomodoro N de M; tocarlo abre la app. Con Pro, botón de pausar/continuar. Toma el último estado guardado (`LastTimer`), así que funciona con la app del reloj cerrada. El color del líquido es el mismo que en el teléfono, incluido el del elemento que tiñe el trabajo.
 
 **Riesgos.** Solo emulador: el enlace entre emuladores a veces se cae y hay que volver a enlazarlos; la vibración y el modo siempre encendido no se ven bien en emulador. Esfuerzo: fases 1 a 3, varias sesiones; 4 y 5, una; 6, media; 7, una o dos.
 

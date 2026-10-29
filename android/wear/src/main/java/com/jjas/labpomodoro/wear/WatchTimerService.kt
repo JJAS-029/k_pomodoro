@@ -40,6 +40,7 @@ class WatchTimerService : WearableListenerService() {
         if (before != null && before != session && (timer.active || timer.state == "FINISHED") && before != IDLE) vibrate(timer)
         prefs.edit().putString(KEY_SESSION, session).apply()
         WatchNotifier.update(this, timer)
+        LastTimer.save(this, timer)
     }
 
     private fun vibrate(timer: WatchTimer) {

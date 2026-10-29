@@ -38,5 +38,18 @@
                     android:scheme="wear" />
             </intent-filter>
         </service>
+        <!-- Tile: el tiempo que falta, al deslizar desde la carátula -->
+        <service
+            android:name=".TimerTileService"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:permission="com.google.android.wearable.permission.BIND_TILE_PROVIDER">
+            <intent-filter>
+                <action android:name="androidx.wear.tiles.action.BIND_TILE_PROVIDER" />
+            </intent-filter>
+            <meta-data
+                android:name="androidx.wear.tiles.PREVIEW"
+                android:resource="@mipmap/ic_launcher" />
+        </service>
     </application>
 </manifest>

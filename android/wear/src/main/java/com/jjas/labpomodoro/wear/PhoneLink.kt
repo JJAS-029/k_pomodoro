@@ -68,6 +68,13 @@ class PhoneLink(context: Context) {
         data.removeListener(listener)
     }
 
+    /** Igual que [send], sin esperar (para el tile, que no es una corrutina). */
+    fun sendAsync(command: String) {
+        nodes.connectedNodes.addOnSuccessListener { connected ->
+            connected.forEach { messages.sendMessage(it.id, WearContract.COMMAND_PREFIX + command, null) }
+        }
+    }
+
     /** Manda [command] a los teléfonos conectados. Devuelve false si no hay ninguno cerca. */
     suspend fun send(command: String): Boolean = runCatching {
         val connected = nodes.connectedNodes.await()

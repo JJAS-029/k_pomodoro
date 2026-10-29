@@ -62,5 +62,9 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.play.services.wearable)
     implementation(libs.wear.ongoing)
+    implementation(libs.wear.tiles)
+    implementation(libs.wear.protolayout)
+    implementation(libs.wear.protolayout.expression)
+    implementation(libs.guava)
     implementation(libs.kotlinx.coroutines.play.services)
 }
