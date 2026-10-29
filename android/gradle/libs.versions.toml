@@ -29,6 +29,7 @@ googleid = "1.2.1"
 # Wear OS: enlace con el reloj y la app del reloj
 playServicesWearable = "19.0.0"
 wearCompose = "1.5.0"
+wearOngoing = "1.0.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -93,6 +94,7 @@ googleid = { group = "com.google.android.libraries.identity.googleid", name = "g
 play-services-wearable = { group = "com.google.android.gms", name = "play-services-wearable", version.ref = "playServicesWearable" }
 wear-compose-material3 = { group = "androidx.wear.compose", name = "compose-material3", version.ref = "wearCompose" }
 wear-compose-foundation = { group = "androidx.wear.compose", name = "compose-foundation", version.ref = "wearCompose" }
+wear-ongoing = { group = "androidx.wear", name = "wear-ongoing", version.ref = "wearOngoing" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

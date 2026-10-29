@@ -1,9 +1,11 @@
 package com.jjas.labpomodoro.wear
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,11 +22,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -34,6 +32,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.wear.compose.material3.AppScaffold
 import androidx.wear.compose.material3.Button
+import androidx.wear.compose.material3.ButtonDefaults
+import androidx.wear.compose.material3.IconButtonDefaults
 import androidx.wear.compose.material3.CircularProgressIndicator
 import androidx.wear.compose.material3.FilledIconButton
 import androidx.wear.compose.material3.Icon
@@ -52,6 +52,12 @@ class WearMainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         link = PhoneLink(this)
+        // Para la actividad en curso (Wear OS 4+ pide permiso para notificar)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+        ) {
+            requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1)
+        }
         setContent {
             MaterialTheme {
                 AppScaffold {
@@ -100,15 +106,19 @@ private fun WatchTimerScreen(timer: WatchTimer?, onCommand: (String) -> Unit) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(4.dp),
-            modifier = Modifier.padding(horizontal = 24.dp),
+            // Abajo de la hora del sistema, que va arriba al centro
+            modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 22.dp),
         ) {
             when {
                 timer == null -> Text(stringResource(R.string.open_phone), textAlign = TextAlign.Center)
                 timer.active -> ActiveTimer(timer, timer.remainingAt(now), color, onCommand)
                 else -> {
-                    Beaker(color = Color(0xFF39FF14), level = 0.8f)
+                    WatchVessel("BEAKER", Color(0xFF39FF14), level = 0.8f, animated = false, modifier = Modifier.size(width = 32.dp, height = 38.dp))
                     if (timer.state == "FINISHED") Text(stringResource(R.string.finished), textAlign = TextAlign.Center)
-                    Button(onClick = { onCommand(WearContract.START) }) { Text(stringResource(R.string.start)) }
+                    Button(
+                        onClick = { onCommand(WearContract.START) },
+                        colors = ButtonDefaults.buttonColors(containerColor = LabGreen, contentColor = Color.Black),
+                    ) { Text(stringResource(R.string.start)) }
                 }
             }
         }
@@ -120,7 +130,8 @@ private fun ActiveTimer(timer: WatchTimer, remaining: Long, color: Color, onComm
     val work = timer.type == "WORK"
     // Trabajando se evapora; en el descanso se vuelve a llenar
     val fraction = remaining.toFloat() / timer.duration
-    Beaker(color = color, level = if (work) fraction else 1f - fraction)
+    // Con Pro, la forma de la sesión y el líquido en movimiento
+    WatchVessel(timer.shape, color, level = if (work) fraction else 1f - fraction, animated = timer.isPro, modifier = Modifier.size(width = 32.dp, height = 38.dp))
     Text(
         stringResource(
             when {
@@ -134,12 +145,13 @@ private fun ActiveTimer(timer: WatchTimer, remaining: Long, color: Color, onComm
         style = MaterialTheme.typography.labelMedium,
     )
     val seconds = (remaining + 999) / 1000
-    Text("%d:%02d".format(seconds / 60, seconds % 60), fontSize = 34.sp, style = MaterialTheme.typography.displaySmall)
+    Text("%d:%02d".format(seconds / 60, seconds % 60), fontSize = 30.sp, style = MaterialTheme.typography.displaySmall)
     if (timer.pomodoros > 0) Text(stringResource(R.string.pomodoro_of, timer.pomodoro, timer.pomodoros), style = MaterialTheme.typography.bodySmall)
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         FilledIconButton(
             onClick = { onCommand(if (timer.paused) WearContract.RESUME else WearContract.PAUSE) },
             enabled = timer.canPause,
+            colors = LabButtonColors(),
         ) {
             Icon(
                 painterResource(if (timer.paused) R.drawable.ic_play else R.drawable.ic_pause),
@@ -148,21 +160,15 @@ private fun ActiveTimer(timer: WatchTimer, remaining: Long, color: Color, onComm
         }
         // Saltar es Pro (y en una sala nadie salta)
         if (timer.canSkip) {
-            FilledIconButton(onClick = { onCommand(WearContract.SKIP) }) {
+            FilledIconButton(onClick = { onCommand(WearContract.SKIP) }, colors = IconButtonDefaults.filledTonalIconButtonColors()) {
                 Icon(painterResource(R.drawable.ic_skip), contentDescription = stringResource(R.string.skip))
             }
         }
     }
 }
 
-/** Vaso de precipitados con el líquido a la altura [level] (0..1). */
+/** El verde neón de la app del teléfono. */
+private val LabGreen = Color(0xFF39FF14)
+
 @Composable
-private fun Beaker(color: Color, level: Float) {
-    Canvas(Modifier.size(width = 34.dp, height = 40.dp)) {
-        val stroke = 2.dp.toPx()
-        val radius = CornerRadius(size.width * 0.25f)
-        val liquidTop = size.height * (1f - level.coerceIn(0f, 1f) * 0.9f)
-        drawRoundRect(color.copy(alpha = 0.85f), Offset(0f, liquidTop), Size(size.width, size.height - liquidTop), radius)
-        drawRoundRect(Color.White.copy(alpha = 0.7f), Offset.Zero, size, radius, style = Stroke(width = stroke))
-    }
-}
+private fun LabButtonColors() = IconButtonDefaults.filledIconButtonColors(containerColor = LabGreen, contentColor = Color.Black)

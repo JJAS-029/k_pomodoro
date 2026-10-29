@@ -658,6 +658,11 @@ Sin Pro, lo de Pro se ve con candado y "Disponible con Lab Pomodoro Pro".
 6. **Publicar:** capturas del reloj (redondas, 384×384 o más), descripción, pista de Wear OS en Play y revisión.
 7. **Semiautónomo** (después, Pro): si el teléfono no está cerca, el reloj corre el plan por su cuenta (con la última configuración que recibió) y guarda los pomodoros completados. Al reconectarse se los manda al teléfono (`DataClient`, `/sessions`, con id único para no contarlos dos veces); el teléfono los registra con su hora real y `RewardSync` entrega los elementos y medallas que correspondan. Si al reconectarse el teléfono también tiene un plan corriendo, manda el del teléfono.
 
+**Avance.** ✅ Fases 1 a 3 (28 de octubre de 2026), probadas en el emulador del reloj con `FakePhoneActivity` (solo debug: publica un timer de mentira por adb). Falta probar el enlace real con el teléfono: hay que emparejar `Lab_Phone_35` y `Lab_Watch` (en el teléfono, Play Store con una cuenta e instalar la app "Pixel Watch" o "Wear OS"; luego *Pair Wearable* en el Device Manager).
+- Vibración al cambiar de sesión (`WatchTimerService`, aunque la app del reloj esté cerrada): trabajo, dos golpes; descanso, tres suaves; fin del plan, uno largo.
+- Actividad en curso (`WatchNotifier`): notificación con cuenta regresiva y el ícono en la carátula.
+- Recipiente (`WatchVessel`): gratis, vaso fijo; Pro, la forma de la sesión (vaso, Erlenmeyer, tubo o bola) con oleaje y burbujas.
+
 **Riesgos.** Solo emulador: el enlace entre emuladores a veces se cae y hay que volver a enlazarlos; la vibración y el modo siempre encendido no se ven bien en emulador. Esfuerzo: fases 1 a 3, varias sesiones; 4 y 5, una; 6, media; 7, una o dos.
 
 #### Pendientes de publicación y técnicos

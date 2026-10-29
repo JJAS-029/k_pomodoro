@@ -61,5 +61,6 @@ dependencies {
     implementation(libs.wear.compose.foundation)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.play.services.wearable)
+    implementation(libs.wear.ongoing)
     implementation(libs.kotlinx.coroutines.play.services)
 }

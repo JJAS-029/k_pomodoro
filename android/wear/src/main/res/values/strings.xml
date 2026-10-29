@@ -12,4 +12,5 @@
     <string name="paused">Paused</string>
     <string name="finished">Plan finished!</string>
     <string name="pomodoro_of">%1$d of %2$d</string>
+    <string name="channel_timer">Timer</string>
 </resources>

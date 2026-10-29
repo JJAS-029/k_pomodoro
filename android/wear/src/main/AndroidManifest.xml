@@ -3,6 +3,7 @@
 
     <uses-feature android:name="android.hardware.type.watch" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:allowBackup="true"
@@ -25,5 +26,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <!-- Cambios del timer del teléfono: vibra y actualiza la actividad en curso -->
+        <service
+            android:name=".WatchTimerService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.DATA_CHANGED" />
+                <data
+                    android:host="*"
+                    android:path="/lab/timer"
+                    android:scheme="wear" />
+            </intent-filter>
+        </service>
     </application>
 </manifest>

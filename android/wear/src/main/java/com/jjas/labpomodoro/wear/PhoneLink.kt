@@ -51,7 +51,7 @@ class PhoneLink(context: Context) {
 
     private val listener = DataClient.OnDataChangedListener { events ->
         events.filter { it.type == DataEvent.TYPE_CHANGED && it.dataItem.uri.path == WearContract.TIMER_PATH }
-            .forEach { _timer.value = DataMapItem.fromDataItem(it.dataItem).dataMap.toTimer() }
+            .forEach { _timer.value = DataMapItem.fromDataItem(it.dataItem).dataMap.toWatchTimer() }
     }
 
     suspend fun start() {
@@ -59,7 +59,7 @@ class PhoneLink(context: Context) {
         // Lo último que publicó el teléfono, aunque haya sido antes de abrir la app
         runCatching {
             val items = data.getDataItems(Uri.Builder().scheme("wear").path(WearContract.TIMER_PATH).build()).await()
-            items.forEach { _timer.value = DataMapItem.fromDataItem(it).dataMap.toTimer() }
+            items.forEach { _timer.value = DataMapItem.fromDataItem(it).dataMap.toWatchTimer() }
             items.release()
         }
     }
@@ -74,20 +74,21 @@ class PhoneLink(context: Context) {
         connected.forEach { messages.sendMessage(it.id, WearContract.COMMAND_PREFIX + command, null).await() }
         connected.isNotEmpty()
     }.getOrDefault(false)
-
-    private fun DataMap.toTimer() = WatchTimer(
-        state = getString(WearContract.KEY_STATE, "IDLE"),
-        type = getString(WearContract.KEY_TYPE, "WORK"),
-        endsAt = getLong(WearContract.KEY_ENDS_AT),
-        paused = getBoolean(WearContract.KEY_PAUSED),
-        remaining = getLong(WearContract.KEY_REMAINING),
-        duration = getLong(WearContract.KEY_DURATION).coerceAtLeast(1),
-        pomodoro = getInt(WearContract.KEY_POMODORO),
-        pomodoros = getInt(WearContract.KEY_POMODOROS),
-        color = getInt(WearContract.KEY_COLOR, 0xFF39FF14.toInt()),
-        shape = getString(WearContract.KEY_SHAPE, "BEAKER"),
-        isPro = getBoolean(WearContract.KEY_PRO),
-        inRoom = getBoolean(WearContract.KEY_ROOM),
-        isHost = getBoolean(WearContract.KEY_HOST),
-    )
 }
+
+/** Lee el DataItem que publica `WearSync` en el teléfono. */
+fun DataMap.toWatchTimer() = WatchTimer(
+    state = getString(WearContract.KEY_STATE, "IDLE"),
+    type = getString(WearContract.KEY_TYPE, "WORK"),
+    endsAt = getLong(WearContract.KEY_ENDS_AT),
+    paused = getBoolean(WearContract.KEY_PAUSED),
+    remaining = getLong(WearContract.KEY_REMAINING),
+    duration = getLong(WearContract.KEY_DURATION).coerceAtLeast(1),
+    pomodoro = getInt(WearContract.KEY_POMODORO),
+    pomodoros = getInt(WearContract.KEY_POMODOROS),
+    color = getInt(WearContract.KEY_COLOR, 0xFF39FF14.toInt()),
+    shape = getString(WearContract.KEY_SHAPE, "BEAKER"),
+    isPro = getBoolean(WearContract.KEY_PRO),
+    inRoom = getBoolean(WearContract.KEY_ROOM),
+    isHost = getBoolean(WearContract.KEY_HOST),
+)
