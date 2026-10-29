@@ -6,6 +6,7 @@ Todo lo que hace falta para la ficha está en esta carpeta. Los pasos que siguen
 |---|---|
 | `listing/es-419/`, `listing/en-US/` | Título, descripción corta y completa, imagen destacada (1024×500) y 8 capturas (1080×2160) por idioma: temporizador, plan, tabla, ficha, sintetizador, estadísticas, tu año y medallas |
 | `icon-512.png` | Ícono de la ficha |
+| `listing/*/wear-screenshots/` | 3 capturas del reloj por idioma (454×454): app, tile y complicación |
 | `../privacy/index.html` | Política de privacidad (se publica con GitHub Pages) |
 | `../privacy/delete-account.html` | Página para pedir que se borre la cuenta |
 
@@ -88,3 +89,22 @@ Pantalla por pantalla, con cada opción a marcar: [seguridad-de-los-datos.md](se
 2. **Cuentas personales nuevas**: Google exige una **prueba cerrada con al menos 12 testers durante 14 días seguidos** antes de poder publicar en producción.
 3. Revisa el *Informe previo al lanzamiento* que genera Play con cada versión.
 4. Producción: empieza con un porcentaje pequeño y súbelo si no hay errores.
+
+## 6. App del reloj (Wear OS)
+
+La app del reloj vive en `android/wear` y se publica en la **misma app** de Play Console (mismo paquete, misma llave). Cada versión lleva dos paquetes:
+
+| Paquete | Archivo | versionCode |
+|---|---|---|
+| Teléfono | `android/app/build/outputs/bundle/release/app-release.aab` | 6 (versión 1.4) |
+| Reloj | `android/wear/build/outputs/bundle/release/wear-release.aab` | 1000006 (1.4) |
+
+Para compilar los dos: `./gradlew :app:bundleRelease :wear:bundleRelease` dentro de `android/`. El versionCode del reloj es 1 000 000 más el del teléfono; al subir el del teléfono, súbelo también en `android/wear/build.gradle.kts`.
+
+**Solo la primera vez:**
+1. Play Console › Lab Pomodoro › **Configuración › Configuración avanzada › Formatos** › **Agregar formato** › **Wear OS**. Acepta los requisitos.
+2. **Presencia en la tienda › Ficha de Play Store principal**: en la sección **Wear OS**, sube las capturas de `listing/es-419/wear-screenshots/` (y las de `en-US` en la ficha en inglés).
+3. **Pruebas › Prueba cerrada**: aparece una pista **"Wear OS"** aparte. Crea una versión ahí con `wear-release.aab` y agrega a los mismos testers.
+4. La primera versión del reloj pasa por una revisión extra de Wear OS (calidad de la app en el reloj); puede tardar unos días más.
+
+**Cada versión:** sube `app-release.aab` a la pista del teléfono y `wear-release.aab` a la pista de Wear OS, con las mismas notas.
