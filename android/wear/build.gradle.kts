@@ -16,7 +16,7 @@ android {
         minSdk = 30
         targetSdk = 36
         // Distinto al del teléfono en la misma versión: 1_000_000 + el del teléfono
-        versionCode = 1_000_007
+        versionCode = 1_000_008
         versionName = "1.4.1"
     }
 
