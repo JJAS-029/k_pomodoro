@@ -94,7 +94,7 @@ En cada uno, Play hace hasta cinco preguntas:
 | ¿Para qué se usan y comparten? | ✅ Publicidad o marketing |
 
 ### 6. Otro contenido generado por el usuario
-*El respaldo en la nube (historial, elementos, ajustes, nombres de lugares) y el apodo de la liga.*
+*El respaldo en la nube (historial, elementos, ajustes, nombres de lugares), el apodo de la liga y el apodo y estado en las salas de estudio.*
 
 | Pregunta | Respuesta |
 |---|---|

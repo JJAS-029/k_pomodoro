@@ -9,10 +9,12 @@ Todo lo que hace falta para la ficha está en esta carpeta. Los pasos que siguen
 | `listing/*/wear-screenshots/` | 3 capturas del reloj por idioma (454×454): app, tile y complicación |
 | `../privacy/index.html` | Política de privacidad (se publica con GitHub Pages) |
 | `../privacy/delete-account.html` | Página para pedir que se borre la cuenta |
+| `../privacy/terms.html` | Condiciones del servicio (las pide Play al declararte comerciante) |
 
 Con GitHub Pages activo en el repositorio, las páginas quedan en:
 - Política de privacidad: `https://jjas-029.github.io/k_pomodoro/privacy/`
 - Borrar la cuenta: `https://jjas-029.github.io/k_pomodoro/privacy/delete-account.html`
+- Condiciones del servicio: `https://jjas-029.github.io/k_pomodoro/privacy/terms.html`
 
 ---
 
