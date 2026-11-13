@@ -46,3 +46,6 @@ android/app/release/
 
 # Capturas de prototipos para revisar (no van al repo)
 prototipos/
+
+# Sitio web de desarrollador (repo aparte: JJAS-029.github.io)
+sitio/
