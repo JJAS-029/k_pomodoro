@@ -47,7 +47,7 @@
     <string name="set_section_appearance">Appearance</string>
     <string name="set_dynamic_color">System colors (Material You)</string>
     <string name="set_requires_android_12">Requires Android 12 or later.</string>
-    <string name="set_dynamic_color_desc">Buttons and accents take on your wallpaper\'s colors. In dark mode, the background stays black.</string>
+    <string name="set_dynamic_color_desc">Buttons, cards and accents take on your wallpaper\'s colors.</string>
 
     <string name="set_section_focus_sound">Focus sound</string>
     <string name="set_section_backup">Cloud backup</string>
@@ -232,7 +232,7 @@
     <string name="set_palette_aurora">Aurora</string>
     <string name="set_palette_pastel">Pastel</string>
     <string name="set_pure_black">Pure black</string>
-    <string name="set_pure_black_desc">In dark mode, cards, menus and dialogs are deep black too. Looks better and saves battery on AMOLED screens.</string>
+    <string name="set_pure_black_desc">In dark mode, the background, cards, menus and dialogs turn deep black. Saves battery on AMOLED screens.</string>
     <string name="set_league_join_denied">The leagues aren\'t available right now. Try again later.</string>
     <string name="set_back">Back</string>
     <string name="set_group_timer">Timer</string>

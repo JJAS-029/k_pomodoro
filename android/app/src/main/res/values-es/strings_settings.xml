@@ -47,7 +47,7 @@
     <string name="set_section_appearance">Apariencia</string>
     <string name="set_dynamic_color">Colores del sistema (Material You)</string>
     <string name="set_requires_android_12">Requiere Android 12 o superior.</string>
-    <string name="set_dynamic_color_desc">Los botones y acentos toman los colores de tu fondo de pantalla. En modo oscuro, el fondo sigue negro.</string>
+    <string name="set_dynamic_color_desc">Los botones, tarjetas y acentos toman los colores de tu fondo de pantalla.</string>
 
     <string name="set_section_focus_sound">Sonido de concentración</string>
     <string name="set_section_backup">Respaldo en la nube</string>
@@ -239,7 +239,7 @@
     <string name="set_palette_aurora">Aurora</string>
     <string name="set_palette_pastel">Pastel</string>
     <string name="set_pure_black">Negro puro</string>
-    <string name="set_pure_black_desc">En el modo oscuro, tarjetas, menús y diálogos también en negro profundo. Se ve mejor y ahorra batería en pantallas AMOLED.</string>
+    <string name="set_pure_black_desc">En el modo oscuro, el fondo, las tarjetas, los menús y los diálogos se vuelven negro profundo. Ahorra batería en pantallas AMOLED.</string>
     <string name="set_league_join_denied">Las ligas no están disponibles por ahora. Intenta más tarde.</string>
     <string name="set_back">Atrás</string>
     <string name="set_group_timer">Temporizador</string>

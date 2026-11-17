@@ -61,7 +61,7 @@ data class AppSettings(
     /** Pro: colores de Material You tomados del fondo de pantalla (Android 12+). */
     val dynamicColor: Boolean = false,
     /** Tema oscuro en negro profundo también en tarjetas, hojas y diálogos (AMOLED). */
-    val pureBlack: Boolean = true,
+    val pureBlack: Boolean = false,
     /** Pro comprado en Google Play (suscripción vigente o pago único). Lo actualiza la tienda. */
     val proPurchased: Boolean = false,
     /** Interruptor de pruebas: solo tiene efecto en compilaciones debug. */

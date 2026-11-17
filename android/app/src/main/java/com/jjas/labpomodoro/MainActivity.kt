@@ -142,7 +142,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val settings by settingsRepository.settings.collectAsStateWithLifecycle(initialValue = null)
-            val pureBlack = settings?.pureBlack ?: true
+            val pureBlack = settings?.pureBlack ?: false
             val labTheme = settings?.let { LabThemeUi.of(it.activeGlassTint, it.activeFlame, it.activeBackground, it.dynamicColorActive, it.activeBurner) } ?: LabThemeUi()
             CompositionLocalProvider(LocalLabTheme provides labTheme) {
             LabPomodoroTheme(dynamicColor = settings?.dynamicColorActive == true, pureBlack = pureBlack) {

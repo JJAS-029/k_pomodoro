@@ -2,6 +2,7 @@
 
 package com.jjas.labpomodoro.ui.stats
 
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.LoadingIndicator
@@ -257,7 +258,8 @@ private fun Tile(value: String, label: String, modifier: Modifier = Modifier) {
 @Composable
 private fun Section(title: String, subtitle: String? = null) {
     Spacer(Modifier.height(28.dp))
-    Text(title, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.secondary)
+    // Títulos con jerarquía: más grandes y con peso, en el verde de la marca
+    Text(title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)
     subtitle?.let {
         Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }

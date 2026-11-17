@@ -2,6 +2,7 @@
 
 package com.jjas.labpomodoro.ui.settings
 
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LoadingIndicator
 import com.jjas.labpomodoro.ui.components.ConnectedChoice
@@ -626,7 +627,7 @@ private fun LanguageSection() {
 @Composable
 private fun SectionTitle(text: String) {
     Spacer(Modifier.height(24.dp))
-    Text(text, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.tertiary)
+    Text(text, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)
     HorizontalDivider(Modifier.padding(top = 4.dp, bottom = 8.dp), color = MaterialTheme.colorScheme.outline)
 }
 

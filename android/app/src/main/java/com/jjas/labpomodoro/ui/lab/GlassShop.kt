@@ -1,5 +1,6 @@
 package com.jjas.labpomodoro.ui.lab
 
+import androidx.compose.ui.text.font.FontWeight
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -161,7 +162,7 @@ fun GlassShop(
 @Composable
 private fun SectionHeader(@StringRes title: Int, @StringRes description: Int) {
     Column(Modifier.padding(top = 8.dp)) {
-        Text(stringResource(title), style = MaterialTheme.typography.titleMedium)
+        Text(stringResource(title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)
         Text(stringResource(description), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }

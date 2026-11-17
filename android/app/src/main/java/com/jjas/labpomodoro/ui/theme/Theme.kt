@@ -127,12 +127,12 @@ val ColorScheme.isLight: Boolean get() = background.luminance() > 0.5f
 fun LabPomodoroTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     dynamicColor: Boolean = false,
-    pureBlack: Boolean = true,
+    pureBlack: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val dynamic = dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
     val scheme = when {
-        dynamic && darkTheme -> dynamicDarkColorScheme(LocalContext.current).copy(background = TrueBlack, surface = TrueBlack)
+        dynamic && darkTheme -> dynamicDarkColorScheme(LocalContext.current)
         dynamic -> dynamicLightColorScheme(LocalContext.current)
         darkTheme -> LabDarkScheme
         else -> LabLightScheme
