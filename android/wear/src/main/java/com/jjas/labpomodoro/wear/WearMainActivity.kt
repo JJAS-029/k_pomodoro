@@ -199,6 +199,8 @@ private fun ActiveTimer(timer: WatchTimer, remaining: Long, color: Color, onComm
         FilledIconButton(
             onClick = { onCommand(if (timer.paused) WearContract.RESUME else WearContract.PAUSE) },
             enabled = timer.canPause,
+            // Expressive: el botón se deforma al tocarlo, como en el teléfono
+            shapes = IconButtonDefaults.animatedShapes(),
             colors = LabButtonColors(),
         ) {
             Icon(
@@ -208,13 +210,13 @@ private fun ActiveTimer(timer: WatchTimer, remaining: Long, color: Color, onComm
         }
         // El plan del reloj se detiene aquí (el del teléfono, en el teléfono)
         if (timer.local) {
-            FilledIconButton(onClick = { onCommand(STOP) }, colors = IconButtonDefaults.filledTonalIconButtonColors()) {
+            FilledIconButton(onClick = { onCommand(STOP) }, shapes = IconButtonDefaults.animatedShapes(), colors = IconButtonDefaults.filledTonalIconButtonColors()) {
                 Icon(painterResource(R.drawable.ic_stop), contentDescription = stringResource(R.string.stop))
             }
         }
         // Saltar es Pro (y en una sala nadie salta)
         if (timer.canSkip) {
-            FilledIconButton(onClick = { onCommand(WearContract.SKIP) }, colors = IconButtonDefaults.filledTonalIconButtonColors()) {
+            FilledIconButton(onClick = { onCommand(WearContract.SKIP) }, shapes = IconButtonDefaults.animatedShapes(), colors = IconButtonDefaults.filledTonalIconButtonColors()) {
                 Icon(painterResource(R.drawable.ic_skip), contentDescription = stringResource(R.string.skip))
             }
         }
