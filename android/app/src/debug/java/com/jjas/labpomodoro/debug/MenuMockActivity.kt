@@ -32,7 +32,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,6 +40,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jjas.labpomodoro.R
+import com.jjas.labpomodoro.ui.components.rememberFullSheetState
 import com.jjas.labpomodoro.ui.main.Vessel
 import com.jjas.labpomodoro.ui.main.VesselUi
 import com.jjas.labpomodoro.ui.theme.LabPomodoroTheme
@@ -82,7 +82,7 @@ private fun Home(modifier: Modifier = Modifier) {
 private fun GroupedMenu() {
     Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Home(Modifier.safeDrawingPadding())
-        ModalBottomSheet(onDismissRequest = {}, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
+        ModalBottomSheet(onDismissRequest = {}, sheetState = rememberFullSheetState()) {
             Column(Modifier.navigationBarsPadding().verticalScroll(rememberScrollState()).padding(bottom = 16.dp)) {
                 Section("Este plan")
                 Item(R.drawable.ic_more_time, "Plan", "Alargar, sumar o quitar pomodoros")
@@ -169,12 +169,11 @@ private fun Section(title: String) {
 @Composable
 private fun Item(icon: Int, title: String, description: String) {
     ListItem(
-        headlineContent = { Text(title) },
         supportingContent = { Text(description) },
         leadingContent = { Icon(painterResource(icon), null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
         modifier = Modifier.padding(horizontal = 8.dp),
-    )
+    ) { Text(title) }
 }
 
 @Composable

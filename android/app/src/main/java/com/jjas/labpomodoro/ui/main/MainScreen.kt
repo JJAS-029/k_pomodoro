@@ -50,7 +50,6 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.AlertDialog
@@ -93,6 +92,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jjas.labpomodoro.R
 import androidx.compose.material3.AssistChip
+import com.jjas.labpomodoro.ui.components.rememberFullSheetState
 import com.jjas.labpomodoro.ui.room.StudyRoomViewModel
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -286,7 +286,7 @@ fun MainScreen(
     var planSheet by rememberSaveable { mutableStateOf(false) }
     val adjustable = timer.timer as? TimerUi.Active
     if (planSheet && adjustable != null) {
-        ModalBottomSheet(onDismissRequest = { planSheet = false }, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
+        ModalBottomSheet(onDismissRequest = { planSheet = false }, sheetState = rememberFullSheetState()) {
             AdjustPlanSheet(
                 active = adjustable,
                 onExtend = timerViewModel::extend,
@@ -304,7 +304,7 @@ fun MainScreen(
 
     var soundSheet by rememberSaveable { mutableStateOf(false) }
     if (soundSheet) {
-        ModalBottomSheet(onDismissRequest = { soundSheet = false }, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
+        ModalBottomSheet(onDismissRequest = { soundSheet = false }, sheetState = rememberFullSheetState()) {
             Column(
                 Modifier
                     .navigationBarsPadding()
@@ -324,7 +324,7 @@ fun MainScreen(
     var planEditor by rememberSaveable { mutableStateOf(false) }
     val idle = timer.timer as? TimerUi.Idle
     if (planEditor && idle != null) {
-        ModalBottomSheet(onDismissRequest = { planEditor = false }, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
+        ModalBottomSheet(onDismissRequest = { planEditor = false }, sheetState = rememberFullSheetState()) {
             PlanEditorSheet(
                 idle = idle,
                 tags = tags,
@@ -353,7 +353,7 @@ fun MainScreen(
     // Cambiar la etiqueta a medio plan
     var tagSheet by rememberSaveable { mutableStateOf(false) }
     if (tagSheet) {
-        ModalBottomSheet(onDismissRequest = { tagSheet = false }, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
+        ModalBottomSheet(onDismissRequest = { tagSheet = false }, sheetState = rememberFullSheetState()) {
             Column(
                 Modifier
                     .navigationBarsPadding()
@@ -808,7 +808,7 @@ private fun LabDock(timer: TimerUi?, account: MainUiState, actions: MainActions,
     var menu by rememberSaveable { mutableStateOf(false) }
     if (menu) {
         // Completa desde el inicio: la lista es larga
-        ModalBottomSheet(onDismissRequest = { menu = false }, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
+        ModalBottomSheet(onDismissRequest = { menu = false }, sheetState = rememberFullSheetState()) {
             LabMenu(timer, account, actions, close = { menu = false })
         }
     }
@@ -956,14 +956,12 @@ private fun MenuSection(title: String) {
 @Composable
 private fun MenuItem(icon: Int, title: String, description: String?, onClick: () -> Unit) {
     ListItem(
-        headlineContent = { Text(title) },
+        onClick = onClick,
         supportingContent = description?.let { { Text(it) } },
         leadingContent = { Icon(painterResource(icon), contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-        modifier = Modifier
-            .clickable(onClick = onClick)
-            .padding(horizontal = 8.dp),
-    )
+        modifier = Modifier.padding(horizontal = 8.dp),
+    ) { Text(title) }
 }
 
 @Composable

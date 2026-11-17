@@ -46,7 +46,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -87,6 +86,7 @@ import com.jjas.labpomodoro.R
 import com.jjas.labpomodoro.domain.model.BurnerStyle
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.lerp
+import com.jjas.labpomodoro.ui.components.rememberFullSheetState
 import java.text.NumberFormat
 import com.jjas.labpomodoro.domain.model.isGas
 import com.jjas.labpomodoro.domain.model.kelvinToCelsius
@@ -295,7 +295,7 @@ private fun LabContent(
             // La ficha es larga: se abre completa para no tener que arrastrarla
             ModalBottomSheet(
                 onDismissRequest = { selected = null },
-                sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+                sheetState = rememberFullSheetState(),
             ) {
                 val item = state.items[z - 1]
                 ElementDetail(

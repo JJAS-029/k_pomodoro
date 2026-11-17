@@ -14,12 +14,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -75,7 +74,7 @@ fun FocusSoundPanel(
     val current = settings ?: return
     val enabled = current.isPro
     // El deslizador se mueve libre y solo se guarda al soltar
-    var volume by remember(current.focusVolume) { mutableFloatStateOf(current.focusVolume) }
+    val volume = remember(current.focusVolume) { SliderState(current.focusVolume) }
 
     Column(modifier) {
         Text(
@@ -116,14 +115,14 @@ fun FocusSoundPanel(
         Spacer(Modifier.height(8.dp))
         Text(stringResource(R.string.set_sound_volume), style = MaterialTheme.typography.bodyLarge)
         Slider(
-            value = volume,
-            onValueChange = { volume = it },
-            onValueChangeFinished = { viewModel.setVolume(volume) },
+            state = volume,
+            onValueChange = { volume.value = it },
+            onValueChangeFinished = { viewModel.setVolume(volume.value) },
             enabled = enabled && current.focusSound != FocusSound.OFF,
         )
         if (enabled) {
             OutlinedButton(
-                onClick = { viewModel.preview(current.focusSound, volume) },
+                onClick = { viewModel.preview(current.focusSound, volume.value) },
                 enabled = current.focusSound != FocusSound.OFF,
             ) { Text(stringResource(R.string.set_sound_preview)) }
         } else {

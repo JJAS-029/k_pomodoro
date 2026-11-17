@@ -3,7 +3,9 @@ package com.jjas.labpomodoro.ui.theme
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialExpressiveTheme
+import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
@@ -77,6 +79,7 @@ val ColorScheme.isLight: Boolean get() = background.luminance() > 0.5f
  * oscuro con [darkTheme]. Con color dinámico (Material You) el oscuro conserva el fondo negro puro;
  * con [pureBlack] también tarjetas, hojas y diálogos (pantallas AMOLED).
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun LabPomodoroTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
@@ -92,8 +95,10 @@ fun LabPomodoroTheme(
         else -> LabLightScheme
     }.let { if (darkTheme && pureBlack) it.pureBlack() else it }
 
-    MaterialTheme(
+    // Material 3 Expressive: movimientos con resorte y las formas y componentes nuevos
+    MaterialExpressiveTheme(
         colorScheme = scheme,
+        motionScheme = MotionScheme.expressive(),
         typography = LabTypography,
         content = content
     )

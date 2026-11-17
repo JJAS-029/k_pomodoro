@@ -307,12 +307,11 @@ private fun SettingsContent(
             Spacer(Modifier.height(8.dp))
             SettingsGroup.entries.forEach { g ->
                 ListItem(
-                    headlineContent = { Text(stringResource(g.titleRes)) },
+                    onClick = { group = g },
                     supportingContent = { Text(stringResource(g.descriptionRes)) },
                     leadingContent = { Icon(painterResource(g.icon), contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
                     colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                    modifier = Modifier.clickable { group = g },
-                )
+                ) { Text(stringResource(g.titleRes)) }
             }
         }
 
