@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+
 package com.jjas.labpomodoro.ui.main
 
 import android.Manifest
@@ -39,7 +41,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.ToggleButton
+import androidx.compose.material3.ToggleButtonDefaults
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LoadingIndicator
+import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.foundation.verticalScroll
@@ -101,12 +109,7 @@ import com.jjas.labpomodoro.ui.components.LabBackdrop
 import com.jjas.labpomodoro.ui.components.SeasonalBackdrop
 import com.jjas.labpomodoro.domain.model.Season
 import androidx.compose.ui.res.stringArrayResource
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.combinedClickable
@@ -574,7 +577,7 @@ private fun MainContent(
             val panelBlock: @Composable ColumnScope.() -> Unit = {
                 room?.let { RoomChip(it, actions.onOpenStudyRoom) }
                 when (timer) {
-                    null -> CircularProgressIndicator()
+                    null -> LoadingIndicator()
                     is TimerUi.Idle -> IdlePanel(timer, clockColor, tags, tagActions, actions.onOpenPlanEditor)
                     is TimerUi.Active -> ActivePanel(timer, clockColor, tags, actions.onOpenTags)
                     is TimerUi.Finished -> FinishedPanel(timer)
@@ -818,14 +821,22 @@ private fun LabDock(timer: TimerUi?, account: MainUiState, actions: MainActions,
             // Controles tipo reproductor: detener · pausar/continuar · saltar
             PlayerButton(R.drawable.ic_stop, stringResource(R.string.main_action_stop), actions.onStop)
             Spacer(Modifier.size(8.dp))
-            Button(
-                onClick = if (timer.isPaused) actions.onResume else actions.onPause,
+            // Expressive: corre = forma más cuadrada; en pausa = redondo, y se deforma al tocarlo
+            ToggleButton(
+                checked = !timer.isPaused,
+                onCheckedChange = { running -> if (running) actions.onResume() else actions.onPause() },
                 // En una sala solo el anfitrión pausa (para todos)
                 enabled = room == null || room.isHost,
                 modifier = Modifier
                     .weight(1f)
-                    .height(52.dp),
-                shape = RoundedCornerShape(26.dp),
+                    .height(DOCK_HEIGHT),
+                shapes = ToggleButtonDefaults.shapesFor(DOCK_HEIGHT),
+                colors = ToggleButtonDefaults.colors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    checkedContainerColor = MaterialTheme.colorScheme.primary,
+                    checkedContentColor = MaterialTheme.colorScheme.onPrimary,
+                ),
             ) {
                 Icon(
                     painterResource(if (timer.isPaused) R.drawable.ic_play else R.drawable.ic_pause),
@@ -848,11 +859,11 @@ private fun LabDock(timer: TimerUi?, account: MainUiState, actions: MainActions,
             }
             Button(
                 onClick = onClick,
+                shapes = ButtonDefaults.shapesFor(DOCK_HEIGHT),
                 enabled = timer != null && (room == null || room.started || room.isHost || timer is TimerUi.Finished),
                 modifier = Modifier
                     .weight(1f)
-                    .height(52.dp),
-                shape = RoundedCornerShape(26.dp),
+                    .height(DOCK_HEIGHT),
             ) {
                 Text(label, fontSize = 16.sp)
             }
@@ -860,9 +871,8 @@ private fun LabDock(timer: TimerUi?, account: MainUiState, actions: MainActions,
         Spacer(Modifier.size(8.dp))
         IconButton(
             onClick = { menu = true },
-            modifier = Modifier
-                .size(52.dp)
-                .clip(CircleShape),
+            shapes = IconButtonDefaults.shapes(),
+            modifier = Modifier.size(DOCK_HEIGHT),
         ) {
             Icon(
                 painterResource(R.drawable.ic_menu),
@@ -964,17 +974,18 @@ private fun MenuItem(icon: Int, title: String, description: String?, onClick: ()
     ) { Text(title) }
 }
 
+/** Alto de los botones del timer. */
+private val DOCK_HEIGHT = 56.dp
+
 @Composable
 private fun PlayerButton(icon: Int, description: String, onClick: () -> Unit) {
-    Surface(
+    // Expressive: se deforma al tocarlo
+    FilledTonalIconButton(
         onClick = onClick,
-        shape = CircleShape,
-        color = MaterialTheme.colorScheme.surfaceVariant,
-        modifier = Modifier.size(52.dp),
+        shapes = IconButtonDefaults.shapes(),
+        modifier = Modifier.size(DOCK_HEIGHT),
     ) {
-        Box(contentAlignment = Alignment.Center) {
-            Icon(painterResource(icon), contentDescription = description, tint = MaterialTheme.colorScheme.onSurface)
-        }
+        Icon(painterResource(icon), contentDescription = description)
     }
 }
 
@@ -1439,15 +1450,15 @@ private fun GoalRing(goal: GoalUi, onClick: () -> Unit, modifier: Modifier = Mod
             .clip(CircleShape)
             .clickable(onClickLabel = stringResource(R.string.goal_title), onClick = onClick),
     ) {
-        Canvas(Modifier.fillMaxSize().padding(4.dp)) {
-            val stroke = size.minDimension * 0.1f
-            val inset = stroke / 2
-            val arc = Size(size.width - stroke, size.height - stroke)
-            drawArc(track, 0f, 360f, false, Offset(inset, inset), arc, style = Stroke(stroke))
-            if (fraction > 0f) {
-                drawArc(color, -90f, 360f * fraction, false, Offset(inset, inset), arc, style = Stroke(stroke, cap = StrokeCap.Round))
-            }
-        }
+        // Expressive: el avance es una onda, como el líquido
+        val progress by animateFloatAsState(fraction.coerceIn(0f, 1f), MaterialTheme.motionScheme.slowSpatialSpec(), label = "goal")
+        CircularWavyProgressIndicator(
+            progress = { progress },
+            modifier = Modifier.fillMaxSize().padding(2.dp),
+            color = color,
+            trackColor = track,
+            wavelength = 12.dp,
+        )
         val spoken = if (daily) {
             pluralStringResource(R.plurals.goal_today, goal.goal, goal.today, goal.goal)
         } else {
