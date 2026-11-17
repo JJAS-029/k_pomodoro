@@ -98,8 +98,8 @@ La app del reloj vive en `android/wear` y se publica en la **misma app** de Play
 
 | Paquete | Archivo | versionCode |
 |---|---|---|
-| Teléfono | `android/app/build/outputs/bundle/release/app-release.aab` | 7 (versión 1.4.1) |
-| Reloj | `android/wear/build/outputs/bundle/release/wear-release.aab` | 1000008 (1.4.1) |
+| Teléfono | `android/app/build/outputs/bundle/release/app-release.aab` | 8 (versión 1.5) |
+| Reloj | `android/wear/build/outputs/bundle/release/wear-release.aab` | 1000009 (1.5) |
 
 Para compilar los dos: `./gradlew :app:bundleRelease :wear:bundleRelease` dentro de `android/`. El versionCode del reloj es 1 000 000 más el del teléfono; al subir el del teléfono, súbelo también en `android/wear/build.gradle.kts`.
 
