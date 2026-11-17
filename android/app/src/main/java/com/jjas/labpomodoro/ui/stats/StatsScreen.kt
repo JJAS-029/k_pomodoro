@@ -1,5 +1,11 @@
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+
 package com.jjas.labpomodoro.ui.stats
 
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.LinearWavyProgressIndicator
+import androidx.compose.material3.LoadingIndicator
+import com.jjas.labpomodoro.ui.components.ConnectedChoice
 import android.Manifest
 import android.content.res.Resources
 import android.text.format.DateFormat
@@ -21,14 +27,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -148,7 +150,7 @@ fun StatsScreen(onBack: () -> Unit, onOpenPro: () -> Unit, initialTab: Int = 0, 
                 if (tab == 2) {
                     LeaguePanel()
                 } else if (current == null) {
-                    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
+                    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { LoadingIndicator() }
                 } else if (tab == 1) {
                     LaunchedEffect(current.medals) { viewModel.markMedalsSeen(current.medals) }
                     Challenges(current.challenges, current.weekDaysLeft)
@@ -197,15 +199,7 @@ fun StatsScreen(onBack: () -> Unit, onOpenPro: () -> Unit, initialTab: Int = 0, 
 
 @Composable
 private fun RangeSelector(range: StatsRange, onChange: (StatsRange) -> Unit) {
-    SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
-        StatsRange.entries.forEachIndexed { i, r ->
-            SegmentedButton(
-                selected = r == range,
-                onClick = { onChange(r) },
-                shape = SegmentedButtonDefaults.itemShape(i, StatsRange.entries.size),
-            ) { Text(stringResource(r.labelRes)) }
-        }
-    }
+    ConnectedChoice(StatsRange.entries.map { it to stringResource(it.labelRes) }, range, onChange)
 }
 
 @Composable
@@ -589,7 +583,7 @@ private fun Challenges(challenges: List<ChallengeProgress>, daysLeft: Int) {
                 )
             }
             Spacer(Modifier.height(4.dp))
-            LinearProgressIndicator(progress = { challenge.fraction }, modifier = Modifier.fillMaxWidth())
+            LinearWavyProgressIndicator(progress = { challenge.fraction }, modifier = Modifier.fillMaxWidth())
             Text(
                 stringResource(if (challenge.done) R.string.challenge_done else R.string.challenge_reward),
                 style = MaterialTheme.typography.bodySmall,

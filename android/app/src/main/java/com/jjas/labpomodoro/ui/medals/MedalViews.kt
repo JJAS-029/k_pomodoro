@@ -1,5 +1,6 @@
 package com.jjas.labpomodoro.ui.medals
 
+import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -19,7 +20,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -434,7 +434,7 @@ fun MedalDialog(progress: MedalProgress, onDismiss: () -> Unit) {
                         color = MaterialTheme.colorScheme.primary,
                     )
                 } else {
-                    LinearProgressIndicator(progress = { progress.fraction }, modifier = Modifier.fillMaxWidth())
+                    LinearWavyProgressIndicator(progress = { progress.fraction }, modifier = Modifier.fillMaxWidth())
                     Spacer(Modifier.height(6.dp))
                     Text(
                         pluralStringResource(medal.progressRes, medal.target.toInt(), progress.shown, medal.target),

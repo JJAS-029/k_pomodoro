@@ -1,5 +1,10 @@
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+
 package com.jjas.labpomodoro.ui.lab
 
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.LinearWavyProgressIndicator
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -30,12 +35,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
@@ -177,7 +180,7 @@ fun LabScreen(onBack: () -> Unit, initialTab: Int = 0, viewModel: LabViewModel =
             ) {
                 val current = state
                 if (current == null) {
-                    CircularProgressIndicator(Modifier.align(Alignment.Center))
+                    LoadingIndicator(Modifier.align(Alignment.Center))
                 } else {
                     LabContent(current, newOnes, onBack, viewModel::fuse, viewModel::setVesselElement, viewModel::buy, viewModel::useBurner, initialTab)
                 }
@@ -389,7 +392,8 @@ private fun RewardBar(label: String, totalWorkSeconds: Long, every: Long, color:
             )
         }
         Spacer(Modifier.height(4.dp))
-        LinearProgressIndicator(
+        // Expressive: la barra hacia el siguiente elemento es una onda
+        LinearWavyProgressIndicator(
             progress = { RewardSchedule.progress(totalWorkSeconds, every) },
             color = color,
             modifier = Modifier.fillMaxWidth(),
@@ -762,7 +766,7 @@ private fun MasteryProgress(element: Element, obtained: Int) {
             )
         }
         Spacer(Modifier.height(6.dp))
-        LinearProgressIndicator(
+        LinearWavyProgressIndicator(
             progress = { (obtained.toFloat() / thresholds[2]).coerceIn(0f, 1f) },
             // La barra toma el color de la meta que viene
             color = (next?.first ?: Mastery.GOLD).metalColor() ?: GoldColor,

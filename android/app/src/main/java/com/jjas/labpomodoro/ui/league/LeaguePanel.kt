@@ -1,5 +1,9 @@
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+
 package com.jjas.labpomodoro.ui.league
 
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.LoadingIndicator
 import android.content.Context
 import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestoreException
@@ -21,7 +25,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -188,7 +191,7 @@ fun LeaguePanel(modifier: Modifier = Modifier, viewModel: LeagueViewModel = hilt
     val error by viewModel.error.collectAsStateWithLifecycle()
     Column(modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
         when (val s = state) {
-            LeagueUi.Loading -> Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
+            LeagueUi.Loading -> Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { LoadingIndicator() }
             LeagueUi.SignedOut -> SignedOut(onSignIn = viewModel::signIn)
             is LeagueUi.NotJoined -> JoinForm(s.avatars, onJoin = viewModel::join)
             is LeagueUi.Joined -> {

@@ -1,5 +1,10 @@
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+
 package com.jjas.labpomodoro.ui.settings
 
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.LoadingIndicator
+import com.jjas.labpomodoro.ui.components.ConnectedChoice
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -28,15 +33,11 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedIconButton
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -148,7 +149,7 @@ fun SettingsScreen(
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         val current = settings
         if (current == null) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { LoadingIndicator() }
         } else {
             Column {
                 SettingsContent(
@@ -342,15 +343,7 @@ private fun SettingsContent(
             PlanRounding.TRIM_LAST to stringResource(R.string.set_rounding_trim),
             PlanRounding.WHOLE_POMODOROS to stringResource(R.string.set_rounding_whole),
         )
-        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-            options.forEachIndexed { index, (mode, label) ->
-                SegmentedButton(
-                    selected = session.rounding == mode,
-                    onClick = { onSessionChange { it.copy(rounding = mode) } },
-                    shape = SegmentedButtonDefaults.itemShape(index, options.size),
-                ) { Text(label) }
-            }
-        }
+        ConnectedChoice(options, session.rounding, onSelect = { mode -> onSessionChange { it.copy(rounding = mode) } })
         Text(
             text = when (session.rounding) {
                 PlanRounding.TRIM_LAST -> stringResource(R.string.set_rounding_trim_desc)
@@ -409,15 +402,7 @@ private fun SettingsContent(
         if (settings.reminderEnabled) {
             Spacer(Modifier.height(8.dp))
             val hours = AppSettings.REMINDER_HOURS
-            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                hours.forEachIndexed { index, hour ->
-                    SegmentedButton(
-                        selected = settings.reminderHour == hour,
-                        onClick = { onReminderHourChange(hour) },
-                        shape = SegmentedButtonDefaults.itemShape(index, hours.size),
-                    ) { Text("$hour:00") }
-                }
-            }
+            ConnectedChoice(hours.map { it to "$it:00" }, settings.reminderHour, onReminderHourChange)
         }
 
         SectionTitle(proTitle(R.string.set_section_ambient, settings.isPro))
@@ -437,15 +422,7 @@ private fun SettingsContent(
             Text(stringResource(R.string.set_ambient_after), style = MaterialTheme.typography.bodyLarge)
             Spacer(Modifier.height(8.dp))
             val delays = AppSettings.AMBIENT_DELAYS
-            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                delays.forEachIndexed { index, minutes ->
-                    SegmentedButton(
-                        selected = settings.ambientDelayMinutes == minutes,
-                        onClick = { onAmbientDelayChange(minutes) },
-                        shape = SegmentedButtonDefaults.itemShape(index, delays.size),
-                    ) { Text("$minutes min") }
-                }
-            }
+            ConnectedChoice(delays.map { it to "$it min" }, settings.ambientDelayMinutes, onAmbientDelayChange)
         }
 
         }
