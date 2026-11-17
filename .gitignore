@@ -49,3 +49,6 @@ prototipos/
 
 # Sitio web de desarrollador (repo aparte: JJAS-029.github.io)
 sitio/
+
+# Video de la declaración del servicio en primer plano (se sube a Play, no al repo)
+play/foreground-service-demo.mp4
