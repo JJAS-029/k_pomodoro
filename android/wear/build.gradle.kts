@@ -16,8 +16,8 @@ android {
         minSdk = 30
         targetSdk = 36
         // Distinto al del teléfono en la misma versión: 1_000_000 + el del teléfono
-        versionCode = 1_000_009
-        versionName = "1.5"
+        versionCode = 1_000_010
+        versionName = "1.6"
     }
 
     // La misma llave de subida que el teléfono (android/keystore.properties)
